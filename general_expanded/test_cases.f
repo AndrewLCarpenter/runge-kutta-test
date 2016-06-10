@@ -9,6 +9,7 @@ c     program 5) Lorenz
 
       parameter(is=9,ivarlen=4)
       parameter(isamp=71,jmax=81,jactual=81)
+      parameter(sigma=10.,rho=28.,beta=8./3.) !Lorenz constants for Prob. 5
 
       integer cases 				!input range of runge kutta cases
       integer problem				!input problem number
@@ -372,8 +373,8 @@ c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j
           do ii = 1,nveclen
             error1(iDT,ii)  = alog10(tmpvec(ii))
             error1P(iDT,ii) = alog10(errvecT(ii))
-            write(49+ii,50)cost(iDT),error1(iDT,ii)
-            write(59+ii,50)cost(iDT),error1P(iDT,ii)
+            write(49+ii,*)cost(iDT),error1(iDT,ii)
+            write(59+ii,*)cost(iDT),error1P(iDT,ii)
           enddo
   
          enddo                                             !  end  loop over different dt

@@ -1,44 +1,44 @@
       program test_cases
 
-c     program 1) van der Pol (Hairer II, pp 403)
-c     program 2) Pureshi and Russo 
-c     program 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
-c     program 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
-c     WARNING: Kreiss has problem with algebraic variable
-c     program 5) Lorenz
+      implicit none 
+!     program 1) van der Pol (Hairer II, pp 403)
+!     program 2) Pureshi and Russo 
+!     program 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
+!     program 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
+!     WARNING: Kreiss has problem with algebraic variable
+!     program 5) Lorenz
+      
+      integer, parameter :: wp=8
 
-      parameter(is=9,ivarlen=4)
-      parameter(isamp=71,jmax=81,jactual=81)
-      parameter(sigma=10.,rho=28.,beta=8./3.) !Lorenz constants for Prob. 5
+      integer, parameter  :: is=9,ivarlen=4
+      integer, parameter  :: isamp=71,jmax=81,jactual=81
+      
+      integer             :: ipred
+      integer             :: cases 			!input range of runge kutta cases
+      integer             :: problem			!input problem number
+      real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal
+      integer             :: icase,icount,jcount,i,iprob,nrk,jepsil
+      integer             :: ii,iDT,nveclen,ival,ktime,L,LL
+      integer             :: jpre,inew,j,k,jsamp,istage
+      real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
+      real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8,q
+      real(wp)            :: tmp,xnorm,snorm,tmpD,dto,totalerror,totalerrorp
 
-      integer cases 				!input range of runge kutta cases
-      integer problem				!input problem number
+      real(wp), dimension(is,is) :: aE,aI,alpha,al3N,al3D,al4N,al4D
+      real(wp), dimension(is) :: bE,bI,cE,cI,bEH,bIH,stageE,stageI
+      real(wp), dimension(is) :: maxiter,bint
+      real(wp), dimension(is,ivarlen) :: bD
+      real(wp), dimension(is,is,0:is) :: svpB
+      real(wp), dimension(ivarlen,is) :: ustage,res,predvec
+      real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
+      real(wp), dimension(ivarlen) :: uexact,Rnewton,errvec,errvecT,tmpvec
+      real(wp), dimension(ivarlen,ivarlen) :: xjacinv
+      real(wp), dimension(isamp) :: cost,sig
+      real(wp), dimension(isamp,ivarlen) :: error1,error1P
+      real(wp), dimension(ivarlen*2) :: a,b,siga1,sigb1,chi2
+      real(wp), dimension(jmax,ivarlen) :: b1save,b1Psave
+      real(wp), dimension(jmax) :: epsave
 
-      dimension aE(is,is),aI(is,is),bE(is),bI(is),cE(is),cI(is)
-      dimension bEH(is),bIH(is),bD(is,4)
-      dimension stageE(is),stageI(is),maxiter(is)
-      dimension svpB(is,is,0:is),alpha(is,is)
-      dimension al3N(is,is),al3D(is,is),bint(is)
-      dimension al4N(is,is),al4D(is,is)
-
-      dimension ustage(ivarlen,is),res(ivarlen,is)
-      dimension predvec(ivarlen,is)
-
-      dimension uvec(ivarlen),uveco(ivarlen),usum(ivarlen)
-      dimension uveciter(ivarlen),uorig(ivarlen) 
-      dimension uexact(ivarlen),Rnewton(ivarlen)
-      dimension errvec(ivarlen),errvecT(ivarlen),tmpvec(ivarlen)
-      dimension xjacinv(ivarlen,ivarlen)
-
-      dimension cost(isamp),sig(isamp)
-
-      dimension error1(isamp,ivarlen),error1P(isamp,ivarlen)
-
-      dimension a(ivarlen*2),b(ivarlen*2),siga1(ivarlen*2)
-      dimension sigb1(ivarlen*2),chi2(ivarlen*2)
-
-      dimension b1save(jmax,ivarlen),b1Psave(jmax,ivarlen)
-      dimension epsave(jmax)
 
       write(*,*)'what is ipred?'
       read(*,*)ipred
@@ -51,19 +51,22 @@ c     program 5) Lorenz
 
         icount = 0        !  cost counters
         jcount = 0        !  cost counters
+   
+        call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, & !icase is the only input
+     &   svpB(1,1,0),alpha,al3N,al3D,al4N,al4D)
+
 
         do i = 1,nrk
           stageE(i) = 0.0
           stageI(i) = 0.0
           maxiter(i)= 0
         enddo
-      
-        call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, !icase is the only input
-     &   svpB(1,1,0),alpha,al3N,al3D,al4N,al4D,ipred)
- 
+
+
+
         do iprob = problem,problem                                !   begin problems loop
-      
-c         loop over different values of stiffness epsilon 
+
+!         loop over different values of stiffness epsilon 
 
           do jepsil = 1,jactual,1                              !  begin stiffness epsilon loop
 
@@ -76,10 +79,9 @@ c         loop over different values of stiffness epsilon
             enddo
 
             do iDT = 1,isamp,1                                 !  timestep loop for vdP, Kaps, etc
-c            do iDT = 1,1,1                                     ! use to determine the exact solution
+!            do iDT = 1,1,1                                     ! use to determine the exact solution
 
-            call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob)     !  initialize problem information
-
+            call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     !  initialize problem information
             dto = dt
             t = 0.
 
@@ -95,7 +97,7 @@ c            do iDT = 1,1,1                                     ! use to determi
 
 
             do ktime = 1,100000000                      ! advance solution (time advancement loop )
-      
+
               if(t+dt.gt.tfinal)dt = tfinal-t + 1.0e-11
 
               do ival = 1,nvecLen
@@ -144,13 +146,13 @@ c            do iDT = 1,1,1                                     ! use to determi
                   enddo
                 endif
 
-c U^{(n+1,4)} = al4_{1}*U^{(n  ,4)} + al4_{2}*U^{(n  ,5)} +
-c             + al4_{3}*U^{(n  ,6)} + al4_{4}*U^{(n+1,2)} +
-c             + al4_{5}*U^{(n+1,3)}
+! U^{(n+1,4)} = al4_{1}*U^{(n  ,4)} + al4_{2}*U^{(n  ,5)} +
+!             + al4_{3}*U^{(n  ,6)} + al4_{4}*U^{(n+1,2)} +
+!             + al4_{5}*U^{(n+1,3)}
 
 
-c al4_{i} = \sum_{j=1}^{2*(order)} al4N(i,j)*r^{j} /
-c           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
+! al4_{i} = \sum_{j=1}^{2*(order)} al4N(i,j)*r^{j} /
+!           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
 
                 if(L.eq.2.and.ktime.ne.1)then
                   the1 = 1.
@@ -162,21 +164,21 @@ c           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
                   the7 = the6*the
                   the8 = the7*the
                   do LL = 1,5
-                    xnum = al3N(LL,1)*the1
-     &                   + al3N(LL,2)*the2
-     &                   + al3N(LL,3)*the3
-     &                   + al3N(LL,4)*the4
-     &                   + al3N(LL,5)*the5
-     &                   + al3N(LL,6)*the6
-     &                   + al3N(LL,7)*the7
+                    xnum = al3N(LL,1)*the1&
+     &                   + al3N(LL,2)*the2&
+     &                   + al3N(LL,3)*the3&
+     &                   + al3N(LL,4)*the4&
+     &                   + al3N(LL,5)*the5&
+     &                   + al3N(LL,6)*the6&
+     &                   + al3N(LL,7)*the7&
      &                   + al3N(LL,8)*the8
-                    xden = al3D(LL,1)*the1
-     &                   + al3D(LL,2)*the2
-     &                   + al3D(LL,3)*the3
-     &                   + al3D(LL,4)*the4
-     &                   + al3D(LL,5)*the5
-     &                   + al3D(LL,6)*the6
-     &                   + al3D(LL,7)*the7
+                    xden = al3D(LL,1)*the1&
+     &                   + al3D(LL,2)*the2&
+     &                   + al3D(LL,3)*the3&
+     &                   + al3D(LL,4)*the4&
+     &                   + al3D(LL,5)*the5&
+     &                   + al3D(LL,6)*the6&
+     &                   + al3D(LL,7)*the7&
      &                   + al3D(LL,8)*the8
                     bint(LL) = xnum/xden
                   enddo
@@ -191,27 +193,27 @@ c           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
                     Z3 = ustage(ival,5)-ustage(ival,3)
                     Z4 = ustage(ival,6)-ustage(ival,3)
                     Z5 = ustage(ival,2)-ustage(ival,3)
-                    uvec(ival) = ustage(ival,3) + bint(1)*z1
-     &                                          + bint(2)*z2
-     &                                          + bint(3)*z3
-     &                                          + bint(4)*z4
+                    uvec(ival) = ustage(ival,3) + bint(1)*z1&
+     &                                          + bint(2)*z2&
+     &                                          + bint(3)*z3&
+     &                                          + bint(4)*z4&
      &                                          + bint(5)*z5
                     uorig(ival) = uvec(ival)               ! put predict into storage for testing
                   enddo
 
-c                 do ival = 1,nvecLen
-c                   uvec(ival) = bint(1)*ustage(ival,3)
-c    &                         + bint(2)*ustage(ival,4)
-c    &                         + bint(3)*ustage(ival,5)
-c    &                         + bint(4)*ustage(ival,6)
-c    &                         + bint(5)*ustage(ival,2)
-c                   uvec(ival) = bint(1)*ustage(ival,4)
-c    &                         + bint(2)*ustage(ival,5)
-c    &                         + bint(3)*ustage(ival,6)
-c    &                         + bint(4)*ustage(ival,2)
-c    &                         + bint(5)*ustage(ival,3)
-c                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
-c                 enddo
+!                 do ival = 1,nvecLen
+!                   uvec(ival) = bint(1)*ustage(ival,3)
+!    &                         + bint(2)*ustage(ival,4)
+!    &                         + bint(3)*ustage(ival,5)
+!    &                         + bint(4)*ustage(ival,6)
+!    &                         + bint(5)*ustage(ival,2)
+!                   uvec(ival) = bint(1)*ustage(ival,4)
+!    &                         + bint(2)*ustage(ival,5)
+!    &                         + bint(3)*ustage(ival,6)
+!    &                         + bint(4)*ustage(ival,2)
+!    &                         + bint(5)*ustage(ival,3)
+!                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
+!                 enddo
                 endif
 
                 do k = 1,20
@@ -225,11 +227,11 @@ c                 enddo
                   call RHS(uvec,res(1,L+1),dt,ep,iprob,sigma,rho,beta)
 
                   do ival = 1,nvecLen
-                    Rnewton(ival) =  
+                    Rnewton(ival) =&  
      &              uvec(ival)  - aI(L+1,L+1)*res(ival,L+1) - usum(ival)
                   enddo
 
-            call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),ttI,iprob,nvecLen)
+            call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen)
 
                   do i = 1,nvecLen
                     do j = 1,nvecLen
@@ -280,7 +282,7 @@ c                 enddo
                 do ival = 1,nvecLen
                   errvec(ival) = 0.0
                   do LL = 1,nrk 
-                    errvec(ival) = errvec(ival) 
+                    errvec(ival) = errvec(ival)& 
      &                       + dt*( (bI(LL)-bIH(LL))*res(ival,LL) )
                   enddo
                   errvec(ival) = abs(errvec(ival))
@@ -289,12 +291,12 @@ c                 enddo
 
                 endif                                        !  end predicted error
 
-c              predict new values stage values :  about 100 different kinds
+!              predict new values stage values :  about 100 different kinds
 
-c                                           !  note that ipred=2 is accomplished elsewhere
+!                                           !  note that ipred=2 is accomplished elsewhere
                 
                if(ipred.eq.1)then
-c              begin with dense output
+!              begin with dense output
                 do K=2,nrk
                   do ival = 1,nvecLen
                     predvec(ival,K) = uvec(ival)
@@ -308,9 +310,9 @@ c              begin with dense output
                     predvec(ival,K) = uveco(ival)
                     the = (1.+cI(K)*rat)
                     do LL = 1,nrk
-                      bb = bD(LL,1)*the
-     &                   + bD(LL,2)*the*the
-     &                   + bD(LL,3)*the*the*the
+                      bb = bD(LL,1)*the&
+     &                   + bD(LL,2)*the*the&
+     &                   + bD(LL,3)*the*the*the&
      &                   + bD(LL,4)*the*the*the*the
                     predvec(ival,K) = predvec(ival,K) + bb*res(ival,LL)
                     enddo
@@ -319,21 +321,21 @@ c              begin with dense output
 
                 elseif(ipred.eq.4.or.ipred.eq.5)then
 
-c              stage value predictors
-c  U^(n+1,i+1) =                  \sum_{k=0}^{order} (etah_{i k}*r^(k)) * U^{n-1} +
-c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j+1}
+!              stage value predictors
+!  U^(n+1,i+1) =                  \sum_{k=0}^{order} (etah_{i k}*r^(k)) * U^{n-1} +
+!                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j+1}
 
                 do ival = 1,nvecLen
                   do inew=2,nrk
                     predvec(ival,inew) = 0.0
                     do j = 1,nrk
                       the = 1.
-                      bb = svpB(inew,j,0)
-     &                   + svpB(inew,j,1)*the
-     &                   + svpB(inew,j,2)*the*the
-     &                   + svpB(inew,j,3)*the*the*the
-     &                   + svpB(inew,j,4)*the*the*the*the
-                      predvec(ival,inew) = predvec(ival,inew) 
+                      bb = svpB(inew,j,0)&
+                        + svpB(inew,j,1)*the&
+                        + svpB(inew,j,2)*the*the&
+                        + svpB(inew,j,3)*the*the*the&
+                        + svpB(inew,j,4)*the*the*the*the
+                      predvec(ival,inew) = predvec(ival,inew)& 
      &                                   + bb*ustage(ival,j)
                     enddo
                   enddo
@@ -358,7 +360,7 @@ c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j
 
   100  continue
        
-          cost(iDT) = alog10((nrk-1)/dto)                    !  nrk - 1 implicit stages
+          cost(iDT) = log10((nrk-1)/dto)                    !  nrk - 1 implicit stages
 
           totalerror  = 0.0
           totalerrorP = 0.0
@@ -371,8 +373,8 @@ c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j
           totalerror = sqrt(totalerror/nvecLen)
 
           do ii = 1,nveclen
-            error1(iDT,ii)  = alog10(tmpvec(ii))
-            error1P(iDT,ii) = alog10(errvecT(ii))
+            error1(iDT,ii)  = log10(tmpvec(ii))
+            error1P(iDT,ii) = log10(errvecT(ii))
             write(49+ii,*)cost(iDT),error1(iDT,ii)
             write(59+ii,*)cost(iDT),error1P(iDT,ii)
           enddo
@@ -381,15 +383,15 @@ c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j
 
            jsamp = 41 
 
-c          if(icase.eq.1)then                        !  make sure that data has not hit machine precision
-c            jsamp = 51      
-c          elseif(icase.eq.2)then
-c            jsamp = 51      
-c          elseif(icase.eq.3)then
-c            jsamp = 51      
-c          elseif(icase.eq.4)then
-c            jsamp = 51      
-c          endif
+!          if(icase.eq.1)then                        !  make sure that data has not hit machine precision
+!            jsamp = 51      
+!          elseif(icase.eq.2)then
+!            jsamp = 51      
+!          elseif(icase.eq.3)then
+!            jsamp = 51      
+!          elseif(icase.eq.4)then
+!            jsamp = 51      
+!          endif
   
            do i=1,isamp
              sig(i) = 0.0
@@ -397,10 +399,10 @@ c          endif
 
 !-- gather values for output
 	   do ii = 1,nveclen
-             call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),
+             call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),&
      & b(ii),siga1(ii),sigb1(ii),chi2(ii),q)
-             call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),
-     & b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),
+             call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),&
+     & b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),&
      & chi2(ii+nveclen),q)
 	   enddo
            

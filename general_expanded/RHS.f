@@ -15,7 +15,7 @@ c-------------------------------------------------------------
         res(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
       elseif(iprob.eq.4)then
         res(1) = dt*(uvec(1) + uvec(2)/ep)
-        res(2) = dt*(        - uvec(2)/ep)
+        res(2) = dt*(        - uvec(2))
       elseif(iprob.eq.5)then
         res(1)=dt*sigma*(uvec(2)-uvec(1))/ep
         res(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))

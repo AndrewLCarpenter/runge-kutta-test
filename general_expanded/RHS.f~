@@ -17,9 +17,9 @@ c-------------------------------------------------------------
         res(1) = dt*(uvec(1) + uvec(2)/ep)
         res(2) = dt*(        - uvec(2)/ep)
       elseif(iprob.eq.5)then
-        res(1)=dt*sigma*(uvec(2)-uvec(1))
+        res(1)=dt*sigma*(uvec(2)-uvec(1))/ep
         res(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-        res(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))/ep
+        res(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
       endif
 
       return
