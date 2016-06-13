@@ -7,17 +7,17 @@
       integer,  parameter                           :: is=9
       integer,  parameter                           :: ivarlen=4
  
-      real(wp),  dimension(ivarlen),          intent(  out) :: uvec
-      real(wp),  dimension(ivarlen),          intent(  out) :: uexact
-      real(wp),                               intent(  out) :: dt
+      real(wp),  dimension(ivarlen),         intent(  out) :: uvec
+      real(wp),  dimension(ivarlen),         intent(  out) :: uexact
+      real(wp),                              intent(  out) :: dt
       integer,                               intent(in   ) :: iDT
-      real(wp),                               intent(  out) :: tfinal
-      real(wp),                               intent(in   ) :: ep
-      integer,                                intent(  out) :: nveclen
-      integer,                                intent(in   ) :: iprob
-      real(wp),                               intent(  out) :: sigma
-      real(wp),                                intent(  out) :: rho
-      real(wp),                               intent(  out) :: beta
+      real(wp),                              intent(  out) :: tfinal
+      real(wp),                              intent(in   ) :: ep
+      integer,                               intent(  out) :: nveclen
+      integer,                               intent(in   ) :: iprob
+      real(wp),                              intent(  out) :: sigma
+      real(wp),                              intent(  out) :: rho
+      real(wp),                              intent(  out) :: beta
 
       real(wp),  dimension(81,ivarlen)                     :: ExactTot
       real(wp)                                             :: pi,diff,uo,vo
@@ -125,7 +125,7 @@
 !         uvec(1) = ?
 !         uvec(2) = ?
 
-          elseif(iprob.eq.5)then                 !Lorenz
+        elseif(iprob.eq.5)then                 !Lorenz
           sigma=10.0_wp
           rho=28.0_wp
           beta=8.0_wp/3.0_wp

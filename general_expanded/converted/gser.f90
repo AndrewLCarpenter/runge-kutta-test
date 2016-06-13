@@ -11,8 +11,8 @@
       real(wp),   intent(in   )  ::  a,x
       real(wp),   intent(  out)  ::  gln
 
-      integer                   ::  n
-      real(wp)                  ::  ap,del,summ,gammln
+      integer                    ::  n
+      real(wp)                   ::  ap,del,summ,gammln
 
 !     USES gammln
 !     Returns the incomplete gamma function P(a, x) evaluated by its series 

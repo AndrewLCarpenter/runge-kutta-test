@@ -6,7 +6,7 @@
 
       integer,                      intent(in   )  ::  mwt,ndata
       real(wp),                     intent(  out)  ::  a,b,siga,sigb,chi2,q
-      real(wp),   dimension(ndata),  intent(in   )  ::  sig,x,y
+      real(wp),   dimension(ndata),  intent(in   ) ::  sig,x,y
 
       real(wp)                    ::  sigdat,ss,st2,sx,sxoss,sy,t,wt,gammq
       integer                     :: i

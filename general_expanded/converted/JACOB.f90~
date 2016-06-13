@@ -24,7 +24,7 @@
       real(wp)                                       :: x21,x22,x23,x24
       real(wp)                                       :: x31,x32,x33,x34
       real(wp)                                       :: x41,x42,x43,x44
-      real(wp)                                       :: det
+      real(wp)                                       :: det,detI
    
       if(iprob.eq.1)then
         xjac(1,1) = 1.-akk*dt*(0.)

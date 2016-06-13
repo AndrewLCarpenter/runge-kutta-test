@@ -1,5 +1,5 @@
       subroutine rungeadd(aE,aI,bE,bI,cE,cI,ns,bEH,bIH,icase,bD,&
-     &                    svpB,alpha,al3N,al3D,al4N,al4D)
+     &                    svpB,alpha,al3N,al3D,al4N,al4D,casename)
       
       implicit none
 
@@ -25,10 +25,11 @@
       real(wp),   dimension(is,is),        intent(  out) :: al3D
       real(wp),   dimension(is,is),        intent(  out) :: al4N
       real(wp),   dimension(is,is),        intent(  out) :: al4D
+      character(len=25)                                  :: casename
 
-      real(wp),   dimension(is)                         :: bdsum
-      integer                                           :: i,j
-      real(wp)                                          :: eps
+      real(wp),   dimension(is)                          :: bdsum
+      integer                                            :: i,j
+      real(wp)                                           :: eps
 
       do i=1,is
        do j=1,is
@@ -51,7 +52,7 @@
        enddo
 
       if(icase.eq.1) then     !    The scheme you're using is: ESDIRK436L2SA_ARK
-    
+      casename='ESDIRK436L2SA_ARK'
       ns = 6 
 
 !  The scheme coefficients, A, b, bh, and c  are given by
@@ -417,7 +418,7 @@
    
 
       elseif(icase.eq.2) then     !    The scheme you're using is: QESDIRK436L2SA
-    
+      casename='QESDIRK436L2SA'
       ns = 6 
 
 !     The scheme coefficients, A, b, bh, and c  are given by
@@ -785,7 +786,7 @@
     
 
       elseif(icase.eq.3) then     !    The scheme you're using is: ESDIRK436L2SA
-    
+      casename='ESDIRK436L2SA'
       ns = 6
 
 !   The scheme coefficients, A, b, bh, and c  are given by
@@ -1153,7 +1154,7 @@
       bD(6,4) = -57076810983509.d0/6060951850295.d0
     
       elseif(icase.eq.4) then     !    The scheme you're using is: ESDIRK43I6L2SA
-    
+      casename='ESDIRK43I6L2SA'
       ns = 6
 
 !     The scheme coefficients, A, b, bh, and c  are given by
@@ -1509,7 +1510,7 @@
       bD(6,4) = -790819010291115811425734981828118.d0/44043529.d0
     
       elseif(icase.eq.5) then     !    The scheme you're using is: ESDIRK536L2SA
-
+      casename='ESDIRK536L2SA'
       ns = 6
     
 !     The scheme coefficients, A, b, bh, and c  are given by
@@ -1877,7 +1878,7 @@
       bD(6,4) = -94251174957.d0/5756881231433.d0
     
       elseif(icase.eq.6) then     !    The scheme you're using is: ESDIRK436L2SA_C3
-    
+      casename='ESDIRK436L2SA_C3'
       ns = 6 
 
 !     The scheme coefficients, A, b, bh, and c  are given by
@@ -2247,7 +2248,7 @@
 !
 ! ARK4(3)6[2]SA_1 
 !
-
+      casename='ARK436[2]SA_1 '
       ns=6
 
       be(1) = 82889.d0/524892.d0
@@ -2309,7 +2310,7 @@
 !
 ! ARK4(3)6[2]SA_2 
 !
-
+      casename='ARK436[2]SA_2'
       ns=6 
 
       be(1) = 0.d0/1.d0
@@ -2372,7 +2373,7 @@
 !
 ! ARK4(3)6[2]SA_3 
 !
-
+      casename='ARK436[2]SA_3'
       ns=6
 
       be(1) = 0.d0/1.d0
@@ -2435,6 +2436,7 @@
 !
 ! ARK4(3)6[2]SA_4 
 !
+      casename='ARK436[2]SA_4'
       ns=6
 
       be(1) = 5.d0/27.d0
@@ -2497,7 +2499,7 @@
 !
 ! ARK4(3)6[1]SA_1 
 !
-
+      casename='ARK436[1]SA_1'
       ns=6
 
       be(1) = 0.d0/1.d0
@@ -2560,7 +2562,7 @@
 !
 ! ARK4(3)6[1]SA_2 
 !
-
+      casename='ARK436[1]SA_2'
       ns=6
 
       be(1) = 0.d0/1.d0
@@ -2623,8 +2625,8 @@
 !
 ! ARK4(3)6[1]SA_3 
 !
-
-      ns=6
+      casename='ARK436[1]SA_3'
+      ns=6 
      
       be(1) = 0.d0/1.d0
       be(2) = 0.d0/1.d0
@@ -2686,7 +2688,7 @@
 !
 ! Lirk4
 !
-
+      casename='Lirk4'
       ns=6
 
       be(1) = 0.d0/1.d0
@@ -2743,7 +2745,7 @@
 !
 ! ARK4(3)7[2]SA_1 - C2E and C2I
 !
-
+      casename='ARK437[2]SA_1-C2EC2I'
       ns=7
 
       be(1) = 0.d0/1.d0
@@ -2822,7 +2824,7 @@
 !
 ! ARK5(3)7[2]SA_1
 !
-
+      casename='ARK537[2]SA_1'
       ns=7
 
       be(1) = -1035874202318.d0/5941463594067.d0
@@ -2908,7 +2910,7 @@
 !
 ! ARK5(4)8[2]SA_1
 !
-      
+      casename='ARK548[2]SA_1'
       ns=8
  
       be(1) = -872700587467.d0/9133579230613.d0
@@ -3005,7 +3007,7 @@
 !
 ! ARK5(4)8[2]SA_2
 !
-
+      casename='ARK548[2]SA_2'
       ns=8
 
       be(1) = 0.d0/1.d0

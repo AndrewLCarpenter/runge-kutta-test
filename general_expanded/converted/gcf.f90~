@@ -13,7 +13,7 @@
       real(wp),   intent(  out)  ::  gln
 
       integer                  ::  i
-      real(wp)                   ::  an,b,c,d,del,h
+      real(wp)                   ::  an,b,c,d,del,h,gammln
 
 !     USES gammln
 

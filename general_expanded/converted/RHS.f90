@@ -2,20 +2,20 @@
 
       implicit none
 
-      integer,   parameter                           :: wp=8
+      integer,   parameter                            :: wp=8
 
-      integer,   parameter                           :: is=9
-      integer,   parameter                           :: ivarlen=4
+      integer,   parameter                            :: is=9
+      integer,   parameter                            :: ivarlen=4
 
-      real(wp),                        intent(in   ) :: sigma
-      real(wp),                        intent(in   ) :: rho
-      real(wp),                        intent(in   ) :: beta
+      real(wp),                        intent(in   )  :: sigma
+      real(wp),                        intent(in   )  :: rho
+      real(wp),                        intent(in   )  :: beta
 
       real(wp),  dimension(ivarlen),    intent(in   ) :: uvec
       real(wp),  dimension(ivarlen),    intent(  out) :: res
-      real(wp),                        intent(in   ) :: dt
-      real(wp),                        intent(in   ) :: ep
-      integer,                         intent(in   ) :: iprob
+      real(wp),                        intent(in   )  :: dt
+      real(wp),                        intent(in   )  :: ep
+      integer,                         intent(in   )  :: iprob
 
       
       if    (iprob.eq.1)then

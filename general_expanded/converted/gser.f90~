@@ -12,14 +12,12 @@
       real(wp),   intent(  out)  ::  gln
 
       integer                   ::  n
-      real(wp)                  ::  ap,del,summ
-
+      real(wp)                  ::  ap,del,summ,gammln
 
 !     USES gammln
 !     Returns the incomplete gamma function P(a, x) evaluated by its series 
 !     representation as gamser. Also returns In r( a) as gln.
-      INTEGER n
-      REAL ap,del,summ,gammln
+
       gln=gammln (A)
       if(x.le.0.)then
       if(x.lt.0.)pause 'x < 0 in gser'

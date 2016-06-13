@@ -13,9 +13,9 @@
 
       real(wp),  dimension(ivarlen),    intent(in   ) :: uvec
       real(wp),  dimension(ivarlen),    intent(  out) :: res
-      real(wp)                        intent(in   ) :: dt
-      real(wp)                        intent(in   ) :: ep
-      integer                         intent(in   ) :: iprob
+      real(wp),                        intent(in   ) :: dt
+      real(wp),                        intent(in   ) :: ep
+      integer,                         intent(in   ) :: iprob
 
       
       if    (iprob.eq.1)then

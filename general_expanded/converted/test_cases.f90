@@ -1,25 +1,61 @@
-      program test_cases
-
-      implicit none 
-!     program 1) van der Pol (Hairer II, pp 403)
-!     program 2) Pureshi and Russo 
-!     program 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
-!     program 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
+!####################################################################
+!### Program to test Runge-Kutta IMEX schemes on various problems ###
+!####################################################################
+!
+!----------------------------PROBLEM LIST----------------------------
+!     problem 1) van der Pol (Hairer II, pp 403)
+!     problem 2) Pureshi and Russo 
+!     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
+!     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     WARNING: Kreiss has problem with algebraic variable
-!     program 5) Lorenz
-      
-      integer, parameter  :: wp=8
+!     problem 5) Lorenz
+!--------------------------------------------------------------------
+!
+!-----------------------------REQUIRED FILES-------------------------
+! RUNGEADD.F90  *CONTAINS RK CONSTANTS
+! INIT.F90      *CONTAINS INITIALIZATIONS FOR PROBLEMS
+! RHS.F90       *CONTAINS THE RIGHT-HAND SIDE OF THE PROBLEMS
+! JACOB.F90     *COMPUTES THE JACOBIAN FOR EACH PROBLEM
+! FIT.F90       *STATISTICS?
+! GSER.F90      *STATISTICS?
+! GCF.F90       *STATISTICS?
+! GAMMQ.F90     *STATISTICS?
+! GAMMLN.F90    *STATISTICS?
+!--------------------------------------------------------------------
+!
+!--------------------------HOW TO USE--------------------------------
+!**Adding test cases:
+!      RHS,JACOB,& INIT need to be updated with information about each
+!      test case. Also update probname array with problem name (9 char)
+!**Compiling
+!      Compile all files listed above together in the same directory
+!**Running test cases
+!      Program will prompt user for which predictor, case, and problem
+!      to run.
+!**Output results
+!      The program outputs results to files with the form:
+! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
+! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
+! /"probname"/"casename"/"probname"_"casename"_conv.dat
+!
+!***************************BEGIN PROGRAM****************************
+      program test_cases
+      implicit none     
+!------------------------------PARAMETERS----------------------------
+      integer, parameter :: wp=8               !working precision
+      integer, parameter :: is=9               !max constant length
+      integer, parameter :: ivarlen=4          !max variable length
+      integer, parameter :: isamp=71           !?
+      integer, parameter :: jmax=81            !?
+      integer, parameter :: jactual=81         !?
+!-----------------------------VARIABLES------------------------------      
+      integer             :: ipred,cases,problem         !user inputs
+      integer             :: icase,icount,jcount,i,ii    !do loops
+      integer             :: iprob,nrk,jepsil,iDT,ival   !do loops
+      integer             :: ktime,L,LL,nveclen          !do loops
+      integer             :: jpre,inew,j,k,jsamp,istage  !do loops
 
-      integer, parameter  :: is=9,ivarlen=4
-      integer, parameter  :: isamp=71,jmax=81,jactual=81
-      
-      integer             :: ipred
-      integer             :: cases        !input range of runge kutta cases
-      integer             :: problem      !input problem number
       real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal
-      integer             :: icase,icount,jcount,i,iprob,nrk,jepsil
-      integer             :: ii,iDT,nveclen,ival,ktime,L,LL
-      integer             :: jpre,inew,j,k,jsamp,istage
       real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
       real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8,q
       real(wp)            :: tmp,xnorm,snorm,tmpD,dto,totalerror,totalerrorp
@@ -38,87 +74,103 @@
       real(wp), dimension(ivarlen*2) :: a,b,siga1,sigb1,chi2
       real(wp), dimension(jmax,ivarlen) :: b1save,b1Psave
       real(wp), dimension(jmax) :: epsave
-
-
-      write(*,*)'what is ipred?'
+      
+      character(len=80) :: filename,fileloc   !file name and location
+      character(len=25) :: casename           !name of RK case
+      character(len=9), dimension(5) :: probname!array of problem names
+      character(len=4)  :: ext='.dat'         !file extension
+      character         :: istr               !loop index placeholder
+     
+      !**ENTER PROBLEM NAMES**
+      probname(1)="vanderPol"
+      probname(2)="Pureshi  "
+      probname(3)="Kaps     "
+      probname(4)="Kreiss   "
+      probname(5)="Lorenz   "
+!-----------------------------USER INPUT-----------------------------
+      write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
-      write(*,*)'what is case?'
+      write(*,*)'what is case?'  !input range of runge kutta cases
       read(*,*)cases
-      write(*,*)'which problem?'
+      write(*,*)'which problem?' !input problem number
       read(*,*)problem
+!-------------------------ALGORITHMS LOOP----------------------------
+      do icase = cases,cases  
 
-      do icase = cases,cases                                  !   begin algorithms loop
+        icount = 0                                  !cost counters
+        jcount = 0                                  !cost counters
+        
+        !**GET RK COEFFICIENTS**
+        call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, &   
+     &   svpB(1,1,0),alpha,al3N,al3D,al4N,al4D,casename)
 
-        icount = 0        !  cost counters
-        jcount = 0        !  cost counters
-   
-        call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, & !icase is the only input
-     &   svpB(1,1,0),alpha,al3N,al3D,al4N,al4D)
-
-
+        !**initilizations?**
         do i = 1,nrk
           stageE(i) = 0.0
           stageI(i) = 0.0
           maxiter(i)= 0
         enddo
+!--------------------------PROBLEMS LOOP------------------------------
+        do iprob = problem,problem 
+          !**INIT. FILE PATH FOR OUTPUTS**                             
+          fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
+          call system('mkdir '//trim(fileloc)) ! create directory
+!--------------------------STIFFNESS LOOP-----------------------------
+          do jepsil = 1,jactual,1                              
 
-
-
-        do iprob = problem,problem                                !   begin problems loop
-
-!         loop over different values of stiffness epsilon 
-
-          do jepsil = 1,jactual,1                                !  begin stiffness epsilon loop
-
-            itmp = 11 - jmax/jactual
-            ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           !  used for 81 values of ep
+            itmp = 11 - jmax/jactual         !used for 81 values of ep
+            ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
+            !**INIT. OUTPUT FILES**
             do ii = 1,ivarlen
+              write(istr,"(I1.1)")ii
+              filename=trim(probname(iprob))//'_'//trim(casename)//'_'//istr//ext
+              open(49+ii,file=trim(fileloc)//filename)
               write(49+ii,*)'zone T = "ep = ',ep,'",'
+              filename=trim(probname(iprob))//'_'//trim(casename)//'_'//istr//'P'//ext
+              open(59+ii,file=trim(fileloc)//filename)
               write(59+ii,*)'zone T = "ep = ',ep,'",'
             enddo
+!--------------------------TIMESTEP LOOP------------------------------
+            do iDT = 1,isamp,1                     
 
-            do iDT = 1,isamp,1                                 !  timestep loop for vdP, Kaps, etc
-!            do iDT = 1,1,1                                     ! use to determine the exact solution
+            !**INITIALIZE PROBLEM INFORMATION**
+            call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     
+            dto = dt        !store time step
+            t = 0.0_wp      !init. start time
 
-            call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     !  initialize problem information
-            dto = dt
-            t = 0.0_wp
-
+            !**INIT. ERROR VECTOR**
             do ival = 1,nvecLen
               errvecT(ival) = 0.0_wp
             enddo
 
-            do i = 1,nrk                                       !  initialize stage value preditor
-              do ival = 1,nvecLen                              !  with trivial guess for first stage
+            do i = 1,nrk            !initialize stage value preditor
+              do ival = 1,nvecLen   !with trivial guess for first stage
                 predvec(ival,i) = uvec(ival)
               enddo
             enddo
-
-
-            do ktime = 1,100000000                      ! advance solution (time advancement loop )
-
-              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0d-11
-
+!--------------------------TIME ADVANCEMENT LOOP----------------------
+            do ktime = 1,100000000                      
+              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0d-11 !check if dt>tfinal
+              
+              !**STORE VALUES OF UVEC**
               do ival = 1,nvecLen
                 uveco(ival) = uvec(ival)
               enddo
-
-              jcount = jcount + (nrk-1)                         !  keep track of total RK stages 
-
-              do L = 1,nrk                                      !  begin RK loop
-
-                ttI = t + cI(L)*dt
+              jcount = jcount + (nrk-1)    !keep track of total RK stages 
+!--------------------------------RK LOOP------------------------------
+              do L = 1,nrk    
+                ttI = t + cI(L)*dt !?
                 
+                !**GET INFORMATION ABOUT RHS OF PROBLEM**
                 call RHS(uvec,res(1,L),dt,ep,iprob,sigma,rho,beta)
 
-                do ival = 1,nvecLen                             !  write the solution into a storage register
+                do ival = 1,nvecLen !write the solution into a storage register
                   ustage(ival,L) = uvec(ival)
                 enddo
 
-              if(L.ne.nrk)then
-
-                ttI = t + cI(L+1)*dt
+              if(L.ne.nrk)then !True for all but last loop
+                ttI = t + cI(L+1)*dt   !?
 
                 do ival = 1,nvecLen
                   usum(ival) = uveco(ival)
@@ -227,11 +279,10 @@
                   call RHS(uvec,res(1,L+1),dt,ep,iprob,sigma,rho,beta)
 
                   do ival = 1,nvecLen
-                    Rnewton(ival) =&  
-     &              uvec(ival)  - aI(L+1,L+1)*res(ival,L+1) - usum(ival)
+                    Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*res(ival,L+1)-usum(ival)
                   enddo
 
-            call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen)
+            call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
 
                   do i = 1,nvecLen
                     do j = 1,nvecLen
@@ -276,9 +327,8 @@
                     uvec(ival) = uvec(ival) + bI(LL)*res(ival,LL)
                   enddo
                 enddo
-
-                if(time.lt.tfinal-1.0d-11)then               !  begin predicted error
-
+!---------------------------PREDICTED ERROR---------------------------
+                if(time.lt.tfinal-1.0d-11)then               
                 do ival = 1,nvecLen
                   errvec(ival) = 0.0_wp
                   do LL = 1,nrk 
@@ -288,15 +338,12 @@
                   errvec(ival) = abs(errvec(ival))
                 enddo
                 rat = 1.0_wp
-
-                endif                                        !  end predicted error
-
-!              predict new values stage values :  about 100 different kinds
-
-!                                           !  note that ipred=2 is accomplished elsewhere
-                
-               if(ipred.eq.1)then
-!              begin with dense output
+                endif                            
+!-----------------------END PREDICTED ERROR---------------------------
+!-----------------------PREDICT NEXT STAGE VALUES---------------------
+!**About 100 different kinds
+!**Note that ipred=2 is accomplished elsewhere         
+               if(ipred.eq.1)then !begin with dense output
                 do K=2,nrk
                   do ival = 1,nvecLen
                     predvec(ival,K) = uvec(ival)
@@ -304,7 +351,6 @@
                 enddo
 
                 elseif(ipred.eq.3)then
-
                 do K=2,nrk
                   do ival = 1,nvecLen
                     predvec(ival,K) = uveco(ival)
@@ -320,11 +366,9 @@
                 enddo
 
                 elseif(ipred.eq.4.or.ipred.eq.5)then
-
 !              stage value predictors
 !  U^(n+1,i+1) =                  \sum_{k=0}^{order} (etah_{i k}*r^(k)) * U^{n-1} +
 !                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j+1}
-
                 do ival = 1,nvecLen
                   do inew=2,nrk
                     predvec(ival,inew) = 0.0_wp
@@ -342,22 +386,18 @@
                 enddo
 
                 endif
-
-
+!-------------------END PREDICT NEXT STAGE VALUES---------------------
               endif
-
-            enddo                                            ! end RK loop
-
+            enddo                                          
+!-----------------------------END RK LOOP-----------------------------
             do ival = 1,nvecLen
               errvecT(ival) = errvecT(ival) + errvec(ival)
             enddo                                         
+            t = t + dt                  !increment time
+            if(t.ge.tfinal) go to 100   !if end time then exit loop
 
-            t = t + dt
-
-            if(t.ge.tfinal) go to 100
-
-          enddo                                              ! end time advancement loop
-
+          enddo                                          
+!-----------------------END TIME ADVANCEMENT LOOP---------------------
   100  continue
        
           cost(iDT) = log10((nrk-1)/dto)                    !  nrk - 1 implicit stages
@@ -379,8 +419,8 @@
             write(59+ii,*)cost(iDT),error1P(iDT,ii)
           enddo
   
-         enddo                                             !  end  loop over different dt
-
+         enddo
+!----------------------------END TIMESTEP LOOP------------------------
            jsamp = 41 
 
 !          if(icase.eq.1)then                        !  make sure that data has not hit machine precision
@@ -426,6 +466,8 @@
          enddo                                              !  end stiffness epsilon loop
 
 !--write to fort.35
+         filename=trim(probname(iprob))//'_'//trim(casename)//'_conv'//ext
+         open(35,file=trim(fileloc)//filename)
          do ii=1,nveclen
            write(35,*)'zone T = "Var ',ii,': Implicit",'
            do j=1,jactual

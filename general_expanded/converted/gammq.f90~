@@ -5,7 +5,7 @@
       integer,  parameter        ::  wp=8
 
       real(wp),   intent(in   )  ::  a,x
-      real(wp),     ::  gammq
+      real(wp)     ::  gammq
 
       real(wp)                  :: gamser,gln,gammcf
 

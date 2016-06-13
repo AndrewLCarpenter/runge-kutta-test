@@ -5,10 +5,10 @@
       integer,  parameter        ::  wp=8
 
       real(wp),   intent(in   )  ::  a,x
-      real(wp)     ::  gammq
+      real(wp)                   ::  gammq
 
-      real(wp)                  :: gamser,gln,gammcf
-
+      real(wp)                   :: gamser,gln,gammcf
+ 
 !     USES gcf,gser
 !     Returns the incomplete gamma function Q(a, x) = 1 -P(a, x).
 
