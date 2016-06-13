@@ -8,20 +8,20 @@
 !     WARNING: Kreiss has problem with algebraic variable
 !     program 5) Lorenz
       
-      integer, parameter :: wp=8
+      integer, parameter  :: wp=8
 
       integer, parameter  :: is=9,ivarlen=4
       integer, parameter  :: isamp=71,jmax=81,jactual=81
       
       integer             :: ipred
-      integer             :: cases 			!input range of runge kutta cases
-      integer             :: problem			!input problem number
+      integer             :: cases        !input range of runge kutta cases
+      integer             :: problem      !input problem number
       real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal
       integer             :: icase,icount,jcount,i,iprob,nrk,jepsil
       integer             :: ii,iDT,nveclen,ival,ktime,L,LL
       integer             :: jpre,inew,j,k,jsamp,istage
       real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
-      real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8
+      real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8,q
       real(wp)            :: tmp,xnorm,snorm,tmpD,dto,totalerror,totalerrorp
 
       real(wp), dimension(is,is) :: aE,aI,alpha,al3N,al3D,al4N,al4D

@@ -8,14 +8,14 @@
 !     WARNING: Kreiss has problem with algebraic variable
 !     program 5) Lorenz
       
-      integer, parameter :: wp=8
+      integer, parameter  :: wp=8
 
       integer, parameter  :: is=9,ivarlen=4
       integer, parameter  :: isamp=71,jmax=81,jactual=81
       
       integer             :: ipred
-      integer             :: cases 			!input range of runge kutta cases
-      integer             :: problem			!input problem number
+      integer             :: cases        !input range of runge kutta cases
+      integer             :: problem      !input problem number
       real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal
       integer             :: icase,icount,jcount,i,iprob,nrk,jepsil
       integer             :: ii,iDT,nveclen,ival,ktime,L,LL
@@ -68,10 +68,10 @@
 
 !         loop over different values of stiffness epsilon 
 
-          do jepsil = 1,jactual,1                              !  begin stiffness epsilon loop
+          do jepsil = 1,jactual,1                                !  begin stiffness epsilon loop
 
             itmp = 11 - jmax/jactual
-            ep = 1./10**((jepsil-1)/(itmp*1.))                           !  used for 81 values of ep
+            ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           !  used for 81 values of ep
             
             do ii = 1,ivarlen
               write(49+ii,*)'zone T = "ep = ',ep,'",'
@@ -83,10 +83,10 @@
 
             call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     !  initialize problem information
             dto = dt
-            t = 0.
+            t = 0.0_wp
 
             do ival = 1,nvecLen
-              errvecT(ival) = 0.0
+              errvecT(ival) = 0.0_wp
             enddo
 
             do i = 1,nrk                                       !  initialize stage value preditor
@@ -98,7 +98,7 @@
 
             do ktime = 1,100000000                      ! advance solution (time advancement loop )
 
-              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0e-11
+              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0d-11
 
               do ival = 1,nvecLen
                 uveco(ival) = uvec(ival)
@@ -155,7 +155,7 @@
 !           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
 
                 if(L.eq.2.and.ktime.ne.1)then
-                  the1 = 1.
+                  the1 = 1.0_wp
                   the2 = the1*the
                   the3 = the2*the
                   the4 = the3*the
@@ -182,11 +182,11 @@
      &                   + al3D(LL,8)*the8
                     bint(LL) = xnum/xden
                   enddo
-                    bint(1) =  9.9518675264213746 
-                    bint(2) =  4.8366852488953721 
-                    bint(3) =-24.163405114569394 
-                    bint(4) = 14.152132944153401
-                    bint(5) =  0.94399768676237158
+                    bint(1) =  9.9518675264213746_wp 
+                    bint(2) =  4.8366852488953721_wp 
+                    bint(3) =-24.163405114569394_wp 
+                    bint(4) = 14.152132944153401_wp
+                    bint(5) =  0.94399768676237158_wp
                   do ival = 1,nvecLen
                     Z1 = ustage(ival,3)-ustage(ival,3)
                     Z2 = ustage(ival,4)-ustage(ival,3)
@@ -239,7 +239,7 @@
                     enddo
                   enddo
 
-                  tmp = 0.0
+                  tmp = 0.0_wp
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival))
                   enddo
@@ -254,8 +254,8 @@
                 ustage(ival,L+1) = uvec(ival)
               enddo
 
-              xnorm = 0.0                                     !  assess how good initial guess was
-              snorm = 0.0                                     !  assess how good initial guess was
+              xnorm = 0.0_wp                                     !  assess how good initial guess was
+              snorm = 0.0_wp                                     !  assess how good initial guess was
               do ival = 1,nvecLen
                 tmpD = (uvec(ival) - uorig(ival))
                 xnorm = xnorm + tmpD*tmpD
@@ -263,7 +263,7 @@
               enddo                                         
               xnorm = sqrt(xnorm/snorm)
               stageE(L+1) = stageE(L+1) + xnorm
-              stageI(L+1) = stageI(L+1) + 1.*k
+              stageI(L+1) = stageI(L+1) + 1.0_wp*k
 
               elseif(L.eq.nrk) then
             
@@ -277,17 +277,17 @@
                   enddo
                 enddo
 
-                if(time.lt.tfinal-1.0e-11)then               !  begin predicted error
+                if(time.lt.tfinal-1.0d-11)then               !  begin predicted error
 
                 do ival = 1,nvecLen
-                  errvec(ival) = 0.0
+                  errvec(ival) = 0.0_wp
                   do LL = 1,nrk 
                     errvec(ival) = errvec(ival)& 
      &                       + dt*( (bI(LL)-bIH(LL))*res(ival,LL) )
                   enddo
                   errvec(ival) = abs(errvec(ival))
                 enddo
-                rat = 1.0
+                rat = 1.0_wp
 
                 endif                                        !  end predicted error
 
@@ -327,9 +327,9 @@
 
                 do ival = 1,nvecLen
                   do inew=2,nrk
-                    predvec(ival,inew) = 0.0
+                    predvec(ival,inew) = 0.0_wp
                     do j = 1,nrk
-                      the = 1.
+                      the = 1.0_wp
                       bb = svpB(inew,j,0)&
                         + svpB(inew,j,1)*the&
                         + svpB(inew,j,2)*the*the&
@@ -362,11 +362,11 @@
        
           cost(iDT) = log10((nrk-1)/dto)                    !  nrk - 1 implicit stages
 
-          totalerror  = 0.0
-          totalerrorP = 0.0
+          totalerror  = 0.0_wp
+          totalerrorP = 0.0_wp
           do ival = 1,nvecLen
             tmpvec(ival) = abs(uvec(ival)-uexact(ival))
-            if(tmpvec(ival).eq.0.0)tmpvec(ival)=1.0e-15
+            if(tmpvec(ival).eq.0.0)tmpvec(ival)=1.0d-15
             totalerror  = totalerror  + tmpvec(ival)**2 
             totalerrorP = totalerrorP + errvecT(ival)**2 
           enddo
@@ -394,7 +394,7 @@
 !          endif
   
            do i=1,isamp
-             sig(i) = 0.0
+             sig(i) = 0.0_wp
            enddo
 
 !-- gather values for output
@@ -445,7 +445,7 @@
 
    50  format( 10(e12.5,1x))
 
-       tmp = 1.0*icount/jcount
+       tmp = 1.0_wp*icount/jcount
        write(*,*)'average iterations per step',tmp
 
        do istage = 2,nrk
