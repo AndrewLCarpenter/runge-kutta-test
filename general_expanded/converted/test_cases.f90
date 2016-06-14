@@ -9,6 +9,7 @@
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     WARNING: Kreiss has problem with algebraic variable
 !     problem 5) Lorenz
+!     problem 6) 
 !--------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-------------------------
@@ -55,7 +56,7 @@
       integer             :: ktime,L,LL,nveclen          !do loops
       integer             :: jpre,inew,j,k,jsamp,istage  !do loops
 
-      real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal
+      real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal,ttE
       real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
       real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8,q
       real(wp)            :: tmp,xnorm,snorm,tmpD,dto,totalerror,totalerrorp
@@ -65,7 +66,7 @@
       real(wp), dimension(is) :: maxiter,bint
       real(wp), dimension(is,ivarlen) :: bD
       real(wp), dimension(is,is,0:is) :: svpB
-      real(wp), dimension(ivarlen,is) :: ustage,res,predvec
+      real(wp), dimension(ivarlen,is) :: ustage,resE,res,predvec
       real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
       real(wp), dimension(ivarlen) :: uexact,Rnewton,errvec,errvecT,tmpvec
       real(wp), dimension(ivarlen,ivarlen) :: xjacinv
@@ -80,6 +81,8 @@
       character(len=9), dimension(5) :: probname!array of problem names
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
+
+      logical           :: dirExists          !check if directory exists
      
       !**ENTER PROBLEM NAMES**
       probname(1)="vanderPol"
@@ -95,7 +98,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = cases,cases  
+      do icase = cases,cases 
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
@@ -111,10 +114,11 @@
           maxiter(i)= 0
         enddo
 !--------------------------PROBLEMS LOOP------------------------------
-        do iprob = problem,problem 
-          !**INIT. FILE PATH FOR OUTPUTS**                             
+        do iprob = problem,problem
+          !**INIT. FILE PATH FOR OUTPUTS**                           
           fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
-          call system('mkdir '//trim(fileloc)) ! create directory
+          inquire( file=trim(fileloc)//'/.', exist=dirExists )  
+          if (.not.dirExists)call system('mkdir '//trim(fileloc)) ! create directory
 !--------------------------STIFFNESS LOOP-----------------------------
           do jepsil = 1,jactual,1                              
 
@@ -160,24 +164,28 @@
               jcount = jcount + (nrk-1)    !keep track of total RK stages 
 !--------------------------------RK LOOP------------------------------
               do L = 1,nrk    
-                ttI = t + cI(L)*dt !?
-                
+                ttI = t + cI(L)*dt
+                ttE = t + cE(L)*dt
+
                 !**GET INFORMATION ABOUT RHS OF PROBLEM**
-                call RHS(uvec,res(1,L),dt,ep,iprob,sigma,rho,beta)
+                call RHS(uvec,res(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta)
 
                 do ival = 1,nvecLen !write the solution into a storage register
                   ustage(ival,L) = uvec(ival)
                 enddo
 
               if(L.ne.nrk)then !True for all but last loop
-                ttI = t + cI(L+1)*dt   !?
+                ttI = t + cI(L+1)*dt   
+                ttE = t + cE(L+1)*dt
 
-                do ival = 1,nvecLen
+                do ival = 1,nvecLen !start the summation vector
                   usum(ival) = uveco(ival)
                 enddo
+
                 do LL = 1,L 
                   do ival = 1,nvecLen
-                    usum(ival) = usum(ival) + aI(L+1,LL)*res(ival,LL)
+                    usum(ival) = usum(ival) + aI(L+1,LL)*res(ival,LL)+ &
+     &                           aE(L+1,LL)*resE(ival,LL) !imex summation
                   enddo
                 enddo
 
@@ -207,9 +215,10 @@
 !           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
 
                 if(L.eq.2.and.ktime.ne.1)then
-                  the1 = 1.0_wp
-                  the2 = the1*the
-                  the3 = the2*the
+                  the1 = 1.0_wp             !"the" is undefined
+                  the2 = the1*the           !bint gets set and then overwritten  
+!***********************************************************************
+                  the3 = the2*the           !unless nrk> 5 then bint gets set for L[1,nrk], LL=L
                   the4 = the3*the
                   the5 = the4*the
                   the6 = the5*the
@@ -267,39 +276,41 @@
 !                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
 !                 enddo
                 endif
-
+!-------------------------------NEWTON ITERATION----------------------
                 do k = 1,20
 
                   icount = icount + 1
 
                   do ival = 1,nvecLen
-                    uveciter(ival) = uvec(ival)
+                    uveciter(ival) = uvec(ival) !store old uvec
                   enddo
 
-                  call RHS(uvec,res(1,L+1),dt,ep,iprob,sigma,rho,beta)
+                  call RHS(uvec,res(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
 
                   do ival = 1,nvecLen
                     Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*res(ival,L+1)-usum(ival)
                   enddo
-
-            call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
+           
+                  !**GET INVERSE JACOBIAN**
+                  call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
 
                   do i = 1,nvecLen
                     do j = 1,nvecLen
-                      uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)
+                      uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
                     enddo
                   enddo
 
                   tmp = 0.0_wp
                   do ival = 1,nvecLen
-                     tmp = tmp + abs(uvec(ival)-uveciter(ival))
+                     tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
                   enddo
                   if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
 
                 enddo
+!-----------------------------------END NEWTON ITERATION--------------
   160           continue
  
-             if((k.gt.maxiter(L+1)).and.(ktime.ne.1))maxiter(L+1)=k
+              if((k.gt.maxiter(L+1)).and.(ktime.ne.1))maxiter(L+1)=k
 
               do ival = 1,nvecLen                    !  write the solution into a storage register
                 ustage(ival,L+1) = uvec(ival)
@@ -324,7 +335,7 @@
 
                 do ival = 1,nvecLen
                   do LL = 1,nrk 
-                    uvec(ival) = uvec(ival) + bI(LL)*res(ival,LL)
+                    uvec(ival) = uvec(ival) + bI(LL)*res(ival,LL)+bE(LL)*resE(ival,LL)
                   enddo
                 enddo
 !---------------------------PREDICTED ERROR---------------------------
@@ -333,7 +344,7 @@
                   errvec(ival) = 0.0_wp
                   do LL = 1,nrk 
                     errvec(ival) = errvec(ival)& 
-     &                       + dt*( (bI(LL)-bIH(LL))*res(ival,LL) )
+     &                       + dt*( (bE(LL)-bEH(LL))*resE(ival,LL)+(bI(LL)-bIH(LL))*res(ival,LL) )!?dt?
                   enddo
                   errvec(ival) = abs(errvec(ival))
                 enddo
@@ -343,7 +354,7 @@
 !-----------------------PREDICT NEXT STAGE VALUES---------------------
 !**About 100 different kinds
 !**Note that ipred=2 is accomplished elsewhere         
-               if(ipred.eq.1)then !begin with dense output
+                if(ipred.eq.1)then !begin with dense output
                 do K=2,nrk
                   do ival = 1,nvecLen
                     predvec(ival,K) = uvec(ival)
@@ -384,7 +395,6 @@
                     enddo
                   enddo
                 enddo
-
                 endif
 !-------------------END PREDICT NEXT STAGE VALUES---------------------
               endif
@@ -400,7 +410,7 @@
 !-----------------------END TIME ADVANCEMENT LOOP---------------------
   100  continue
        
-          cost(iDT) = log10((nrk-1)/dto)                    !  nrk - 1 implicit stages
+          cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
 
           totalerror  = 0.0_wp
           totalerrorP = 0.0_wp
@@ -437,16 +447,17 @@
              sig(i) = 0.0_wp
            enddo
 
-!-- gather values for output
-	   do ii = 1,nveclen
+!--------------------------OUTPUTS------------------------------------
+           !**GATHER OUTPUT VALUES
+	       do ii = 1,nveclen
              call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),&
-     & b(ii),siga1(ii),sigb1(ii),chi2(ii),q)
+     &       b(ii),siga1(ii),sigb1(ii),chi2(ii),q)
              call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),&
-     & b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),&
-     & chi2(ii+nveclen),q)
-	   enddo
+     &       b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),&
+     &       chi2(ii+nveclen),q)
+	       enddo
            
-!--output to terminal
+           !**OUTPUT TO TERMINAL**
            write(*,60,advance="no")ep
            do ii = 1,nveclen*2-1
              write(*,60,advance="no")a(ii),b(ii)
@@ -458,14 +469,9 @@
             b1save(jepsil,ii) = -b(ii)
             b1Psave(jepsil,ii) = -b(ii+nveclen)
            enddo
-	! test outputs
-           !print *,'x:',uvec(1)
-           !print *,'y:',uvec(2)
-           !print *,'z:',uvec(3)
-           !write(33,*)uvec(1),uvec(2),uvec(3)
-         enddo                                              !  end stiffness epsilon loop
-
-!--write to fort.35
+         enddo           
+!---------------------END STIFFNESS LOOP------------------------------
+         !**OUTPUT CONVERGENCE VS STIFFNESS**
          filename=trim(probname(iprob))//'_'//trim(casename)//'_conv'//ext
          open(35,file=trim(fileloc)//filename)
          do ii=1,nveclen
@@ -479,26 +485,27 @@
            enddo
          enddo
 
-        enddo                                            !  end problems loop
-
-       enddo                                             !  end algorithms loop
-
+         !**OUTPUT TO TERMINAL**
+         tmp = 1.0_wp*icount/jcount
+         write(*,*)'average iterations per step',tmp
+           
+         do istage = 2,nrk
+           stageE(istage) = (nrk-1)*stageE(istage)/jcount
+           stageI(istage) = (nrk-1)*stageI(istage)/jcount
+         enddo
+         write(*,*)'error of initial guess is '
+         do istage = 2,nrk
+           write(*,*) istage,stageE(istage),maxiter(istage),stageI(istage)
+         enddo
+!----------------------END OUTPUTS------------------------------------
+        enddo                                       
+!----------------------END PROBLEMS LOOP------------------------------
+       enddo                                    
+!----------------------END ALGORITHMS LOOP----------------------------
    60  format( e12.5,1x,12(f8.3,1x))
-
    50  format( 10(e12.5,1x))
 
-       tmp = 1.0_wp*icount/jcount
-       write(*,*)'average iterations per step',tmp
+      END PROGRAM test_cases
 
-       do istage = 2,nrk
-         stageE(istage) = (nrk-1)*stageE(istage)/jcount
-         stageI(istage) = (nrk-1)*stageI(istage)/jcount
-       enddo
-       write(*,*)'error of initial guess is '
-       do istage = 2,nrk
-         write(*,*) istage,stageE(istage),maxiter(istage),stageI(istage)
-       enddo
-       stop
-       end
 
    
