@@ -7,19 +7,19 @@
       integer,   parameter                           :: is=9
       integer,   parameter                           :: ivarlen=4
  
-      real(wp),                                intent(in   ) :: sigma
-      real(wp),                                intent(in   ) :: rho
-      real(wp),                                intent(in   ) :: beta
+      real(wp),                                intent(in   )  :: sigma
+      real(wp),                                intent(in   )  :: rho
+      real(wp),                                intent(in   )  :: beta
 
-      real(wp),   dimension(ivarlen),           intent(in   ) :: uvec
-      real(wp),   dimension(ivarlen,ivarlen),   intent(  out) :: xinv
-      real(wp),                                intent(in   ) :: dt
-      real(wp),                                intent(in   ) :: ep
-      real(wp) ,                               intent(in   ) :: akk
-      integer,                                 intent(in   ) :: iprob
-      integer,                                 intent(in   ) :: nveclen
+      real(wp),   dimension(ivarlen),          intent(in   )  :: uvec
+      real(wp),   dimension(ivarlen,ivarlen),  intent(  out)  :: xinv
+      real(wp),                                intent(in   )  :: dt
+      real(wp),                                intent(in   )  :: ep
+      real(wp) ,                               intent(in   )  :: akk
+      integer,                                 intent(in   )  :: iprob
+      integer,                                 intent(in   )  :: nveclen
 
-      real(wp),   dimension(ivarlen,ivarlen)          :: xjac    
+      real(wp),   dimension(ivarlen,ivarlen)         :: xjac    
       real(wp)                                       :: x11,x12,x13,x14
       real(wp)                                       :: x21,x22,x23,x24
       real(wp)                                       :: x31,x32,x33,x34

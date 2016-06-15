@@ -135,7 +135,7 @@
 
           tfinal = 1.0_wp !!arbitrary
 
-          open(unit=39,file='exact.lorenz.data')		
+          open(unit=39,file='exact.lorenz.data')
 
           rewind(39)
           do i=1,81

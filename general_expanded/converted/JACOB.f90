@@ -4,15 +4,14 @@
 
       integer,   parameter                           :: wp=8
 
-      integer,   parameter                           :: is=9
       integer,   parameter                           :: ivarlen=4
  
       real(wp),                                intent(in   )  :: sigma
       real(wp),                                intent(in   )  :: rho
       real(wp),                                intent(in   )  :: beta
 
-      real(wp),   dimension(ivarlen),           intent(in   ) :: uvec
-      real(wp),   dimension(ivarlen,ivarlen),   intent(  out) :: xinv
+      real(wp),   dimension(ivarlen),          intent(in   )  :: uvec
+      real(wp),   dimension(ivarlen,ivarlen),  intent(  out)  :: xinv
       real(wp),                                intent(in   )  :: dt
       real(wp),                                intent(in   )  :: ep
       real(wp) ,                               intent(in   )  :: akk
