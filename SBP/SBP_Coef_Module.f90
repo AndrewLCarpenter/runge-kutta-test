@@ -3,9 +3,10 @@
       implicit none
 
       integer,   parameter                      :: wp = 8
+      real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  D1_242
+      public  ::  D1_242, D2_242
 
       contains
 
@@ -26,10 +27,6 @@
       real(wp)                                  :: h, tnorm
       real(wp),  allocatable, dimension(:)      :: d1mat
       real(wp),  allocatable, dimension(:,:)    :: D1blk, D2blk, D1blkT
-      real(wp),  parameter                      :: tol=1.0e-12_wp
-      real(wp),  allocatable, dimension(:)      :: err, x0_vec, x1_vec, x2_vec, x3_vec
-      real(wp),  allocatable, dimension(:)      ::     dx0_vec,dx1_vec,dx2_vec,dx3_vec
-      real(wp),  allocatable, dimension(:)      ::     dx0T_vec,dx1T_vec,dx2T_vec,dx3T_vec
 
       continue
 
@@ -76,37 +73,17 @@
 
       call CSR_Filler(n,nnz,d1mat,D1blk,D2blk, ia,ja,a)
 
-      allocate(  x0_vec(n),  x1_vec(n),  x2_vec(n),  x3_vec(n))
-      allocate( dx0_vec(n), dx1_vec(n), dx2_vec(n), dx3_vec(n))
-      allocate(dx0T_vec(n),dx1T_vec(n),dx2T_vec(n),dx3T_vec(n))
-      allocate(err(n))
-      do i = 1,n
-        x0_vec(i) = 1.0_wp        ;  dx0_vec(i) = 0.0_wp
-        x1_vec(i) = 1.0_wp*i      ;  dx1_vec(i) = 1.0_wp
-        x2_vec(i) = 1.0_wp*i*i    ;  dx2_vec(i) = 2.0_wp*i
-        x3_vec(i) = 1.0_wp*i*i*i  ;  dx3_vec(i) = 3.0_wp*i*i
-      enddo
+      a(:) = a(:) / h
 
-      call amux_local (n, x0_vec,dx0T_vec, a,ja,ia)
-      call amux_local (n, x1_vec,dx1T_vec, a,ja,ia)
-      call amux_local (n, x2_vec,dx2T_vec, a,ja,ia)
-      call amux_local (n, x3_vec,dx3T_vec, a,ja,ia)
+      call test_error(1,n,nnz,ia,ja,a)
 
-      err(:) = dx0_vec(:) - dx0T_vec(:) &
-             + dx1_vec(:) - dx1T_vec(:) &
-             + dx2_vec(:) - dx2T_vec(:)!&
-            !+ dx3_vec(:) - dx3T_vec(:)
-      
-      tnorm = maxval(err)
-      write(*,*)'error in derivative',tnorm
-      if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
-
-
-      deallocate(d1mat,D1blk,D2blk,D1blkT,err)
+      deallocate(d1mat,D1blk,D2blk,D1blkT)
 
       return
 
       end subroutine D1_242
+
+! ======================================================================================
 
       subroutine D2_242(n,nnz,ia,ja,a,Pmat,Pinv)
 
@@ -157,11 +134,11 @@
       d2mat(:) = - reshape((/  1.0_wp/12.0_wp,-16.0_wp/12.0_wp,30.0_wp/12.0_wp,-16.0_wp/12.0_wp,1.0_wp/12.0_wp /),(/5/))
 
       m24 = 16815244.0_wp/410099621.0_wp
-      M1blkT1= reshape(                                                                                                &
-              & (/  9.0_wp/ 8.0_wp,-59.0_wp/48.0_wp, +1.0_wp/12.0_wp, 1.0_wp/48.0_wp, 0.0_wp        , 0.0_wp,          &
-              &   -59.0_wp/48.0_wp, 59.0_wp/24.0_wp,-59.0_wp/48.0_wp, 0.0_wp        , 0.0_wp        , 0.0_wp,          &
-              &     1.0_wp/12.0_wp,-59.0_wp/48.0_wp, 55.0_wp/24.0_wp,59.0_wp/48.0_wp, 1.0_wp/12.0_wp, 0.0_wp,          &
-              &     1.0_wp/48.0_wp,  0.0_wp        ,-59.0_wp/48.0_wp,59.0_wp/24.0_wp,-4.0_wp/ 3.0_wp, 1.0_wp/12.0_wp/),&
+      M1blkT1= reshape(                                                                                                 &
+              & (/  9.0_wp/ 8.0_wp,-59.0_wp/48.0_wp, +1.0_wp/12.0_wp,  1.0_wp/48.0_wp, 0.0_wp        , 0.0_wp,          &
+              &   -59.0_wp/48.0_wp, 59.0_wp/24.0_wp,-59.0_wp/48.0_wp,  0.0_wp        , 0.0_wp        , 0.0_wp,          &
+              &     1.0_wp/12.0_wp,-59.0_wp/48.0_wp, 55.0_wp/24.0_wp,-59.0_wp/48.0_wp, 1.0_wp/12.0_wp, 0.0_wp,          &
+              &     1.0_wp/48.0_wp,  0.0_wp        ,-59.0_wp/48.0_wp, 59.0_wp/24.0_wp,-4.0_wp/ 3.0_wp, 1.0_wp/12.0_wp/),&
               & (/6,4/)  )
       M1blkT2= reshape(                                                                                         &
               & (/-1.0_wp/3.0_wp*m24,+1.0_wp/1.0_wp*m24,-1.0_wp/1.0_wp*m24,+1.0_wp/3.0_wp*m24, 0.0_wp, 0.0_wp,  &
@@ -169,7 +146,7 @@
               &   -1.0_wp/1.0_wp*m24,+3.0_wp/1.0_wp*m24,-3.0_wp/1.0_wp*m24,+1.0_wp/1.0_wp*m24, 0.0_wp, 0.0_wp,  &
               &   +1.0_wp/3.0_wp*m24,-1.0_wp/1.0_wp*m24,+1.0_wp/1.0_wp*m24,-1.0_wp/3.0_wp*m24, 0.0_wp, 0.0_wp/),&
               & (/6,4/)  )
-      M1blk = - Transpose(M1blkT1+M1blkT2)
+      M1blk = Transpose(-M1blkT1-M1blkT2)
 
       do i=1,4
          do j=1,6
@@ -178,11 +155,19 @@
       end do
 
       do j = 1,4
-        D1blk(1,j) = Pinv(  j)*(M1blk(1,  j) - d1vec(j))
-        D2blk(4,:) = Pinv(5-j)*(M2blk(4,7-j) + d1vec(j))
+        M1blk(1,  j) = M1blk(1,  j) - d1vec(j)
+        M2blk(4,7-j) = M2blk(4,7-j) - d1vec(j)
+      enddo
+      do i = 1,4
+        D1blk(i,:) = Pinv(  i)*M1blk(i,:)
+        D2blk(i,:) = Pinv(5-i)*M2blk(i,:)
       enddo
 
       call CSR_Filler(n,nnz,d2mat,D1blk,D2blk, ia,ja,a)
+
+      a(:) = a(:) / h / h
+
+      call test_error(2,n,nnz,ia,ja,a)
 
       end subroutine D2_242
 
@@ -236,7 +221,7 @@
         do j = 1,5
           if(abs(dmat(j)) >= tol) then
               icnt = icnt + 1 ; jcnt = jcnt + 1 ;
-          ja(icnt) = n-6+j
+          ja(icnt) = i-3+j
            a(icnt) = dmat(j)
           endif
         enddo
@@ -257,10 +242,79 @@
       enddo
       if(icnt /= nnz) then
         write(*,*)'dimension of nnz buckets is incorrect: stopping'
+        write(*,*)'icnt, nnz', icnt, nnz
         stop
       endif
 
       end subroutine CSR_Filler
+
+! ======================================================================================
+
+      subroutine test_error(order,n,nnz,ia,ja,a)
+
+      implicit none
+
+      integer,                   intent(in) :: order, n, nnz
+      integer,   dimension(:),   intent(in) :: ia
+      integer,   dimension(:),   intent(in) :: ja
+      real(wp),  dimension(:),   intent(in) ::  a
+      integer                               ::  i
+
+      real(wp),  allocatable, dimension(:)  :: err,  x0_vec ,  x1_vec ,   x2_vec,   x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d1x0_vec ,d1x1_vec , d1x2_vec, d1x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d1x0T_vec,d1x1T_vec,d1x2T_vec,d1x3T_vec
+      real(wp),  allocatable, dimension(:)  ::      d2x0_vec, d2x1_vec, d2x2_vec, d2x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d2x0T_vec,d2x1T_vec,d2x2T_vec,d2x3T_vec
+
+      real(wp)                              :: tnorm, x
+
+      continue
+
+      allocate(  x0_vec(n),  x1_vec(n),  x2_vec(n),  x3_vec(n))
+      allocate(d1x0_vec(n) ,d1x1_vec(n) ,d1x2_vec(n) ,d1x3_vec(n) )
+      allocate(d1x0T_vec(n),d1x1T_vec(n),d1x2T_vec(n),d1x3T_vec(n))
+      allocate(d2x0_vec(n) ,d2x1_vec(n) ,d2x2_vec(n) ,d2x3_vec(n) )
+      allocate(d2x0T_vec(n),d2x1T_vec(n),d2x2T_vec(n),d2x3T_vec(n))
+      allocate(err(n))
+
+      do i = 1,n
+         x = 1.0_wp*(i-1)/(n-1)
+        x0_vec(i) = 1.0_wp       ; d1x0_vec(i) = 0.0_wp     ; d2x0_vec(i) = 0.0_wp
+        x1_vec(i) = 1.0_wp*x     ; d1x1_vec(i) = 1.0_wp     ; d2x1_vec(i) = 0.0_wp
+        x2_vec(i) = 1.0_wp*x*x   ; d1x2_vec(i) = 2.0_wp*x   ; d2x2_vec(i) = 2.0_wp
+        x3_vec(i) = 1.0_wp*x*x*x ; d1x3_vec(i) = 3.0_wp*x*x ; d2x3_vec(i) = 6.0_wp*x
+      enddo
+
+      if(order == 1) then
+         call amux_local (n, x0_vec,d1x0T_vec, a,ja,ia)
+         call amux_local (n, x1_vec,d1x1T_vec, a,ja,ia)
+         call amux_local (n, x2_vec,d1x2T_vec, a,ja,ia)
+         call amux_local (n, x3_vec,d1x3T_vec, a,ja,ia)
+         err(:) = d1x0_vec(:) - d1x0T_vec(:) &
+                + d1x1_vec(:) - d1x1T_vec(:) &
+                + d1x2_vec(:) - d1x2T_vec(:)!&
+               !+ d1x3_vec(:) - d1x3T_vec(:)
+         tnorm = maxval(err)
+         write(*,*)'error in  first derivative',tnorm
+         if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
+      elseif(order == 2) then
+         call amux_local (n, x0_vec,d2x0T_vec, a,ja,ia)
+         call amux_local (n, x1_vec,d2x1T_vec, a,ja,ia)
+         call amux_local (n, x2_vec,d2x2T_vec, a,ja,ia)
+         call amux_local (n, x3_vec,d2x3T_vec, a,ja,ia)
+
+         err(:) = d2x0_vec(:) - d2x0T_vec(:) &
+                + d2x1_vec(:) - d2x1T_vec(:) &
+                + d2x2_vec(:) - d2x2T_vec(:)!&
+               !+ d2x3_vec(:) - d2x3T_vec(:)
+         tnorm = maxval(err)
+         write(*,*)'error in second derivative',tnorm
+         if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
+      endif
+
+      return
+
+      end subroutine test_error
 
 ! ======================================================================================
 
