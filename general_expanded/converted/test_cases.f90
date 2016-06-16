@@ -297,6 +297,11 @@
                   !**GET INVERSE JACOBIAN**
                   call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
 
+                  !  Build Jacobian routine (implicit or IMEX)
+                  !  Add scaled Identity to Jacobian
+                  !  Form LU-decomposition
+                  !  Back-Solve to get solution
+                  
                   do i = 1,nvecLen
                     do j = 1,nvecLen
                       uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
