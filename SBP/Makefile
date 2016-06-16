@@ -7,10 +7,10 @@ FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(IN
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = SBP_Coef_Module.f90\
-       driver.f90
+       Driver.f90
 
 OBJS = SBP_Coef_Module.o\
-       driver.o
+       Driver.o
 
 TARGET = driver
 
