@@ -101,7 +101,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = 1,18 
+      do icase = cases,cases 
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
@@ -123,8 +123,8 @@
           inquire( file=trim(fileloc)//'/.', exist=dirExists )  
           if (.not.dirExists)call system('mkdir '//trim(fileloc)) ! create directory
 !--------------------------STIFFNESS LOOP-----------------------------
-          do jepsil = 1,jactual,1                              
-
+          !do jepsil = 1,jactual,1                              
+          do jepsil = 20,20,1
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -297,6 +297,11 @@
                   !**GET INVERSE JACOBIAN**
                   call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
 
+                  !  Build Jacobian routine (implicit or IMEX)
+                  !  Add scaled Identity to Jacobian
+                  !  Form LU-decomposition
+                  !  Back-Solve to get solution
+                  
                   do i = 1,nvecLen
                     do j = 1,nvecLen
                       uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
@@ -307,6 +312,7 @@
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
                   enddo
+                  print*,ival,tmp
                   if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
 
                 enddo

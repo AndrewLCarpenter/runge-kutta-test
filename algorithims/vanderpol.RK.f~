@@ -38,7 +38,8 @@ c
 
       imex = iimex - 1
 
-      do jjj = 1,jmax,1
+      !do jjj = 1,jmax,1
+      do jjj = 20,20,1
       ep = 1./10**((jjj-1)/1.)
 c     ep = 1./10**((jjj-1)/10.)
       write(50,*)'zone T = "ep = ',ep,'",'
@@ -118,6 +119,7 @@ c     do iii = 61,61
               u = u - di11*r1 - di12*r2
               v = v - di21*r1 - di22*r2
               tmp = abs(u-uold) + abs(v-vold)
+              write(*,*) tmp
               if(tmp.lt.1.e-12) go to 150
             enddo
   150       continue
@@ -3624,6 +3626,7 @@ c
 
 
       endif                                                  !  end icase loop
+
       if(icase.ge.38.or.icase.le.49) then
         do i=1,ns
          bi(i)  = be(i)

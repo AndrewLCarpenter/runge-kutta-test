@@ -49,7 +49,7 @@
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
 
-      elseif (stage==1.or.stage==2) then
+      elseif (stage==1 .or.stage==2) then
         resE(1) = dt*uvec(2)
         resE(2) = 0.0_wp
         resI(1) = 0.0_wp

@@ -27,7 +27,7 @@
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
 
-      if (stage==1) then
+      if (stage==0) then
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)
         do i=1,81
@@ -49,7 +49,7 @@
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
 
-      elseif (stage==2) then
+      elseif (stage==1.or.stage==2) then
         resE(1) = dt*uvec(2)
         resE(2) = 0.0_wp
         resI(1) = 0.0_wp

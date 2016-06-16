@@ -65,8 +65,8 @@ c     program 5) Lorenz
       
 c         loop over different values of stiffness epsilon 
 
-          do jepsil = 1,jactual,1                              !  begin stiffness epsilon loop
-
+          !do jepsil = 1,jactual,1                              !  begin stiffness epsilon loop
+          do jepsil = 20,20,1
             itmp = 11 - jmax/jactual
             ep = 1./10**((jepsil-1)/(itmp*1.))                           !  used for 81 values of ep
             
@@ -108,7 +108,7 @@ c            do iDT = 1,1,1                                     ! use to determi
 
                 ttI = t + cI(L)*dt
                 
-                call RHS(uvec,res(1,L),dt,ep,iprob,sigma,rho,beta)
+                call RHS(uvec,res(1,L),dt,ep,ttI,iprob)
 
                 do ival = 1,nvecLen                             !  write the solution into a storage register
                   ustage(ival,L) = uvec(ival)
@@ -222,7 +222,7 @@ c                 enddo
                     uveciter(ival) = uvec(ival)
                   enddo
 
-                  call RHS(uvec,res(1,L+1),dt,ep,iprob,sigma,rho,beta)
+                  call RHS(uvec,res(1,L+1),dt,ep,ttI,iprob)
 
                   do ival = 1,nvecLen
                     Rnewton(ival) =  
@@ -241,6 +241,7 @@ c                 enddo
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival))
                   enddo
+                  write(*,*)tmp
                   if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
 
                 enddo

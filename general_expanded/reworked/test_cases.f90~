@@ -101,7 +101,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = 1,18 
+      do icase = cases,cases
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
@@ -123,8 +123,8 @@
           inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
           if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
 !--------------------------STIFFNESS LOOP-----------------------------
-          do jepsil = 1,jactual,1                              
-
+          !do jepsil = 1,jactual,1                              
+          do jepsil = 20,20,1
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -142,8 +142,8 @@
             do iDT = 1,isamp,1                     
 
             !**INITIALIZE PROBLEM INFORMATION**
-            stage=1
-            call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT)
+            stage=0
+            call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT)!,resE(1,1),resI(1,1),aI(1,1),xjac)
            ! call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     
             dto = dt        !store time step
             t = 0.0_wp      !init. start time
@@ -173,8 +173,8 @@
                 ttE = t + cE(L)*dt
 
                 !**GET INFORMATION ABOUT RHS OF PROBLEM**
-                stage=2
-                call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L))
+                stage=1
+                call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L))!,aI(1,1),xjac)
 !                call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta)
 
                 do ival = 1,nvecLen !write the solution into a storage register
@@ -292,7 +292,7 @@
                     uveciter(ival) = uvec(ival) !store old uvec
                   enddo
                   stage=2
-                  call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1))
+                  call problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1))!,aI(L+1,L+1),xjac)
                   !call RHS(uvec,resI(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
 
                   do ival = 1,nvecLen
@@ -315,6 +315,7 @@
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
                   enddo
+                  
                   if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
 
                 enddo
