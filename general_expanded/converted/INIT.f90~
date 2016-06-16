@@ -145,7 +145,7 @@
 
           do i=1,81
             diff = abs(ExactTot(i,4) - ep)
-            if(diff.le.1.0d-10)then
+            if(diff.le.1.0e-10_wp)then
               uexact(1) = ExactTot(i,1)
               uexact(2) = ExactTot(i,2)
               uexact(3) = ExactTot(i,3)

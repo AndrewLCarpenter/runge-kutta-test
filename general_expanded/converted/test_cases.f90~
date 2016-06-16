@@ -9,7 +9,8 @@
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     WARNING: Kreiss has problem with algebraic variable
 !     problem 5) Lorenz
-!     problem 6) 
+!     problem 6) Burger's
+!     problem 7) Black-Scholes
 !--------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-------------------------
@@ -66,7 +67,7 @@
       real(wp), dimension(is) :: maxiter,bint
       real(wp), dimension(is,ivarlen) :: bD
       real(wp), dimension(is,is,0:is) :: svpB
-      real(wp), dimension(ivarlen,is) :: ustage,resE,res,predvec
+      real(wp), dimension(ivarlen,is) :: ustage,resE,resI,predvec
       real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
       real(wp), dimension(ivarlen) :: uexact,Rnewton,errvec,errvecT,tmpvec
       real(wp), dimension(ivarlen,ivarlen) :: xjacinv
@@ -78,7 +79,7 @@
       
       character(len=80) :: filename,fileloc   !file name and location
       character(len=25) :: casename           !name of RK case
-      character(len=9), dimension(5) :: probname!array of problem names
+      character(len=9), dimension(7) :: probname!array of problem names
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
 
@@ -90,6 +91,8 @@
       probname(3)="Kaps     "
       probname(4)="Kreiss   "
       probname(5)="Lorenz   "
+      probname(6)="Burgers  "
+      probname(7)="BlackScho"      
 !-----------------------------USER INPUT-----------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
@@ -98,7 +101,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = cases,cases 
+      do icase = 1,18 
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
@@ -168,7 +171,7 @@
                 ttE = t + cE(L)*dt
 
                 !**GET INFORMATION ABOUT RHS OF PROBLEM**
-                call RHS(uvec,res(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta)
+                call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta)
 
                 do ival = 1,nvecLen !write the solution into a storage register
                   ustage(ival,L) = uvec(ival)
@@ -184,7 +187,7 @@
 
                 do LL = 1,L 
                   do ival = 1,nvecLen
-                    usum(ival) = usum(ival) + aI(L+1,LL)*res(ival,LL)+ &
+                    usum(ival) = usum(ival) + aI(L+1,LL)*resI(ival,LL)+ &
      &                           aE(L+1,LL)*resE(ival,LL) !imex summation
                   enddo
                 enddo
@@ -215,34 +218,34 @@
 !           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
 
                 if(L.eq.2.and.ktime.ne.1)then
-                  the1 = 1.0_wp             !"the" is undefined
-                  the2 = the1*the           !bint gets set and then overwritten  
+!                  the1 = 1.0_wp             !"the" is undefined
+!                  the2 = the1*the           !bint gets set and then overwritten  
 !***********************************************************************
-                  the3 = the2*the           !unless nrk> 5 then bint gets set for L[1,nrk], LL=L
-                  the4 = the3*the
-                  the5 = the4*the
-                  the6 = the5*the
-                  the7 = the6*the
-                  the8 = the7*the
-                  do LL = 1,5
-                    xnum = al3N(LL,1)*the1&
-     &                   + al3N(LL,2)*the2&
-     &                   + al3N(LL,3)*the3&
-     &                   + al3N(LL,4)*the4&
-     &                   + al3N(LL,5)*the5&
-     &                   + al3N(LL,6)*the6&
-     &                   + al3N(LL,7)*the7&
-     &                   + al3N(LL,8)*the8
-                    xden = al3D(LL,1)*the1&
-     &                   + al3D(LL,2)*the2&
-     &                   + al3D(LL,3)*the3&
-     &                   + al3D(LL,4)*the4&
-     &                   + al3D(LL,5)*the5&
-     &                   + al3D(LL,6)*the6&
-     &                   + al3D(LL,7)*the7&
-     &                   + al3D(LL,8)*the8
-                    bint(LL) = xnum/xden
-                  enddo
+!                  the3 = the2*the           !unless nrk> 5 then bint gets set for L[1,nrk], LL=L
+!                  the4 = the3*the
+!                  the5 = the4*the
+!                  the6 = the5*the
+!                  the7 = the6*the
+!                  the8 = the7*the
+!                  do LL = 1,5
+!                    xnum = al3N(LL,1)*the1&
+!     &                   + al3N(LL,2)*the2&
+!     &                   + al3N(LL,3)*the3&
+!     &                   + al3N(LL,4)*the4&
+!     &                   + al3N(LL,5)*the5&
+!     &                   + al3N(LL,6)*the6&
+!     &                   + al3N(LL,7)*the7&
+!     &                   + al3N(LL,8)*the8
+!                    xden = al3D(LL,1)*the1&
+!     &                   + al3D(LL,2)*the2&
+!     &                   + al3D(LL,3)*the3&
+!     &                   + al3D(LL,4)*the4&
+!     &                   + al3D(LL,5)*the5&
+!     &                   + al3D(LL,6)*the6&
+!     &                   + al3D(LL,7)*the7&
+!     &                   + al3D(LL,8)*the8
+!                    bint(LL) = xnum/xden
+!                  enddo
                     bint(1) =  9.9518675264213746_wp 
                     bint(2) =  4.8366852488953721_wp 
                     bint(3) =-24.163405114569394_wp 
@@ -285,10 +288,10 @@
                     uveciter(ival) = uvec(ival) !store old uvec
                   enddo
 
-                  call RHS(uvec,res(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
+                  call RHS(uvec,resI(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
 
                   do ival = 1,nvecLen
-                    Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*res(ival,L+1)-usum(ival)
+                    Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*resI(ival,L+1)-usum(ival)
                   enddo
            
                   !**GET INVERSE JACOBIAN**
@@ -335,7 +338,7 @@
 
                 do ival = 1,nvecLen
                   do LL = 1,nrk 
-                    uvec(ival) = uvec(ival) + bI(LL)*res(ival,LL)+bE(LL)*resE(ival,LL)
+                    uvec(ival) = uvec(ival) + bI(LL)*resI(ival,LL)+bE(LL)*resE(ival,LL)
                   enddo
                 enddo
 !---------------------------PREDICTED ERROR---------------------------
@@ -344,7 +347,7 @@
                   errvec(ival) = 0.0_wp
                   do LL = 1,nrk 
                     errvec(ival) = errvec(ival)& 
-     &                       + dt*( (bE(LL)-bEH(LL))*resE(ival,LL)+(bI(LL)-bIH(LL))*res(ival,LL) )!?dt?
+     &                       + dt*( (bE(LL)-bEH(LL))*resE(ival,LL)+(bI(LL)-bIH(LL))*resI(ival,LL) )!?dt?
                   enddo
                   errvec(ival) = abs(errvec(ival))
                 enddo
@@ -371,7 +374,7 @@
      &                   + bD(LL,2)*the*the&
      &                   + bD(LL,3)*the*the*the&
      &                   + bD(LL,4)*the*the*the*the
-                    predvec(ival,K) = predvec(ival,K) + bb*res(ival,LL)
+                    predvec(ival,K) = predvec(ival,K) + bb*resI(ival,LL)
                     enddo
                   enddo
                 enddo
@@ -449,13 +452,13 @@
 
 !--------------------------OUTPUTS------------------------------------
            !**GATHER OUTPUT VALUES
-	       do ii = 1,nveclen
-             call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),&
+               do ii = 1,nveclen
+                 call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),&
      &       b(ii),siga1(ii),sigb1(ii),chi2(ii),q)
-             call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),&
+                 call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),&
      &       b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),&
      &       chi2(ii+nveclen),q)
-	       enddo
+               enddo
            
            !**OUTPUT TO TERMINAL**
            write(*,60,advance="no")ep

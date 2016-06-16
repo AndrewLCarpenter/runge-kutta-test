@@ -1,3 +1,3 @@
  #! /bin/sh
 
-gfortran -O3 -r8 INIT.f test_cases.f RHS.f JACOB.f rungeadd.f fit.f gser.f gcf.f gammq.f gammln.f -o test_cases.out
+gfortran -O3 -fdefault-real-8 INIT.f test_cases.f RHS.f JACOB.f rungeadd.f fit.f gser.f gcf.f gammq.f gammln.f -o test_cases.out
