@@ -21,7 +21,11 @@
       if    (iprob==1) then
         call vanderPol(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==2) then
-        print *,'2!!'
+        call Pureschi(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      elseif (iprob==3) then
+        call Kaps(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      elseif (iprob==4) then
+        call Kreiss(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
       endif
       return
       end subroutine

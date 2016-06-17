@@ -10,6 +10,9 @@ CFLAGS = -Ofast  $(INCLUDESDIR)
 SRCS = test_cases.f90\
        JACOB2.f90\
        vanderPol.f90\
+       Pureschi.f90\
+       Kaps.f90\
+       Kreiss.f90\
        problemsub.f90\
        fit.f90\
        gser.f90\
@@ -27,6 +30,9 @@ $(OBJS1)
 OBJS = test_cases.o\
        JACOB2.o\
        vanderPol.o\
+       Pureschi.o\
+       Kaps.o\
+       Kreiss.o\
        problemsub.o\
        fit.o\
        gser.o\
