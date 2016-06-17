@@ -41,23 +41,17 @@
 
       h = 1.0_wp / (n - 1)
 
-      Pmat(1:  4) = reshape(                              &
-                  & (/17.0_wp/48.0_wp, 59.0_wp/48.0_wp,   &
-                  &   43.0_wp/48.0_wp, 49.0_wp/48.0_wp /),&
-                  & (/4/)  )
+      !  Diagonal matrix norm needed for 1st- and 2nd-order derivatives 
+      Pmat(1:  4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
       Pmat(5:n-4) = 1.0_wp
-      Pmat(n-3:n) = reshape(                              &
-                    (/49.0_wp/48.0_wp, 43.0_wp/48.0_wp,   &
-                      59.0_wp/48.0_wp, 17.0_wp/48.0_wp /),&
-                  & (/4/)  )
+      Pmat(n-3:n) = reshape((/49.0_wp/48.0_wp,43.0_wp/48.0_wp,59.0_wp/48.0_wp,17.0_wp/48.0_wp/),(/4/))
 
       Pinv(:) = 1.0_wp / Pmat(:)
 
-      d1mat(:) = reshape(                                               &
-              & (/ 1.0_wp/12,-8.0_wp/12,0.0_wp,8.0_wp/12,-1.0_wp/12 /),&
-              & (/5/))
+      d1mat(:)= reshape((/1.0_wp/12.0_wp,-8.0_wp/12.0_wp,0.0_wp,8.0_wp/12.0_wp,-1.0_wp/12.0_wp/),(/5/))
 
-      D1blkT  = reshape(                                                                 &
+      !  Boundary closure data for first derivative operators,  Note reshape does column first; hence the transpose
+      D1blkT  = reshape(                                                                                               &
               & (/-24.0_wp/17.0_wp, 59.0_wp/34.0_wp, -4.0_wp/17.0_wp,-3.0_wp/34.0_wp, 0.0_wp        , 0.0_wp,          &
               &    -1.0_wp/ 2.0_wp,  0.0_wp        ,  1.0_wp/2.0_wp , 0.0_wp        , 0.0_wp        , 0.0_wp,          &
               &     4.0_wp/43.0_wp,-59.0_wp/86.0_wp,  0.0_wp        ,59.0_wp/86.0_wp,-4.0_wp/43.0_wp, 0.0_wp,          &
@@ -65,16 +59,20 @@
               & (/6,4/)  )
       D1blk = Transpose(D1blkT)
 
+      !  Derivative operators are ``per-symmetric''
       do i=1,4
          do j=1,6
            D2blk(i,j)= - D1blk(5-i,7-j)
          end do
       end do
-
+     
+      !  Assemble derivative operator into compressed sparse row storage format
       call CSR_Filler(n,nnz,d1mat,D1blk,D2blk, ia,ja,a)
 
+      !  account for spatial grid spacing.  Assumes domain is 0 <= x <= 1  
       a(:) = a(:) / h
 
+      !  Derivative operator must differentiate monomials of sufficient order to be correct.
       call test_error(1,n,nnz,ia,ja,a)
 
       deallocate(d1mat,D1blk,D2blk,D1blkT)
@@ -123,12 +121,9 @@
 
       h = 1.0_wp / (n - 1)
 
-      Pmat(1:  4) = reshape(                              &
-                  & (/17.0_wp/48.0_wp, 59.0_wp/48.0_wp,   &
-                  &   43.0_wp/48.0_wp, 49.0_wp/48.0_wp /),&
-                  & (/4/)  )
+      Pmat(1:4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
 
-      Pinv(:) = 1.0_wp / Pmat(:)
+      Pinv(:)   = 1.0_wp / Pmat(:)
 
       d1vec(:) = + reshape((/-24.0_wp/17.0_wp, 59.0_wp/34.0_wp,-4.0_wp/17.0_wp, -3.0_wp/34.0_wp                /),(/4/))
       d2mat(:) = - reshape((/  1.0_wp/12.0_wp,-16.0_wp/12.0_wp,30.0_wp/12.0_wp,-16.0_wp/12.0_wp,1.0_wp/12.0_wp /),(/5/))
