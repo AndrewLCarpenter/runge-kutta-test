@@ -101,7 +101,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = 7,18 
+      do icase = cases,cases 
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters

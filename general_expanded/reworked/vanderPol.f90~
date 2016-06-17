@@ -49,7 +49,7 @@
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
 
-      elseif (stage==1.or.stage==2) then
+      elseif (stage==1 .or.stage==2) then
         resE(1) = dt*uvec(2)
         resE(2) = 0.0_wp
         resI(1) = 0.0_wp
@@ -57,7 +57,7 @@
 
       elseif (stage==3) then
         xjac(1,1) = 1.-akk*dt*(0.)
-        xjac(1,2) = 0.-akk*dt*(1.)
+        xjac(1,2) = 0.-akk*dt*(0.)
         xjac(2,1) = 0.-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
         xjac(2,2) = 1.-akk*dt*(1-uvec(1)*uvec(1))/ep
       endif

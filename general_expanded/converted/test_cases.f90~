@@ -101,7 +101,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP----------------------------
-      do icase = cases,cases 
+      do icase = 7,18 
 
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
@@ -123,8 +123,8 @@
           inquire( file=trim(fileloc)//'/.', exist=dirExists )  
           if (.not.dirExists)call system('mkdir '//trim(fileloc)) ! create directory
 !--------------------------STIFFNESS LOOP-----------------------------
-          !do jepsil = 1,jactual,1                              
-          do jepsil = 20,20,1
+          do jepsil = 1,jactual,1                              
+
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -312,7 +312,6 @@
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
                   enddo
-                  print*,ival,tmp
                   if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
 
                 enddo

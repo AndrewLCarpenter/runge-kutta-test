@@ -1,10 +1,10 @@
-      subroutine vanderPol(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine vanderPol(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
       implicit none
 
       integer,  parameter                      :: wp=8
       integer,  parameter                      :: vecl=4
 
-      integer,                   intent(in   ) :: stage
+      integer,                   intent(in   ) :: programStep
 
       !INIT vars
       real(wp), dimension(vecl), intent(inout) :: uvec
@@ -27,7 +27,7 @@
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
 
-      if (stage==0) then
+      if (programStep==0) then
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)
         do i=1,81
@@ -49,15 +49,15 @@
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
 
-      elseif (stage==1 .or.stage==2) then
+      elseif (programStep==1 .or.programStep==2) then
         resE(1) = dt*uvec(2)
         resE(2) = 0.0_wp
         resI(1) = 0.0_wp
         resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
 
-      elseif (stage==3) then
+      elseif (programStep==3) then
         xjac(1,1) = 1.-akk*dt*(0.)
-        xjac(1,2) = 0.-akk*dt*(1.)
+        xjac(1,2) = 0.-akk*dt*(0.)
         xjac(2,1) = 0.-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
         xjac(2,2) = 1.-akk*dt*(1-uvec(1)*uvec(1))/ep
       endif

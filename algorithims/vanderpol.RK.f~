@@ -1,7 +1,7 @@
       program test
 c     program to solve van der Pol (Hairer II, pp 403)
       parameter(is=9)
-      parameter(isamp=51,jmax=9)
+      parameter(isamp=71,jmax=9)
 
       dimension aE(is,is),aI(is,is),bE(is),bI(is),cE(is),cI(is)
       dimension bEH(is),bIH(is)
@@ -38,8 +38,7 @@ c
 
       imex = iimex - 1
 
-      !do jjj = 1,jmax,1
-      do jjj = 20,20,1
+      do jjj = 1,jmax,1
       ep = 1./10**((jjj-1)/1.)
 c     ep = 1./10**((jjj-1)/10.)
       write(50,*)'zone T = "ep = ',ep,'",'
@@ -119,7 +118,6 @@ c     do iii = 61,61
               u = u - di11*r1 - di12*r2
               v = v - di21*r1 - di22*r2
               tmp = abs(u-uold) + abs(v-vold)
-              write(*,*) tmp
               if(tmp.lt.1.e-12) go to 150
             enddo
   150       continue
