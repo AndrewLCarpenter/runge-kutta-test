@@ -1,4 +1,4 @@
-.SUFFIXES: .o .c .f90 .F90 .mod
+.SUFFIXES: .o .c .f90 .F90
 
 CC = gcc
 FC = gfortran

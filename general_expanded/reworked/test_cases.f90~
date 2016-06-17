@@ -42,9 +42,13 @@
 !
 !***************************BEGIN PROGRAM****************************
       program test_cases
+
+      use precision_vars
+      use CSR_Variables
+
       implicit none     
 !------------------------------PARAMETERS----------------------------
-      integer, parameter :: wp=8               !working precision
+!     integer, parameter :: wp=8               !working precision
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
       integer, parameter :: isamp=71           !?
@@ -54,8 +58,9 @@
       integer             :: ipred,cases,problem         !user inputs
       integer             :: icase,icount,jcount,i,ii    !do loops
       integer             :: iprob,nrk,jepsil,iDT,ival   !do loops
-      integer             :: ktime,L,LL,nveclen,programStep    !do loops,notstage
+      integer             :: ktime,L,LL,nveclen          !do loops
       integer             :: jpre,inew,j,k,jsamp,istage  !do loops
+      integer             :: programStep                 !counts step of program
 
       real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal,ttE
       real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
@@ -122,8 +127,11 @@
           fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
           inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
           if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
+          
+          call Allocata_CSR_Storage(problem,nveclen)
 !--------------------------STIFFNESS LOOP-----------------------------
-           do jepsil = 1,jactual,1                              
+          do jepsil = 1,jactual,1     
+                         
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -301,8 +309,15 @@
                   !**GET INVERSE JACOBIAN**
                   programStep=3
                   call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1),aI(L+1,L+1),xjac)
-                  call JACOB2(nveclen,xjac,xjacinv)
+                  !call JACOB2(nveclen,xjac,xjacinv)
+                  call Jacobian(uvec,xjac,dt,ep,aI(L+1,L+1),iprob,nveclen,sigma,rho,beta)
+                  call Invert_jacobian(nveclen,xjac,xjacinv)
                   !call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
+
+!                 call Jacobian_CSR(uvec,dt,ep,aI(L+1,L+1),iprob,nveclen,sigma,rho,beta)
+!                 call ilu0(nveclen,aJac,jaJac,aluJac,jluJac,iw,ierr)
+!Form LU decompositoin
+! backsolve to get solution
 
                   do i = 1,nvecLen
                     do j = 1,nvecLen
