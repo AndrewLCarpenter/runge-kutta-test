@@ -42,9 +42,13 @@
 !
 !***************************BEGIN PROGRAM****************************
       program test_cases
+
+      use precision_vars
+      use CSR_Variables
+
       implicit none     
 !------------------------------PARAMETERS----------------------------
-      integer, parameter :: wp=8               !working precision
+!     integer, parameter :: wp=8               !working precision
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
       integer, parameter :: isamp=71           !?
@@ -70,7 +74,7 @@
       real(wp), dimension(ivarlen,is) :: ustage,resE,resI,predvec
       real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
       real(wp), dimension(ivarlen) :: uexact,Rnewton,errvec,errvecT,tmpvec
-      real(wp), dimension(ivarlen,ivarlen) :: xjacinv
+      real(wp), dimension(ivarlen,ivarlen) :: xjac,xjacinv
       real(wp), dimension(isamp) :: cost,sig
       real(wp), dimension(isamp,ivarlen) :: error1,error1P
       real(wp), dimension(ivarlen*2) :: a,b,siga1,sigb1,chi2
@@ -122,6 +126,9 @@
           fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
           inquire( file=trim(fileloc)//'/.', exist=dirExists )  
           if (.not.dirExists)call system('mkdir '//trim(fileloc)) ! create directory
+
+          call Allocate_CSR_Storage(problem, nvecLen)
+
 !--------------------------STIFFNESS LOOP-----------------------------
           do jepsil = 1,jactual,1                              
 
@@ -294,11 +301,12 @@
                     Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*resI(ival,L+1)-usum(ival)
                   enddo
            
-                  !**GET INVERSE JACOBIAN**
-                  call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
+                  call Jacobian(uvec,xjac,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
+                  call Invert_Jacobian(nvecLen,xjac,xjacinv)
 
-                  !  Build Jacobian routine (implicit or IMEX)
-                  !  Add scaled Identity to Jacobian
+!                 call Jacobian_CSR(uvec,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
+!                 call ilu0(nvecLen, aJac, jaJac, iaJac, aluJac, jluJac, juJac, iw, ierr) 
+
                   !  Form LU-decomposition
                   !  Back-Solve to get solution
                   

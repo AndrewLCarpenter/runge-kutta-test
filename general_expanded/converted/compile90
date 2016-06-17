@@ -1,5 +1,5 @@
  #! /bin/sh
 
-gfortran -pedantic  -O3 INIT.f90 test_cases.f90 RHS.f90 JACOB.f90 rungeadd.f90 fit.f90 gser.f90 gcf.f90 gammq.f90 gammln.f90 -o test_cases90.out
+gfortran -pedantic  -O3 CSR_Variables.f90 Allocate_CSR_Storage.f90 INIT.f90 test_cases.f90 RHS.f90 Jacobian_CSR.f90 Jacobian.f90 Invert_Jacobian.f90 rungeadd.f90 fit.f90 gser.f90 gcf.f90 gammq.f90 gammln.f90 precision_vars.f90 -o test_cases90.out
 
 #-Wall
