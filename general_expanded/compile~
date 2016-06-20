@@ -1,4 +1,0 @@
- #! /bin/sh
-
-g95 -O3 -r8 INIT.f test_cases.f RHS.f JACOB.f rungeadd.f fit.f gser.f gcf.f gammq.f gammln.f -o test_cases.out
-#g95 -O3 -r8 INIT.f test_cases.f RHS_MHC.f JACOB.f rungeadd.f fit.f gser.f gcf.f gammq.f gammln.f -o test_cases90.out
