@@ -8,24 +8,21 @@ FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\
-       CSR_variables.f90\
+       poly_fit_Mod.f90\
+       CSR_Variables.f90\
+       Invert_Jacobian.f90\
        Allocate_CSR_Storage.f90\
        JACOB2.f90\
+       Jacobian.f90\
+       Newton_Iteration.f90\
+       rungeadd.f90\
+       test_cases.f90\
        vanderPol.f90\
        Pureschi.f90\
        Kaps.f90\
        Kreiss.f90\
-       problemsub.f90\
-       fit.f90\
-       gser.f90\
-       gammln.f90\
-       gammq.f90\
-       gcf.f90\
-       rungeadd.f90\
-       Invert_Jacobian.f90\
-       Jacobian.f90\
-       Jacobian_CSR.f90\
-       test_cases.f90
+       problemsub.f90
+      
        
 
 
@@ -35,24 +32,21 @@ SRCS = precision_vars.f90\
 $(OBJS1)
 
 OBJS = precision_vars.o\
-       CSR_variables.o\
+       poly_fit_Mod.o\
+       CSR_Variables.o\
+       Invert_Jacobian.o\
        Allocate_CSR_Storage.o\
+       Jacobian_CSR.o\
        JACOB2.o\
+       Jacobian.o\
+       Newton_Iteration.o\
+       rungeadd.o\
+       test_cases.o\
        vanderPol.o\
        Pureschi.o\
        Kaps.o\
        Kreiss.o\
-       problemsub.o\
-       fit.o\
-       gser.o\
-       gammln.o\
-       gammq.o\
-       gcf.o\
-       rungeadd.o\
-       Invrt_Jacobian.o\
-       Jacobian.o\
-       Jacobian_CSR.o\
-       test_cases.o
+       problemsub.o
       
 #LINK = gfortran
 

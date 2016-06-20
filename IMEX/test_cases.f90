@@ -43,7 +43,6 @@
 
       implicit none     
 !------------------------------PARAMETERS----------------------------
-!      integer, parameter :: wp=8               !working precision
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
       integer, parameter :: isamp=71           !?

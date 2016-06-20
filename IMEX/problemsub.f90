@@ -1,7 +1,9 @@
       subroutine problemsub(iprob,stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+
+      use precision_vars
+
       implicit none
     
-      integer,  parameter                      :: wp=8
       integer,  parameter                      :: vecl=4
 
       !PROBLEM PARAMETERS
