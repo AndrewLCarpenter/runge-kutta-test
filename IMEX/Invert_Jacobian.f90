@@ -16,7 +16,8 @@
       real(wp)                                       :: x41,x42,x43,x44
       real(wp)                                       :: det,detI
    
-      
+      xinv(:,:)=0.0_wp
+
       if(nvecLen.eq.2)then
         det = (xjac(1,1)*xjac(2,2)-xjac(1,2)*xjac(2,1))
         xinv(1,1) =  xjac(2,2)/det

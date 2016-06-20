@@ -17,8 +17,8 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-      !!
-      if    (iprob==1) then
+
+      if     (iprob==1) then
         call vanderPol(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==2) then
         call Pureschi(stage,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)

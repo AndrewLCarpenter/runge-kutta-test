@@ -7,7 +7,9 @@ FC = gfortran
 FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
-SRCS = test_cases.f90\
+SRCS = precision_vars.f90\
+       CSR_variables.f90\
+       Allocate_CSR_Storage.f90\
        JACOB2.f90\
        vanderPol.f90\
        Pureschi.f90\
@@ -19,13 +21,12 @@ SRCS = test_cases.f90\
        gammln.f90\
        gammq.f90\
        gcf.f90\
-       rungeadd.f90
-       #Allocate_CSR_Storage.f90\
-       #CSR_variables.f90\
-       #Invert_Jacobian.f90\
-       #Jacobian.f90\
-       #Jacobian_CSR.f90\
-       #precision_vars.f90
+       rungeadd.f90\
+       Invert_Jacobian.f90\
+       Jacobian.f90\
+       Jacobian_CSR.f90\
+       test_cases.f90
+       
 
 
 #OBJS2 = $(SRCS:.F90=.o)
@@ -33,7 +34,9 @@ SRCS = test_cases.f90\
 #OBJS= $(OBJS2) \
 $(OBJS1)
 
-OBJS = test_cases.o\
+OBJS = precision_vars.o\
+       CSR_variables.o\
+       Allocate_CSR_Storage.o\
        JACOB2.o\
        vanderPol.o\
        Pureschi.o\
@@ -45,13 +48,11 @@ OBJS = test_cases.o\
        gammln.o\
        gammq.o\
        gcf.o\
-       rungeadd.o
-       #Allocate_CSR_Storage.o\
-       #CSR_variables.o\
-       #Invrt_Jacobian.o\
-       #Jacobian.o\
-       #precision_vars.o\
-       #Jacobian_CSR.o
+       rungeadd.o\
+       Invrt_Jacobian.o\
+       Jacobian.o\
+       Jacobian_CSR.o\
+       test_cases.o
       
 #LINK = gfortran
 

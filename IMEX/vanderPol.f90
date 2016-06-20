@@ -17,7 +17,7 @@
 
       real(wp), dimension(81,vecl)             :: ExactTot
       real(wp)                                 :: diff
-      integer                                  :: i
+      integer                                  :: i,j
 
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE,resI
@@ -25,6 +25,9 @@
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
+
+
+
 
 
       if (programStep==0) then

@@ -15,14 +15,9 @@
 !
 !-----------------------------REQUIRED FILES-------------------------
 ! RUNGEADD.F90  *CONTAINS RK CONSTANTS
-! INIT.F90      *CONTAINS INITIALIZATIONS FOR PROBLEMS
-! RHS.F90       *CONTAINS THE RIGHT-HAND SIDE OF THE PROBLEMS
-! JACOB.F90     *COMPUTES THE JACOBIAN FOR EACH PROBLEM
-! FIT.F90       *STATISTICS?
-! GSER.F90      *STATISTICS?
-! GCF.F90       *STATISTICS?
-! GAMMQ.F90     *STATISTICS?
-! GAMMLN.F90    *STATISTICS?
+! NEWTON_ITERATION.F90
+! PROBLEMSSUB.F90
+! ...
 !--------------------------------------------------------------------
 !
 !--------------------------HOW TO USE--------------------------------
@@ -43,12 +38,12 @@
 !***************************BEGIN PROGRAM****************************
       program test_cases
 
-!!      use precision_vars
-!!      use CSR_Variables
+      use precision_vars
+      use poly_fit_Mod
 
       implicit none     
 !------------------------------PARAMETERS----------------------------
-     integer, parameter :: wp=8               !working precision
+!      integer, parameter :: wp=8               !working precision
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
       integer, parameter :: isamp=71           !?
@@ -88,7 +83,7 @@
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
 
-      logical           :: dirExists,filex    !check if directory exists
+      logical           :: dirExists,filex,test    !check if directory exists
      
       !**ENTER PROBLEM NAMES**
       probname(1)="vanderPol"
@@ -174,6 +169,7 @@
                 uveco(ival) = uvec(ival)
               enddo
               jcount = jcount + (nrk-1)    !keep track of total RK stages 
+
 !--------------------------------RK LOOP------------------------------
               do L = 1,nrk    
                 ttI = t + cI(L)*dt
@@ -291,52 +287,11 @@
 !                 enddo
                 endif
 !-------------------------------NEWTON ITERATION----------------------
-                do k = 1,20
-
-                  icount = icount + 1
-
-                  do ival = 1,nvecLen
-                    uveciter(ival) = uvec(ival) !store old uvec
-                  enddo
-                  programStep=2
-                  call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1))!,aI(L+1,L+1),xjac)
-                  !call RHS(uvec,resI(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
-
-                  do ival = 1,nvecLen
-                    Rnewton(ival) =uvec(ival)-aI(L+1,L+1)*resI(ival,L+1)-usum(ival)
-                  enddo
-           
-                  !**GET INVERSE JACOBIAN**
-                  programStep=3
-                  call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1),aI(L+1,L+1),xjac)
-                  call JACOB2(nveclen,xjac,xjacinv)
-!!                  call Jacobian(uvec,xjac,dt,ep,aI(L+1,L+1),iprob,nveclen,sigma,rho,beta)
-!!                  call Invert_Jacobian(nveclen,xjac,xjacinv)
-                  !call JACOB(uvec,xjacinv,dt,ep,aI(L+1,L+1),iprob,nvecLen,sigma,rho,beta)
-
-!                 call Jacobian_CSR(uvec,dt,ep,aI(L+1,L+1),iprob,nveclen,sigma,rho,beta)
-!                 call ilu0(nveclen,aJac,jaJac,aluJac,jluJac,iw,ierr)
-!Form LU decompositoin
-! backsolve to get solution
-
-                  do i = 1,nvecLen
-                    do j = 1,nvecLen
-                      uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
-                    enddo
-                  enddo
-
-                  tmp = 0.0_wp
-                  do ival = 1,nvecLen
-                     tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
-                  enddo
-
-                  if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
-
-                enddo
-!-----------------------------------END NEWTON ITERATION--------------
-  160           continue
- 
+                call Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,resE,resI,aI(L+1,L+1),usum,icount,k)
+!---------------------------EMD NEWTON ITERATION----------------------
+              
               if((k.gt.maxiter(L+1)).and.(ktime.ne.1))maxiter(L+1)=k
+       
 
               do ival = 1,nvecLen                    !  write the solution into a storage register
                 ustage(ival,L+1) = uvec(ival)

@@ -1,0 +1,7 @@
+ #! /bin/sh
+
+gfortran -c test_cases.f90 JACOB2.f90 vanderPol.f90 Pureschi.f90 Kaps.f90 Kreiss.f90 problemsub.f90 poly_fit_Mod.f90 rungeadd.f90 Allocate_CSR_Storage.f90 CSR_variables.f90 Invert_Jacobian.f90 Jacobian.f90 Jacobian_CSR.f90 precision_vars.f90
+
+gfortran *.o -o test_cases90.out
+
+#-Wall
