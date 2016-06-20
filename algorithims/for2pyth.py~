@@ -1,5 +1,0 @@
-from numpy import f2py
-with open("rk.coef.08.25.04.f") as sourcefile:
-	sourcecode=sourcefile.read()
-	f2py.compile(sourcecode,modulename='coefs')
-
