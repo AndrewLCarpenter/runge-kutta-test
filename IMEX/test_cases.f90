@@ -42,6 +42,7 @@
       use poly_fit_Mod
 
       implicit none     
+
 !------------------------------PARAMETERS----------------------------
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
@@ -64,7 +65,7 @@
       real(wp), dimension(is,is) :: aE,aI,alpha,al3N,al3D,al4N,al4D
       real(wp), dimension(is) :: bE,bI,cE,cI,bEH,bIH,stageE,stageI
       real(wp), dimension(is) :: maxiter,bint
-      real(wp), dimension(is,ivarlen) :: bD
+      real(wp), dimension(is,4) :: bD
       real(wp), dimension(is,is,0:is) :: svpB
       real(wp), dimension(ivarlen,is) :: ustage,resE,resI,predvec
       real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
@@ -144,7 +145,7 @@
 
             !**INITIALIZE PROBLEM INFORMATION**
             programStep=0
-            call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT)!,resE(1,1),resI(1,1),aI(1,1),xjac)
+            call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT)   !,resE(1,1),resI(1,1),aI(1,1),xjac)
            ! call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     
             dto = dt        !store time step
             t = 0.0_wp      !init. start time
@@ -166,220 +167,69 @@
               jcount = jcount + (nrk-1)    !keep track of total RK stages 
 
 !--------------------------------RK LOOP------------------------------
-              do L = 1,nrk    
-                ttI = t + cI(L)*dt
+              ttI = t + cI(1)*dt
+              ttE = t + cE(1)*dt
+
+              programStep=1
+              call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,1),resI(1,1))
+!             call RHS(uvec,resI(1,1),resE(1,1),dt,ep,iprob,sigma,rho,beta)
+              ustage(:,1) = uvec(:)
+
+              do L = 2,nrk
+
+                ttI = t + cI(L)*dt   
                 ttE = t + cE(L)*dt
 
-                !**GET INFORMATION ABOUT RHS OF PROBLEM**
-                programStep=1
-                call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L))!,aI(1,1),xjac)
-!                call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta)
-
-                do ival = 1,nvecLen !write the solution into a storage register
-                  ustage(ival,L) = uvec(ival)
+                usum(:) = uveco(:)
+                do LL = 1,L-1 
+                  usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
+                          &         + aE(L,LL)*resE(:,LL)
                 enddo
 
-              if(L.ne.nrk)then !True for all but last loop
-                ttI = t + cI(L+1)*dt   
-                ttE = t + cE(L+1)*dt
+!---------------BEG NEWTON ITERATION------------------------------------
 
-                do ival = 1,nvecLen !start the summation vector
-                  usum(ival) = uveco(ival)
-                enddo
+                uvec(:) = predvec(:,L)
 
-                do LL = 1,L 
-                  do ival = 1,nvecLen
-                    usum(ival) = usum(ival) + aI(L+1,LL)*resI(ival,LL)+ &
-     &                           aE(L+1,LL)*resE(ival,LL) !imex summation
-                  enddo
-                enddo
+                call Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,resE,resI,aI(L,L),usum,icount,k)
 
-                do ival = 1,nvecLen
-                  if(ipred.eq.2)predvec(ival,L+1)=uvec(ival)    ! previous guess as starter
-                  uvec(ival)  = predvec(ival,L+1)               ! put predict into start guess
-                  uorig(ival) = uvec(ival)                      ! put predict into storage for testing
-                enddo
+!---------------END NEWTON ITERATION------------------------------------
+             
+                ustage(:,L) = uvec(:)                !  Save the solution at each stage
+                ! Fill in resE and resI with the converged data
+                programStep=2
+                call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L))
 
-                if(L.gt.1.and.L.lt.nrk)then
-                  do ival = 1,nvecLen
-                    uvec(ival)  = uveco(ival)               ! put predict into start guess
-                    do jpre = 2,L
-                       Z = ustage(ival,jpre)-uveco(ival)
-                       uvec(ival) = uvec(ival) + alpha(L+1,jpre)*Z
-                       uorig(ival) = uvec(ival)               ! put predict into storage for testing
-                    enddo
-                  enddo
-                endif
+                call Stage_Value_Predictor(L,nrk,ustage,predvec)
 
-! U^{(n+1,4)} = al4_{1}*U^{(n  ,4)} + al4_{2}*U^{(n  ,5)} +
-!             + al4_{3}*U^{(n  ,6)} + al4_{4}*U^{(n+1,2)} +
-!             + al4_{5}*U^{(n+1,3)}
+                if((k.gt.maxiter(L)).and.(ktime.ne.1)) maxiter(L) = k
+ 
+                xnorm = sqrt(dot_product(uvec(:)-predvec(:,L),uvec(:)-predvec(:,L)) /  &
+                      &      dot_product(uvec(:)             ,uvec(:)             ) )
 
+                stageE(L) = stageE(L) + xnorm
+                stageI(L) = stageI(L) + 1.0_wp*k
 
-! al4_{i} = \sum_{j=1}^{2*(order)} al4N(i,j)*r^{j} /
-!           \sum_{j=1}^{2*(order)} al4D(i,j)*r^{j}
+            enddo   !-----------------------------END of A_{k,j} portion of RK LOOP---------------
 
-                if(L.eq.2.and.ktime.ne.1)then
-!                  the1 = 1.0_wp             !"the" is undefined
-!                  the2 = the1*the           !bint gets set and then overwritten  
-!***********************************************************************
-!                  the3 = the2*the           !unless nrk> 5 then bint gets set for L[1,nrk], LL=L
-!                  the4 = the3*the
-!                  the5 = the4*the
-!                  the6 = the5*the
-!                  the7 = the6*the
-!                  the8 = the7*the
-!                  do LL = 1,5
-!                    xnum = al3N(LL,1)*the1&
-!     &                   + al3N(LL,2)*the2&
-!     &                   + al3N(LL,3)*the3&
-!     &                   + al3N(LL,4)*the4&
-!     &                   + al3N(LL,5)*the5&
-!     &                   + al3N(LL,6)*the6&
-!     &                   + al3N(LL,7)*the7&
-!     &                   + al3N(LL,8)*the8
-!                    xden = al3D(LL,1)*the1&
-!     &                   + al3D(LL,2)*the2&
-!     &                   + al3D(LL,3)*the3&
-!     &                   + al3D(LL,4)*the4&
-!     &                   + al3D(LL,5)*the5&
-!     &                   + al3D(LL,6)*the6&
-!     &                   + al3D(LL,7)*the7&
-!     &                   + al3D(LL,8)*the8
-!                    bint(LL) = xnum/xden
-!                  enddo
-                    bint(1) =  9.9518675264213746_wp 
-                    bint(2) =  4.8366852488953721_wp 
-                    bint(3) =-24.163405114569394_wp 
-                    bint(4) = 14.152132944153401_wp
-                    bint(5) =  0.94399768676237158_wp
-                  do ival = 1,nvecLen
-                    Z1 = ustage(ival,3)-ustage(ival,3)
-                    Z2 = ustage(ival,4)-ustage(ival,3)
-                    Z3 = ustage(ival,5)-ustage(ival,3)
-                    Z4 = ustage(ival,6)-ustage(ival,3)
-                    Z5 = ustage(ival,2)-ustage(ival,3)
-                    uvec(ival) = ustage(ival,3) + bint(1)*z1&
-     &                                          + bint(2)*z2&
-     &                                          + bint(3)*z3&
-     &                                          + bint(4)*z4&
-     &                                          + bint(5)*z5
-                    uorig(ival) = uvec(ival)               ! put predict into storage for testing
-                  enddo
+            uvec(:) = uveco(:)
+            do LL = 1,nrk 
+              uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
+            enddo
+!----------------------------- Final Sum of RK loop using the b_{j} 
 
-!                 do ival = 1,nvecLen
-!                   uvec(ival) = bint(1)*ustage(ival,3)
-!    &                         + bint(2)*ustage(ival,4)
-!    &                         + bint(3)*ustage(ival,5)
-!    &                         + bint(4)*ustage(ival,6)
-!    &                         + bint(5)*ustage(ival,2)
-!                   uvec(ival) = bint(1)*ustage(ival,4)
-!    &                         + bint(2)*ustage(ival,5)
-!    &                         + bint(3)*ustage(ival,6)
-!    &                         + bint(4)*ustage(ival,2)
-!    &                         + bint(5)*ustage(ival,3)
-!                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
-!                 enddo
-                endif
-!-------------------------------NEWTON ITERATION----------------------
-                call Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,resE,resI,aI(L+1,L+1),usum,icount,k)
-!---------------------------EMD NEWTON ITERATION----------------------
-              
-              if((k.gt.maxiter(L+1)).and.(ktime.ne.1))maxiter(L+1)=k
-       
-
-              do ival = 1,nvecLen                    !  write the solution into a storage register
-                ustage(ival,L+1) = uvec(ival)
+            ! ERROR ESTIMATE
+            if(time.lt.tfinal-1.0e-11_wp)then               
+              errvec(:) = 0.0_wp
+              do LL = 1,nrk 
+                errvec(:) = errvec(:) + (bE(LL)-bEH(LL))*resE(:,LL) &
+                                    & + (bI(LL)-bIH(LL))*resI(:,LL)
               enddo
+              errvec(:) = abs(errvec(:))
+              rat = 1.0_wp
+            endif                            
 
-              xnorm = 0.0_wp                                     !  assess how good initial guess was
-              snorm = 0.0_wp                                     !  assess how good initial guess was
-              do ival = 1,nvecLen
-                tmpD = (uvec(ival) - uorig(ival))
-                xnorm = xnorm + tmpD*tmpD
-                snorm = snorm + uvec(ival)*uvec(ival)
-              enddo                                         
-              xnorm = sqrt(xnorm/snorm)
-              stageE(L+1) = stageE(L+1) + xnorm
-              stageI(L+1) = stageI(L+1) + 1.0_wp*k
+            errvecT(:) = errvecT(:) + errvec(:)
 
-              elseif(L.eq.nrk) then
-            
-                do ival = 1,nvecLen
-                  uvec(ival) = uveco(ival)
-                enddo
-
-                do ival = 1,nvecLen
-                  do LL = 1,nrk 
-                    uvec(ival) = uvec(ival) + bI(LL)*resI(ival,LL)+bE(LL)*resE(ival,LL)
-                  enddo
-                enddo
-!---------------------------PREDICTED ERROR---------------------------
-                if(time.lt.tfinal-1.0d-11)then               
-                do ival = 1,nvecLen
-                  errvec(ival) = 0.0_wp
-                  do LL = 1,nrk 
-                    errvec(ival) = errvec(ival)& 
-!     &                       + dt*( (bE(LL)-bEH(LL))*resE(ival,LL)+(bI(LL)-bIH(LL))*resI(ival,LL) )!?dt?
-     &                       + ( (bE(LL)-bEH(LL))*resE(ival,LL)+(bI(LL)-bIH(LL))*resI(ival,LL) )!?dt?
-                  enddo
-                  errvec(ival) = abs(errvec(ival))
-                enddo
-                rat = 1.0_wp
-                endif                            
-!-----------------------END PREDICTED ERROR---------------------------
-!-----------------------PREDICT NEXT STAGE VALUES---------------------
-!**About 100 different kinds
-!**Note that ipred=2 is accomplished elsewhere         
-                if(ipred.eq.1)then !begin with dense output
-                do K=2,nrk
-                  do ival = 1,nvecLen
-                    predvec(ival,K) = uvec(ival)
-                  enddo
-                enddo
-
-                elseif(ipred.eq.3)then
-                do K=2,nrk
-                  do ival = 1,nvecLen
-                    predvec(ival,K) = uveco(ival)
-                    the = (1.+cI(K)*rat)
-                    do LL = 1,nrk
-                      bb = bD(LL,1)*the&
-     &                   + bD(LL,2)*the*the&
-     &                   + bD(LL,3)*the*the*the&
-     &                   + bD(LL,4)*the*the*the*the
-                    predvec(ival,K) = predvec(ival,K) + bb*resI(ival,LL)
-                    enddo
-                  enddo
-                enddo
-
-                elseif(ipred.eq.4.or.ipred.eq.5)then
-!              stage value predictors
-!  U^(n+1,i+1) =                  \sum_{k=0}^{order} (etah_{i k}*r^(k)) * U^{n-1} +
-!                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j+1}
-                do ival = 1,nvecLen
-                  do inew=2,nrk
-                    predvec(ival,inew) = 0.0_wp
-                    do j = 1,nrk
-                      the = 1.0_wp
-                      bb = svpB(inew,j,0)&
-                        + svpB(inew,j,1)*the&
-                        + svpB(inew,j,2)*the*the&
-                        + svpB(inew,j,3)*the*the*the&
-                        + svpB(inew,j,4)*the*the*the*the
-                      predvec(ival,inew) = predvec(ival,inew)& 
-     &                                   + bb*ustage(ival,j)
-                    enddo
-                  enddo
-                enddo
-                endif
-!-------------------END PREDICT NEXT STAGE VALUES---------------------
-              endif
-            enddo                                          
-!-----------------------------END RK LOOP-----------------------------
-            do ival = 1,nvecLen
-              errvecT(ival) = errvecT(ival) + errvec(ival)
-            enddo                                         
             t = t + dt                  !increment time
             if(t.ge.tfinal) exit
 

@@ -4,6 +4,7 @@
       use precision_vars
 
       implicit none
+
       integer, parameter :: ivarlen=4,is=9
 
       real(wp), dimension(ivarlen),    intent(inout) :: uvec
@@ -11,7 +12,7 @@
       real(wp),                        intent(in   ) :: ep,dt
       integer,                         intent(in   ) :: nveclen,iDT
       real(wp), dimension(ivarlen,is), intent(inout) :: resE,resI
-      real(wp),                        intent(in   ) :: aI!from aI(L+1,L+1)
+      real(wp),                        intent(in   ) :: aI!from aI(L,L)
       real(wp), dimension(ivarlen),    intent(in   ) :: usum
       integer,                         intent(inout) :: icount,k
       
@@ -31,30 +32,25 @@
 
         icount = icount + 1
 
-        do ival = 1,nvecLen
-          uveciter(ival) = uvec(ival) !store old uvec
-        enddo
+        uveciter(:) = uvec(:) !store old uvec
 
         programStep=2
-        call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1))!,aI,xjac)
-        !call RHS(uvec,resI(1,L+1),resE(1,L+1),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
+        call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L))!,aI,xjac)
+        !call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
 
-        do ival = 1,nvecLen
-          Rnewton(ival) =uvec(ival)-aI*resI(ival,L+1)-usum(ival)
-        enddo
+        Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
            
         !**GET INVERSE JACOBIAN**
         programStep=3
-        call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L+1),resI(1,L+1),aI,xjac)
+        call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
 !!        call JACOB2(nveclen,xjac,xjacinv)
-!!        call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
+!!      call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
         call Invert_Jacobian(nveclen,xjac,xjacinv)
         !call JACOB(uvec,xjacinv,dt,ep,aI,iprob,nvecLen,sigma,rho,beta)
 
 !        call Jacobian_CSR(uvec,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
 !        call ilu0(nveclen,aJac,jaJac,aluJac,jluJac,iw,ierr)
-!Form LU decompositoin
-! backsolve to get solution
+!        Backsolve to get solution
 
         do i = 1,nvecLen
           do j = 1,nvecLen
@@ -66,13 +62,12 @@
        do ival = 1,nvecLen
          tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
        enddo
-
-       if(tmp.lt.1.e-12) go to 100                 !  kick out of newton iteration
+       if(tmp.lt.1.0e-13_wp) exit
 
       enddo
- 100  continue
+
       if (.false.) then
-      !print*,'newton',resE!(1,L+1)
+      !print*,'newton',resE!(1,L)
       write(*,*),uvec
       write(*,*),iprob
       write(*,*)L

@@ -15,6 +15,7 @@ SRCS = precision_vars.f90\
        JACOB2.f90\
        Jacobian.f90\
        Newton_Iteration.f90\
+       Stage_Value_Predictor.f90\
        rungeadd.f90\
        test_cases.f90\
        vanderPol.f90\
@@ -40,6 +41,7 @@ OBJS = precision_vars.o\
        JACOB2.o\
        Jacobian.o\
        Newton_Iteration.o\
+       Stage_Value_Predictor.o\
        rungeadd.o\
        test_cases.o\
        vanderPol.o\
