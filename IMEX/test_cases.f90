@@ -111,8 +111,8 @@
 
         !**initilizations?**
         do i = 1,nrk
-          stageE(i) = 0.0
-          stageI(i) = 0.0
+          stageE(i) = 0.0_wp
+          stageI(i) = 0.0_wp
           maxiter(i)= 0
         enddo
 !--------------------------PROBLEMS LOOP------------------------------
@@ -150,23 +150,19 @@
             t = 0.0_wp      !init. start time
 
             !**INIT. ERROR VECTOR**
-            do ival = 1,nvecLen
-              errvecT(ival) = 0.0_wp
-            enddo
+            errvecT(:) = 0.0_wp
 
             do i = 1,nrk            !initialize stage value preditor
-              do ival = 1,nvecLen   !with trivial guess for first stage
-                predvec(ival,i) = uvec(ival)
-              enddo
+              predvec(:,i) = uvec(:)
             enddo
 !--------------------------TIME ADVANCEMENT LOOP----------------------
             do ktime = 1,100000000                      
-              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0d-11 !check if dt>tfinal
+
+              if(t+dt.gt.tfinal)dt = tfinal-t + 1.0e-11_wp !check if dt>tfinal
               
               !**STORE VALUES OF UVEC**
-              do ival = 1,nvecLen
-                uveco(ival) = uvec(ival)
-              enddo
+              uveco(:) = uvec(:)
+
               jcount = jcount + (nrk-1)    !keep track of total RK stages 
 
 !--------------------------------RK LOOP------------------------------
@@ -385,11 +381,10 @@
               errvecT(ival) = errvecT(ival) + errvec(ival)
             enddo                                         
             t = t + dt                  !increment time
-            if(t.ge.tfinal) go to 100   !if end time then exit loop
+            if(t.ge.tfinal) exit
 
           enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP---------------------
-  100  continue
        
           cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
 
@@ -397,7 +392,7 @@
           totalerrorP = 0.0_wp
           do ival = 1,nvecLen
             tmpvec(ival) = abs(uvec(ival)-uexact(ival))
-            if(tmpvec(ival).eq.0.0)tmpvec(ival)=1.0d-15
+            if(tmpvec(ival) == 0.0_wp)tmpvec(ival)=1.0e-15_wp
             totalerror  = totalerror  + tmpvec(ival)**2 
             totalerrorP = totalerrorP + errvecT(ival)**2 
           enddo
@@ -414,16 +409,6 @@
 !----------------------------END TIMESTEP LOOP------------------------
            jsamp = 41 
 
-!          if(icase.eq.1)then                        !  make sure that data has not hit machine precision
-!            jsamp = 51      
-!          elseif(icase.eq.2)then
-!            jsamp = 51      
-!          elseif(icase.eq.3)then
-!            jsamp = 51      
-!          elseif(icase.eq.4)then
-!            jsamp = 51      
-!          endif
-  
            do i=1,isamp
              sig(i) = 0.0_wp
            enddo
@@ -450,6 +435,7 @@
             b1save(jepsil,ii) = -b(ii)
             b1Psave(jepsil,ii) = -b(ii+nveclen)
            enddo
+
          enddo           
 !---------------------END STIFFNESS LOOP------------------------------
          !**OUTPUT CONVERGENCE VS STIFFNESS**
