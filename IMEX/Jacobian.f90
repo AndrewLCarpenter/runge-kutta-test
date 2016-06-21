@@ -1,8 +1,8 @@
       subroutine Jacobian(uvec,xjac,dt,ep,akk,iprob,nvecLen,sigma,rho,beta)
 
-      implicit none
+      use precision_vars
 
-      integer,   parameter                           :: wp=8
+      implicit none
 
       integer,   parameter                           :: ivarlen=4
  

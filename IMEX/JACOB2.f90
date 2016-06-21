@@ -1,8 +1,9 @@
       subroutine JACOB2(nvecLen,xjac,xinv)
 
+      use precision_vars
+
       implicit none
 
-      integer,   parameter                           :: wp=8
       integer,   parameter                           :: ivarlen=4
  
       integer,                                 intent(in   )  :: nveclen

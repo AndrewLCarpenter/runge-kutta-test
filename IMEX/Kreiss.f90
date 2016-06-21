@@ -1,7 +1,9 @@
       subroutine Kreiss(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+
+      use precision_vars
+
       implicit none
 
-      integer,  parameter                      :: wp=8
       integer,  parameter                      :: vecl=4
 
       integer,                   intent(in   ) :: programStep

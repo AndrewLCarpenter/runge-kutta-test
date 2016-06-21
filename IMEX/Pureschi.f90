@@ -1,7 +1,9 @@
       subroutine Pureschi(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+
+      use precision_vars
+
       implicit none
 
-      integer,  parameter                      :: wp=8
       integer,  parameter                      :: vecl=4
 
       integer,                   intent(in   ) :: programStep
@@ -16,7 +18,7 @@
       integer,                   intent(in   ) :: iDT
 
       real(wp), dimension(81,vecl)             :: ExactTot
-      real(wp)                                 :: diff,pi
+      real(wp)                                 :: diff
       integer                                  :: i
 
       !RHS vars
@@ -49,7 +51,7 @@
         nvecLen = 2
         tfinal = 5.0_wp
 
-        pi = acos(-1.0_wp)
+!       pi = acos(-1.0_wp)  brought in through ``precision_vars''
 
 !  IC: problem 1   :  equilibrium IC
           uvec(1) = pi/2.0_wp

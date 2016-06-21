@@ -1,9 +1,9 @@
       subroutine rungeadd(aE,aI,bE,bI,cE,cI,ns,bEH,bIH,icase,bD,&
      &                    svpB,alpha,al3N,al3D,al4N,al4D,casename)
       
-      implicit none
+      use precision_vars
 
-      integer,   parameter                               :: wp=8
+      implicit none
 
       integer,   parameter                               :: is=9
       integer,   parameter                               :: ivarlen=4
