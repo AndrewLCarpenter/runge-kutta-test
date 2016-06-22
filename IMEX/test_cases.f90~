@@ -45,7 +45,6 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
-!
 !********************************BEGIN PROGRAM**********************************
       program test_cases
 
@@ -91,20 +90,20 @@
       
       character(len=80) :: filename,fileloc   !file name and location
       character(len=25) :: casename           !name of RK case
-      character(len=9), dimension(7) :: probname!array of problem names
+      character(len=9)  :: probname           !problem name
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
 
       logical           :: dirExists,filex    !check if directory exists
      
       !**ENTER PROBLEM NAMES**
-      probname(1)="vanderPol"
-      probname(2)="Pureshi  "
-      probname(3)="Kaps     "
-      probname(4)="Kreiss   "
-      probname(5)="Lorenz   "
-      probname(6)="Burgers  "
-      probname(7)="BlackScho"      
+      probname="vanderPol"
+      !probname(2)="Pureshi  "
+      !probname(3)="Kaps     "
+      !probname(4)="Kreiss   "
+      !probname(5)="Lorenz   "
+     ! probname(6)="Burgers  "
+      !probname(7)="BlackScho"      
 !-----------------------------USER INPUT----------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
@@ -113,6 +112,9 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP---------------------------------------
+      !programStep=0
+      !call problemsub(iprob,programStep,probname,uvec,ep,uexact,dt,nveclen)
+
       do icase = cases,cases
 
         icount = 0                                  !cost counters
@@ -131,7 +133,7 @@
 !--------------------------PROBLEMS LOOP----------------------------------------
         do iprob = problem,problem
           !**INIT. FILE PATH FOR OUTPUTS**                           
-          fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
+          fileloc=trim(probname)//'/'//trim(casename)//'/'
           inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
           if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
           
@@ -146,11 +148,11 @@
             do ii = 1,ivarlen
               write(istr,"(I1.1)")ii
               filename= &
-     &           trim(probname(iprob))//'_'//trim(casename)//'_'//istr//ext
+     &           trim(probname)//'_'//trim(casename)//'_'//istr//ext
               open(49+ii,file=trim(fileloc)//filename)
               write(49+ii,*)'zone T = "ep = ',ep,'",'
               filename= &
-     &           trim(probname(iprob))//'_'//trim(casename)//'_'//istr//'P'//ext
+     &           trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
               open(59+ii,file=trim(fileloc)//filename)
               write(59+ii,*)'zone T = "ep = ',ep,'",'
             enddo
@@ -324,7 +326,7 @@
           enddo           
 !---------------------END STIFFNESS LOOP----------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          filename=trim(probname(iprob))//'_'//trim(casename)//'_conv'//ext
+          filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
           open(35,file=trim(fileloc)//filename)
           do ii=1,nveclen
             write(35,*)'zone T = "Var ',ii,': Implicit",'

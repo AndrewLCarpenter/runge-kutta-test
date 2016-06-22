@@ -62,7 +62,7 @@
        do ival = 1,nvecLen
          tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
        enddo
-       if(tmp.lt.1.0e-13_wp) exit
+       if(tmp.lt.1.0e-12_wp) exit
 
       enddo
 
