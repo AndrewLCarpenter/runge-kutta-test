@@ -9,7 +9,6 @@ echo enter message
 
 read text 
 
-
 git commit -m "$text"
 git push -u origin master
 git push origin master
