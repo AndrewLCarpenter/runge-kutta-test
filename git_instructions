@@ -2,7 +2,7 @@
 
 git config --global user.email "bmurray7@binghamton.edu"
 git config --global user.name "brandonmurray0"
-git remote set-url origin ssh://git0@github.com/AndrewLCarpenter/runge-kutta-test.git
+git remote set-url origin https://brandonmurray0@github.com/AndrewLCarpenter/runge-kutta-test.git
 git add .
 
 echo enter message
