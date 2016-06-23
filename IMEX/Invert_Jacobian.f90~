@@ -20,7 +20,6 @@
         xinv(1,2) = -xjac(1,2)/det
         xinv(2,1) = -xjac(2,1)/det
         xinv(2,2) =  xjac(1,1)/det
-        
       elseif(nvecLen.eq.3)then
 
         x11 = xjac(1,1)

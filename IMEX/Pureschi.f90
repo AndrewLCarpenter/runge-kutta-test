@@ -1,4 +1,4 @@
-      subroutine Pureschi(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine Pureschi(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -9,6 +9,7 @@
       integer,                   intent(in   ) :: programStep
 
       !INIT vars
+      character(len=9),          intent(  out) :: probname
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
@@ -30,6 +31,7 @@
 
 
       if (programStep==0) then
+        probname='Pureschi  '
         open(unit=39,file='exact.pureschi.1.data')
         rewind(39)
         do i=1,81

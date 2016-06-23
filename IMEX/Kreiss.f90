@@ -1,4 +1,4 @@
-      subroutine Kreiss(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine Kreiss(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -9,6 +9,7 @@
       integer,                   intent(in   ) :: programStep
 
       !INIT vars
+      character(len=9),          intent(  out) :: probname
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
@@ -28,6 +29,7 @@
 
 
       if (programStep==0) then
+        probname="Kreiss   "
         dt = 0.25_wp/10**((iDT-1)/20.0_wp)
         nvecLen = 2
 

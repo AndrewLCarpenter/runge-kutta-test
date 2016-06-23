@@ -25,7 +25,7 @@
       real(wp),   dimension(is,is),        intent(  out) :: al3D
       real(wp),   dimension(is,is),        intent(  out) :: al4N
       real(wp),   dimension(is,is),        intent(  out) :: al4D
-      character(len=25)                                  :: casename
+      character(len=25),                   intent(  out) :: casename
 
       real(wp),   dimension(is)                          :: bdsum
       integer                                            :: i,j

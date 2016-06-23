@@ -51,9 +51,8 @@
 
       use precision_vars
       use poly_fit_Mod
-
+!------------------------------VARIABLES----------------------------------------
       implicit none     
-
 !------------------------------PARAMETERS---------------------------------------
       integer, parameter :: is=9               !max constant length
       integer, parameter :: ivarlen=4          !max variable length
@@ -61,50 +60,64 @@
       integer, parameter :: jmax=81            !?
       integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES-----------------------------------------   
-      integer             :: ipred,cases,problem         !user inputs
-      integer             :: icase,icount,jcount,i,ii    !do loops
-      integer             :: iprob,nrk,jepsil,iDT,ival   !do loops
-      integer             :: ktime,L,LL,nveclen          !do loops
-      integer             :: jpre,inew,j,k,jsamp,istage  !do loops
-      integer             :: programStep                 !counts step of program
+      !user inputs
+      integer          :: ipred,cases,problem      
+             
+      !do loops
+      integer          :: icase,i,iprob,jepsil,iDT,ival  
+      integer          :: j,k,istage,ktime,L,LL
+      
+      !counters      
+      integer          :: icount,jcount                    
+      
+      !problemsub variables
+      integer                         :: programStep
+      character(len=9)                :: probname
+      real(wp), dimension(:), ALLOCATABLE     :: uvec !ivarlen
+      real(wp)                        :: ep
+      real(wp), dimension(:), ALLOCATABLE     :: uexact !ivarlen
+      real(wp)                        :: dt
+      integer                         :: nveclen
+      real(wp)                        :: tfinal     
+      real(wp), dimension(:,:), ALLOCATABLE  :: resE,resI !ivarlen,is
+      
+      !rungeadd variables
+      real(wp),   dimension(is,is)      :: aE,aI
+      real(wp),   dimension(is)         :: bE,bI,cE,cI
+      integer                           :: nrk
+      real(wp),   dimension(is)         :: bEH,bIH
+      real(wp),   dimension(is,ivarlen) :: bD 
+      real(wp),   dimension(is,is,0:is) :: svpB 
+      real(wp),   dimension(is,is)      :: alpha,al3N,al3D,al4N,al4D
+      character(len=25)                 :: casename     
 
-      real(wp)            :: dt,itmp,ep,t,sigma,rho,beta,tfinal,ttE
-      real(wp)            :: ttI,Z,time,rat,bb,xnum,xden,z1,z2,z3,z4,z5
-      real(wp)            :: the,the1,the2,the3,the4,the5,the6,the7,the8,q
-      real(wp)            :: tmp,xnorm,snorm,tmpD,dto,totalerror,totalerrorp
-
-      real(wp), dimension(is,is) :: aE,aI,alpha,al3N,al3D,al4N,al4D
-      real(wp), dimension(is) :: bE,bI,cE,cI,bEH,bIH,stageE,stageI
-      real(wp), dimension(is) :: maxiter,bint
-      real(wp), dimension(is,4) :: bD
-      real(wp), dimension(is,is,0:is) :: svpB
-      real(wp), dimension(ivarlen,is) :: ustage,resE,resI,predvec
-      real(wp), dimension(ivarlen) :: uvec,uveco,usum,uveciter,uorig
-      real(wp), dimension(ivarlen) :: uexact,Rnewton,errvec,errvecT,tmpvec
-      real(wp), dimension(ivarlen,ivarlen) :: xjacinv,xjac
-      real(wp), dimension(isamp) :: cost,sig
-      real(wp), dimension(isamp,ivarlen) :: error1,error1P
-      real(wp), dimension(isamp,ivarlen*2) :: errors
-      real(wp), dimension(ivarlen*2) :: a,b,siga1,sigb1,chi2
-      real(wp), dimension(jmax,ivarlen) :: b1save,b1Psave
-      real(wp), dimension(jmax) :: epsave
+      !fit variables
+      real(wp), dimension(isamp)         :: cost      
+      real(wp), dimension(:,:), ALLOCATABLE  :: error,errorP    !isamp,ivarlen  
+      integer                            :: jsamp
+      real(wp), dimension(isamp)         :: sig
+      real(wp), dimension(:), ALLOCATABLE      :: a,b,siga1,sigb1,chi2 !ivarlen*2
+      real(wp)                           :: q
+      
+      !newton_iteration variables
+      !add variables
+      
+      !internal variables**includes newton
+      real(wp)                          :: itmp,t,time,rat,tmp,xnorm
+      real(wp)                          :: dto,totalerror,totalerrorp
+      real(wp), dimension(is)           :: stageE,stageI,maxiter,bint
+      real(wp), dimension(:,:), ALLOCATABLE    :: ustage,predvec !ivarlen,is
+      real(wp), dimension(:), ALLOCATABLE       :: uveco,usum,uveciter,uorig !ivarlen
+      real(wp), dimension(:), ALLOCATABLE       :: errvec,errvecT,tmpvec !ivarlen
+      real(wp), dimension(:,:), ALLOCATABLE  :: b1save,b1Psave !jmax,ivarlen
+      real(wp), dimension(jmax)         :: epsave
       
       character(len=80) :: filename,fileloc   !file name and location
-      character(len=25) :: casename           !name of RK case
-      character(len=9), dimension(7) :: probname!array of problem names
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
 
-      logical           :: dirExists,filex    !check if directory exists
-     
-      !**ENTER PROBLEM NAMES**
-      probname(1)="vanderPol"
-      probname(2)="Pureshi  "
-      probname(3)="Kaps     "
-      probname(4)="Kreiss   "
-      probname(5)="Lorenz   "
-      probname(6)="Burgers  "
-      probname(7)="BlackScho"      
+      logical           :: dirExists   !check if directory exists
+         
 !-----------------------------USER INPUT----------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
@@ -114,7 +127,11 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP---------------------------------------
       do icase = cases,cases
-
+        
+        !**initilizations?**
+        stageE(:) = 0.0_wp
+        stageI(:) = 0.0_wp
+        maxiter(:)= 0
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
         
@@ -122,16 +139,32 @@
         call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, &   
      &       svpB(1,1,0),alpha,al3N,al3D,al4N,al4D,casename)
 
-        !**initilizations?**
-        do i = 1,nrk
-          stageE(i) = 0.0_wp
-          stageI(i) = 0.0_wp
-          maxiter(i)= 0
-        enddo
 !--------------------------PROBLEMS LOOP----------------------------------------
         do iprob = problem,problem
+          !**CALL FOR PROBNAME**
+          programStep=-1
+          call problemsub(iprob,programStep,probname,nveclen)!,uvec,ep,uexact,dt,&
+    ! &    tfinal,iDT)
+          !**ALLOCATE VARIABLES**
+          !problemsub
+          AllOCATE(uvec(nveclen),uexact(nveclen))
+          ALLOCATE(resE(nveclen,is),resI(nveclen,is))
+          
+          !fit
+          ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen))
+          ALLOCATE(a(nveclen*2),b(nveclen*2),siga1(nveclen*2))
+          ALLOCATE(sigb1(nveclen*2),chi2(nveclen*2))
+          
+          !Newton_iteration
+          
+          !internal
+          ALLOCATE(ustage(nveclen,is),predvec(nveclen,is))
+          ALLOCATE(uveco(nveclen),usum(nveclen),uveciter(nveclen),uorig(nveclen))
+          ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
+          ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen))
+
           !**INIT. FILE PATH FOR OUTPUTS**                           
-          fileloc=trim(probname(iprob))//'/'//trim(casename)//'/'
+          fileloc=trim(probname)//'/'//trim(casename)//'/'
           inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
           if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
           
@@ -143,37 +176,39 @@
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            do ii = 1,ivarlen
-              write(istr,"(I1.1)")ii
+            do i = 1,ivarlen
+              write(istr,"(I1.1)")i
               filename= &
-     &           trim(probname(iprob))//'_'//trim(casename)//'_'//istr//ext
-              open(49+ii,file=trim(fileloc)//filename)
-              write(49+ii,*)'zone T = "ep = ',ep,'",'
+     &           trim(probname)//'_'//trim(casename)//'_'//istr//ext
+              open(49+i,file=trim(fileloc)//filename)
+              write(49+i,*)'zone T = "ep = ',ep,'",'
               filename= &
-     &           trim(probname(iprob))//'_'//trim(casename)//'_'//istr//'P'//ext
-              open(59+ii,file=trim(fileloc)//filename)
-              write(59+ii,*)'zone T = "ep = ',ep,'",'
+     &           trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+              open(59+i,file=trim(fileloc)//filename)
+              write(59+i,*)'zone T = "ep = ',ep,'",'
             enddo
 !--------------------------TIMESTEP LOOP----------------------------------------
             do iDT = 1,isamp,1                     
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
-              call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,&
-     &                        tfinal,iDT)   !,resE(1,1),resI(1,1),aI(1,1),xjac)
-             ! call INIT(uvec,uexact,dt,iDT,tfinal,ep,nvecLen,iprob,sigma,rho,beta)     
+              call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
+     &                        tfinal,iDT)
+
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
-
+              
               !**INIT. ERROR VECTOR**
               errvecT(:) = 0.0_wp
 
-              do i = 1,nrk            !initialize stage value preditor
-                predvec(:,i) = uvec(:)
+              do j = 1,nveclen
+                do i = 1,nrk            !initialize stage value preditor
+                  predvec(j,i) = uvec(j)
+                enddo
               enddo
 !--------------------------TIME ADVANCEMENT LOOP--------------------------------
-              do ktime = 1,100000000                      
-
+              do ktime = 1,1000000                      
+                !print*,uvec(:),ktime
                 if(t+dt.gt.tfinal)dt = tfinal-t + 1.0e-11_wp !check if dt>tfinal
                
                 !**STORE VALUES OF UVEC**
@@ -182,20 +217,12 @@
                 jcount = jcount + (nrk-1)    !keep track of total RK stages 
 
 !--------------------------------RK LOOP----------------------------------------
-                ttI = t + cI(1)*dt
-                ttE = t + cE(1)*dt
-  
                 programStep=1
-                call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,&
+                call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
      &                          tfinal,iDT,resE(1,1),resI(1,1))
-!               call RHS(uvec,resI(1,1),resE(1,1),dt,ep,iprob,sigma,rho,beta)
                 ustage(:,1) = uvec(:)
   
                 do L = 2,nrk
-  
-                  ttI = t + cI(L)*dt   
-                  ttE = t + cE(L)*dt
-  
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
                     usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
@@ -204,17 +231,18 @@
  
                   if(ipred.eq.2) predvec(:,L)=uvec(:)  ! previous guess as starter
                   if(ipred.ne.2) uvec(:) = predvec(:,L)  
-!---------------BEG NEWTON ITERATION--------------------------------------------
-                
+!---------------BEG NEWTON ITERATION -------------------------------------------
+                 ! print*,'newtonstart',uvec
                   call Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,resE, &
      &                                  resI,aI(L,L),usum,icount,k)
+                 ! print*,'newtonend  ',uvec,k
 
 !---------------END NEWTON ITERATION--------------------------------------------
              
                   ustage(:,L) = uvec(:)       !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
-                  call problemsub(iprob,programStep,uvec,ep,uexact,dt,nveclen,&
+                  call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
      &                            tfinal,iDT,resE(1,L),resI(1,L))
 
                   if(ipred.ne.2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
@@ -230,8 +258,8 @@
 
                   if (ipred.eq.2) then
                     uvec(:)  = uveco(:)          ! put predict into start guess
-                    do jpre = 2,L-1
-                      uvec(:) = uvec(:) + alpha(L,jpre)*(ustage(:,jpre)-uvec(:))
+                    do j = 2,L-1
+                      uvec(:) = uvec(:) + alpha(L,j)*(ustage(:,j)-uvec(:))
                     enddo
                 
                     if(L.eq.2.and.ktime.ne.1)then
@@ -254,6 +282,8 @@
                 do LL = 1,nrk 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
                 enddo
+
+                
 !-----------------------Final Sum of RK loop using the b_{j}--------------------
 
                 ! ERROR ESTIMATE
@@ -273,67 +303,75 @@
                 if(t.ge.tfinal) exit
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP-------------------------------
-       
+           
               cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
 
-              totalerror  = 0.0_wp
-              totalerrorP = 0.0_wp
+              tmpvec(:) = abs(uvec(:)-uexact(:))
               do ival = 1,nvecLen
-                tmpvec(ival) = abs(uvec(ival)-uexact(ival))
                 if(tmpvec(ival) == 0.0_wp)tmpvec(ival)=1.0e-15_wp
-                totalerror  = totalerror  + tmpvec(ival)**2 
-                totalerrorP = totalerrorP + errvecT(ival)**2 
               enddo
+  
+              totalerror  = sum( tmpvec(:)**2 )
+              totalerrorP = sum( errvecT(:)**2 )
               totalerror = sqrt(totalerror/nvecLen)
-
-              do ii = 1,nveclen
-                error1(iDT,ii)  = log10(tmpvec(ii))
-                error1P(iDT,ii) = log10(errvecT(ii))
-                write(49+ii,*)cost(iDT),error1(iDT,ii)
-                write(59+ii,*)cost(iDT),error1P(iDT,ii)
+              error(iDT,:)  = log10(tmpvec(:))
+              errorP(iDT,:) = log10(errvecT(:))
+              
+              do i = 1,nveclen
+                write(49+i,*)cost(iDT),error(iDT,i)
+                write(59+i,*)cost(iDT),errorP(iDT,i)
               enddo
             enddo
 !----------------------------END TIMESTEP LOOP----------------------------------
+!----------------------------OUTPUTS--------------------------------------------
             jsamp = 41 
+            sig(:) = 0.0_wp
+            !**GATHER OUTPUT VALUES
+            do i = 1,nveclen
+         !     print*,'i',i,'nveclen',nveclen
+         !     print*,cost
+         !     print*,error(:,i)
+         !     print*,jsamp
+         !     print*,sig
+         !     print*,0
+         !     print*,a(i)
+         !     print*,b(i)
+         !     print*,siga1(i)
+         !     print*,sigb1(i)
+         !     print*,chi2(i)
+         !     print*,q
+              call fit(cost,error(:,i),jsamp,sig,0,a(i),&
+     &         b(i),siga1(i),sigb1(i),chi2(i),q)
+              call fit(cost,errorP(:,i),jsamp,sig,0,a(i+nveclen),&
+     &         b(i+nveclen),siga1(i+nveclen),sigb1(i+nveclen),&
+     &         chi2(i+nveclen),q)
+            enddo
 
-            do i=1,isamp
-              sig(i) = 0.0_wp
-            enddo
-!--------------------------OUTPUTS----------------------------------------------
-           !**GATHER OUTPUT VALUES
-            do ii = 1,nveclen
-              call fit(cost,error1(:,ii),jsamp,sig,0,a(ii),&
-     &         b(ii),siga1(ii),sigb1(ii),chi2(ii),q)
-              call fit(cost,error1P(:,ii),jsamp,sig,0,a(ii+nveclen),&
-     &         b(ii+nveclen),siga1(ii+nveclen),sigb1(ii+nveclen),&
-     &         chi2(ii+nveclen),q)
-            enddo
-           
             !**OUTPUT TO TERMINAL**
             write(*,60,advance="no")ep
-            do ii = 1,nveclen*2-1
-              write(*,60,advance="no")a(ii),b(ii)
+            do i = 1,nveclen*2-1
+              write(*,60,advance="no")a(i),b(i)
             enddo
             write(*,60)a(nveclen*2),b(nveclen*2)
 
             epsave(jepsil) = log10(ep)
-            do ii = 1,nveclen
-              b1save(jepsil,ii) = -b(ii)
-              b1Psave(jepsil,ii) = -b(ii+nveclen)
+            do i = 1,nveclen
+              b1save(jepsil,i) = -b(i)
+              b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
           enddo           
 !---------------------END STIFFNESS LOOP----------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          filename=trim(probname(iprob))//'_'//trim(casename)//'_conv'//ext
+          filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
           open(35,file=trim(fileloc)//filename)
-          do ii=1,nveclen
-            write(35,*)'zone T = "Var ',ii,': Implicit",'
+          do i=1,nveclen
+            write(35,*)'zone T = "Var ',i,': Implicit",'
             do j=1,jactual
-              write(35,50)epsave(j),b1save(j,ii)
+              write(35,50)epsave(j),b1save(j,i)
             enddo
-            write(35,*)'zone T = "Var ',ii,': Predicted",'
+            write(35,*)'zone T = "Var ',i,': Predicted",'
             do j=1,jactual
-              write(35,50)epsave(j),b1Psave(j,ii)
+              write(35,50)epsave(j),b1Psave(j,i)
             enddo
           enddo
 
@@ -341,15 +379,31 @@
           tmp = 1.0_wp*icount/jcount
           write(*,*)'average iterations per step',tmp
              
-          do istage = 2,nrk
-            stageE(istage) = (nrk-1)*stageE(istage)/jcount
-            stageI(istage) = (nrk-1)*stageI(istage)/jcount
-          enddo
+          stageE(2:) = (nrk-1)*stageE(2:)/jcount
+          stageI(2:) = (nrk-1)*stageI(2:)/jcount
+
           write(*,*)'error of initial guess is '
           do istage = 2,nrk
             write(*,*) istage,stageE(istage),maxiter(istage),stageI(istage)
           enddo
 !----------------------END OUTPUTS----------------------------------------------
+           !**DEALLOCATE VARIABLES**
+          !problemsub
+          DEAllOCATE(uvec,uexact)
+          DEALLOCATE(resE,resI)
+          
+          !fit
+          DEALLOCATE(error,errorP)
+          DEALLOCATE(a,b,siga1)
+          DEALLOCATE(sigb1,chi2)
+          
+          !Newton_iteration
+          
+          !internal
+          DEALLOCATE(ustage,predvec)
+          DEALLOCATE(uveco,usum,uveciter,uorig)
+          DEALLOCATE(errvec,errvecT,tmpvec)
+          DEALLOCATE(b1save,b1Psave)
         enddo                                       
 !----------------------END PROBLEMS LOOP----------------------------------------
       enddo                                    
@@ -358,6 +412,3 @@
    50 format( 10(e12.5,1x))
 !----------------------END PROGRAM----------------------------------------------
       END PROGRAM test_cases
-
-
-   

@@ -28,6 +28,7 @@
 !============================================================
       
       Rnewton(:)=0.0_wp
+      !print*,'entering newton'
       do k = 1,20
 
         icount = icount + 1
@@ -35,7 +36,8 @@
         uveciter(:) = uvec(:) !store old uvec
 
         programStep=2
-        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
+        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))!,aI,xjac)
+        !call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
 
         Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
          
@@ -45,6 +47,7 @@
         call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
 !!        call JACOB2(nveclen,xjac,xjacinv)
 !!      call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
+        !print*, xjac,'len',nveclen,k
         call Invert_Jacobian(nveclen,xjac,xjacinv)
         !call JACOB(uvec,xjacinv,dt,ep,aI,iprob,nvecLen,sigma,rho,beta)
 
@@ -54,7 +57,9 @@
         
         do i = 1,nvecLen
           do j = 1,nvecLen
+          !print*,'newton1',xjacinv(i,j),i,j
             uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
+          !print*,'newton2',xjacinv(i,j),i,j
           enddo
        enddo
 
@@ -62,10 +67,37 @@
        do ival = 1,nvecLen
          tmp = tmp + abs(uvec(ival)-uveciter(ival)) !check accuracy of zeros
        enddo
-
+       !print*,'tmp',tmp
        if(tmp.lt.1.0e-12_wp) exit
 
       enddo
 
+      if (.false.) then
+      !print*,'newton',resE!(1,L)
+      write(*,*),uvec
+      write(*,*),iprob
+      write(*,*)L
+      write(*,*)ep
+      write(*,*)dt
+      write(*,*)nveclen
+      write(*,*)iDT
+      write(*,*)resE
+      write(*,*)resI
+      write(*,*)aI
+      write(*,*)usum
+      write(*,*)'icount',icount
+      write(*,*)ival
+      write(*,*)i              
+      write(*,*)j
+      write(*,*)k
+      write(*,*)programStep
+      write(*,*)uveciter
+      write(*,*)uexact
+      write(*,*)tfinal
+      write(*,*)Rnewton
+      write(*,*)xjac
+      write(*,*)xjacinv
+      write(*,*)tmp
+      endif
       return
       end subroutine 

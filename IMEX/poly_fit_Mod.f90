@@ -10,7 +10,6 @@
 
       contains
 
-!changed----
 ! ==================currently not working=======================================
 !      subroutine DataOut(ep,nveclen,x,y,ndata,sig,mwt,b)
 !      

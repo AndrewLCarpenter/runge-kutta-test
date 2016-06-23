@@ -1,23 +1,24 @@
-      subroutine vanderPol(programStep,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine vanderPol(programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
       implicit none
 
-      integer,  parameter                      :: vecl=4
+      integer,  parameter                      :: vecl=2
 
       integer,                   intent(in   ) :: programStep
 
       !INIT vars
+      character(len=9),          intent(  out) :: probname
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
       real(wp),                  intent(inout) :: dt
-      integer,                   intent(inout) :: nveclen
+      integer,                   intent(  out) :: nveclen
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
-      real(wp), dimension(81,vecl)             :: ExactTot
+      real(wp), dimension(81,vecl+1)             :: ExactTot
       real(wp)                                 :: diff
       integer                                  :: i,j
 
@@ -28,11 +29,11 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-
-
-
-
-      if (programStep==0) then
+      if (programStep==-1) then
+        nvecLen = vecl
+        probname='vanderPol'  
+              
+      elseif (programStep==0) then
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)
         do i=1,81
@@ -49,11 +50,11 @@
         enddo
  100    continue
         dt = 0.5_wp/10**((iDT-1)/20.0_wp)
-        nvecLen = 2
+
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
-
+        
       elseif (programStep==1 .or.programStep==2) then
         resE(1) = dt*uvec(2)
         resE(2) = 0.0_wp
