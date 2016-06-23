@@ -195,7 +195,6 @@
               programStep=0
               call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
      &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)   
-
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
               

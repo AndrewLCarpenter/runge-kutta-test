@@ -1,9 +1,9 @@
-<<<<<<< .merge_file_JeyiR7
-      subroutine Pureschi(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+<<<<<<< .merge_file_HtM9iE
+      subroutine Pureschi(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt, &
 =======
       subroutine Pureschi(programStep,temporal_splitting,uvec,ep,uexact,dt,nveclen, &
+>>>>>>> .merge_file_P2kjvC
                          &  tfinal,iDT,resE,resI,akk,xjac)
->>>>>>> .merge_file_vDjGe5
 
       use precision_vars
 
@@ -34,7 +34,6 @@
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
-
 
       if (programStep==0) then
         probname='Pureschi  '

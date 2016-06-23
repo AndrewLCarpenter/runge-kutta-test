@@ -1,5 +1,12 @@
+<<<<<<< .merge_file_cjBeHC
       subroutine problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
      &                      dt,tfinal,iDT,resE,resI,akk,xjac)
+=======
+      subroutine problemsub(iprob,programStep,temporal_splitting,uvec,ep,uexact,&
+                           &dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+
+!     call problemsub(iprob,programStep,temporal_splitting,
+>>>>>>> .merge_file_Nn1kRy
 
       use precision_vars
 
@@ -8,11 +15,14 @@
       integer,  parameter                      :: vecl=2
 
       !PROBLEM PARAMETERS
-<<<<<<< .merge_file_RhdIyf
+<<<<<<< .merge_file_cjBeHC
       integer,                   intent(in   ) :: iprob, problemStep
-      character(len=9), intent(  out) :: probname
+      character(len=9),          intent(  out) :: probname
+=======
+      integer,                   intent(in   ) :: iprob
+      integer,                   intent(in   ) :: programStep
+>>>>>>> .merge_file_Nn1kRy
       character(80),             intent(in   ) :: temporal_splitting
->>>>>>> .merge_file_bG0ttd
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
@@ -24,16 +34,19 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-<<<<<<< .merge_file_RhdIyf
+<<<<<<< .merge_file_cjBeHC
       if     (iprob==1) then
-        call vanderPol(problemStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+        call vanderPol(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                      & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==2) then
-        call Pureschi(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+        call Pureschi(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                     & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==3) then
-        call Kaps(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+        call Kaps(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                 & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==4) then
-        call Kreiss(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
-      endif      
+        call Kreiss(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact, &
+                   & dt,tfinal,iDT,resE,resI,akk,xjac)
 =======
 !     write(*,*)'iprob,programStep,temporal_splitting'
 !     write(*,*) iprob,programStep,temporal_splitting 
@@ -49,7 +62,8 @@
       elseif (iprob==4) then
         call Kreiss(programStep,temporal_splitting,uvec,ep,uexact, &
                    & dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+>>>>>>> .merge_file_Nn1kRy
       endif
->>>>>>> .merge_file_bG0ttd
+
       return
       end subroutine

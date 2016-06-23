@@ -37,25 +37,16 @@
         uveciter(:) = uvec(:) !store old uvec
 
         programStep=2
-<<<<<<< .merge_file_ZtL6O3
-        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
-=======
-        call problemsub(iprob,programStep,Temporal_Splitting,uvec,ep,uexact,dt,nveclen,&
-          &tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
-        !call RHS(uvec,resI(1,L),resE(1,L),dt,ep,iprob,sigma,rho,beta) !get res() for newton iteration
->>>>>>> .merge_file_9wNQWZ
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
+     &                   tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
 
         Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
          
         !**GET INVERSE JACOBIAN**
         programStep=3
-<<<<<<< .merge_file_ZtL6O3
-        
-        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
-=======
-        call problemsub(iprob,programStep,Temporal_Splitting,uvec,ep,uexact,dt,nveclen,&
-          &tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
->>>>>>> .merge_file_9wNQWZ
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
+     &                   tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+
 !!        call JACOB2(nveclen,xjac,xjacinv)
 !!      call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
         call Invert_Jacobian(nveclen,xjac,xjacinv)

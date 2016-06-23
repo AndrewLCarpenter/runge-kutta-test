@@ -1,9 +1,5 @@
-<<<<<<< .merge_file_O8ulq5
-      subroutine Kreiss(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
-=======
-      subroutine Kreiss(programStep,temporal_splitting,uvec,ep,uexact,dt,nveclen, &
+      subroutine Kreiss(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt, &
                        &  tfinal,iDT,resE,resI,akk,xjac)
->>>>>>> .merge_file_8y3qO3
 
       use precision_vars
 

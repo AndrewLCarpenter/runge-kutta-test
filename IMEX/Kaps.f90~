@@ -1,9 +1,9 @@
-<<<<<<< .merge_file_IRC0v2
-      subroutine Kaps(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+<<<<<<< .merge_file_Zi5eYn
+      subroutine Kaps(programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt, &
 =======
       subroutine Kaps(programStep,Temporal_Splitting,uvec,ep,uexact,dt,nveclen, &
+>>>>>>> .merge_file_37BHeo
                      & tfinal,iDT,resE,resI,akk,xjac)
->>>>>>> .merge_file_M71JiZ
 
       use precision_vars
 

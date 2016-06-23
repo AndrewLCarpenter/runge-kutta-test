@@ -30,7 +30,6 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-
       if (programStep==-1) then
         nvecLen = vecl
         probname='vanderPol'  
@@ -56,7 +55,6 @@
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
-
       endif
 
       select case (Temporal_Splitting)

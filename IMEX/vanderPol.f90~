@@ -1,5 +1,10 @@
+<<<<<<< .merge_file_WLQcN0
       subroutine vanderPol(programStep,probname,nveclen,temporal_splitting, &
      &                     uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+=======
+      subroutine vanderPol(programStep,temporal_splitting,uvec,ep,uexact,dt,nveclen, &
+                          tfinal,iDT,resE,resI,akk,xjac)
+>>>>>>> .merge_file_apl5QV
 
       use precision_vars
 
@@ -30,12 +35,15 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-
+<<<<<<< .merge_file_WLQcN0
       if (programStep==-1) then
         nvecLen = vecl
         probname='vanderPol'  
               
       elseif (programStep==0) then
+=======
+      if (programStep==0) then
+>>>>>>> .merge_file_apl5QV
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)
         do i=1,81
@@ -56,7 +64,10 @@
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
+<<<<<<< .merge_file_WLQcN0
 
+=======
+>>>>>>> .merge_file_apl5QV
       endif
 
       select case (Temporal_Splitting)

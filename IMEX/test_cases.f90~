@@ -195,7 +195,6 @@
               programStep=0
               call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
      &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)   
-
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
               
@@ -241,13 +240,8 @@
                   ustage(:,L) = uvec(:)       !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
-<<<<<<< .merge_file_bMbV5s
-                  call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
-     &                            tfinal,iDT,resE(1,L),resI(1,L))
-=======
-                  call problemsub(iprob,programStep,temporal_splitting,uvec,ep,uexact,dt,nveclen,&
+                  call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
      &                            tfinal,iDT,resE(1,L),resI(1,L),aI(L,L),xjac)
->>>>>>> .merge_file_aa1pxr
 
                   if(ipred.ne.2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
 

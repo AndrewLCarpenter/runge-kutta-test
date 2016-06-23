@@ -8,11 +8,9 @@
       integer,  parameter                      :: vecl=2
 
       !PROBLEM PARAMETERS
-
       integer,                   intent(in   ) :: iprob, problemStep
-      character(len=9), intent(  out) :: probname
+      character(len=9),          intent(  out) :: probname
       character(80),             intent(in   ) :: temporal_splitting
-
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
