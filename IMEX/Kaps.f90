@@ -1,4 +1,5 @@
-      subroutine Kaps(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine Kaps(programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt, &
+                     & tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -7,6 +8,7 @@
       integer,  parameter                      :: vecl=4
 
       integer,                   intent(in   ) :: programStep
+      character(80),             intent(in   ) :: temporal_splitting
 
       !INIT vars
       character(len=9),          intent(  out) :: probname
@@ -41,18 +43,27 @@
 !  IC: problem 1   :  equilibrium IC
         uvec(1) = 1.0_wp
         uvec(2) = 1.0_wp
-      elseif (programStep==1 .or.programStep==2) then
-        resE(1) = dt*(-2.0_wp*uvec(1))
-        resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
-        resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
-        resI(2) = 0.0_wp
-
-      elseif (programStep==3) then
-        xjac(1,1) = 1.-akk*dt*(-(1./ep))
-        xjac(1,2) = 0.-akk*dt*(+1./ep)*2*uvec(2)
-        xjac(2,1) = 0.-akk*dt*(0)
-        xjac(2,2) = 1.-akk*dt*(0)
       endif
+
+      select case (Temporal_Splitting)
+
+        case('IMEX')
+              if (programStep==1 .or.programStep==2) then
+            resE(1) = dt*(-2.0_wp*uvec(1))
+            resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+            resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
+            resI(2) = 0.0_wp
+          elseif (programStep==3) then
+            xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp/ep))
+            xjac(1,2) = 0.0_wp-akk*dt*(+1.0_wp/ep)*2*uvec(2)
+            xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
+            xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
+          endif
+        case('IMPLICIT')
+              if (programStep==1 .or.programStep==2) then
+          elseif (programStep==3) then
+          endif
+        end select
 
       return
       end subroutine

@@ -1,5 +1,9 @@
-      subroutine Kreiss(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt, &
-                       &  tfinal,iDT,resE,resI,akk,xjac)
+<<<<<<< .merge_file_IRC0v2
+      subroutine Kaps(programStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+=======
+      subroutine Kaps(programStep,Temporal_Splitting,uvec,ep,uexact,dt,nveclen, &
+                     & tfinal,iDT,resE,resI,akk,xjac)
+>>>>>>> .merge_file_M71JiZ
 
       use precision_vars
 
@@ -20,7 +24,7 @@
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
-      real(wp)                                 :: tmp,tmpM,tmpP
+      real(wp)                                 :: tmp
 
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE,resI
@@ -31,39 +35,39 @@
 
 
       if (programStep==0) then
-        probname="Kreiss   "
-        dt = 0.25_wp/10**((iDT-1)/20.0_wp)
+        probname='Kaps     '
+        dt = 0.5_wp/10**((iDT-1)/20.0_wp)
         nvecLen = 2
 
         tfinal = 1.0_wp
-        tmpP = exp(+tfinal   )
-        tmpM = exp(-tfinal/ep)
-        tmp = exp(tfinal)
+        tmp = exp(-tfinal)
+        uexact(1) = tmp*tmp
+        uexact(2) = tmp
+
+!  IC: problem 1   :  equilibrium IC
         uvec(1) = 1.0_wp
         uvec(2) = 1.0_wp
-        uexact(1) = uvec(1)*tmpP + uvec(2)*(tmpP - tmpM)/(1.0_wp + ep)
-        uexact(2) = uvec(2)*tmpM
       endif
 
       select case (Temporal_Splitting)
 
         case('IMEX')
               if (programStep==1 .or.programStep==2) then
-            resE(1) = dt*uvec(1)
-            resE(2) = dt*(-uvec(2))
-            resI(1) = dt*(uvec(2)/ep)
+            resE(1) = dt*(-2.0_wp*uvec(1))
+            resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+            resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
             resI(2) = 0.0_wp
           elseif (programStep==3) then
-            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-            xjac(1,2) = 0.0_wp-akk*dt/ep
-            xjac(2,1) = 0.0_wp-akk*dt*( 0.0_wp)
-            xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp) !possible error here
+            xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp/ep))
+            xjac(1,2) = 0.0_wp-akk*dt*(+1.0_wp/ep)*2*uvec(2)
+            xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
+            xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
           endif
         case('IMPLICIT')
               if (programStep==1 .or.programStep==2) then
           elseif (programStep==3) then
           endif
-      end select
+        end select
 
       return
       end subroutine

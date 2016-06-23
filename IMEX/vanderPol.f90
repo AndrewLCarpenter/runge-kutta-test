@@ -1,4 +1,5 @@
-      subroutine vanderPol(programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine vanderPol(programStep,probname,nveclen,temporal_splitting, &
+     &                     uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -7,7 +8,7 @@
       integer,  parameter                      :: vecl=2
 
       integer,                   intent(in   ) :: programStep
-
+      character(80),             intent(in   ) :: temporal_splitting
       !INIT vars
       character(len=9),          intent(  out) :: probname
       real(wp), dimension(vecl), intent(inout) :: uvec
@@ -28,6 +29,7 @@
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
+
 
       if (programStep==-1) then
         nvecLen = vecl
@@ -54,19 +56,36 @@
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
-        
-      elseif (programStep==1 .or.programStep==2) then
-        resE(1) = dt*uvec(2)
-        resE(2) = 0.0_wp
-        resI(1) = 0.0_wp
-        resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
 
-      elseif (programStep==3) then
-        xjac(1,1) = 1.-akk*dt*(0.)
-        xjac(1,2) = 0.-akk*dt*(0.)
-        xjac(2,1) = 0.-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
-        xjac(2,2) = 1.-akk*dt*(1-uvec(1)*uvec(1))/ep
       endif
+
+      select case (Temporal_Splitting)
+
+        case('IMEX')
+              if (programStep==1 .or.programStep==2) then
+            resE(1) = dt*uvec(2)
+            resE(2) = 0.0_wp
+            resI(1) = 0.0_wp
+            resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+          elseif (programStep==3) then
+            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+            xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+            xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+            xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
+          endif
+        case('IMPLICIT')
+              if (programStep==1 .or.programStep==2) then
+            resE(1) = 0.0_wp
+            resE(2) = 0.0_wp
+            resI(1) = dt*uvec(2)
+            resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+          elseif (programStep==3) then
+            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+            xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
+            xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+            xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
+          endif
+      end select
 
       return
       end subroutine

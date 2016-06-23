@@ -1,4 +1,5 @@
-      subroutine problemsub(iprob,problemStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+      subroutine problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+     &                      dt,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -7,8 +8,11 @@
       integer,  parameter                      :: vecl=2
 
       !PROBLEM PARAMETERS
+
       integer,                   intent(in   ) :: iprob, problemStep
       character(len=9), intent(  out) :: probname
+      character(80),             intent(in   ) :: temporal_splitting
+
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
@@ -21,13 +25,18 @@
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
       if     (iprob==1) then
-        call vanderPol(problemStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+        call vanderPol(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                      & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==2) then
-        call Pureschi(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+        call Pureschi(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                     & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==3) then
-        call Kaps(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
+        call Kaps(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,&
+                 & dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==4) then
-        call Kreiss(problemStep,probname,uvec,ep,uexact,dt,nveclen,tfinal,iDT,resE,resI,akk,xjac)
-      endif      
+        call Kreiss(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact, &
+                   & dt,tfinal,iDT,resE,resI,akk,xjac)
+      endif
+
       return
       end subroutine

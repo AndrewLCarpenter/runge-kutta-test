@@ -112,6 +112,7 @@
       real(wp), dimension(:,:), ALLOCATABLE  :: b1save,b1Psave !jmax,ivarlen
       real(wp), dimension(jmax)         :: epsave
       
+      character(len=80) :: Temporal_Splitting  = 'IMEX'
       character(len=80) :: filename,fileloc   !file name and location
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
@@ -192,8 +193,8 @@
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
-              call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
-     &                        tfinal,iDT)
+              call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
+     &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)   
 
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
@@ -218,8 +219,8 @@
 
 !--------------------------------RK LOOP----------------------------------------
                 programStep=1
-                call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
-     &                          tfinal,iDT,resE(1,1),resI(1,1))
+                call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,nveclen,&
+     &                          tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)
                 ustage(:,1) = uvec(:)
   
                 do L = 2,nrk
@@ -231,19 +232,17 @@
  
                   if(ipred.eq.2) predvec(:,L)=uvec(:)  ! previous guess as starter
                   if(ipred.ne.2) uvec(:) = predvec(:,L)  
-!---------------BEG NEWTON ITERATION -------------------------------------------
-                 ! print*,'newtonstart',uvec
-                  call Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,resE, &
-     &                                  resI,aI(L,L),usum,icount,k)
-                 ! print*,'newtonend  ',uvec,k
 
+!---------------BEG NEWTON ITERATION -------------------------------------------
+                  call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,nveclen,iDT,resE, &
+     &                                  resI,aI(L,L),usum,icount,k)
 !---------------END NEWTON ITERATION--------------------------------------------
              
                   ustage(:,L) = uvec(:)       !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
-                  call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,&
-     &                            tfinal,iDT,resE(1,L),resI(1,L))
+                  call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
+     &                            tfinal,iDT,resE(1,L),resI(1,L),aI(L,L),xjac)
 
                   if(ipred.ne.2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
 

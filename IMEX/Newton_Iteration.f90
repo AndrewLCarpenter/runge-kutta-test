@@ -1,4 +1,4 @@
-      subroutine Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,&
+      subroutine Newton_Iteration(uvec,iprob,Temporal_Splitting,L,ep,dt,nveclen,iDT,&
      & resE,resI,aI,usum,icount,k)
 
       use precision_vars
@@ -8,7 +8,9 @@
       integer, parameter :: ivarlen=2,is=9
 
       real(wp), dimension(ivarlen),    intent(inout) :: uvec
-      integer,                         intent(in   ) :: iprob,L
+      integer,                         intent(in   ) :: iprob
+      character(80),                   intent(in   ) :: Temporal_Splitting
+      integer,                         intent(in   ) :: L
       real(wp),                        intent(in   ) :: ep,dt
       integer,                         intent(in   ) :: nveclen,iDT
       real(wp), dimension(ivarlen,is), intent(inout) :: resE,resI
@@ -35,14 +37,16 @@
         uveciter(:) = uvec(:) !store old uvec
 
         programStep=2
-        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
+     &                   tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
 
         Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
          
         !**GET INVERSE JACOBIAN**
         programStep=3
-        
-        call problemsub(iprob,programStep,probname,nveclen,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
+     &                   tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+
 !!        call JACOB2(nveclen,xjac,xjacinv)
 !!      call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
         call Invert_Jacobian(nveclen,xjac,xjacinv)

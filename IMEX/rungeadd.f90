@@ -3116,11 +3116,11 @@
          enddo
        enddo
  
-       eps = 1.0e-7
+       eps = 1.0e-7_wp
        if(beh(1).lt.eps.and.bih(1).lt.eps)then
        do i = 1,ns
-         beh(i) = 1./ns
-         bih(i) = 1./ns
+         beh(i) = 1.0_wp/ns
+         bih(i) = 1.0_wp/ns
        enddo
        endif
 
