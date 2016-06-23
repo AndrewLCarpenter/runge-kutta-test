@@ -32,8 +32,7 @@
 
       if (programStep==-1) then
         nvecLen = vecl
-        probname='vanderPol'  
-              
+        probname='vanderPol'       
       elseif (programStep==0) then
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)
@@ -55,36 +54,37 @@
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
+      
+      elseif (programStep>=1 .and. programStep<=3) then
+        select case (Temporal_Splitting)
+
+          case('IMEX')
+                if (programStep==1 .or.programStep==2) then
+              resE(1) = dt*uvec(2)
+              resE(2) = 0.0_wp
+              resI(1) = 0.0_wp
+              resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+            elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+              xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
+            endif
+          case('IMPLICIT')
+                if (programStep==1 .or.programStep==2) then
+              resE(1) = 0.0_wp
+              resE(2) = 0.0_wp
+              resI(1) = dt*uvec(2)
+              resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+            elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+              xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
+            endif
+        end select
       endif
-
-      select case (Temporal_Splitting)
-
-        case('IMEX')
-              if (programStep==1 .or.programStep==2) then
-            resE(1) = dt*uvec(2)
-            resE(2) = 0.0_wp
-            resI(1) = 0.0_wp
-            resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
-          elseif (programStep==3) then
-            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-            xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
-            xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
-            xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
-          endif
-        case('IMPLICIT')
-              if (programStep==1 .or.programStep==2) then
-            resE(1) = 0.0_wp
-            resE(2) = 0.0_wp
-            resI(1) = dt*uvec(2)
-            resI(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
-          elseif (programStep==3) then
-            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-            xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
-            xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
-            xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
-          endif
-      end select
-
+      
       return
       end subroutine
 

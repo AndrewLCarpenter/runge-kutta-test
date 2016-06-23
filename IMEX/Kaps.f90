@@ -5,7 +5,7 @@
 
       implicit none
 
-      integer,  parameter                      :: vecl=4
+      integer,  parameter                      :: vecl=2
 
       integer,                   intent(in   ) :: programStep
       character(80),             intent(in   ) :: temporal_splitting
@@ -23,14 +23,16 @@
       real(wp)                                 :: tmp
 
       !RHS vars
-      real(wp), dimension(vecl), intent(  out) :: resE,resI
+      real(wp), dimension(vecl+1), intent(  out) :: resE,resI
       
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-
-      if (programStep==0) then
+      if (programStep==-1) then
+        nvecLen = vecl
+        probname='Kaps     '  
+      elseif (programStep==0) then
         probname='Kaps     '
         dt = 0.5_wp/10**((iDT-1)/20.0_wp)
         nvecLen = 2
@@ -43,28 +45,29 @@
 !  IC: problem 1   :  equilibrium IC
         uvec(1) = 1.0_wp
         uvec(2) = 1.0_wp
+
+      elseif (programStep>=1 .and. programStep<=3) then
+        select case (Temporal_Splitting)
+
+          case('IMEX')
+                if (programStep==1 .or.programStep==2) then
+              resE(1) = dt*(-2.0_wp*uvec(1))
+              resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+              resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
+              resI(2) = 0.0_wp
+            elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp/ep))
+              xjac(1,2) = 0.0_wp-akk*dt*(+1.0_wp/ep)*2*uvec(2)
+              xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
+            endif
+          case('IMPLICIT')
+                if (programStep==1 .or.programStep==2) then
+            elseif (programStep==3) then
+            endif
+          end select
       endif
-
-      select case (Temporal_Splitting)
-
-        case('IMEX')
-              if (programStep==1 .or.programStep==2) then
-            resE(1) = dt*(-2.0_wp*uvec(1))
-            resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
-            resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
-            resI(2) = 0.0_wp
-          elseif (programStep==3) then
-            xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp/ep))
-            xjac(1,2) = 0.0_wp-akk*dt*(+1.0_wp/ep)*2*uvec(2)
-            xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
-            xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
-          endif
-        case('IMPLICIT')
-              if (programStep==1 .or.programStep==2) then
-          elseif (programStep==3) then
-          endif
-        end select
-
+      
       return
       end subroutine
 

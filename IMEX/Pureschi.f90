@@ -5,7 +5,7 @@
 
       implicit none
 
-      integer,  parameter                      :: vecl=4
+      integer,  parameter                      :: vecl=2
 
       integer,                   intent(in   ) :: programStep
       character(80),             intent(in   ) :: temporal_splitting
@@ -20,7 +20,7 @@
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
-      real(wp), dimension(81,vecl)             :: ExactTot
+      real(wp), dimension(81,vecl+1)             :: ExactTot
       real(wp)                                 :: diff
       integer                                  :: i
 
@@ -31,7 +31,11 @@
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
-      if (programStep==0) then
+
+      if (programStep==-1) then
+        nvecLen = vecl
+        probname='Pureschi '   
+      elseif (programStep==0) then
         probname='Pureschi  '
         open(unit=39,file='exact.pureschi.1.data')
         rewind(39)
@@ -60,28 +64,29 @@
           uvec(1) = pi/2.0_wp
           uvec(2) = sin(pi/2.0_wp)
 
+      elseif (programStep>=1 .and. programStep<=3) then
+
+        select case (Temporal_Splitting)
+
+          case('IMEX')
+                if (programStep==1 .or.programStep==2) then
+              resE(1) = dt*(-uvec(2))
+              resE(2) = dt* uvec(1)
+              resI(1) = 0.0_wp
+              resI(2) = dt*(sin(uvec(1)) - uvec(2))/ep
+            elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(cos(uvec(1)) )/ep
+              xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
+            endif
+          case('IMPLICIT')
+                if (programStep==1 .or.programStep==2) then
+            elseif (programStep==3) then
+            endif
+        end select
       endif
-
-      select case (Temporal_Splitting)
-
-        case('IMEX')
-              if (programStep==1 .or.programStep==2) then
-            resE(1) = dt*(-uvec(2))
-            resE(2) = dt* uvec(1)
-            resI(1) = 0.0_wp
-            resI(2) = dt*(sin(uvec(1)) - uvec(2))/ep
-          elseif (programStep==3) then
-            xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-            xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
-            xjac(2,1) = 0.0_wp-akk*dt*(cos(uvec(1)) )/ep
-            xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
-          endif
-        case('IMPLICIT')
-              if (programStep==1 .or.programStep==2) then
-          elseif (programStep==3) then
-          endif
-      end select
-
+      
       return
       end subroutine
 

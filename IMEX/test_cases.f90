@@ -17,9 +17,9 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
 ! CSR_VARIABLES.F90         *?
-! INVERT_JACOBIAN.F90       *INVERTS JACOBIAN (NOT USED?)
+! INVERT_JACOBIAN.F90       *INVERTS JACOBIAN 
 ! ALLOCATE_CSR_STORAGE.F90  *ALLOCATES STOREAGE OF VARIABLES IN CSR
-! JACOB2.F90                *INVERTS JACOBIAN
+! JACOB2.F90                *INVERTS JACOBIAN (NOT USED?)
 ! JACOBIAN.F90              *DEFINES JACOBIANS (NOT USED?)
 ! NEWTON_ITERATION.F90      *PERFORMS NEWTON ITERATION
 ! STAGE_VALUE_PREDICTOR.F90 *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
@@ -55,64 +55,63 @@
       implicit none     
 !------------------------------PARAMETERS---------------------------------------
       integer, parameter :: is=9               !max constant length
-      integer, parameter :: ivarlen=4          !max variable length
       integer, parameter :: isamp=71           !?
       integer, parameter :: jmax=81            !?
       integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES-----------------------------------------   
       !user inputs
-      integer          :: ipred,cases,problem      
+      integer            :: ipred,cases,problem      
              
       !do loops
-      integer          :: icase,i,iprob,jepsil,iDT,ival  
-      integer          :: j,k,istage,ktime,L,LL
+      integer            :: icase,i,iprob,jepsil,iDT,ival  
+      integer            :: j,k,istage,ktime,L,LL
       
       !counters      
-      integer          :: icount,jcount                    
+      integer            :: icount,jcount                    
       
       !problemsub variables
-      integer                         :: programStep
-      character(len=9)                :: probname
-      real(wp), dimension(:), ALLOCATABLE     :: uvec !ivarlen
-      real(wp)                        :: ep
-      real(wp), dimension(:), ALLOCATABLE     :: uexact !ivarlen
-      real(wp)                        :: dt
-      integer                         :: nveclen
-      real(wp)                        :: tfinal     
-      real(wp), dimension(:,:), ALLOCATABLE  :: resE,resI !ivarlen,is
+      integer                               :: programStep
+      character(len=9)                      :: probname
+      real(wp), dimension(:), ALLOCATABLE   :: uvec
+      real(wp)                              :: ep
+      real(wp), dimension(:), ALLOCATABLE   :: uexact
+      real(wp)                              :: dt
+      integer                               :: nveclen
+      real(wp)                              :: tfinal     
+      real(wp), dimension(:,:), ALLOCATABLE :: resE,resI 
       
       !rungeadd variables
       real(wp),   dimension(is,is)      :: aE,aI
       real(wp),   dimension(is)         :: bE,bI,cE,cI
       integer                           :: nrk
       real(wp),   dimension(is)         :: bEH,bIH
-      real(wp),   dimension(is,ivarlen) :: bD 
+      real(wp),   dimension(is,4)       :: bD 
       real(wp),   dimension(is,is,0:is) :: svpB 
       real(wp),   dimension(is,is)      :: alpha,al3N,al3D,al4N,al4D
       character(len=25)                 :: casename     
 
       !fit variables
-      real(wp), dimension(isamp)         :: cost      
-      real(wp), dimension(:,:), ALLOCATABLE  :: error,errorP    !isamp,ivarlen  
-      integer                            :: jsamp
-      real(wp), dimension(isamp)         :: sig
-      real(wp), dimension(:), ALLOCATABLE      :: a,b,siga1,sigb1,chi2 !ivarlen*2
-      real(wp)                           :: q
+      real(wp), dimension(isamp)            :: cost      
+      real(wp), dimension(:,:), ALLOCATABLE :: error,errorP    
+      integer                               :: jsamp
+      real(wp), dimension(isamp)            :: sig
+      real(wp), dimension(:), ALLOCATABLE   :: a,b,siga1,sigb1,chi2
+      real(wp)                              :: q
       
       !newton_iteration variables
-      !add variables
-      
+      real(wp), dimension(:), ALLOCATABLE :: usum
+     
       !internal variables**includes newton
-      real(wp)                          :: itmp,t,time,rat,tmp,xnorm
-      real(wp)                          :: dto,totalerror,totalerrorp
-      real(wp), dimension(is)           :: stageE,stageI,maxiter,bint
-      real(wp), dimension(:,:), ALLOCATABLE    :: ustage,predvec !ivarlen,is
-      real(wp), dimension(:), ALLOCATABLE       :: uveco,usum,uveciter,uorig !ivarlen
-      real(wp), dimension(:), ALLOCATABLE       :: errvec,errvecT,tmpvec !ivarlen
-      real(wp), dimension(:,:), ALLOCATABLE  :: b1save,b1Psave !jmax,ivarlen
-      real(wp), dimension(jmax)         :: epsave
+      real(wp)                              :: itmp,t,time,rat,tmp,xnorm
+      real(wp)                              :: dto,totalerror,totalerrorp
+      real(wp), dimension(is)               :: stageE,stageI,maxiter,bint
+      real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
+      real(wp), dimension(:), ALLOCATABLE   :: uveco,uveciter,uorig 
+      real(wp), dimension(:), ALLOCATABLE   :: errvec,errvecT,tmpvec 
+      real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
+      real(wp), dimension(jmax)             :: epsave
       
-      character(len=80) :: Temporal_Splitting  = 'IMEX'
+      character(len=80) :: Temporal_Splitting = 'IMEX'
       character(len=80) :: filename,fileloc   !file name and location
       character(len=4)  :: ext='.dat'         !file extension
       character         :: istr               !loop index placeholder
@@ -142,25 +141,26 @@
 
 !--------------------------PROBLEMS LOOP----------------------------------------
         do iprob = problem,problem
-          !**CALL FOR PROBNAME**
+          !**CALL FOR PROBNAME & NVECLEN**
           programStep=-1
-          call problemsub(iprob,programStep,probname,nveclen)!,uvec,ep,uexact,dt,&
-    ! &    tfinal,iDT)
+          call problemsub(iprob,programStep,probname,nveclen)
+          
           !**ALLOCATE VARIABLES**
           !problemsub
           AllOCATE(uvec(nveclen),uexact(nveclen))
           ALLOCATE(resE(nveclen,is),resI(nveclen,is))
-          
+
           !fit
           ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen))
           ALLOCATE(a(nveclen*2),b(nveclen*2),siga1(nveclen*2))
           ALLOCATE(sigb1(nveclen*2),chi2(nveclen*2))
           
           !Newton_iteration
+          ALLOCATE(usum(nveclen))
           
           !internal
           ALLOCATE(ustage(nveclen,is),predvec(nveclen,is))
-          ALLOCATE(uveco(nveclen),usum(nveclen),uveciter(nveclen),uorig(nveclen))
+          ALLOCATE(uveco(nveclen),uveciter(nveclen),uorig(nveclen))
           ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
           ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen))
 
@@ -169,7 +169,10 @@
           inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
           if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
           
+          write(*,*)'Problem name: ',trim(probname)
+          write(*,*)'Casename: ', trim(casename)
 !         call Allocata_CSR_Storage(problem,nveclen)
+
 !--------------------------STIFFNESS LOOP---------------------------------------
           do jepsil = 1,jactual,1     
                          
@@ -177,7 +180,7 @@
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            do i = 1,ivarlen
+            do i = 1,nveclen
               write(istr,"(I1.1)")i
               filename= &
      &           trim(probname)//'_'//trim(casename)//'_'//istr//ext
@@ -188,13 +191,15 @@
               open(59+i,file=trim(fileloc)//filename)
               write(59+i,*)'zone T = "ep = ',ep,'",'
             enddo
+            
 !--------------------------TIMESTEP LOOP----------------------------------------
-            do iDT = 1,isamp,1                     
+            do iDT = 1,isamp,1      
+             
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
               call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
-     &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)   
+     &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1))  
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
               
@@ -214,14 +219,13 @@
                 !**STORE VALUES OF UVEC**
                 uveco(:) = uvec(:)
 
-                jcount = jcount + (nrk-1)    !keep track of total RK stages 
-
+                jcount = jcount + (nrk-1)    !keep track of total RK stages  
 !--------------------------------RK LOOP----------------------------------------
                 programStep=1
-                call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,nveclen,&
-     &                          tfinal,iDT,resE(1,1),resI(1,1),aI(1,1),xjac)
+                call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
+     &                          tfinal,iDT,resE(1,1),resI(1,1),aI(1,1))
                 ustage(:,1) = uvec(:)
-  
+
                 do L = 2,nrk
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
@@ -236,12 +240,12 @@
                   call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,nveclen,iDT,resE, &
      &                                  resI,aI(L,L),usum,icount,k)
 !---------------END NEWTON ITERATION--------------------------------------------
-             
+                 
                   ustage(:,L) = uvec(:)       !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
                   call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
-     &                            tfinal,iDT,resE(1,L),resI(1,L),aI(L,L),xjac)
+     &                            tfinal,iDT,resE(1,L),resI(1,L),aI(L,L))
 
                   if(ipred.ne.2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
 
@@ -275,7 +279,7 @@
                   endif
                 enddo
 !-----------------------------END of A_{k,j} portion of RK LOOP-----------------
-
+     
                 uvec(:) = uveco(:)
                 do LL = 1,nrk 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
@@ -301,7 +305,7 @@
                 if(t.ge.tfinal) exit
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP-------------------------------
-           
+
               cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
 
               tmpvec(:) = abs(uvec(:)-uexact(:))
@@ -396,10 +400,11 @@
           DEALLOCATE(sigb1,chi2)
           
           !Newton_iteration
+          DEALLOCATE(usum)
           
           !internal
           DEALLOCATE(ustage,predvec)
-          DEALLOCATE(uveco,usum,uveciter,uorig)
+          DEALLOCATE(uveco,uveciter,uorig)
           DEALLOCATE(errvec,errvecT,tmpvec)
           DEALLOCATE(b1save,b1Psave)
         enddo                                       
