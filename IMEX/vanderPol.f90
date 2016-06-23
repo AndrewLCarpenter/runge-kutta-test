@@ -19,7 +19,7 @@
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
-      real(wp), dimension(81,vecl+1)             :: ExactTot
+      real(wp), dimension(81,vecl+1)           :: ExactTot
       real(wp)                                 :: diff
       integer                                  :: i,j
 

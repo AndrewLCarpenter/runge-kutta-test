@@ -10,6 +10,7 @@ CFLAGS = -Ofast  $(INCLUDESDIR)
 SRCS = precision_vars.f90\
        poly_fit_Mod.f90\
        CSR_Variables.f90\
+       output_module.f90\
        Invert_Jacobian.f90\
        Allocate_CSR_Storage.f90\
        JACOB2.f90\
@@ -36,6 +37,7 @@ $(OBJS1)
 OBJS = precision_vars.o\
        poly_fit_Mod.o\
        CSR_Variables.o\
+       output_module.o\
        Invert_Jacobian.o\
        Allocate_CSR_Storage.o\
        Jacobian_CSR.o\

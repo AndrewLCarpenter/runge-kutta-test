@@ -6,39 +6,10 @@
 
       
       private
-      public  :: fit!,DataOut
+      public  :: fit
 
       contains
 
-! ==================currently not working=======================================
-!      subroutine DataOut(ep,nveclen,x,y,ndata,sig,mwt,b)
-!      
-!      integer, parameter                            :: ivarlen=4
-!      real(wp),                       intent(in   ) :: ep !stiffness
-!      integer,                        intent(in   ) :: nveclen !number of variables
-!      integer,                        intent(in   ) :: mwt,ndata
-!      real(wp), dimension(ndata),     intent(in   ) :: sig,x
-!      real(wp), dimension(ndata,ivarlen), intent(in) :: y
-!      real(wp), dimension(ivarlen*2), intent(  out) :: b     
-!      
-!      real(wp), dimension(ivarlen*2) :: a    
-!      integer                        :: ii
-!      real(wp)                       :: siga,sigb,chi2,q
-!      
-!      !**GATHER OUTPUT VALUES
-!      do ii = 1,nveclen
-!        call fit(x,y(:,ii),ndata,sig,mwt,a(ii),b(ii),siga,sigb,chi2,q)
-!      enddo
-!           
-!      !**OUTPUT TO TERMINAL**
-!      write(*,60,advance="no")ep
-!      do ii = 1,nveclen-1
-!        write(*,60,advance="no")a(ii),b(ii)
-!      enddo
-!        write(*,60)a(nveclen),b(nveclen)
-!        
-!   60 format( e12.5,1x,12(f8.3,1x))
-!      end subroutine DataOut
 ! ==============================================================================
 
       subroutine fit(x,y,ndata,sig,mwt,a,b,siga,sigb,chi2,q)

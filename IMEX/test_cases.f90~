@@ -1,19 +1,20 @@
-!###############################################################################
-!######## Program to test Runge-Kutta IMEX schemes on various problems #########
-!###############################################################################
+!##############################################################################
+!######## Program to test Runge-Kutta IMEX schemes on various problems ########
+!##############################################################################
 !
-!----------------------------PROBLEM LIST---------------------------------------
+!----------------------------PROBLEM LIST--------------------------------------
 !     problem 1) van der Pol (Hairer II, pp 403)
 !     problem 2) Pureshi and Russo 
 !     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     WARNING: Kreiss has problem with algebraic variable
 !     problem 5) Lorenz
+!     WARNING: Lorenz has problem as well with something and wont converge
 !     problem 6) Burger's
 !     problem 7) Black-Scholes
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !
-!-----------------------------REQUIRED FILES------------------------------------
+!-----------------------------REQUIRED FILES-----------------------------------
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
 ! CSR_VARIABLES.F90         *?
@@ -29,36 +30,36 @@
 ! KAPS.F90                  *PROBLEM CONSTANTS FOR KAPS
 ! KREISS.F90                *PROBLEM CONSTANTS FOR KREISS'
 ! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !
-!--------------------------HOW TO USE-------------------------------------------
+!--------------------------HOW TO USE------------------------------------------
 !**Adding test cases:
-!      Subroutine file can be added to the directory with form of vanderpol.f90,
-!      etc. problemsub.f90 must be updated for the problem to be included
+!     Subroutine file can be added to the directory with form of vanderpol.f90,
+!     etc. problemsub.f90 must be updated for the problem to be included
 !**Compiling
-!      Compile all files listed above together in the same directory
+!     Compile all files listed above together in the same directory
 !**Running test cases
-!      Program will prompt user for which predictor, case, and problem
-!      to run.
+!     Program will prompt user for which predictor, case, and problem
+!     to run.
 !**Output results
-!      The program outputs results to files with the form:
+!     The program outputs results to files with the form:
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
 !
-!********************************BEGIN PROGRAM**********************************
+!********************************BEGIN PROGRAM*********************************
       program test_cases
 
       use precision_vars
-      use poly_fit_Mod
-!------------------------------VARIABLES----------------------------------------
+      use output_module
+!------------------------------VARIABLES---------------------------------------
       implicit none     
-!------------------------------PARAMETERS---------------------------------------
+!------------------------------PARAMETERS--------------------------------------
       integer, parameter :: is=9               !max constant length
       integer, parameter :: isamp=71           !?
       integer, parameter :: jmax=81            !?
       integer, parameter :: jactual=81         !?
-!-----------------------------VARIABLES-----------------------------------------   
+!-----------------------------VARIABLES----------------------------------------  
       !user inputs
       integer            :: ipred,cases,problem      
              
@@ -90,13 +91,13 @@
       real(wp),   dimension(is,is)      :: alpha,al3N,al3D,al4N,al4D
       character(len=25)                 :: casename     
 
-      !fit variables
+      !data out variables
       real(wp), dimension(isamp)            :: cost      
       real(wp), dimension(:,:), ALLOCATABLE :: error,errorP    
       integer                               :: jsamp
       real(wp), dimension(isamp)            :: sig
-      real(wp), dimension(:), ALLOCATABLE   :: a,b,siga1,sigb1,chi2
-      real(wp)                              :: q
+      real(wp), dimension(:), ALLOCATABLE   :: b
+      real(wp), dimension(is)               :: stageE,stageI,maxiter
       
       !newton_iteration variables
       real(wp), dimension(:), ALLOCATABLE :: usum
@@ -104,28 +105,23 @@
       !internal variables**includes newton
       real(wp)                              :: itmp,t,time,rat,tmp,xnorm
       real(wp)                              :: dto,totalerror,totalerrorp
-      real(wp), dimension(is)               :: stageE,stageI,maxiter,bint
+      real(wp), dimension(is)               :: bint
       real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
       real(wp), dimension(:), ALLOCATABLE   :: uveco,uveciter,uorig 
       real(wp), dimension(:), ALLOCATABLE   :: errvec,errvecT,tmpvec 
       real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
       real(wp), dimension(jmax)             :: epsave
       
-      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
-      character(len=80) :: filename,fileloc   !file name and location
-      character(len=4)  :: ext='.dat'         !file extension
-      character         :: istr               !loop index placeholder
-
-      logical           :: dirExists   !check if directory exists
+      character(len=80) :: Temporal_Splitting = 'IMEX'
          
-!-----------------------------USER INPUT----------------------------------------
+!-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
       write(*,*)'what is case?'  !input range of runge kutta cases
       read(*,*)cases
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
-!-------------------------ALGORITHMS LOOP---------------------------------------
+!-------------------------ALGORITHMS LOOP--------------------------------------
       do icase = cases,cases
         
         !**initilizations?**
@@ -139,21 +135,20 @@
         call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, &   
      &       svpB(1,1,0),alpha,al3N,al3D,al4N,al4D,casename)
 
-!--------------------------PROBLEMS LOOP----------------------------------------
+!--------------------------PROBLEMS LOOP---------------------------------------
         do iprob = problem,problem
           !**CALL FOR PROBNAME & NVECLEN**
           programStep=-1
           call problemsub(iprob,programStep,probname,nveclen)
-          
+                    
           !**ALLOCATE VARIABLES**
           !problemsub
           AllOCATE(uvec(nveclen),uexact(nveclen))
           ALLOCATE(resE(nveclen,is),resI(nveclen,is))
 
-          !fit
+          !data outs
           ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen))
-          ALLOCATE(a(nveclen*2),b(nveclen*2),siga1(nveclen*2))
-          ALLOCATE(sigb1(nveclen*2),chi2(nveclen*2))
+          ALLOCATE(b(nveclen*2))
           
           !Newton_iteration
           ALLOCATE(usum(nveclen))
@@ -164,33 +159,20 @@
           ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
           ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen))
 
-          !**INIT. FILE PATH FOR OUTPUTS**                           
-          fileloc=trim(probname)//'/'//trim(casename)//'/'
-          inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
-          if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) ! create directory
-          
-          write(*,*)'Problem name: ',trim(probname)
-          write(*,*)'Casename: ', trim(casename)
+          !**INIT. FILE PATH FOR OUTPUTS**
+          call create_file_paths(probname,casename)
+          call output_names(probname,casename)                           
+
 !         call Allocata_CSR_Storage(problem,nveclen)
 
-!--------------------------STIFFNESS LOOP---------------------------------------
+!--------------------------STIFFNESS LOOP--------------------------------------
           do jepsil = 1,jactual,1     
                          
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            do i = 1,nveclen
-              write(istr,"(I1.1)")i
-              filename= &
-     &           trim(probname)//'_'//trim(casename)//'_'//istr//ext
-              open(49+i,file=trim(fileloc)//filename)
-              write(49+i,*)'zone T = "ep = ',ep,'",'
-              filename= &
-     &           trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
-              open(59+i,file=trim(fileloc)//filename)
-              write(59+i,*)'zone T = "ep = ',ep,'",'
-            enddo
+            call init_output_files(probname,casename,nveclen,ep)
             
 !--------------------------TIMESTEP LOOP----------------------------------------
             do iDT = 1,isamp,1      
@@ -198,8 +180,8 @@
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
-              call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
-     &                        tfinal,iDT,resE(1,1),resI(1,1),aI(1,1))  
+              call problemsub(iprob,programStep,probname,nveclen,& 
+     &                        temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT)  
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
               
@@ -211,19 +193,18 @@
                   predvec(j,i) = uvec(j)
                 enddo
               enddo
-!--------------------------TIME ADVANCEMENT LOOP--------------------------------
+!--------------------------TIME ADVANCEMENT LOOP-------------------------------
               do ktime = 1,1000000                      
-                !print*,uvec(:),ktime
-                if(t+dt.gt.tfinal)dt = tfinal-t + 1.0e-11_wp !check if dt>tfinal
+                if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
                
                 !**STORE VALUES OF UVEC**
                 uveco(:) = uvec(:)
 
                 jcount = jcount + (nrk-1)    !keep track of total RK stages  
-!--------------------------------RK LOOP----------------------------------------
+!--------------------------------RK LOOP---------------------------------------
                 programStep=1
-                call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
-     &                          tfinal,iDT,resE(1,1),resI(1,1),aI(1,1))
+                call problemsub(iprob,programStep,probname,nveclen, &
+     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE(1,1),resI(1,1))
                 ustage(:,1) = uvec(:)
 
                 do L = 2,nrk
@@ -233,23 +214,23 @@
      &                                + aE(L,LL)*resE(:,LL)
                   enddo
  
-                  if(ipred.eq.2) predvec(:,L)=uvec(:)  ! previous guess as starter
-                  if(ipred.ne.2) uvec(:) = predvec(:,L)  
+                  if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
+                  if(ipred/=2) uvec(:) = predvec(:,L)  
 
-!---------------BEG NEWTON ITERATION -------------------------------------------
-                  call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,nveclen,iDT,resE, &
-     &                                  resI,aI(L,L),usum,icount,k)
-!---------------END NEWTON ITERATION--------------------------------------------
+!---------------BEG NEWTON ITERATION ------------------------------------------
+                  call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,&
+     &                             nveclen,iDT,resE,resI,aI(L,L),usum,icount,k)
+!---------------END NEWTON ITERATION-------------------------------------------
                  
-                  ustage(:,L) = uvec(:)       !  Save the solution at each stage
+                  ustage(:,L) = uvec(:)     !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
-                  call problemsub(iprob,programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt,&
-     &                            tfinal,iDT,resE(1,L),resI(1,L),aI(L,L))
+                  call problemsub(iprob,programStep,probname,nveclen,&
+     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
 
-                  if(ipred.ne.2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
+                  if(ipred/=2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
 
-                  if((k.gt.maxiter(L)).and.(ktime.ne.1)) maxiter(L) = k
+                  if((k > maxiter(L)).and.(ktime/=1)) maxiter(L) = k
 
                   xnorm = sqrt(dot_product(uvec(:)-predvec(:,L),  &
      &                                    uvec(:)-predvec(:,L))/  &
@@ -258,27 +239,27 @@
                   stageE(L) = stageE(L) + xnorm
                   stageI(L) = stageI(L) + 1.0_wp*k
 
-                  if (ipred.eq.2) then
+                  if (ipred==2) then
                     uvec(:)  = uveco(:)          ! put predict into start guess
                     do j = 2,L-1
                       uvec(:) = uvec(:) + alpha(L,j)*(ustage(:,j)-uvec(:))
                     enddo
                 
-                    if(L.eq.2.and.ktime.ne.1)then
+                    if(L == 2 .and.ktime/=1)then
                       bint(1) =  9.9518675264213746_wp 
                       bint(2) =  4.8366852488953721_wp 
                       bint(3) =-24.163405114569394_wp 
                       bint(4) = 14.152132944153401_wp
                       bint(5) =  0.94399768676237158_wp
-                      uvec(:) = ustage(:,3) + bint(1)*(ustage(:,3)-ustage(:,3))&
-     &                                      + bint(2)*(ustage(:,4)-ustage(:,3))&
-     &                                      + bint(3)*(ustage(:,5)-ustage(:,3))&
-     &                                      + bint(4)*(ustage(:,6)-ustage(:,3))&
-     &                                      + bint(5)*(ustage(:,2)-ustage(:,3))
+                      uvec(:) = ustage(:,3) +bint(1)*(ustage(:,3)-ustage(:,3))&
+     &                                      +bint(2)*(ustage(:,4)-ustage(:,3))&
+     &                                      +bint(3)*(ustage(:,5)-ustage(:,3))&
+     &                                      +bint(4)*(ustage(:,6)-ustage(:,3))&
+     &                                      +bint(5)*(ustage(:,2)-ustage(:,3))
                     endif
                   endif
                 enddo
-!-----------------------------END of A_{k,j} portion of RK LOOP-----------------
+!-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
                 uvec(:) = uveco(:)
                 do LL = 1,nrk 
@@ -286,10 +267,10 @@
                 enddo
 
                 
-!-----------------------Final Sum of RK loop using the b_{j}--------------------
+!-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
-                if(time.lt.tfinal-1.0e-11_wp)then               
+                if(time<tfinal-1.0e-11_wp)then               
                   errvec(:) = 0.0_wp
                   do LL = 1,nrk 
                     errvec(:) = errvec(:) + (bE(LL)-bEH(LL))*resE(:,LL) &
@@ -302,9 +283,9 @@
                 errvecT(:) = errvecT(:) + errvec(:)
   
                 t = t + dt                  !increment time
-                if(t.ge.tfinal) exit
+                if(t>=tfinal) exit
               enddo                                          
-!-----------------------END TIME ADVANCEMENT LOOP-------------------------------
+!-----------------------END TIME ADVANCEMENT LOOP------------------------------
 
               cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
 
@@ -324,80 +305,38 @@
                 write(59+i,*)cost(iDT),errorP(iDT,i)
               enddo
             enddo
-!----------------------------END TIMESTEP LOOP----------------------------------
-!----------------------------OUTPUTS--------------------------------------------
+!----------------------------END TIMESTEP LOOP---------------------------------
+!----------------------------OUTPUTS-------------------------------------------
             jsamp = 41 
             sig(:) = 0.0_wp
-            !**GATHER OUTPUT VALUES
-            do i = 1,nveclen
-         !     print*,'i',i,'nveclen',nveclen
-         !     print*,cost
-         !     print*,error(:,i)
-         !     print*,jsamp
-         !     print*,sig
-         !     print*,0
-         !     print*,a(i)
-         !     print*,b(i)
-         !     print*,siga1(i)
-         !     print*,sigb1(i)
-         !     print*,chi2(i)
-         !     print*,q
-              call fit(cost,error(:,i),jsamp,sig,0,a(i),&
-     &         b(i),siga1(i),sigb1(i),chi2(i),q)
-              call fit(cost,errorP(:,i),jsamp,sig,0,a(i+nveclen),&
-     &         b(i+nveclen),siga1(i+nveclen),sigb1(i+nveclen),&
-     &         chi2(i+nveclen),q)
-            enddo
-
-            !**OUTPUT TO TERMINAL**
-            write(*,60,advance="no")ep
-            do i = 1,nveclen*2-1
-              write(*,60,advance="no")a(i),b(i)
-            enddo
-            write(*,60)a(nveclen*2),b(nveclen*2)
-
+            
+            call output_terminal_iteration(cost,error,errorP,jsamp,sig,0, &
+     &           ep,nveclen,b)
+                    
+                    
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
-          enddo           
-!---------------------END STIFFNESS LOOP----------------------------------------
+          enddo  
+!---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
-          open(35,file=trim(fileloc)//filename)
-          do i=1,nveclen
-            write(35,*)'zone T = "Var ',i,': Implicit",'
-            do j=1,jactual
-              write(35,50)epsave(j),b1save(j,i)
-            enddo
-            write(35,*)'zone T = "Var ',i,': Predicted",'
-            do j=1,jactual
-              write(35,50)epsave(j),b1Psave(j,i)
-            enddo
-          enddo
-
+          call output_conv_stiff(probname,casename,nveclen,jactual,epsave, &
+     &                           b1save,b1Psave)
+          
           !**OUTPUT TO TERMINAL**
-          tmp = 1.0_wp*icount/jcount
-          write(*,*)'average iterations per step',tmp
-             
-          stageE(2:) = (nrk-1)*stageE(2:)/jcount
-          stageI(2:) = (nrk-1)*stageI(2:)/jcount
+          call output_terminal_final(icount,jcount,nrk,stageE,stageI,maxiter)
 
-          write(*,*)'error of initial guess is '
-          do istage = 2,nrk
-            write(*,*) istage,stageE(istage),maxiter(istage),stageI(istage)
-          enddo
-!----------------------END OUTPUTS----------------------------------------------
+!----------------------END OUTPUTS---------------------------------------------
            !**DEALLOCATE VARIABLES**
           !problemsub
           DEAllOCATE(uvec,uexact)
           DEALLOCATE(resE,resI)
           
-          !fit
+          !data out
           DEALLOCATE(error,errorP)
-          DEALLOCATE(a,b,siga1)
-          DEALLOCATE(sigb1,chi2)
+          DEALLOCATE(b)
           
           !Newton_iteration
           DEALLOCATE(usum)
@@ -408,10 +347,8 @@
           DEALLOCATE(errvec,errvecT,tmpvec)
           DEALLOCATE(b1save,b1Psave)
         enddo                                       
-!----------------------END PROBLEMS LOOP----------------------------------------
+!----------------------END PROBLEMS LOOP---------------------------------------
       enddo                                    
-!----------------------END ALGORITHMS LOOP--------------------------------------
-   60 format( e12.5,1x,12(f8.3,1x))
-   50 format( 10(e12.5,1x))
-!----------------------END PROGRAM----------------------------------------------
+!----------------------END ALGORITHMS LOOP-------------------------------------
+!----------------------END PROGRAM---------------------------------------------
       END PROGRAM test_cases
