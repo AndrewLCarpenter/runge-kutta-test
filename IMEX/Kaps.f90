@@ -33,10 +33,7 @@
         nvecLen = vecl
         probname='Kaps     '  
       elseif (programStep==0) then
-        probname='Kaps     '
         dt = 0.5_wp/10**((iDT-1)/20.0_wp)
-        nvecLen = 2
-
         tfinal = 1.0_wp
         tmp = exp(-tfinal)
         uexact(1) = tmp*tmp

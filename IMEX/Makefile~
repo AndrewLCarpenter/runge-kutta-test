@@ -12,6 +12,7 @@ SRCS = precision_vars.f90\
        CSR_Variables.f90\
        output_module.f90\
        Stage_Value_module.f90\
+       Stage_Value_Predictor.f90\
        Invert_Jacobian.f90\
        Allocate_CSR_Storage.f90\
        Newton_Iteration.f90\
@@ -37,6 +38,7 @@ OBJS = precision_vars.o\
        CSR_Variables.o\
        output_module.o\
        Stage_Value_module.o\
+       Stage_Value_Predictor.f90\
        Invert_Jacobian.o\
        Allocate_CSR_Storage.o\
        Newton_Iteration.o\

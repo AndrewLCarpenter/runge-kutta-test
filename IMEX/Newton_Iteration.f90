@@ -45,12 +45,8 @@
         call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
      &                   tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
 
-!!      call JACOB2(nveclen,xjac,xjacinv)
-!!      call Jacobian(uvec,xjac,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
         call Invert_Jacobian(nveclen,xjac,xjacinv)
 
-!        call Jacobian_CSR(uvec,dt,ep,aI,iprob,nveclen,sigma,rho,beta)
-!        call ilu0(nveclen,aJac,jaJac,aluJac,jluJac,iw,ierr)
 !        Backsolve to get solution
 
        !**want to use this but there is a different trunkation/round off error compared to the explicit do loop

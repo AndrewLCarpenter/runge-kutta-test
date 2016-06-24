@@ -4,7 +4,6 @@
 
       implicit none
 
-      
       private
       public  :: fit
 

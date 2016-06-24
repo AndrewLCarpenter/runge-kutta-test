@@ -7,7 +7,7 @@
       
       public :: create_file_paths, output_names, init_output_files
       public :: output_conv_stiff,output_terminal_iteration
-      public :: output_terminal_final
+      public :: output_terminal_final,output_conv_error
       private
 
       contains
@@ -69,12 +69,12 @@
       subroutine output_conv_stiff(probname,casename,nveclen,jactual,epsave, &
      &                             b1save,b1Psave)
       
-      integer, parameter           :: jmax=81
+      integer, parameter                   :: jmax=81
       
-      character(len=*), intent(in) :: probname,casename
-      integer,          intent(in) :: nveclen,jactual
+      character(len=*),         intent(in) :: probname,casename
+      integer,                  intent(in) :: nveclen,jactual
       real(wp), dimension(:,:), intent(in) :: b1save,b1Psave
-      real(wp), dimension(:),  intent(in)  :: epsave
+      real(wp), dimension(:),   intent(in) :: epsave
       
       character(len=4)             :: ext='.dat'  !file extension
       character(len=1)             :: istr        !loop index placeholder
@@ -105,18 +105,18 @@
       subroutine output_terminal_iteration(cost,error,errorP,jsamp,sig,mwt, &
      &           ep,nveclen,b)
             
-      real(wp), dimension(:), intent(in)   :: cost      
+      real(wp), dimension(:),   intent(in) :: cost      
       real(wp), dimension(:,:), intent(in) :: error,errorP    
-      integer,      intent(in)             :: jsamp
-      real(wp), dimension(:), intent(in)   :: sig
-      integer, intent(in) :: mwt
-      real(wp), intent(in) :: ep
-      integer,          intent(in) :: nveclen
+      integer,                  intent(in) :: jsamp
+      real(wp), dimension(:),   intent(in) :: sig
+      integer,                  intent(in) :: mwt
+      real(wp),                 intent(in) :: ep
+      integer,                  intent(in) :: nveclen
       real(wp), dimension(nveclen*2), intent(out) :: b
       
-      real(wp), dimension(nveclen*2)   :: a,siga1,sigb1,chi2
-      real(wp)                              :: q
-      integer                                :: i
+      real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
+      real(wp)                       :: q
+      integer                        :: i
 
             !**GATHER OUTPUT VALUES
             do i = 1,nveclen
@@ -142,11 +142,11 @@
 
       subroutine output_terminal_final(icount,jcount,nrk,stageE,stageI,maxiter)
       
-      integer, intent(in) :: icount,jcount,nrk
+      integer,                intent(in   ) :: icount,jcount,nrk
       real(wp), dimension(:), intent(inout) :: stageE,stageI,maxiter
       
       real(wp) :: tmp
-      integer :: i
+      integer  :: i
       
       tmp = 1.0_wp*icount/jcount
       write(*,*)'average iterations per step',tmp
@@ -162,6 +162,22 @@
       end subroutine output_terminal_final
 
 !==============================================================================
+
+      subroutine output_conv_error(cost,uvec,uexact,errvecT)
+      real(wp),               intent(in) :: cost
+      real(wp), dimension(:), intent(in) :: uvec,uexact,errvecT
+      
+      integer  :: i
+      real(wp) :: tmp
+  
+      do i = 1,size(uvec)
+        tmp=abs(uvec(i)-uexact(i))
+        if (tmp==0.0_wp)tmp=1.0e-15_wp
+        write(49+i,*)cost,log10(tmp)
+        write(59+i,*)cost,log10(errvecT(i))
+      enddo
+      
+      end subroutine output_conv_error
 
 !==============================================================================
       end module output_module

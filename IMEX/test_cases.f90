@@ -20,8 +20,6 @@
 ! CSR_VARIABLES.F90         *?
 ! INVERT_JACOBIAN.F90       *INVERTS JACOBIAN 
 ! ALLOCATE_CSR_STORAGE.F90  *ALLOCATES STOREAGE OF VARIABLES IN CSR
-! JACOB2.F90                *INVERTS JACOBIAN (NOT USED?)
-! JACOBIAN.F90              *DEFINES JACOBIANS (NOT USED?)
 ! NEWTON_ITERATION.F90      *PERFORMS NEWTON ITERATION
 ! STAGE_VALUE_PREDICTOR.F90 *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! RUNGEADD.F90              *CONTAINS RK CONSTANTS
@@ -52,6 +50,7 @@
 
       use precision_vars
       use output_module
+      use Stage_value_module
 !------------------------------VARIABLES---------------------------------------
       implicit none     
 !------------------------------PARAMETERS--------------------------------------
@@ -60,6 +59,18 @@
       integer, parameter :: jmax=81            !?
       integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES----------------------------------------  
+      !internal variables
+      real(wp)                              :: itmp,t,time,rat,tmp
+      real(wp)                              :: dto,totalerror,totalerrorp
+      real(wp), dimension(is)               :: bint
+      real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
+      real(wp), dimension(:), ALLOCATABLE   :: uveco,uveciter,uorig 
+      real(wp), dimension(:), ALLOCATABLE   :: errvec,errvecT,tmpvec 
+      real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
+      real(wp), dimension(jmax)             :: epsave
+      
+      character(len=80) :: Temporal_Splitting = 'IMEX'
+      
       !user inputs
       integer            :: ipred,cases,problem      
              
@@ -101,19 +112,7 @@
       
       !newton_iteration variables
       real(wp), dimension(:), ALLOCATABLE :: usum
-     
-      !internal variables**includes newton
-      real(wp)                              :: itmp,t,time,rat,tmp,xnorm
-      real(wp)                              :: dto,totalerror,totalerrorp
-      real(wp), dimension(is)               :: bint
-      real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
-      real(wp), dimension(:), ALLOCATABLE   :: uveco,uveciter,uorig 
-      real(wp), dimension(:), ALLOCATABLE   :: errvec,errvecT,tmpvec 
-      real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
-      real(wp), dimension(jmax)             :: epsave
-      
-      character(len=80) :: Temporal_Splitting = 'IMEX'
-         
+              
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
@@ -188,11 +187,9 @@
               !**INIT. ERROR VECTOR**
               errvecT(:) = 0.0_wp
 
-              do j = 1,nveclen
                 do i = 1,nrk            !initialize stage value preditor
-                  predvec(j,i) = uvec(j)
+                  predvec(:,i) = uvec(:)
                 enddo
-              enddo
 !--------------------------TIME ADVANCEMENT LOOP-------------------------------
               do ktime = 1,1000000                      
                 if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
@@ -228,36 +225,16 @@
                   call problemsub(iprob,programStep,probname,nveclen,&
      &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
 
-                  if(ipred/=2)call Stage_Value_Predictor(L,nrk,ustage,predvec)
+                  if(ipred/=2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
+     &                                      predvec,uvec,uveco,alpha,ktime)
 
                   if((k > maxiter(L)).and.(ktime/=1)) maxiter(L) = k
 
-                  xnorm = sqrt(dot_product(uvec(:)-predvec(:,L),  &
-     &                                    uvec(:)-predvec(:,L))/  &
-     &                        dot_product(uvec(:),uvec(:)))
-
-                  stageE(L) = stageE(L) + xnorm
+                  stageE(L) = stageE(L) + xnorm(uvec,predvec(:,L))
                   stageI(L) = stageI(L) + 1.0_wp*k
 
-                  if (ipred==2) then
-                    uvec(:)  = uveco(:)          ! put predict into start guess
-                    do j = 2,L-1
-                      uvec(:) = uvec(:) + alpha(L,j)*(ustage(:,j)-uvec(:))
-                    enddo
-                
-                    if(L == 2 .and.ktime/=1)then
-                      bint(1) =  9.9518675264213746_wp 
-                      bint(2) =  4.8366852488953721_wp 
-                      bint(3) =-24.163405114569394_wp 
-                      bint(4) = 14.152132944153401_wp
-                      bint(5) =  0.94399768676237158_wp
-                      uvec(:) = ustage(:,3) +bint(1)*(ustage(:,3)-ustage(:,3))&
-     &                                      +bint(2)*(ustage(:,4)-ustage(:,3))&
-     &                                      +bint(3)*(ustage(:,5)-ustage(:,3))&
-     &                                      +bint(4)*(ustage(:,6)-ustage(:,3))&
-     &                                      +bint(5)*(ustage(:,2)-ustage(:,3))
-                    endif
-                  endif
+                  if(ipred==2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
+     &                                      predvec,uvec,uveco,alpha,ktime)
                 enddo
 !-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
@@ -286,24 +263,19 @@
                 if(t>=tfinal) exit
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
-
+     
               cost(iDT) = log10((nrk-1)/dto)    !  nrk - 1 implicit stages
-
+              
+              call output_conv_error(cost(iDT),uvec,uexact,errvecT)
+              
+!
               tmpvec(:) = abs(uvec(:)-uexact(:))
               do ival = 1,nvecLen
                 if(tmpvec(ival) == 0.0_wp)tmpvec(ival)=1.0e-15_wp
               enddo
-  
-              totalerror  = sum( tmpvec(:)**2 )
-              totalerrorP = sum( errvecT(:)**2 )
-              totalerror = sqrt(totalerror/nvecLen)
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-              
-              do i = 1,nveclen
-                write(49+i,*)cost(iDT),error(iDT,i)
-                write(59+i,*)cost(iDT),errorP(iDT,i)
-              enddo
+
             enddo
 !----------------------------END TIMESTEP LOOP---------------------------------
 !----------------------------OUTPUTS-------------------------------------------
