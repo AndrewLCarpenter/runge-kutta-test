@@ -6,7 +6,6 @@
       implicit none
 
       integer,   parameter                               :: is=9
-      integer,   parameter                               :: ivarlen=4
 
       real(wp),   dimension(is,is),        intent(  out) :: aE
       real(wp),   dimension(is,is),        intent(  out) :: aI
@@ -18,7 +17,7 @@
       real(wp),   dimension(is),           intent(  out) :: bEH
       real(wp),   dimension(is),           intent(  out) :: bIH
       integer,                             intent(in   ) :: icase
-      real(wp),   dimension(is,ivarlen),   intent(  out) :: bD
+      real(wp),   dimension(is,4),         intent(  out) :: bD
       real(wp),   dimension(is,is,0:is),   intent(  out) :: svpB
       real(wp),   dimension(is,is),        intent(  out) :: alpha
       real(wp),   dimension(is,is),        intent(  out) :: al3N
@@ -33,19 +32,19 @@
 
       do i=1,is
        do j=1,is
-        aE(i,j) = 0.0
-        aI(i,j) = 0.0
+        aE(i,j) = 0.0_wp
+        aI(i,j) = 0.0_wp
        enddo
-       be(i)  = 0.
-       bi(i)  = 0.
-       beh(i) = 0.
-       bih(i) = 0.
-       ce(i)  = 0.
-       ci(i)  = 0.
+       be(i)  = 0.0_wp
+       bi(i)  = 0.0_wp
+       beh(i) = 0.0_wp
+       bih(i) = 0.0_wp
+       ce(i)  = 0.0_wp
+       ci(i)  = 0.0_wp
       enddo
 
        do i = 1,is
-         bdsum(i) = 0.0
+         bdsum(i) = 0.0_wp
          do j = 1,4
            bd(i,j) = 0.0
          enddo

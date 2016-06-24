@@ -36,7 +36,7 @@
         nvecLen = vecl
         probname='Pureschi '   
       elseif (programStep==0) then
-        probname='Pureschi  '
+        probname='Pureschi '
         open(unit=39,file='exact.pureschi.1.data')
         rewind(39)
         do i=1,81

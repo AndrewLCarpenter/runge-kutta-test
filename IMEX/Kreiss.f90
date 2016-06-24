@@ -33,7 +33,7 @@
         nvecLen = vecl
         probname='Kreiss   '   
       else if (programStep==0) then
-        probname="Kreiss   "
+        probname='Kreiss   '
         dt = 0.25_wp/10**((iDT-1)/20.0_wp)
         nvecLen = 2
 

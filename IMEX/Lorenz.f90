@@ -73,17 +73,17 @@
               resI(2)=0.0_wp
               resI(3)=0.0_wp
             elseif (programStep==3) then
-              xjac(1,1) = 1.-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.-akk*dt*(sigma)/ep
-              xjac(1,3) = 0.-akk*dt*(0.0_wp)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
+              xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep
+              xjac(1,3) = 0.0_wp-akk*dt*(0.0_wp)/ep
 
-              xjac(2,1) = 0.-akk*dt*(0.0_wp)
-              xjac(2,2) = 1.-akk*dt*(0.0_wp)
-              xjac(2,3) = 0.-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(2,3) = 0.0_wp-akk*dt*(0.0_wp)
 
-              xjac(3,1) = 0.-akk*dt*(0.0_wp)
-              xjac(3,2) = 0.-akk*dt*(0.0_wp)
-              xjac(3,3) = 1.-akk*dt*(0.0_wp)
+              xjac(3,1) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(3,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(3,3) = 1.0_wp-akk*dt*(0.0_wp)
             endif
           case('IMPLICIT')
             if (programStep==1 .or.programStep==2) then
@@ -92,17 +92,17 @@
               resI(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
               resI(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
             elseif (programStep==3) then
-              xjac(1,1) = 1.-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.-akk*dt*(sigma)/ep
-              xjac(1,3) = 0.-akk*dt*(0)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
+              xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep
+              xjac(1,3) = 0.0_wp-akk*dt*(0)/ep
 
-              xjac(2,1) = 0.-akk*dt*(rho-uvec(3))
-              xjac(2,2) = 1.-akk*dt*(-1.)
-              xjac(2,3) = 0.-akk*dt*(-uvec(1))
+              xjac(2,1) = 0.0_wp-akk*dt*(rho-uvec(3))
+              xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)
+              xjac(2,3) = 0.0_wp-akk*dt*(-uvec(1))
 
-              xjac(3,1) = 0.-akk*dt*(uvec(2))
-              xjac(3,2) = 0.-akk*dt*(uvec(1))
-              xjac(3,3) = 1.-akk*dt*(-beta)
+              xjac(3,1) = 0.0_wp-akk*dt*(uvec(2))
+              xjac(3,2) = 0.0_wp-akk*dt*(uvec(1))
+              xjac(3,3) = 1.0_wp-akk*dt*(-beta)
             endif
         end select
       endif
