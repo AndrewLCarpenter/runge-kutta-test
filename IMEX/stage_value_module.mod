@@ -1,4 +1,4 @@
-GFORTRAN module version '0' created from Stage_Value_module.f90 on Fri Jun 24 12:05:45 2016
+GFORTRAN module version '0' created from Stage_Value_module.f90 on Fri Jun 24 16:56:41 2016
 MD5:9975a0ea9a36fc7dbb4f96cc6b38da80 -- If you edit this, you'll get what you deserve.
 
 

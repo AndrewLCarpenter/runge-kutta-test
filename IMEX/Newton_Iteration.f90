@@ -27,8 +27,59 @@
       real(wp), dimension(nveclen)         :: Rnewton !Newton 
       real(wp), dimension(nveclen,nveclen) :: xjac,xjacinv !Jacobians
       real(wp)                             :: tmp !temp variable for accuracy
-!============================================================
       
+      !line search variables
+      real(wp) :: al,rnorm,rnormt
+      real(wp), dimension(nveclen) :: dxi
+      
+!============================================================
+      if (.false.) then !true for linesearch
+      do k = 1,100
+        icount = icount + 1
+
+        programStep=2
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
+     &               uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+     
+        rnorm = sqrt(dot_product(resI(:,L),resI(:,L)))
+
+        programStep=3
+        call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
+     &               uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+
+        call Invert_Jacobian(nveclen,xjac,xjacinv)
+
+        dxi = MatMul(xjacinv,uvec(:)-aI*resI(:,L)-usum(:))
+
+        al = 1.0_wp
+        do j = 1,20    !   under-relax the value of the parameter alpha
+
+          uveciter(:) = uvec(:) - al*dxi
+
+          programStep=2
+          call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
+     &               uveciter,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+
+           rnormt = sqrt(dot_product(resI(:,L),resI(:,L)))
+
+           if(rnormt >= rnorm) then
+             al = 0.5_wp * al
+           else
+             !print*,'j',j
+             exit
+           endif
+        enddo
+
+        uvec(:) = uvec(:) - al*dxi
+
+        rnorm = rnormt
+        if (k==50) print*,'L',L,'k',k,'tmp',rnorm,'ep',ep,dxi 
+        if(rnorm <= 1.0e-12_wp) then
+          return
+        endif
+      enddo
+
+      else      
       do k = 1,20
         icount = icount + 1
 
@@ -49,7 +100,7 @@
 
 !        Backsolve to get solution
 
-       !**want to use this but there is a different trunkation/round off error compared to the explicit do loop
+       !**want to use this but there is a different truncation/round off error compared to the explicit do loop
        ! uvec(:)=uvec(:)-matmul(xjacinv,Rnewton)
         do i = 1,nvecLen
           do j = 1,nvecLen
@@ -58,8 +109,9 @@
        enddo
 
        tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros
+       
        if(tmp.lt.1.0e-12_wp) exit
       enddo
-
+      endif
       return
       end subroutine 

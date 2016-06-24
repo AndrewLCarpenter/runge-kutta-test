@@ -60,22 +60,20 @@
       integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
-      real(wp)                              :: itmp,t,time,rat,tmp
-      real(wp)                              :: dto,totalerror,totalerrorp
-      real(wp), dimension(is)               :: bint
+      real(wp)                              :: itmp,t,time,dto
       real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
-      real(wp), dimension(:), ALLOCATABLE   :: uveco,uveciter,uorig 
-      real(wp), dimension(:), ALLOCATABLE   :: errvec,errvecT,tmpvec 
+      real(wp), dimension(:),   ALLOCATABLE :: uveco,uveciter,uorig 
+      real(wp), dimension(:),   ALLOCATABLE :: errvec,errvecT,tmpvec 
       real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
       real(wp), dimension(jmax)             :: epsave
       
-      character(len=80) :: Temporal_Splitting = 'IMEX'
+      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
       
       !user inputs
       integer            :: ipred,cases,problem      
              
       !do loops
-      integer            :: icase,i,iprob,jepsil,iDT,ival  
+      integer            :: icase,i,iprob,jepsil,iDT 
       integer            :: j,k,istage,ktime,L,LL
       
       !counters      
@@ -84,9 +82,9 @@
       !problemsub variables
       integer                               :: programStep
       character(len=9)                      :: probname
-      real(wp), dimension(:), ALLOCATABLE   :: uvec
+      real(wp), dimension(:),   ALLOCATABLE :: uvec
       real(wp)                              :: ep
-      real(wp), dimension(:), ALLOCATABLE   :: uexact
+      real(wp), dimension(:),   ALLOCATABLE :: uexact
       real(wp)                              :: dt
       integer                               :: nveclen
       real(wp)                              :: tfinal     
@@ -107,7 +105,7 @@
       real(wp), dimension(:,:), ALLOCATABLE :: error,errorP    
       integer                               :: jsamp
       real(wp), dimension(isamp)            :: sig
-      real(wp), dimension(:), ALLOCATABLE   :: b
+      real(wp), dimension(:),   ALLOCATABLE :: b
       real(wp), dimension(is)               :: stageE,stageI,maxiter
       
       !newton_iteration variables
@@ -187,11 +185,9 @@
               !**INIT. ERROR VECTOR**
               errvecT(:) = 0.0_wp
 
-
                 do i = 1,nrk            !initialize stage value preditor
                   predvec(:,i) = uvec(:)
                 enddo
-
 !--------------------------TIME ADVANCEMENT LOOP-------------------------------
               do ktime = 1,1000000                      
                 if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
@@ -256,7 +252,6 @@
      &                                    + (bI(LL)-bIH(LL))*resI(:,LL)
                   enddo
                   errvec(:) = abs(errvec(:))
-                  rat = 1.0_wp
                 endif                            
   
                 errvecT(:) = errvecT(:) + errvec(:)
@@ -272,8 +267,8 @@
               
 !
               tmpvec(:) = abs(uvec(:)-uexact(:))
-              do ival = 1,nvecLen
-                if(tmpvec(ival) == 0.0_wp)tmpvec(ival)=1.0e-15_wp
+              do i = 1,nvecLen
+                if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
