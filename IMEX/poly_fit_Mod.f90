@@ -115,8 +115,9 @@
  
 !     USES gcf,gser
 !     Returns the incomplete gamma function Q(a, x) = 1 -P(a, x).
+      gammq = 0.0_wp
 
-      if(x <  0.0_wp.or.a <= 0.0_wp)then
+      if(x <  0.0_wp .or. a <= 0.0_wp)then
         write(*,*)'bad arguments in gammq'
       endif
       if (x <  a+1.0_wp) then 

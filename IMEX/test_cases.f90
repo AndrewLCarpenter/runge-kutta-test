@@ -67,7 +67,7 @@
       real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
       real(wp), dimension(jmax)             :: epsave
       
-      character(len=80) :: Temporal_Splitting = 'IMEX'
+      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
       
       !user inputs
       integer            :: ipred,cases,problem      
@@ -245,7 +245,7 @@
 !-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
-                if(time<tfinal-1.0e-11_wp)then               
+                if(t <= tfinal-1.0e-11_wp)then               
                   errvec(:) = 0.0_wp
                   do LL = 1,nrk 
                     errvec(:) = errvec(:) + (bE(LL)-bEH(LL))*resE(:,LL) &
@@ -257,7 +257,7 @@
                 errvecT(:) = errvecT(:) + errvec(:)
   
                 t = t + dt                  !increment time
-                if(t>=tfinal) exit
+                if(t >= tfinal) exit
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      
