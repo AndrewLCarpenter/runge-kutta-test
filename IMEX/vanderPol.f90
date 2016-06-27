@@ -51,11 +51,13 @@
  100    continue
         dt = 0.5_wp/10**((iDT-1)/20.0_wp)
 
+!  IC and tfinal
         tfinal = 0.5_wp
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
       
       elseif (programStep>=1 .and. programStep<=3) then
+
         select case (Temporal_Splitting)
 
           case('IMEX')

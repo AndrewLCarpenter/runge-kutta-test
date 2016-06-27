@@ -4,7 +4,7 @@
 !
 !----------------------------PROBLEM LIST--------------------------------------
 !     problem 1) van der Pol (Hairer II, pp 403)
-!     problem 2) Pureshi and Russo 
+!     problem 2) Pureschi and Russo 
 !     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     WARNING: Kreiss has problem with algebraic variable
@@ -114,12 +114,13 @@
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
-      write(*,*)'what is case?'  !input range of runge kutta cases
-      read(*,*)cases
+!     write(*,*)'what is case?'  !input range of runge kutta cases
+!     read(*,*)cases
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
-      do icase = cases,cases
+!     do icase = cases,cases
+      do icase = 7,18
         
         !**initilizations?**
         stageE(:) = 0.0_wp

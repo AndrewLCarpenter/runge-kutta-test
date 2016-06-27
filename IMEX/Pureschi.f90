@@ -71,7 +71,7 @@
           case('IMEX')
                 if (programStep==1 .or.programStep==2) then
               resE(1) = dt*(-uvec(2))
-              resE(2) = dt* uvec(1)
+              resE(2) = dt*(+uvec(1))
               resI(1) = 0.0_wp
               resI(2) = dt*(sin(uvec(1)) - uvec(2))/ep
             elseif (programStep==3) then
@@ -82,13 +82,19 @@
             endif
           case('IMPLICIT')
                 if (programStep==1 .or.programStep==2) then
+              resE(1) = 0.0_wp
+              resE(2) = 0.0_wp
+              resI(1) = dt*(-uvec(2))
+              resI(2) = dt*(+uvec(1) + (sin(uvec(1)) - uvec(2))/ep)
             elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp + cos(uvec(1))/ep)
+              xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
             endif
         end select
       endif
       
       return
       end subroutine
-
-      
 
