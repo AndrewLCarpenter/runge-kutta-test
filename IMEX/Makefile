@@ -15,6 +15,7 @@ SRCS = precision_vars.f90\
        Stage_Value_module.f90\
        Invert_Jacobian.f90\
        Allocate_CSR_Storage.f90\
+       QR_Module.f90\
        Newton_Iteration.f90\
        rungeadd.f90\
        test_cases.f90\
@@ -40,6 +41,7 @@ OBJS = precision_vars.o\
        Stage_Value_module.o\
        Invert_Jacobian.o\
        Allocate_CSR_Storage.o\
+       QR_Module.o\
        Newton_Iteration.o\
        rungeadd.o\
        test_cases.o\

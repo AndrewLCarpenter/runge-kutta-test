@@ -22,7 +22,9 @@
       real(wp),                  intent(in   ) :: time
 
       real(wp)                                 :: tmp,tmpM,tmpP
-      real(wp) :: epi,lambda_p,lambda_m,a,b,sin_t,cos_t     
+      real(wp) :: epi,lambda_p,lambda_m,a,b,sin_t,cos_t  
+      real(wp), dimension(nveclen,nveclen) :: E_mat,wrk_matrix
+      real(wp), dimension(nveclen)         :: wrk_vec   
       !RHS vars
       real(wp), dimension(vecl+1), intent(  out) :: resE,resI
       
@@ -50,12 +52,25 @@
         lambda_m=0.5_wp*(-1.0_wp-epi) - 0.5_wp*sqrt((1.0_wp-epi)**2-4.0_wp)
         !uexact(1) = uvec(1)*tmpP + uvec(2)*(tmpP - tmpM)/(1.0_wp + ep)
         !uexact(2) = uvec(2)*tmpM
-        a = ep*(exp(lambda_p*tfinal)+exp(lambda_m*tfinal))
-       b = (1.0_wp+ep*lambda_p)*exp(lambda_p*tfinal)+(1.0_wp+ep*lambda_m)*exp(lambda_m*tfinal)
-        uexact(1) = cos(tfinal)*a-sin(tfinal)*b
-        uexact(2) = sin(tfinal)*a+cos(tfinal)*b
+       ! a = ep*(exp(lambda_p*tfinal)+exp(lambda_m*tfinal))
+      ! b = (1.0_wp+ep*lambda_p)*exp(lambda_p*tfinal)+(1.0_wp+ep*lambda_m)*exp(lambda_m*tfinal)
+       ! uexact(1) = cos(tfinal)*a-sin(tfinal)*b
+       !uexact(2) = sin(tfinal)*a+cos(tfinal)*b
         !uexact(1) = -exp(tfinal)*sin(tfinal)
         !uexact(2) = exp(tfinal)*cos(tfinal)
+        E_mat(1,1)=cos(tfinal)
+        E_mat(1,2)=-sin(tfinal)
+        E_mat(2,1)=sin(tfinal)
+        E_mat(2,2)=cos(tfinal)
+        wrk_matrix(1,1)=ep
+        wrk_matrix(1,2)=ep
+        wrk_matrix(2,1)=1+lambda_p*ep
+        wrk_matrix(2,2)=1+lambda_m*ep
+        wrk_vec(1)=exp(lambda_p*tfinal)
+        wrk_vec(2)=exp(lambda_m*tfinal)
+        uexact=matmul(matmul(E_mat,wrk_matrix),wrk_vec)
+        
+        
       elseif (programStep>=1 .and. programStep<=3) then
         select case (Temporal_Splitting)
 
