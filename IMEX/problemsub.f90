@@ -1,5 +1,5 @@
       subroutine problemsub(iprob,programStep,probname,nveclen, &
-     &      temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+     &      temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
 
       use precision_vars
 
@@ -18,6 +18,7 @@
       real(wp),                  intent(inout) :: dt
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
+      real(wp),                  intent(inout) :: time
       real(wp), dimension(nveclen), intent(  out) :: resE,resI
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(nveclen,nveclen), intent(  out) :: xjac
@@ -33,7 +34,7 @@
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==4) then
        call Kreiss(   programStep,probname,nveclen,temporal_splitting,uvec,ep,&
-     &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
+     &                uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
       elseif (iprob==5) then !some sort of problem, fully implicit doesnt converge and the imex doesn't work
        call Lorenz(   programStep,probname,nveclen,temporal_splitting,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)

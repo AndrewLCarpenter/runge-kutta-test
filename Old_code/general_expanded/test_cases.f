@@ -142,6 +142,9 @@ c            do iDT = 1,1,1                                     ! use to determi
                        uorig(ival) = uvec(ival)               ! put predict into storage for testing
                     enddo
                   enddo
+                  print*,'uvec',uvec
+                  !print*,'alpha',alpha(:,:)
+                  print*,'ustage',ustage(:,:)
                 endif
 
 c U^{(n+1,4)} = al4_{1}*U^{(n  ,4)} + al4_{2}*U^{(n  ,5)} +
@@ -213,7 +216,8 @@ c    &                         + bint(5)*ustage(ival,3)
 c                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
 c                 enddo
                 endif
-
+                                     print*,uvec
+                          if(ktime.eq.2)            stop               
                 do k = 1,20
 
                   icount = icount + 1
@@ -245,7 +249,7 @@ c                 enddo
 
                 enddo
   160           continue
- 
+
              if((k.gt.maxiter(L+1)).and.(ktime.ne.1))maxiter(L+1)=k
 
               do ival = 1,nvecLen                    !  write the solution into a storage register
@@ -281,8 +285,10 @@ c                 enddo
                   errvec(ival) = 0.0
                   do LL = 1,nrk 
                     errvec(ival) = errvec(ival) 
-     &                       + dt*( (bI(LL)-bIH(LL))*res(ival,LL) )
+     &                       + dt*( (bI(LL)-bIH(LL))*res(ival,LL) )                
+
                   enddo
+
                   errvec(ival) = abs(errvec(ival))
                 enddo
                 rat = 1.0

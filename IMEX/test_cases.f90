@@ -66,11 +66,12 @@
       real(wp), dimension(:),   ALLOCATABLE :: errvec,errvecT,tmpvec 
       real(wp), dimension(:,:), ALLOCATABLE :: b1save,b1Psave
       real(wp), dimension(jmax)             :: epsave
-      
-      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
+      real(wp)                             :: cputime1,cputime2
+     
+      character(len=80) :: Temporal_Splitting = 'IMEX'
       
       !user inputs
-      integer            :: ipred,cases,problem      
+      integer            :: ipred,problem,cases      
              
       !do loops
       integer            :: icase,i,iprob,jepsil,iDT 
@@ -120,7 +121,9 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
 !     do icase = cases,cases
-      do icase = 7,18
+      do icase = 7,7
+        
+        
         
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -135,6 +138,9 @@
 
 !--------------------------PROBLEMS LOOP---------------------------------------
         do iprob = problem,problem
+        
+          call cpu_time(cputime1)
+          
           !**CALL FOR PROBNAME & NVECLEN**
           programStep=-1
           call problemsub(iprob,programStep,probname,nveclen)
@@ -164,7 +170,7 @@
 !         call Allocata_CSR_Storage(problem,nveclen)
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
+          do jepsil = 6,jactual,1     
                          
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -179,7 +185,8 @@
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
               call problemsub(iprob,programStep,probname,nveclen,& 
-     &                        temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT)  
+     &                        temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t)  
+
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
               
@@ -200,7 +207,7 @@
 !--------------------------------RK LOOP---------------------------------------
                 programStep=1
                 call problemsub(iprob,programStep,probname,nveclen, &
-     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE(1,1),resI(1,1))
+     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t,resE(1,1),resI(1,1))
                 ustage(:,1) = uvec(:)
 
                 do L = 2,nrk
@@ -215,14 +222,14 @@
 
 !---------------BEG NEWTON ITERATION ------------------------------------------
                   call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,&
-     &                             nveclen,iDT,resE,resI,aI(L,L),usum,icount,k)
+     &                             nveclen,iDT,t,resE,resI,aI(L,L),usum,icount,k)
 !---------------END NEWTON ITERATION-------------------------------------------
-                 
+
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
                   call problemsub(iprob,programStep,probname,nveclen,&
-     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L))
+     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t,resE(1,L),resI(1,L))
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
      &                                      predvec,uvec,uveco,alpha,ktime)
@@ -234,15 +241,17 @@
 
                   if(ipred==2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
      &                                      predvec,uvec,uveco,alpha,ktime)
+             !     print*,uvec
+              !    if(ktime.eq.2)            stop      
                 enddo
 !-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
                 uvec(:) = uveco(:)
+
                 do LL = 1,nrk 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
                 enddo
 
-                
 !-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
@@ -251,6 +260,7 @@
                   do LL = 1,nrk 
                     errvec(:) = errvec(:) + (bE(LL)-bEH(LL))*resE(:,LL) &
      &                                    + (bI(LL)-bIH(LL))*resI(:,LL)
+
                   enddo
                   errvec(:) = abs(errvec(:))
                 endif                            
@@ -272,6 +282,7 @@
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
               error(iDT,:)  = log10(tmpvec(:))
+
               errorP(iDT,:) = log10(errvecT(:))
 
             enddo
@@ -279,7 +290,7 @@
 !----------------------------OUTPUTS-------------------------------------------
             jsamp = 41 
             sig(:) = 0.0_wp
-            
+
             call output_terminal_iteration(cost,error,errorP,jsamp,sig,0, &
      &           ep,nveclen,b)
                     
@@ -297,6 +308,9 @@
           
           !**OUTPUT TO TERMINAL**
           call output_terminal_final(icount,jcount,nrk,stageE,stageI,maxiter)
+          
+          call cpu_time(cputime2)
+          write(*,*)'Total time elapsed for this case: ',cputime2-cputime1,'sec'  
 
 !----------------------END OUTPUTS---------------------------------------------
            !**DEALLOCATE VARIABLES**
@@ -318,7 +332,7 @@
           DEALLOCATE(b1save,b1Psave)
         enddo                                       
 !----------------------END PROBLEMS LOOP---------------------------------------
-      enddo                                    
+      enddo                                 
 !----------------------END ALGORITHMS LOOP-------------------------------------
 !----------------------END PROGRAM---------------------------------------------
       END PROGRAM test_cases

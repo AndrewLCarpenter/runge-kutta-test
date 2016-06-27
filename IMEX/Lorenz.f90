@@ -5,7 +5,9 @@
       implicit none
 
       integer, parameter                       :: vecl=3
-      real(wp), parameter                      :: sigma=10,beta=8/3,rho=28
+      real(wp), parameter                      :: sigma=10.0_wp
+      real(wp), parameter                      :: beta=8.0_wp/3.0_wp
+      real(wp), parameter                      :: rho=28.0_wp
                  
       integer,                   intent(in   ) :: programStep
       character(80),             intent(in   ) :: temporal_splitting

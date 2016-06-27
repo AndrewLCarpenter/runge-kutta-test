@@ -87,7 +87,7 @@
 
       subroutine Stage_Value_Predictor2(L,uvec,ustage,uveco,alpha,ktime)
       
-      integer,                  intent(in  ) :: L,ktime
+      integer,                  intent(in  )  :: L,ktime
       real(wp), dimension(:,:), intent(in   ) :: ustage
       real(wp), dimension(:),   intent(inout) :: uvec
       real(wp), dimension(:),   intent(in   ) :: uveco
@@ -100,6 +100,9 @@
         do j = 2,L-1
           uvec(:) = uvec(:) + alpha(L,j)*(ustage(:,j)-uvec(:))
         enddo
+       ! print*,'uvec',uvec
+        !print*,'alpha',alpha(:,:)
+        !print*,'ustage',ustage(:,:)
                 
         if(L == 2 .and.ktime/=1)then
           bint(1) =  9.9518675264213746_wp 
@@ -113,7 +116,7 @@
      &                          +bint(4)*(ustage(:,6)-ustage(:,3))&
      &                          +bint(5)*(ustage(:,2)-ustage(:,3))
         endif    
-      
+
       end subroutine Stage_Value_Predictor2
 
 !==============================================================================

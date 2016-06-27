@@ -1,4 +1,4 @@
-      subroutine Newton_Iteration(uvec,iprob,Temporal_Splitting,L,ep,dt,nveclen,iDT,&
+      subroutine Newton_Iteration(uvec,iprob,Temporal_Splitting,L,ep,dt,nveclen,iDT,time,&
      & resE,resI,aI,usum,icount,k)
 
       use precision_vars
@@ -17,6 +17,7 @@
       real(wp),                        intent(in   ) :: aI!from aI(L,L)
       real(wp), dimension(nveclen),    intent(in   ) :: usum
       integer,                         intent(inout) :: icount,k
+      real(wp),                        intent(in   ) :: time
       
       character(len=9)                     :: probname
       integer                              :: i,j  !Do loop variables
@@ -36,19 +37,19 @@
       ierr = 0 
 !============================================================
       if (.false.) then !true for linesearch
-        do k = 1,10
+        do k = 1,100
           icount = icount + 1
   
           programStep=2
           call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
-     &                 uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+     &                 uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
      
           Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
           rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
   
           programStep=3
           call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
-     &                 uvec,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+     &                 uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
 
           call Invert_Jacobian(nveclen,xjac,xjacinv)
   
@@ -61,7 +62,7 @@
   
             programStep=2
             call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,&
-     &                 uveciter,ep,uexact,dt,tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+     &                 uveciter,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
 
             Rnewton(:) =uveciter(:)-aI*resI(:,L)-usum(:)
             rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
@@ -92,15 +93,15 @@
 
           programStep=2
           call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
-     &                     tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
+     &                     tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
   
           Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
-           
+
           !**GET INVERSE JACOBIAN**
           programStep=3
           call problemsub(iprob,programStep,probname,nveclen,Temporal_Splitting,uvec,ep,uexact,dt,&
-     &                     tfinal,iDT,resE(1,L),resI(1,L),aI,xjac)
-  
+     &                     tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
+   
           call Invert_Jacobian(nveclen,xjac,xjacinv)
   
 !          Backsolve to get solution
@@ -112,9 +113,9 @@
               uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
             enddo
           enddo
-  
+
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros
-         
+         if (k>=4) print*,'tmp',tmp,'L',L,'k',k,'time',time
          if(tmp.lt.1.0e-11_wp) then
            ierr = 0
            return 
