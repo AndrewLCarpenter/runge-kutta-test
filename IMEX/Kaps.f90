@@ -20,7 +20,7 @@
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
-      real(wp)                                 :: tmp
+      real(wp)                                 :: tmp, epI
 
       !RHS vars
       real(wp), dimension(vecl+1), intent(  out) :: resE,resI
@@ -28,6 +28,8 @@
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl,vecl), intent(  out) :: xjac
+
+      epI = 1.0_wp / ep 
 
       if (programStep==-1) then
         nvecLen = vecl
@@ -50,17 +52,25 @@
                 if (programStep==1 .or.programStep==2) then
               resE(1) = dt*(-2.0_wp*uvec(1))
               resE(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
-              resI(1) = dt*(-1./ep*uvec(1) + (1./ep)*uvec(2)*uvec(2))
+              resI(1) = dt*(-epI*uvec(1) + epI*uvec(2)*uvec(2))
               resI(2) = 0.0_wp
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp/ep))
-              xjac(1,2) = 0.0_wp-akk*dt*(+1.0_wp/ep)*2*uvec(2)
+              xjac(1,1) = 1.0_wp-akk*dt*(-epI)
+              xjac(1,2) = 0.0_wp-akk*dt*(+epI)*2.0_wp*uvec(2)
               xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
               xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
             endif
           case('IMPLICIT')
                 if (programStep==1 .or.programStep==2) then
+              resE(1) = 0.0_wp
+              resE(2) = 0.0_wp
+              resI(1) = dt*(-(epI+2.0_wp)*uvec(1) + epI*uvec(2)*uvec(2))
+              resI(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
             elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp-akk*dt*(-(epI+2.0_wp))
+              xjac(1,2) = 0.0_wp-akk*dt*(+epI*2.0_wp*uvec(2))
+              xjac(2,1) = 0.0_wp-akk*dt*(1.0_wp)
+              xjac(2,2) = 1.0_wp-akk*dt*(-(1.0_wp+2.0_wp*uvec(2)))
             endif
           end select
       endif
