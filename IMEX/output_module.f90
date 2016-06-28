@@ -2,6 +2,7 @@
 
       use precision_vars     , only : wp
       use poly_fit_Mod
+      use control_variables
 
       implicit none
       
@@ -14,9 +15,9 @@
       
 !==============================================================================
 
-      subroutine create_file_paths(probname,casename)
+      subroutine create_file_paths(casename)
       
-      character(len=*), intent(in) :: probname,casename
+      character(len=*), intent(in) :: casename
       character(len=80) :: fileloc   !file name and location
       logical           :: dirExists   !check if directory exists
       
@@ -28,9 +29,9 @@
       
 !==============================================================================  
 
-      subroutine output_names(probname,casename)
+      subroutine output_names(casename)
        
-      character(len=*), intent(in) :: probname,casename
+      character(len=*), intent(in) :: casename
        
       write(*,*)'Problem name: ',trim(probname)
       write(*,*)'Casename: ', trim(casename)
@@ -39,9 +40,9 @@
        
 !==============================================================================
 
-      subroutine init_output_files(probname,casename,nveclen,ep)
+      subroutine init_output_files(casename,nveclen,ep)
       
-      character(len=*), intent(in) :: probname,casename
+      character(len=*), intent(in) :: casename
       integer,          intent(in) :: nveclen
       character(len=4)             :: ext='.dat'  !file extension
       character(len=1)             :: istr        !loop index placeholder
@@ -66,12 +67,12 @@
       
 !==============================================================================      
 
-      subroutine output_conv_stiff(probname,casename,nveclen,jactual,epsave, &
+      subroutine output_conv_stiff(casename,nveclen,jactual,epsave, &
      &                             b1save,b1Psave)
       
       integer, parameter                   :: jmax=81
       
-      character(len=*),         intent(in) :: probname,casename
+      character(len=*),         intent(in) :: casename
       integer,                  intent(in) :: nveclen,jactual
       real(wp), dimension(:,:), intent(in) :: b1save,b1Psave
       real(wp), dimension(:),   intent(in) :: epsave

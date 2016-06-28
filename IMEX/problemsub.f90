@@ -1,7 +1,8 @@
-      subroutine problemsub(iprob,programStep,probname,nveclen, &
-     &      temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
+      subroutine problemsub(iprob,programStep,nveclen, &
+     &      uvec,ep,uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
 
       use precision_vars
+      use control_variables
 
       implicit none
     
@@ -9,9 +10,7 @@
 
       !PROBLEM PARAMETERS
       integer,                   intent(in   ) :: iprob, programStep
-      character(len=9),          intent(  out) :: probname
       integer,                   intent(inout) :: nveclen
-      character(80),             intent(in   ) :: temporal_splitting
       real(wp), dimension(nveclen), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(nveclen), intent(  out) :: uexact
@@ -22,23 +21,37 @@
       real(wp), dimension(nveclen), intent(  out) :: resE,resI
       real(wp),                       intent(in   ) :: akk
       real(wp), dimension(nveclen,nveclen), intent(  out) :: xjac
+      
+
+
+
+      
 
       if     (iprob==1) then
-       call vanderPol(programStep,probname,nveclen,temporal_splitting,uvec,ep,&
+       call vanderPol(programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==2) then
-       call Pureschi( programStep,probname,nveclen,temporal_splitting,uvec,ep,&
+       call Pureschi( programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==3) then
-       call Kaps(     programStep,probname,nveclen,temporal_splitting,uvec,ep,&
+       call Kaps(     programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==4) then
-       call Kreiss(   programStep,probname,nveclen,temporal_splitting,uvec,ep,&
+     !  print*,'calling kreiss'
+     !  print*,programStep
+       call Kreiss(   programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
       elseif (iprob==5) then !some sort of problem, fully implicit doesnt converge and the imex doesn't work
-       call Lorenz(   programStep,probname,nveclen,temporal_splitting,uvec,ep,&
+       call Lorenz(   programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       endif
+
+   !   write(*,*)'allocated variables'                     
+    !  AllOCATE(uvec(nveclen),uexact(nveclen))
+    !  ALLOCATE(resE(nveclen),resI(nveclen))
+    !  ALLOCATE(xjac(nveclen,nveclen))
+
+
 
       return
       end subroutine

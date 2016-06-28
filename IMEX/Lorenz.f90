@@ -1,19 +1,18 @@
-      subroutine Lorenz(programStep,probname,nveclen,temporal_splitting,uvec,ep,uexact,dt, &
+      subroutine Lorenz(programStep,nveclen,uvec,ep,uexact,dt, &
                          &  tfinal,iDT,resE,resI,akk,xjac)
       use precision_vars
+      use control_variables
 
       implicit none
 
       integer, parameter                       :: vecl=3
-      real(wp), parameter                      :: sigma=10.0_wp
-      real(wp), parameter                      :: beta=8.0_wp/3.0_wp
-      real(wp), parameter                      :: rho=28.0_wp
+      real(wp), parameter                      :: sigma=5.0_wp
+      real(wp), parameter                      :: beta=1.0_wp/3.0_wp
+      real(wp), parameter                      :: rho=2.0_wp
                  
       integer,                   intent(in   ) :: programStep
-      character(80),             intent(in   ) :: temporal_splitting
  
       !INIT vars
-      character(len=9),          intent(  out) :: probname
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact

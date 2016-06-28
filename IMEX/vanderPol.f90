@@ -1,16 +1,17 @@
-      subroutine vanderPol(programStep,probname,nveclen,temporal_splitting, &
+      subroutine vanderPol(programStep,nveclen, &
      &                     uvec,ep,uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
 
       use precision_vars
+      use control_variables
 
       implicit none
 
       integer,  parameter                      :: vecl=2
 
       integer,                   intent(in   ) :: programStep
-      character(80),             intent(in   ) :: temporal_splitting
+
       !INIT vars
-      character(len=9),          intent(  out) :: probname
+
       real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: uexact
@@ -32,7 +33,8 @@
 
       if (programStep==-1) then
         nvecLen = vecl
-        probname='vanderPol'       
+        probname='vanderPol'     
+          
       elseif (programStep==0) then
         open(unit=39,file='exact.vanderpol.data')
         rewind(39)

@@ -100,9 +100,10 @@
         do j = 2,L-1
           uvec(:) = uvec(:) + alpha(L,j)*(ustage(:,j)-uvec(:))
         enddo
-       ! print*,'uvec',uvec
-        !print*,'alpha',alpha(:,:)
-        !print*,'ustage',ustage(:,:)
+    !    print*,'uvec',uvec
+       ! print*,'alpha',alpha(:,:)
+     !   print*,'ustage',ustage(:,:)
+      !  stop
                 
         if(L == 2 .and.ktime/=1)then
           bint(1) =  9.9518675264213746_wp 

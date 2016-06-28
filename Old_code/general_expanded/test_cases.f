@@ -11,7 +11,7 @@ c     program 5) Lorenz
       parameter(isamp=71,jmax=81,jactual=81)
       parameter(sigma=10.,rho=28.,beta=8./3.) !Lorenz constants for Prob. 5
 
-      integer cases 				!input range of runge kutta cases
+      integer cases     			!input range of runge kutta cases
       integer problem				!input problem number
 
       dimension aE(is,is),aI(is,is),bE(is),bI(is),cE(is),cI(is)
@@ -52,11 +52,11 @@ c     program 5) Lorenz
         icount = 0        !  cost counters
         jcount = 0        !  cost counters
 
-        do i = 1,nrk
-          stageE(i) = 0.0
-          stageI(i) = 0.0
-          maxiter(i)= 0
-        enddo
+
+          stageE(:) = 0.0
+          stageI(:) = 0.0
+          maxiter(:)= 0
+
       
         call rungeadd(aE,aI,bE,bI,cE,cI,nrk,bEH,bIH,icase,bD, !icase is the only input
      &   svpB(1,1,0),alpha,al3N,al3D,al4N,al4D,ipred)
@@ -104,8 +104,12 @@ c            do iDT = 1,1,1                                     ! use to determi
 
               jcount = jcount + (nrk-1)                         !  keep track of total RK stages 
 
-              do L = 1,nrk                                      !  begin RK loop
-
+              do L = 1,nrk            !  begin RK loop
+                    
+               ! print*,'L=',L
+               ! print*,'uvec'
+               ! print*,uvec(:2)
+               !if(L==6) stop
                 ttI = t + cI(L)*dt
                 
                 call RHS(uvec,res(1,L),dt,ep,ttI,iprob)
@@ -142,9 +146,10 @@ c            do iDT = 1,1,1                                     ! use to determi
                        uorig(ival) = uvec(ival)               ! put predict into storage for testing
                     enddo
                   enddo
-                  print*,'uvec',uvec
+                  !print*,'uvec',uvec
                   !print*,'alpha',alpha(:,:)
-                  print*,'ustage',ustage(:,:)
+               !  print*,'ustage',ustage(:3,:)
+
                 endif
 
 c U^{(n+1,4)} = al4_{1}*U^{(n  ,4)} + al4_{2}*U^{(n  ,5)} +
@@ -215,9 +220,8 @@ c    &                         + bint(4)*ustage(ival,2)
 c    &                         + bint(5)*ustage(ival,3)
 c                   uorig(ival) = uvec(ival)               ! put predict into storage for testing
 c                 enddo
-                endif
-                                     print*,uvec
-                          if(ktime.eq.2)            stop               
+    
+                endif 
                 do k = 1,20
 
                   icount = icount + 1
@@ -245,7 +249,7 @@ c                 enddo
                   do ival = 1,nvecLen
                      tmp = tmp + abs(uvec(ival)-uveciter(ival))
                   enddo
-                  if(tmp.lt.1.e-12) go to 160                 !  kick out of newton iteration
+                  if(tmp.lt.1.e-11) go to 160                 !  kick out of newton iteration
 
                 enddo
   160           continue

@@ -51,6 +51,7 @@
       use precision_vars
       use output_module
       use Stage_value_module
+      use control_variables
 !------------------------------VARIABLES---------------------------------------
       implicit none     
 !------------------------------PARAMETERS--------------------------------------
@@ -60,7 +61,7 @@
       integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
-      real(wp)                              :: itmp,t,time,dto
+      real(wp)                              :: itmp,t,time,dto,tt
       real(wp), dimension(:,:), ALLOCATABLE :: ustage,predvec 
       real(wp), dimension(:),   ALLOCATABLE :: uveco,uveciter,uorig 
       real(wp), dimension(:),   ALLOCATABLE :: errvec,errvecT,tmpvec 
@@ -68,7 +69,7 @@
       real(wp), dimension(jmax)             :: epsave
       real(wp)                             :: cputime1,cputime2
      
-      character(len=80) :: Temporal_Splitting = 'IMEX'
+
       
       !user inputs
       integer            :: ipred,problem,cases      
@@ -82,7 +83,7 @@
       
       !problemsub variables
       integer                               :: programStep
-      character(len=9)                      :: probname
+
       real(wp), dimension(:),   ALLOCATABLE :: uvec
       real(wp)                              :: ep
       real(wp), dimension(:),   ALLOCATABLE :: uexact
@@ -121,7 +122,7 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
 !     do icase = cases,cases
-      do icase = 7,7
+      do icase = 15,15
         
         
         
@@ -140,32 +141,33 @@
         do iprob = problem,problem
         
           call cpu_time(cputime1)
-          
+          write(*,*)'cpu time'
+          write(*,*)cputime1
           !**CALL FOR PROBNAME & NVECLEN**
           programStep=-1
-          call problemsub(iprob,programStep,probname,nveclen)
-                    
+          call problemsub(iprob,programStep,nveclen)
+          write(*,*)'allocated variables0'                     
           !**ALLOCATE VARIABLES**
           !problemsub
           AllOCATE(uvec(nveclen),uexact(nveclen))
           ALLOCATE(resE(nveclen,is),resI(nveclen,is))
-
+          write(*,*)'allocated variables1' 
           !data outs
           ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen))
           ALLOCATE(b(nveclen*2))
-          
+          write(*,*)'allocated variables2'           
           !Newton_iteration
           ALLOCATE(usum(nveclen))
-          
+          write(*,*)'allocated variables3'          
           !internal
           ALLOCATE(ustage(nveclen,is),predvec(nveclen,is))
           ALLOCATE(uveco(nveclen),uveciter(nveclen),uorig(nveclen))
           ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
           ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen))
-
+          write(*,*)'allocated variables4'
           !**INIT. FILE PATH FOR OUTPUTS**
-          call create_file_paths(probname,casename)
-          call output_names(probname,casename)                           
+          call create_file_paths(casename)
+          call output_names(casename)                           
 
 !         call Allocata_CSR_Storage(problem,nveclen)
 
@@ -176,20 +178,20 @@
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            call init_output_files(probname,casename,nveclen,ep)
-            
+            call init_output_files(casename,nveclen,ep)
+            !print*,'printed'
 !--------------------------TIMESTEP LOOP----------------------------------------
             do iDT = 1,isamp,1      
              
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
-              call problemsub(iprob,programStep,probname,nveclen,& 
-     &                        temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t)  
+              call problemsub(iprob,programStep,nveclen,& 
+     &                        uvec,ep,uexact,dt,tfinal,iDT,tt)  
 
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
-              
+
               !**INIT. ERROR VECTOR**
               errvecT(:) = 0.0_wp
 
@@ -199,37 +201,42 @@
 !--------------------------TIME ADVANCEMENT LOOP-------------------------------
               do ktime = 1,1000000                      
                 if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
-               
+                tt=t+Ci(1)*dt
                 !**STORE VALUES OF UVEC**
                 uveco(:) = uvec(:)
 
                 jcount = jcount + (nrk-1)    !keep track of total RK stages  
 !--------------------------------RK LOOP---------------------------------------
                 programStep=1
-                call problemsub(iprob,programStep,probname,nveclen, &
-     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t,resE(1,1),resI(1,1))
+                call problemsub(iprob,programStep,nveclen, &
+     &     uvec,ep,uexact,dt,tfinal,iDT,tt,resE(1,1),resI(1,1))
                 ustage(:,1) = uvec(:)
-
+               ! print*,'L=',1
+               ! print*,'uvec',uvec
                 do L = 2,nrk
+                tt=t+Ci(L)*dt
+                !print*,'L=',L
+                !print*,'uvec',uvec
+                ! if (L==6)stop
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
                     usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
      &                                + aE(L,LL)*resE(:,LL)
                   enddo
- 
+               
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
                   if(ipred/=2) uvec(:) = predvec(:,L)  
 
 !---------------BEG NEWTON ITERATION ------------------------------------------
-                  call Newton_Iteration(uvec,iprob,Temporal_splitting,L,ep,dt,&
-     &                             nveclen,iDT,t,resE,resI,aI(L,L),usum,icount,k)
+                  call Newton_Iteration(uvec,iprob,L,ep,dt,&
+     &                             nveclen,iDT,tt,resE,resI,aI(L,L),usum,icount,k)
 !---------------END NEWTON ITERATION-------------------------------------------
 
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                   ! Fill in resE and resI with the converged data
                   programStep=2
-                  call problemsub(iprob,programStep,probname,nveclen,&
-     &     temporal_splitting,uvec,ep,uexact,dt,tfinal,iDT,t,resE(1,L),resI(1,L))
+                  call problemsub(iprob,programStep,nveclen,&
+     &     uvec,ep,uexact,dt,tfinal,iDT,tt,resE(1,L),resI(1,L))
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
      &                                      predvec,uvec,uveco,alpha,ktime)
@@ -241,8 +248,6 @@
 
                   if(ipred==2)call Stage_Value_Predictor(ipred,L,nrk,ustage,&
      &                                      predvec,uvec,uveco,alpha,ktime)
-             !     print*,uvec
-              !    if(ktime.eq.2)            stop      
                 enddo
 !-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
@@ -303,8 +308,8 @@
           enddo  
 !---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          call output_conv_stiff(probname,casename,nveclen,jactual,epsave, &
-     &                           b1save,b1Psave)
+          call output_conv_stiff(casename,nveclen,jactual,epsave, &
+    &                           b1save,b1Psave)
           
           !**OUTPUT TO TERMINAL**
           call output_terminal_final(icount,jcount,nrk,stageE,stageI,maxiter)

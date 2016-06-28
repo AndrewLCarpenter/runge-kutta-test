@@ -1,14 +1,16 @@
 .SUFFIXES: .o .c .f90 .F90 .mod
 
 CC = gcc
-FC = gfortran
+FC = ifort
 
 #FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
-FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+#FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+FCFLAGS = -check uninit -WB -O3 $(INCLUDESDIR)
 #FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\
+       control_variables.f90\
        poly_fit_Mod.f90\
        CSR_Variables.f90\
        output_module.f90\
@@ -35,6 +37,7 @@ SRCS = precision_vars.f90\
 $(OBJS1)
 
 OBJS = precision_vars.o\
+       control_variables.o\
        poly_fit_Mod.o\
        CSR_Variables.o\
        output_module.o\
