@@ -37,7 +37,8 @@
         nvecLen = vecl
         probname='Lorenz   '         
       elseif (programStep==0) then
-        dt = 0.5_wp/10**((iDT-1)/20.0_wp)
+        !dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp)
+        dt = 0.25_wp/10**((iDT-1)/20.0_wp)        
         tfinal = 1.0_wp !!arbitrary
 
         open(unit=39,file='exact.lorenz.data')

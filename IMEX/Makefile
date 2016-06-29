@@ -27,9 +27,6 @@ SRCS = precision_vars.f90\
        Lorenz.f90\
        problemsub.f90
       
-       
-
-
 #OBJS2 = $(SRCS:.F90=.o)
 
 #OBJS= $(OBJS2) \

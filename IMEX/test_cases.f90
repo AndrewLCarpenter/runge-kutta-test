@@ -7,9 +7,7 @@
 !     problem 2) Pureschi and Russo 
 !     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
-!     WARNING: Kreiss has problem with algebraic variable
 !     problem 5) Lorenz
-!     WARNING: Lorenz has problem as well with something and wont converge
 !     problem 6) Burger's
 !     problem 7) Black-Scholes
 !------------------------------------------------------------------------------
@@ -18,10 +16,9 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES USED IN THE PROGRAM
-! CSR_VARIABLES.F90         *?
-! INVERT_JACOBIAN.F90       *INVERTS JACOBIAN 
+! CSR_VARIABLES.F90         *COMPRESSED SPARSE ROW STORAGE VARIABLES
 ! ALLOCATE_CSR_STORAGE.F90  *ALLOCATES STOREAGE OF VARIABLES IN CSR
-! NEWTON_ITERATION.F90      *PERFORMS NEWTON ITERATION
+! NEWTON.F90                *PERFORMS NEWTON ITERATION
 ! STAGE_VALUE_PREDICTOR.F90 *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
 ! VANDERPOL.F90             *PROBLEM CONSTANTS FOR VANDERPOL
@@ -45,7 +42,7 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
-!
+
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
@@ -108,13 +105,12 @@
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
-!     write(*,*)'what is case?'  !input range of runge kutta cases
-!     read(*,*)cases
+      write(*,*)'what is case?'  !input range of runge kutta cases
+      read(*,*)cases
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
-!     do icase = cases,cases
-      do icase = 15,15
+      do icase = cases,cases
         
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -218,7 +214,7 @@
 
 !---------------BEG NEWTON ITERATION ------------------------------------------
                   call Newton_Iteration(uvec,iprob,L,ep,dt,&
-     &                             nveclen,iDT,tt,resE,resI,aI(L,L),usum,icount,k)
+     &                          nveclen,iDT,tt,resE,resI,aI(L,L),usum,icount,k)
 !---------------END NEWTON ITERATION-------------------------------------------
 
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
@@ -276,7 +272,6 @@
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
               error(iDT,:)  = log10(tmpvec(:))
-
               errorP(iDT,:) = log10(errvecT(:))
 
             enddo
@@ -287,8 +282,7 @@
 
             call output_terminal_iteration(cost,error,errorP,jsamp,sig,0, &
      &           ep,nveclen,b)
-                    
-                    
+                               
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)

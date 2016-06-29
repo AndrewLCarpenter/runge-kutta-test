@@ -5,6 +5,8 @@
       use control_variables
       use Runge_Kutta
       
+      implicit none
+      
       public :: Newton_Iteration
       private      
       
@@ -13,7 +15,6 @@
       subroutine Newton_Iteration(uvec,iprob,L,ep,dt,nveclen,iDT,time,&
      & resE,resI,aI,usum,icount,k)
 
-      implicit none
 
       real(wp), dimension(nveclen),    intent(inout) :: uvec
       integer,                         intent(in   ) :: iprob
@@ -44,63 +45,16 @@
       real, dimension(nveclen) :: uvectemp
       
       ierr = 0 
-!============================================================
+!////////////////////////////
 !set typ to 1 for line search
 !            2 for newton
 !            3 for QR
-      
+!/////////////////////////////     
       typ = 2
 !----------------LINE SEARCH---------------------------------------------------
-      if (typ==1) then !true for linesearch
-        !uvectemp=sngl(uvec)
-        !call newt(uvectemp,nveclen,check)  
-        !uvec=dble(uvectemp)
-        do k = 1,150
-          icount = icount + 1
-  
-          programStep=2
-          call problemsub(iprob,programStep,nveclen,&
-     &                 uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
-     
-          Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
-          rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
-  
-          programStep=3
-          call problemsub(iprob,programStep,nveclen,&
-     &                 uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
-
-          xjacinv=Invert_Jacobian(xjac)
-  
-          dxi = MatMul(xjacinv,Rnewton(:))
-  
-          al = 1.0_wp
-          do j = 1,10    !   under-relax the value of the parameter alpha
-  
-            uveciter(:) = uvec(:) - al*dxi
-  
-            programStep=2
-            call problemsub(iprob,programStep,nveclen,&
-     &                 uveciter,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
-
-            Rnewton(:) =uveciter(:)-aI*resI(:,L)-usum(:)
-            rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
-  
-             if((rnormt >= rnorm) .and. (rnorm >= 1.0e-4_wp)) then
-               al = 0.5_wp * al
-             else
-               exit
-             endif
-          enddo
-
-          uvec(:) = uvec(:) - al*dxi
-
-          rnorm = rnormt
-         if (k >= 125) print*,'L',L,'k',k,'tmp',rnorm,'j',j
-          if(rnorm <= 1.0e-9_wp) then
-            ierr = 0
-            return
-          endif
-        enddo
+      if (typ==1) then
+        call newt_line_search(uvec,iprob,L,ep,dt,nveclen,time,resE,resI, &
+     &                            aI,usum,icount,k)
 !-------------------NEWTON AND QR----------------------------------------------
       else      
 
@@ -109,13 +63,10 @@
 
           uveciter(:) = uvec(:) !store old uvec
 
-          programStep=2
-          call problemsub(iprob,programStep,nveclen,uvec,ep,uexact,dt,&
-     &                     tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
-  
-          Rnewton(:) =uvec(:)-aI*resI(:,L)-usum(:)
-
+          call Build_Rnewton(Rnewton,uvec,usum,ep,dt,time,aI,iprob,L)
+ 
           !**GET INVERSE JACOBIAN**
+!!          call Build_Jac()
           programStep=3
           call problemsub(iprob,programStep,nveclen,uvec,ep,uexact,dt,&
      &                     tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
@@ -123,18 +74,10 @@
            if (typ==2) then !**NEWTON ITERATION**
              !print*,xjac
 
-             xjacinv=Invert_Jacobian(xjac)
+             xjacinv=Mat_invert(xjac)
 !----------------------QR------------------------------------------------------             
            elseif (typ==3) then
-             call qrdcmp(xjac,nveclen,nveclen,wrk_c,wrk_d,snglr)
-         
-             if(.not.snglr) then
-               call qrsolv(xjac,nveclen,nveclen,wrk_c,wrk_d,rnewton)
-             else
-               write(*,*)'matrix is singular in Newton Iteration: Stopping'
-               stop
-             endif
-             uvec(:)=uvec(:)-rnewton(:)  
+             call QR_decomp(xjac,nveclen,rnewton,uvec)
             endif
 !---------------------END QR---------------------------------------------------            
 !          Backsolve to get solution
@@ -154,7 +97,7 @@
          if (k>=15) print*,'tmp',tmp,'L',L,'k',k,'time',time
          !if (tmp/=tmp)  print*, 'hit nan', uveciter
          
-         if(tmp.lt.1.0e-11_wp) then
+         if(tmp.lt.1.0e-12_wp) then
            ierr = 0
            exit 
          endif
@@ -166,41 +109,159 @@
 
       end subroutine Newton_Iteration
 !==============================================================================
-
-      function Invert_Jacobian(xjac)
-
-      implicit none
       
-      real(wp), dimension(:,:), intent(in   ) :: xjac
+      subroutine Build_Rnewton(Rnewton,uvec,usum,ep,dt,time,aI,iprob,L)
+            
+      real(wp), dimension(:), intent(  out) :: Rnewton
+      real(wp), dimension(:), intent(in   ) :: uvec,usum
+      real(wp),               intent(in   ) :: ep,dt,time,aI
+      integer,                intent(in   ) :: iprob,L
+      
+      real(wp), dimension(size(uvec),size(uvec)) :: xjac
+      integer :: iDT, programStep,nveclen
+      real(wp) :: tfinal      
+      real(wp), dimension(size(uvec)) :: uexact
+      real(wp), dimension(size(uvec),is) :: resE,resI
+      
+      programStep=2
+      call problemsub(iprob,programStep,nveclen,uvec,ep,uexact,dt,&
+     &                     tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
+  
+      Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
+      
+      end subroutine Build_Rnewton
+
+!==============================================================================
+!  PERFORMS LINE SEARCH AND NEWTON ITERATION 
+      subroutine newt_line_search(uvec,iprob,L,ep,dt,nveclen,time,resE,resI, &
+     &                            aI,usum,icount,k)
+      
+      real(wp), dimension(nveclen),    intent(inout) :: uvec
+      integer,                         intent(in   ) :: iprob
+      integer,                         intent(in   ) :: L
+      real(wp),                        intent(in   ) :: ep,dt
+      integer,                         intent(in   ) :: nveclen
+      real(wp),                        intent(in   ) :: time
+      real(wp), dimension(nveclen,is), intent(inout) :: resE,resI
+      real(wp),                        intent(in   ) :: aI!from aI(L,L)
+      real(wp), dimension(nveclen),    intent(in   ) :: usum
+      integer,                         intent(inout) :: icount,k
+      
+      integer                              :: j  !Do loop variables
+      integer                              :: programStep !input to problemsub
+      integer                              :: ierr,iDT
+      real(wp), dimension(nveclen)         :: uveciter !Storage of uvec
+      real(wp), dimension(nveclen)         :: uexact !input to problemsub (not needed)
+      real(wp)                             :: tfinal !output of problemsub (not needed)
+      real(wp), dimension(nveclen)         :: Rnewton !Newton 
+      real(wp), dimension(nveclen,nveclen) :: xjac,xjacinv !Jacobian
+
+      real(wp)                             :: tmp !temp variable for accuracy
+      real(wp) :: al,rnorm,rnormt
+      real(wp), dimension(nveclen) :: dxi
+      
+      do k = 1,150
+        icount = icount + 1
+
+        programStep=2
+        call problemsub(iprob,programStep,nveclen,&
+      &          uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
+
+        Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
+        rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
+
+        programStep=3
+        call problemsub(iprob,programStep,nveclen,&
+      &          uvec,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
+
+        xjacinv=Mat_invert(xjac)
+
+        dxi = MatMul(xjacinv,Rnewton(:))
+
+        al = 1.0_wp
+        do j = 1,10    !   under-relax the value of the parameter alpha
+          uveciter(:) = uvec(:) - al*dxi
+
+          programStep=2
+          call problemsub(iprob,programStep,nveclen,&
+     &       uveciter,ep,uexact,dt,tfinal,iDT,time,resE(1,L),resI(1,L),aI,xjac)
+
+          Rnewton(:) =uveciter(:)-aI*resI(:,L)-usum(:)
+          rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
+
+           if((rnormt >= rnorm) .and. (rnorm >= 1.0e-4_wp)) then
+             al = 0.5_wp * al
+           else
+             exit
+           endif
+        enddo
+
+        uvec(:) = uvec(:) - al*dxi
+
+        rnorm = rnormt
+       if (k >= 125) print*,'L',L,'k',k,'tmp',rnorm,'j',j
+        if(rnorm <= 1.0e-9_wp) then
+          ierr = 0
+          return
+        endif
+      enddo      
+      end subroutine newt_line_search
+      
+!==============================================================================
+!  PEFORMS QR DECOMPOSITION USING QR       
+      subroutine QR_decomp(xjac,nveclen,rnewton,uvec)
+      
+      real(wp), dimension(:,:), intent(inout) :: xjac
+      integer,                  intent(in   ) :: nveclen
+      real(wp), dimension(:),   intent(inout) :: rnewton,uvec
+      
+      real(wp), dimension(nveclen) :: wrk_c,wrk_d
+      logical                :: snglr
+      
+      call qrdcmp(xjac,nveclen,nveclen,wrk_c,wrk_d,snglr)
+      if (snglr) then
+        write(*,*)'matrix is singular in Newton Iteration: Stopping'
+        stop
+      else
+        call qrsolv(xjac,nveclen,nveclen,wrk_c,wrk_d,rnewton)
+      endif
+      uvec(:)=uvec(:)-rnewton(:) 
+      end subroutine QR_decomp       
+      
+!==============================================================================
+!  INVERTS MATRIX OF SIZE 2X2 TO 4X4
+      function Mat_invert(mat)
+
+      real(wp), dimension(:,:), intent(in   ) :: mat
       integer :: mat_size
       !real(wp), dimension(:,:), allocatable, intent(  out) :: xinv
-      real(wp), dimension(size(xjac(:,1)),size(xjac(1,:))) :: xinv
-      real(wp), dimension(size(xjac(:,1)),size(xjac(1,:))) :: Invert_Jacobian
+      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: xinv
+      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: Mat_invert
       real(wp) :: x11,x12,x13,x14
       real(wp) :: x21,x22,x23,x24
       real(wp) :: x31,x32,x33,x34
       real(wp) :: x41,x42,x43,x44
       real(wp) :: det,detI   
 
-      mat_size=size(xjac(:,1))
+      mat_size=size(mat(:,1))
      
       if(mat_size==2)then
-        det = (xjac(1,1)*xjac(2,2)-xjac(1,2)*xjac(2,1))
-        xinv(1,1) =  xjac(2,2)/det
-        xinv(1,2) = -xjac(1,2)/det
-        xinv(2,1) = -xjac(2,1)/det
-        xinv(2,2) =  xjac(1,1)/det
+        det = (mat(1,1)*mat(2,2)-mat(1,2)*mat(2,1))
+        xinv(1,1) =  mat(2,2)/det
+        xinv(1,2) = -mat(1,2)/det
+        xinv(2,1) = -mat(2,1)/det
+        xinv(2,2) =  mat(1,1)/det
       elseif(mat_size==3)then
 
-        x11 = xjac(1,1)
-        x12 = xjac(1,2)
-        x13 = xjac(1,3)
-        x21 = xjac(2,1)
-        x22 = xjac(2,2)
-        x23 = xjac(2,3)
-        x31 = xjac(3,1)
-        x32 = xjac(3,2)
-        x33 = xjac(3,3)
+        x11 = mat(1,1)
+        x12 = mat(1,2)
+        x13 = mat(1,3)
+        x21 = mat(2,1)
+        x22 = mat(2,2)
+        x23 = mat(2,3)
+        x31 = mat(3,1)
+        x32 = mat(3,2)
+        x33 = mat(3,3)
 
         det = - x13*x22*x31 + x12*x23*x31 +  x13*x21*x32& 
      &        - x11*x23*x32 - x12*x21*x33 +  x11*x22*x33
@@ -219,22 +280,22 @@
 
       elseif(mat_size==4)then
 
-        x11 = xjac(1,1)
-        x12 = xjac(1,2)
-        x13 = xjac(1,3)
-        x14 = xjac(1,4)
-        x21 = xjac(2,1)
-        x22 = xjac(2,2)
-        x23 = xjac(2,3)
-        x24 = xjac(2,4)
-        x31 = xjac(3,1)
-        x32 = xjac(3,2)
-        x33 = xjac(3,3)
-        x34 = xjac(3,4)
-        x41 = xjac(4,1)
-        x42 = xjac(4,2)
-        x43 = xjac(4,3)
-        x44 = xjac(4,4)
+        x11 = mat(1,1)
+        x12 = mat(1,2)
+        x13 = mat(1,3)
+        x14 = mat(1,4)
+        x21 = mat(2,1)
+        x22 = mat(2,2)
+        x23 = mat(2,3)
+        x24 = mat(2,4)
+        x31 = mat(3,1)
+        x32 = mat(3,2)
+        x33 = mat(3,3)
+        x34 = mat(3,4)
+        x41 = mat(4,1)
+        x42 = mat(4,2)
+        x43 = mat(4,3)
+        x44 = mat(4,4)
 
         det =& 
      &  (x14*x23*x32*x41 - x13*x24*x32*x41 - &
@@ -301,7 +362,8 @@
      & -(x13*x22*x31) + x12*x23*x31 + x13*x21*x32 - &
      &   x11*x23*x32  - x12*x21*x33 + x11*x22*x33  ) * detI
       endif
-      Invert_Jacobian=xinv
+      Mat_invert=xinv
       return
-      end function Invert_Jacobian
+      end function Mat_invert
+!==============================================================================      
       end module Newton

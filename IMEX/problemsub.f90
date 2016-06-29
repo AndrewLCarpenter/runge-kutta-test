@@ -37,21 +37,12 @@
        call Kaps(     programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       elseif (iprob==4) then
-     !  print*,'calling kreiss'
-     !  print*,programStep
        call Kreiss(   programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,time,resE,resI,akk,xjac)
-      elseif (iprob==5) then !some sort of problem, fully implicit doesnt converge and the imex doesn't work
+      elseif (iprob==5) then 
        call Lorenz(   programStep,nveclen,uvec,ep,&
      &                uexact,dt,tfinal,iDT,resE,resI,akk,xjac)
       endif
-
-   !   write(*,*)'allocated variables'                     
-    !  AllOCATE(uvec(nveclen),uexact(nveclen))
-    !  ALLOCATE(resE(nveclen),resI(nveclen))
-    !  ALLOCATE(xjac(nveclen,nveclen))
-
-
 
       return
       end subroutine
