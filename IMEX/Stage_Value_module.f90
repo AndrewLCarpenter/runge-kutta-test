@@ -1,6 +1,7 @@
       module Stage_value_module
   
       use precision_vars
+      use runge_kutta
 
       implicit none
     
@@ -11,10 +12,10 @@
       
 !==============================================================================      
       
-      subroutine Stage_Value_Predictor(ipred,L,nrk,ustage,predvec,uvec,uveco,&
+      subroutine Stage_Value_Predictor(ipred,L,ustage,predvec,uvec,uveco,&
      &                                 alpha,ktime)
       
-      integer, intent(in  ) :: ipred,L,nrk,ktime
+      integer, intent(in  ) :: ipred,L,ktime
       real(wp), dimension(:,:), intent(in   ) :: ustage
       real(wp), dimension(:,:), intent(inout) :: predvec
       real(wp), dimension(:),   intent(inout) :: uvec
@@ -24,19 +25,19 @@
       if (ipred==2) then
         call Stage_Value_Predictor2(L,uvec,ustage,uveco,alpha,ktime)
       else 
-        call Stage_Value_Predictor1(L,nrk,ustage,predvec)
+        call Stage_Value_Predictor1(L,ustage,predvec)
       endif   
       
       end subroutine Stage_Value_Predictor
       
 !==============================================================================
       
-      subroutine Stage_Value_Predictor1(L,nrk,ustage,predvec)
+      subroutine Stage_Value_Predictor1(L,ustage,predvec)
       
 !  The SVP routine is called after the newton iteration has converged.  (stage L)
 !  Thus, it is predicting the starting guesses of the next stage (L+1)
 
-      integer,                    intent(in   ) :: L,nrk
+      integer,                    intent(in   ) :: L
       real(wp),   dimension(:,:), intent(in   ) :: ustage
       real(wp),   dimension(:,:), intent(inout) :: predvec
       !real(wp),   dimension(is,4),         intent(in   ) :: bD
@@ -55,7 +56,7 @@
 
       M = L+1
 
-      if(L <= nrk-1) then
+      if(L <= ns-1) then
         predvec(:,M) = ustage(:,L) ! previous guess as starter
       else
         predvec(:,2) = ustage(:,6)

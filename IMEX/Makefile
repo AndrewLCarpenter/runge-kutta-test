@@ -13,13 +13,12 @@ SRCS = precision_vars.f90\
        control_variables.f90\
        poly_fit_Mod.f90\
        CSR_Variables.f90\
+       runge_kutta.f90\
        output_module.f90\
        Stage_Value_module.f90\
-       Invert_Jacobian.f90\
        Allocate_CSR_Storage.f90\
        QR_Module.f90\
-       Newton_Iteration.f90\
-       rungeadd.f90\
+       Newton.f90\
        test_cases.f90\
        vanderPol.f90\
        Pureschi.f90\
@@ -40,13 +39,12 @@ OBJS = precision_vars.o\
        control_variables.o\
        poly_fit_Mod.o\
        CSR_Variables.o\
+       runge_kutta.o\
        output_module.o\
        Stage_Value_module.o\
-       Invert_Jacobian.o\
        Allocate_CSR_Storage.o\
        QR_Module.o\
-       Newton_Iteration.o\
-       rungeadd.o\
+       Newton.o\
        test_cases.o\
        vanderPol.o\
        Pureschi.o\

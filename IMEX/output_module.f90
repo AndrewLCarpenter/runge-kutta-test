@@ -1,37 +1,56 @@
+!******************************************************************************
+! Module to output data for test_cases.f90 to data files in the form:
+! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
+! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
+! /"probname"/"casename"/"probname"_"casename"_conv.dat
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+! POLY_FIT_MOD.F90              *CONTAINS SUBROUTINES TO OUTPUT DATA
+! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
+! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
+!******************************************************************************
+
       module  output_module
 
       use precision_vars     , only : wp
       use poly_fit_Mod
       use control_variables
+      use runge_kutta
 
       implicit none
       
       public :: create_file_paths, output_names, init_output_files
       public :: output_conv_stiff,output_terminal_iteration
       public :: output_terminal_final,output_conv_error
+      
       private
+      character(len=80) :: fileloc   !file  location
 
       contains
+!==============================================================================
+!  SETS FILE LOCATION VARIABLE
+      subroutine set_file_loc()
+      
+      fileloc=trim(probname)//'/'//trim(casename)//'/' ! get file location  
+      
+      end subroutine set_file_loc           
       
 !==============================================================================
-
-      subroutine create_file_paths(casename)
+!  CHECKS AND CREATES FILE PATHS FOR OUTPUTS
+      subroutine create_file_paths()
       
-      character(len=*), intent(in) :: casename
-      character(len=80) :: fileloc   !file name and location
       logical           :: dirExists   !check if directory exists
       
-      fileloc=trim(probname)//'/'//trim(casename)//'/' ! create directory
+      call set_file_loc
       inquire( file=trim(fileloc)//'/.', exist=dirExists ) 
       if (.not.dirExists)call system('mkdir -p '//trim(fileloc)) 
        
       end subroutine create_file_paths
       
 !==============================================================================  
-
-      subroutine output_names(casename)
-       
-      character(len=*), intent(in) :: casename
+!  WRITES PROBLEM NAME AND CASE NAME TO THE TOP OF THE TERMIINAL OUTPUT
+      subroutine output_names()
        
       write(*,*)'Problem name: ',trim(probname)
       write(*,*)'Casename: ', trim(casename)
@@ -39,26 +58,22 @@
       end subroutine output_names
        
 !==============================================================================
-
-      subroutine init_output_files(casename,nveclen,ep)
-      
-      character(len=*), intent(in) :: casename
+!  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
+      subroutine init_output_files(nveclen,ep)
+     
       integer,          intent(in) :: nveclen
       character(len=4)             :: ext='.dat'  !file extension
       character(len=1)             :: istr        !loop index placeholder
       integer                      :: i
       real(wp)                     :: ep
-      character(len=80) :: fileloc,filename   !file name and location
-      
-      fileloc=trim(probname)//'/'//trim(casename)//'/' ! get file location      
+      character(len=80) :: filename   !file name and location
+          
       do i = 1,nveclen
         write(istr,"(I1.1)")i
-        filename= &
-     &           trim(probname)//'_'//trim(casename)//'_'//istr//ext
+        filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
         open(49+i,file=trim(fileloc)//filename)
         write(49+i,*)'zone T = "ep = ',ep,'",'
-        filename= &
-     &           trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+        filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
         open(59+i,file=trim(fileloc)//filename)
         write(59+i,*)'zone T = "ep = ',ep,'",'
       enddo
@@ -66,13 +81,12 @@
       end subroutine init_output_files
       
 !==============================================================================      
-
-      subroutine output_conv_stiff(casename,nveclen,jactual,epsave, &
+!  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
+      subroutine output_conv_stiff(nveclen,jactual,epsave, &
      &                             b1save,b1Psave)
       
       integer, parameter                   :: jmax=81
       
-      character(len=*),         intent(in) :: casename
       integer,                  intent(in) :: nveclen,jactual
       real(wp), dimension(:,:), intent(in) :: b1save,b1Psave
       real(wp), dimension(:),   intent(in) :: epsave
@@ -81,9 +95,8 @@
       character(len=1)             :: istr        !loop index placeholder
       integer                      :: i,j
       real(wp)                     :: ep
-      character(len=80) :: fileloc,filename   !file name and location
-     
-      fileloc= trim(probname)//'/'//trim(casename)//'/' ! get file location   
+      character(len=80) :: filename   !file name and location
+      
       filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
       
       open(35,file=trim(fileloc)//filename)
@@ -103,6 +116,7 @@
       end subroutine output_conv_stiff
 
 !==============================================================================
+!  OUTPUTS ITERATION INFORMATION TO TERMINAL      
       subroutine output_terminal_iteration(cost,error,errorP,jsamp,sig,mwt, &
      &           ep,nveclen,b)
             
@@ -140,10 +154,10 @@
       end subroutine output_terminal_iteration
 
 !==============================================================================
-
-      subroutine output_terminal_final(icount,jcount,nrk,stageE,stageI,maxiter)
+!  OUTPUTS FINAL DATA BLOCK TO TERMINAL. ITERATION INFORMATION
+      subroutine output_terminal_final(icount,jcount,stageE,stageI,maxiter)
       
-      integer,                intent(in   ) :: icount,jcount,nrk
+      integer,                intent(in   ) :: icount,jcount
       real(wp), dimension(:), intent(inout) :: stageE,stageI,maxiter
       
       real(wp) :: tmp
@@ -152,18 +166,18 @@
       tmp = 1.0_wp*icount/jcount
       write(*,*)'average iterations per step',tmp
              
-      stageE(2:) = (nrk-1)*stageE(2:)/jcount
-      stageI(2:) = (nrk-1)*stageI(2:)/jcount
+      stageE(2:) = (ns-1)*stageE(2:)/jcount
+      stageI(2:) = (ns-1)*stageI(2:)/jcount
 
       write(*,*)'error of initial guess is '
-      do i = 2,nrk
+      do i = 2,ns
         write(*,*) i,stageE(i),maxiter(i),stageI(i)
       enddo
       
       end subroutine output_terminal_final
 
 !==============================================================================
-
+!  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
       subroutine output_conv_error(cost,uvec,uexact,errvecT)
       real(wp),               intent(in) :: cost
       real(wp), dimension(:), intent(in) :: uvec,uexact,errvecT

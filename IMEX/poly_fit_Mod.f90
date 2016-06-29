@@ -1,3 +1,10 @@
+!******************************************************************************
+! Module to take data from test_cases and perform linear regression
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+
       module  poly_fit_Mod
 
       use precision_vars     , only : wp
@@ -9,8 +16,8 @@
 
       contains
 
-! ==============================================================================
-
+!==============================================================================
+!  PERFORM LINEAR REGRESSION USING ROUTINES AND FUNCTIONS CONTAINED BELOW
       subroutine fit(x,y,ndata,sig,mwt,a,b,siga,sigb,chi2,q)
       
       integer,                      intent(in   )  ::  mwt,ndata
