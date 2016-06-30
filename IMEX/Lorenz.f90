@@ -1,5 +1,5 @@
-      subroutine Lorenz(programStep,nveclen,uvec,ep,uexact,dt, &
-                         &  tfinal,iDT,resE,resI,akk,xjac)
+      subroutine Lorenz(programStep,nveclen,ep,dt, &
+                         &  tfinal,iDT,rese_vec,resi_vec,akk)
       use precision_vars
       use control_variables
 
@@ -13,9 +13,9 @@
       integer,                   intent(in   ) :: programStep
  
       !INIT vars
-      real(wp), dimension(vecl), intent(inout) :: uvec
+      !real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
-      real(wp), dimension(vecl), intent(  out) :: uexact
+      !real(wp), dimension(vecl), intent(  out) :: uexact
       real(wp),                  intent(inout) :: dt
       integer,                   intent(inout) :: nveclen
       real(wp),                  intent(  out) :: tfinal
@@ -26,16 +26,17 @@
       integer                                  :: i,j
 
       !RHS vars
-      real(wp), dimension(vecl), intent(  out) :: resE,resI
+      real(wp), dimension(vecl), intent(  out) :: rese_vec,resi_vec
       
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
-      real(wp), dimension(vecl,vecl), intent(  out) :: xjac
+      !real(wp), dimension(vecl,vecl), intent(  out) :: xjac
 
 
       if (programStep==-1) then
         nvecLen = vecl
         probname='Lorenz   '         
+        tol=1.0e-11_wp
       elseif (programStep==0) then
         !dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp)
         dt = 0.25_wp/10**((iDT-1)/20.0_wp)        
@@ -68,12 +69,12 @@
 
           case('IMEX')
             if (programStep==1 .or.programStep==2) then
-              resE(1)=0.0_wp
-              resE(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              resE(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))     
-              resI(1)=dt*sigma*(uvec(2)-uvec(1))/ep
-              resI(2)=0.0_wp
-              resI(3)=0.0_wp
+              rese_vec(1)=0.0_wp
+              rese_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
+              rese_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))     
+              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
+              resi_vec(2)=0.0_wp
+              resi_vec(3)=0.0_wp
             elseif (programStep==3) then
               xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
               xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep
@@ -89,10 +90,10 @@
             endif
           case('IMPLICIT')
             if (programStep==1 .or.programStep==2) then
-              resE(:)=0.0_wp
-              resI(1)=dt*sigma*(uvec(2)-uvec(1))/ep
-              resI(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              resI(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
+              rese_vec(:)=0.0_wp
+              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
+              resi_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
+              resi_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
             elseif (programStep==3) then
               xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
               xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep

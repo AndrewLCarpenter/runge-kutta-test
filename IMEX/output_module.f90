@@ -26,13 +26,16 @@
       
       private
       character(len=80) :: fileloc   !file  location
+      character(len=4)             :: ext='.dat'  !file extension
 
       contains
+      
 !==============================================================================
 !  SETS FILE LOCATION VARIABLE
       subroutine set_file_loc()
       
-      fileloc=trim(probname)//'/'//trim(casename)//'/' ! get file location  
+      fileloc=trim(temporal_splitting)//'/'// &
+     &        trim(probname)//'/'//trim(casename)//'/' ! get file location  
       
       end subroutine set_file_loc           
       
@@ -61,12 +64,11 @@
 !  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
       subroutine init_output_files(nveclen,ep)
      
-      integer,          intent(in) :: nveclen
-      character(len=4)             :: ext='.dat'  !file extension
-      character(len=1)             :: istr        !loop index placeholder
-      integer                      :: i
-      real(wp)                     :: ep
-      character(len=80) :: filename   !file name and location
+      integer,  intent(in) :: nveclen
+      real(wp), intent(in) :: ep
+      character(len=80)    :: filename   !file name and location
+      character(len=1)     :: istr        !loop index placeholder
+      integer              :: i
           
       do i = 1,nveclen
         write(istr,"(I1.1)")i
@@ -82,26 +84,20 @@
       
 !==============================================================================      
 !  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
-      subroutine output_conv_stiff(nveclen,jactual,epsave, &
-     &                             b1save,b1Psave)
+      subroutine output_conv_stiff(nveclen,jactual,epsave)
       
-      integer, parameter                   :: jmax=81
+      integer,                intent(in) :: nveclen,jactual
+      real(wp), dimension(:), intent(in) :: epsave
       
-      integer,                  intent(in) :: nveclen,jactual
-      real(wp), dimension(:,:), intent(in) :: b1save,b1Psave
-      real(wp), dimension(:),   intent(in) :: epsave
-      
-      character(len=4)             :: ext='.dat'  !file extension
-      character(len=1)             :: istr        !loop index placeholder
-      integer                      :: i,j
-      real(wp)                     :: ep
+      character(len=1)  :: istr        !loop index placeholder
+      integer           :: i,j
       character(len=80) :: filename   !file name and location
       
       filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
       
       open(35,file=trim(fileloc)//filename)
       do i=1,nveclen
-        write(35,*)'zone T = "Var ',i,': Implicit",'
+        write(35,*)'zone T = "Var ',i,': ',trim(temporal_splitting),'",'
         do j=1,jactual
           write(35,50)epsave(j),b1save(j,i)
         enddo
@@ -117,40 +113,37 @@
 
 !==============================================================================
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
-      subroutine output_terminal_iteration(cost,error,errorP,jsamp,sig,mwt, &
-     &           ep,nveclen,b)
+      subroutine output_terminal_iteration(cost,jsamp,sig,mwt,ep,nveclen)
             
-      real(wp), dimension(:),   intent(in) :: cost      
-      real(wp), dimension(:,:), intent(in) :: error,errorP    
+      real(wp), dimension(:),   intent(in) :: cost       
       integer,                  intent(in) :: jsamp
       real(wp), dimension(:),   intent(in) :: sig
       integer,                  intent(in) :: mwt
       real(wp),                 intent(in) :: ep
       integer,                  intent(in) :: nveclen
-      real(wp), dimension(nveclen*2), intent(out) :: b
       
       real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
       integer                        :: i
 
-            !**GATHER OUTPUT VALUES
-            do i = 1,nveclen
-              call fit(cost,error(:,i),jsamp,sig,mwt,a(i),&
-     &         b(i),siga1(i),sigb1(i),chi2(i),q)
-              call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),&
-     &         b(i+nveclen),siga1(i+nveclen),sigb1(i+nveclen),&
-     &         chi2(i+nveclen),q)
-            enddo
+      !**GATHER OUTPUT VALUES
+      do i = 1,nveclen
+        call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
+     &           siga1(i),sigb1(i),chi2(i),q)
+        call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
+     &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)
+        
+      enddo
 
-            !**OUTPUT TO TERMINAL**
-            write(*,60,advance="no")ep
-            do i = 1,nveclen*2-1
-              write(*,60,advance="no")a(i),b(i)
-            enddo
-            write(*,60)a(nveclen*2),b(nveclen*2)
+      !**OUTPUT TO TERMINAL**
+      write(*,60,advance="no")ep
+        do i = 1,nveclen*2-1
+          write(*,60,advance="no")a(i),b(i)
+        enddo
+      write(*,60)a(nveclen*2),b(nveclen*2)
 
-   
    60 format( e12.5,1x,12(f8.3,1x))
+   
       end subroutine output_terminal_iteration
 
 !==============================================================================
@@ -178,9 +171,8 @@
 
 !==============================================================================
 !  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
-      subroutine output_conv_error(cost,uvec,uexact,errvecT)
+      subroutine output_conv_error(cost)
       real(wp),               intent(in) :: cost
-      real(wp), dimension(:), intent(in) :: uvec,uexact,errvecT
       
       integer  :: i
       real(wp) :: tmp

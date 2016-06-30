@@ -1,5 +1,5 @@
-      subroutine Kreiss(programStep,nveclen,uvec,ep,uexact,dt, &
-                       &  tfinal,iDT,time,resE,resI,akk,xjac)
+      subroutine Kreiss(programStep,nveclen,ep,dt, &
+                       &  tfinal,iDT,time,rese_vec,resi_vec,akk)
 
       use precision_vars
       use control_variables
@@ -11,24 +11,24 @@
       integer,                   intent(in   ) :: programStep
 
       !INIT vars
-      real(wp), dimension(vecl), intent(inout) :: uvec
+      !real(wp), dimension(vecl), intent(inout) :: uvec
       real(wp),                  intent(in   ) :: ep
-      real(wp), dimension(vecl), intent(  out) :: uexact
+     ! real(wp), dimension(vecl), intent(  out) :: uexact
       real(wp),                  intent(inout) :: dt
       integer,                   intent(inout) :: nveclen
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
       real(wp),                  intent(in   ) :: time
 
-      real(wp) :: epi,lambda_p,lambda_m,a,b,sin_t,cos_t  
+      real(wp) :: epi,lambda_p,lambda_m,sin_t,cos_t  
       real(wp), dimension(nveclen,nveclen) :: E_mat,wrk_matrix
       real(wp), dimension(nveclen)         :: wrk_vec   
       !RHS vars
-      real(wp), dimension(vecl+1), intent(  out) :: resE,resI
+      real(wp), dimension(vecl+1), intent(  out) :: rese_vec,resi_vec
       
       !Jacob vars
       real(wp),                       intent(in   ) :: akk
-      real(wp), dimension(vecl,vecl), intent(  out) :: xjac
+      !real(wp), dimension(vecl,vecl), intent(  out) :: xjac
       !print*,'in Kreiss'
 
       
@@ -36,6 +36,7 @@
        ! print*,'in kreiss step=-1'
         nvecLen = vecl
         probname='Kreiss   '   
+        tol=1.0e-10_wp
       else if (programStep==0) then
             epi =1/ep
       cos_t=cos(time)
@@ -78,10 +79,10 @@
 
           case('IMEX')
                 if (programStep==1 .or.programStep==2) then
-              resE(1) = dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))
-              resE(2) = dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))
-              resI(1) = dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
-              resI(2) = dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
+              rese_vec(1) = dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))
+              rese_vec(2) = dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))
+              resi_vec(1) = dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
+              resi_vec(2) = dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
             elseif (programStep==3) then
               xjac(1,1) = 1.0_wp-akk*dt*(-cos_t*cos_t)/ep
               xjac(1,2) = 0.0_wp-akk*dt*(-sin_t*cos_t)/ep
@@ -90,11 +91,11 @@
             endif
           case('IMPLICIT')
             if (programStep==1 .or.programStep==2) then
-              resE(1) = 0.0_wp
-              resE(2) = 0.0_wp
-              resI(1) =  dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))+ &
+              rese_vec(1) = 0.0_wp
+              rese_vec(2) = 0.0_wp
+              resi_vec(1) =  dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))+ &
      &                   dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
-              resI(2) =  dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))+ &
+              resi_vec(2) =  dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))+ &
      &                   dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
 
             elseif (programStep==3) then

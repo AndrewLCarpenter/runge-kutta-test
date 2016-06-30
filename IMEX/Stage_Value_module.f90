@@ -1,6 +1,16 @@
+!******************************************************************************
+! Module to perform stage value prediction on uvec
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
+! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
+!******************************************************************************
+
       module Stage_value_module
   
       use precision_vars
+      use control_variables
       use runge_kutta
 
       implicit none
@@ -12,34 +22,28 @@
       
 !==============================================================================      
       
-      subroutine Stage_Value_Predictor(ipred,L,ustage,predvec,uvec,uveco,&
-     &                                 alpha,ktime)
+      subroutine Stage_Value_Predictor(ipred,L,ktime)
       
       integer, intent(in  ) :: ipred,L,ktime
-      real(wp), dimension(:,:), intent(in   ) :: ustage
-      real(wp), dimension(:,:), intent(inout) :: predvec
-      real(wp), dimension(:),   intent(inout) :: uvec
-      real(wp), dimension(:),   intent(in   ) :: uveco
-      real(wp), dimension(:,:), intent(in   ) :: alpha      
       
       if (ipred==2) then
-        call Stage_Value_Predictor2(L,uvec,ustage,uveco,alpha,ktime)
+        call Stage_Value_Predictor2(L,ktime)
       else 
-        call Stage_Value_Predictor1(L,ustage,predvec)
+        call Stage_Value_Predictor1(L)
       endif   
       
       end subroutine Stage_Value_Predictor
       
 !==============================================================================
       
-      subroutine Stage_Value_Predictor1(L,ustage,predvec)
+      subroutine Stage_Value_Predictor1(L)
       
 !  The SVP routine is called after the newton iteration has converged.  (stage L)
 !  Thus, it is predicting the starting guesses of the next stage (L+1)
 
       integer,                    intent(in   ) :: L
-      real(wp),   dimension(:,:), intent(in   ) :: ustage
-      real(wp),   dimension(:,:), intent(inout) :: predvec
+    !  real(wp),   dimension(:,:), intent(in   ) :: ustage
+     ! real(wp),   dimension(:,:), intent(inout) :: predvec
       !real(wp),   dimension(is,4),         intent(in   ) :: bD
       !real(wp),   dimension(is,is),        intent(  out) :: alpha
 
@@ -86,13 +90,13 @@
  
 !==============================================================================
 
-      subroutine Stage_Value_Predictor2(L,uvec,ustage,uveco,alpha,ktime)
+      subroutine Stage_Value_Predictor2(L,ktime)
       
       integer,                  intent(in  )  :: L,ktime
-      real(wp), dimension(:,:), intent(in   ) :: ustage
-      real(wp), dimension(:),   intent(inout) :: uvec
-      real(wp), dimension(:),   intent(in   ) :: uveco
-      real(wp), dimension(:,:), intent(in   ) :: alpha      
+      !real(wp), dimension(:,:), intent(in   ) :: ustage
+      !real(wp), dimension(:),   intent(inout) :: uvec
+   !   real(wp), dimension(:),   intent(in   ) :: uveco
+      !real(wp), dimension(:,:), intent(in   ) :: alpha      
             
       integer :: j
       real(wp), dimension(5) :: bint
@@ -122,14 +126,14 @@
       end subroutine Stage_Value_Predictor2
 
 !==============================================================================
-
-      function xnorm(a,b)
+!  COMPUTES NORM OF TWO VECTORS
+      function xnorm(vec1,vec2)
       
-      real(wp)                              :: xnorm
-      real(wp), dimension(:), intent(in   ) :: a,b
+      real(wp)                           :: xnorm
+      real(wp), dimension(:), intent(in) :: vec1,vec2
       
-      xnorm = sqrt(dot_product(a(:)-b(:),a(:)-b(:))/  &
-     &                          dot_product(a(:),a(:)))
+      xnorm = sqrt(dot_product(vec1(:)-vec2(:),vec1(:)-vec2(:))/  &
+     &                          dot_product(vec1(:),vec1(:)))
       
       return
       end function xnorm
