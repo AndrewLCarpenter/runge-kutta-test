@@ -1,3 +1,10 @@
+!******************************************************************************
+! Module to set global variables for the RK scheme constants
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+
       module runge_kutta
       
       use precision_vars
@@ -6,7 +13,8 @@
       
       public 
       
-!********VARIABLES*************************************************************
+!-------------------VARIABLES--------------------------------------------------
+
       integer,   parameter              :: is=9
       
       real(wp),   dimension(is,is)      :: aE
@@ -26,7 +34,7 @@
       real(wp),   dimension(is,is)      :: al4N
       real(wp),   dimension(is,is)      :: al4D
       character(len=25)                 :: casename
-!******************************************************************************
+!------------------------------------------------------------------------------
       
       contains
       

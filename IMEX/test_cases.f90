@@ -87,6 +87,7 @@
       real(wp), dimension(is)               :: stageE,stageI,maxiter
                     
 !-----------------------------USER INPUT---------------------------------------
+
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
       write(*,*)'what is case?'  !input range of runge kutta cases
@@ -95,7 +96,7 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
       do icase = cases,cases
-        
+
         !**initilizations?**
         stageE(:) = 0.0_wp
         stageI(:) = 0.0_wp
