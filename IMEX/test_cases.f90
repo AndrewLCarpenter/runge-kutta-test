@@ -8,7 +8,7 @@
 !     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     problem 5) Lorenz
-!     problem 6) 
+!     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
 !     problem 7) 
 !------------------------------------------------------------------------------
 !
@@ -26,6 +26,7 @@
 ! PURESCHI.F90              *PROBLEM CONSTANTS FOR PURESCHI & RUSSO
 ! KAPS.F90                  *PROBLEM CONSTANTS FOR KAPS
 ! KREISS.F90                *PROBLEM CONSTANTS FOR KREISS'
+! Rossler_Chaos.F90         *PROBLEM CONSTANTS FOR Rossler_Chaos'
 ! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
 !------------------------------------------------------------------------------
 !
