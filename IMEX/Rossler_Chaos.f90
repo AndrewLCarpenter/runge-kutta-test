@@ -7,7 +7,7 @@
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
 
-      subroutine Lorenz(programStep,nveclen,ep,dt, &
+      subroutine Rossler_Chaos(programStep,nveclen,ep,dt, &
      &                  tfinal,iDT,rese_vec,resi_vec,akk)
       use precision_vars
       use control_variables
@@ -15,9 +15,9 @@
       implicit none
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
-      real(wp), parameter    :: sigma=5.0_wp
-      real(wp), parameter    :: beta=1.0_wp/3.0_wp
-      real(wp), parameter    :: rho=2.0_wp
+      real(wp), parameter    :: aa= 0.15_wp
+      real(wp), parameter    :: bb= 0.20_wp
+      real(wp), parameter    :: cc=10.00_wp
                  
       integer, intent(in   ) :: programStep
  
@@ -42,7 +42,7 @@
       !**Pre-initialization. Get problem name and vector length**
       if (programStep==-1) then
         nvecLen = vecl
-        probname='Lorenz   '         
+        probname='Rossler_3'         
         tol=1.0e-11_wp
         
       !**Initialization of problem information**
@@ -53,7 +53,7 @@
         tfinal = 1.0_wp                    ! final time
 
         !**Exact Solution**
-        open(unit=39,file='exact.lorenz.data')
+        open(unit=39,file='exact.Rossler_Chaos.data')
         rewind(39)
         do i=1,81
           read(39,*)ExactTot(i,1),ExactTot(i,2),ExactTot(i,3)
@@ -80,47 +80,45 @@
           case('IMEX') ! For IMEX schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              rese_vec(1)=0.0_wp
-              rese_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              rese_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))     
-              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
-              resi_vec(2)=0.0_wp
-              resi_vec(3)=0.0_wp
+              rese_vec(:)=0.0_wp
+              resi_vec(1)=dt * (-uvec(2)-uvec(3)) ;
+              resi_vec(2)=dt * (+uvec(1)+aa*uvec(2)) ;
+              resi_vec(3)=dt * (bb + uvec(3)*(uvec(1)-cc)) ;
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep
-              xjac(1,3) = 0.0_wp-akk*dt*(0.0_wp)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
+              xjac(1,3) = 0.0_wp-akk*dt*(+1.0_wp)
 
-              xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp)
+              xjac(2,2) = 1.0_wp-akk*dt*(aa )
               xjac(2,3) = 0.0_wp-akk*dt*(0.0_wp)
 
-              xjac(3,1) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(3,1) = 0.0_wp-akk*dt*(uvec(3))
               xjac(3,2) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(3,3) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(3,3) = 1.0_wp-akk*dt*(-cc + uvec(1))
             endif
             
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
               rese_vec(:)=0.0_wp
-              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
-              resi_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              resi_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
-            !**Jacobian**
+              resi_vec(1)=dt * (-uvec(2)-uvec(3)) ;
+              resi_vec(2)=dt * (+uvec(1)+aa*uvec(2)) ;
+              resi_vec(3)=dt * (bb + uvec(3)*(uvec(1)-cc)) ;
+            !**Jacobian* *
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.0_wp-akk*dt*(sigma)/ep
-              xjac(1,3) = 0.0_wp-akk*dt*(0)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
+              xjac(1,3) = 0.0_wp-akk*dt*(+1.0_wp)
 
-              xjac(2,1) = 0.0_wp-akk*dt*(rho-uvec(3))
-              xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)
-              xjac(2,3) = 0.0_wp-akk*dt*(-uvec(1))
+              xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp)
+              xjac(2,2) = 1.0_wp-akk*dt*(aa )
+              xjac(2,3) = 0.0_wp-akk*dt*(0.0_wp)
 
-              xjac(3,1) = 0.0_wp-akk*dt*(uvec(2))
-              xjac(3,2) = 0.0_wp-akk*dt*(uvec(1))
-              xjac(3,3) = 1.0_wp-akk*dt*(-beta)
+              xjac(3,1) = 0.0_wp-akk*dt*(uvec(3))
+              xjac(3,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(3,3) = 1.0_wp-akk*dt*(-cc + uvec(1))
             endif
             
           case default ! To catch invald inputs
@@ -132,4 +130,4 @@
           
       endif
 
-      end subroutine Lorenz
+      end subroutine Rossler_Chaos

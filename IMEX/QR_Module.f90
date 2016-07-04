@@ -1,13 +1,22 @@
+!******************************************************************************
+! Module to perform QR decomposition
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+
       module QR_Module
 
       use precision_vars
 
       implicit none
 
-      private
       public    ::  qrdcmp, qrsolv
-
+      private
+      
       contains
+
+!==============================================================================
 
       SUBROUTINE qrdcmp(a,n,np,c,d,sing)
 
@@ -63,10 +72,10 @@
       enddo
       d(n)=a(n,n)
       if(d(n).eq.0.0_wp)sing=.true.
-      return
+      
       END subroutine qrdcmp
 
-!===========================================================================================================
+!==============================================================================
 
       SUBROUTINE qrsolv(a,n,np,c,d,b)
 
@@ -96,10 +105,10 @@
         enddo
       enddo
       call rsolv(a,n,np,d,b)                   !  Solve R x = Q^T b
-      return
+      
       END subroutine qrsolv
 
-!===========================================================================================================
+!==============================================================================
 
       SUBROUTINE rsolv(a,n,np,d,b)
 
@@ -124,7 +133,7 @@
         enddo
         b(i)=(b(i)-wrk)/d(i)
       enddo
-      return
+      
       end subroutine rsolv
-
+!==============================================================================
       end module QR_Module
