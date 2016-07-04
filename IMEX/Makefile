@@ -1,11 +1,12 @@
 .SUFFIXES: .o .c .f90 .F90 .mod
 
 CC = gcc
-FC = ifort
+#FC = ifort
+ FC = gfortran
 
 #FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
-#FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
-FCFLAGS = -check uninit -WB -O3 $(INCLUDESDIR)
+ FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+#FCFLAGS = -check uninit -WB -O3 $(INCLUDESDIR)
 #FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
