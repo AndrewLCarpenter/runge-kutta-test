@@ -136,7 +136,7 @@
           jsamp=j
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
-      
+
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &

@@ -124,8 +124,9 @@
       real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
       integer                        :: i,j
-      integer  :: jsamp
-      real(wp), dimension(isamp)           :: sig
+      integer                        :: jsamp
+      real(wp), dimension(isamp)     :: sig
+      
       sig(:)=0.0_wp
 
 
@@ -135,7 +136,7 @@
           jsamp=j
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
-      
+        jsamp=41
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &

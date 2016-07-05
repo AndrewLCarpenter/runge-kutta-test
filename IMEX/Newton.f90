@@ -51,7 +51,7 @@
 !            2 for newton
 !            3 for QR
 !/////////////////////////////     
-      typ = 2
+      typ = 1
 !----------------LINE SEARCH---------------------------------------------------
       if (typ==1) then
         call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
@@ -90,6 +90,7 @@
 !---------------------END QR---------------------------------------------------            
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
           if (k>=16) print*,'tmp',tmp,'L',L,'k',k!,'time',time
+         
           !if(tmp < 1.0e-12_wp) then
           if(tmp < tol) then
             ierr = 0

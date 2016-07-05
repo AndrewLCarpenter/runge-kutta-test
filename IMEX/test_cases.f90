@@ -135,9 +135,10 @@
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
+!           do iDT =1,1
 ! HACK
             do iDT = 1,isamp,1      
-             
+
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
@@ -251,7 +252,7 @@
 !----------------------------OUTPUTS-------------------------------------------
 
             call output_terminal_iteration(cost,0,ep,nveclen)
-                               
+              
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
@@ -269,10 +270,12 @@
           write(*,*)'Total time elapsed for this case: ',cputime2-cputime1,'sec'  
 
 !----------------------END OUTPUTS---------------------------------------------
+
           call deallocate_vars
         enddo                                       
 !----------------------END PROBLEMS LOOP---------------------------------------
       enddo                                 
 !----------------------END ALGORITHMS LOOP-------------------------------------
 !----------------------END PROGRAM---------------------------------------------
+
       END PROGRAM test_cases

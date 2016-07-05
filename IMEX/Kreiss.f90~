@@ -42,6 +42,7 @@
         nvecLen = vecl
         probname='Kreiss   '   
         tol=1.0e-10_wp
+        dt_error_tol=1.0e-13_wp
         
       else if (programStep==0) then
         !**Initialize constants**

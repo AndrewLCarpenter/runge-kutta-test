@@ -84,7 +84,6 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       integer                               :: jsamp
-      real(wp), dimension(isamp)            :: sig
       real(wp), dimension(is)               :: stageE,stageI,maxiter
                     
 !-----------------------------USER INPUT---------------------------------------
@@ -126,7 +125,7 @@
 
 !         call Allocata_CSR_Storage(problem,nveclen)
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
+          do jepsil = 1,1!6,jactual,1     
                          
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -137,8 +136,8 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
 ! HACK
-            do iDT = 1,isamp,1      
-             
+ !           do iDT = 1,isamp,1      
+             do iDT =1,1
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep=0
@@ -252,7 +251,7 @@
 !----------------------------OUTPUTS-------------------------------------------
 
             call output_terminal_iteration(cost,0,ep,nveclen)
-                               
+              
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
@@ -270,10 +269,13 @@
           write(*,*)'Total time elapsed for this case: ',cputime2-cputime1,'sec'  
 
 !----------------------END OUTPUTS---------------------------------------------
+          print*,'uvec',uvec
           call deallocate_vars
         enddo                                       
 !----------------------END PROBLEMS LOOP---------------------------------------
       enddo                                 
 !----------------------END ALGORITHMS LOOP-------------------------------------
 !----------------------END PROGRAM---------------------------------------------
+      print*,'time',t
+
       END PROGRAM test_cases

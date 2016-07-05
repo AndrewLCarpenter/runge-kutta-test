@@ -14,10 +14,7 @@
 
 !     Oregonator system
 !     
-!     x_t = - y - z
-!     y_t = + x + aa y
-!     z_t = + bb * x + (-cc + x) z
-!
+
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
@@ -60,27 +57,17 @@
       !**Initialization of problem information**
       elseif (programStep==0) then
       
-        !dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp) !used for exact solution
+!       dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp) !used for exact solution
 !  HACK
-!       dt = 0.0125_wp/10**((iDT-1)/20.0_wp) ! timestep 
+       dt = 0.0125_wp/10**((iDT-1)/20.0_wp) ! timestep 
 !  HACK
-        dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
-        tfinal = 1.0_wp                    ! final time
+!        dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
+        tfinal = 360.0_wp                    ! final time
 
         !**Exact Solution**
-        open(unit=39,file='exact.Oregonator.data')
-        rewind(39)
-        do i=1,81
-          read(39,*)ExactTot(i,1),ExactTot(i,2),ExactTot(i,3)
-          ExactTot(i,4) = 1.0_wp/10**((i-1)/(10.0_wp)) !  used for 81 values of ep
-        enddo
-        do i=1,81
-          diff = abs(ExactTot(i,4) - ep)
-          if(diff.le.1.0e-10_wp)then
-            uexact(:) = ExactTot(i,:vecl)
-            exit
-          endif
-        enddo
+        uexact(1)=0.1000814870318523e1_wp
+        uexact(2)=0.1228178521549917e4_wp
+        uexact(3)=0.1320554942846706e3_wp
 
         !**IC**
         uvec(1) = 1.0_wp

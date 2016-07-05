@@ -44,7 +44,7 @@
         nvecLen = vecl
         probname='Lorenz   '         
         tol=1.0e-14_wp
-        dt_error_tol=1.0e-13_wp
+        dt_error_tol=1.0e-11_wp
         
       !**Initialization of problem information**
       elseif (programStep==0) then
@@ -80,6 +80,29 @@
       elseif (programStep>=1) then
 
         select case (Temporal_Splitting)
+          
+          case('EXPLICIT') ! For fully implicit schemes
+            !**RHS**
+            if (programStep==1 .or.programStep==2) then
+              resI_vec(:)=0.0_wp
+              resE_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
+              resE_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
+              resE_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
+            !**Jacobian**
+            elseif (programStep==3) then
+              xjac(1,1) = 1.0_wp
+              xjac(1,2) = 0.0_wp
+              xjac(1,3) = 0.0_wp
+
+              xjac(2,1) = 0.0_wp
+              xjac(2,2) = 1.0_wp
+              xjac(2,3) = 0.0_wp
+
+              xjac(3,1) = 0.0_wp
+              xjac(3,2) = 0.0_wp
+              xjac(3,3) = 1.0_wp
+            endif
+        
 
           case('IMEX') ! For IMEX schemes
             !**RHS**
