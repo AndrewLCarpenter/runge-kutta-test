@@ -15,14 +15,14 @@
       public    
         
 !--------------------------VARIABLES-------------------------------------------
-!     character(len=80) :: Temporal_Splitting = 'IMEX'
-      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
+     character(len=80) :: Temporal_Splitting = 'IMEX'
+!      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
       character(len=9)  :: probname
       
       integer, parameter :: isamp=71   
-      integer, parameter :: jmax=81            
+      integer, parameter :: jmax=81     
       
-      real(wp) :: tol
+      real(wp) :: tol,dt_error_tol
 
       real(wp), dimension(:),   ALLOCATABLE :: uvec,uexact,b,usum,uveco
       real(wp), dimension(:),   allocatable :: errvec,errvecT,tmpvec

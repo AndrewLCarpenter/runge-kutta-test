@@ -84,7 +84,6 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       integer                               :: jsamp
-      real(wp), dimension(isamp)            :: sig
       real(wp), dimension(is)               :: stageE,stageI,maxiter
                     
 !-----------------------------USER INPUT---------------------------------------
@@ -250,10 +249,8 @@
 !           write(120,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
-            jsamp = 41 
-            sig(:) = 0.0_wp
 
-            call output_terminal_iteration(cost,jsamp,sig,0,ep,nveclen)
+            call output_terminal_iteration(cost,0,ep,nveclen)
                                
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen

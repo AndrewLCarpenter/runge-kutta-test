@@ -113,27 +113,34 @@
 
 !==============================================================================
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
-      subroutine output_terminal_iteration(cost,jsamp,sig,mwt,ep,nveclen)
+      subroutine output_terminal_iteration(cost,mwt,ep,nveclen)
             
-      real(wp), dimension(:),   intent(in) :: cost       
-      integer,                  intent(in) :: jsamp
-      real(wp), dimension(:),   intent(in) :: sig
+      real(wp), dimension(:),   intent(in) :: cost
+
       integer,                  intent(in) :: mwt
       real(wp),                 intent(in) :: ep
       integer,                  intent(in) :: nveclen
       
       real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
-      integer                        :: i
+      integer                        :: i,j
+      integer                        :: jsamp
+      real(wp), dimension(isamp)     :: sig
+      
+      sig(:)=0.0_wp
+
 
       !**GATHER OUTPUT VALUES
       do i = 1,nveclen
-        do k = 1,isamp
+        do j=1,size(error(:,i))
+          jsamp=j
+          if (error(j,i)<=log10(dt_error_tol)) exit
+        enddo
+      
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
-     &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)
-        
+     &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)   
       enddo
 
       !**OUTPUT TO TERMINAL**

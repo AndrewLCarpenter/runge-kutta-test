@@ -41,7 +41,8 @@
         nvecLen = vecl
         probname='vanderPol'     
         tol=1.0e-12_wp  
-
+        dt_error_tol=5.0e-14_wp
+        
       !**Initialization of problem information**        
       elseif (programStep==0) then
       

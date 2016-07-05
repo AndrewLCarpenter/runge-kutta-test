@@ -55,6 +55,7 @@
         nvecLen = vecl
         probname='Rossler_3'         
         tol=1.0e-14_wp
+        dt_error_tol=1.0e-13_wp
         
       !**Initialization of problem information**
       elseif (programStep==0) then

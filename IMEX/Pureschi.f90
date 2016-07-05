@@ -40,6 +40,7 @@
         nvecLen = vecl
         probname='Pureschi '   
         tol=1.0e-12_wp
+        dt_error_tol=1.0e-13_wp
         
       !**Initialization of problem information**        
       elseif (programStep==0) then
