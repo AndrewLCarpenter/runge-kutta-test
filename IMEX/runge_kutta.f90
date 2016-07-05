@@ -50,8 +50,8 @@
 
       do i=1,is
        do j=1,is
-        aE(i,j) = 0.0_wp
-        aI(i,j) = 0.0_wp
+         aE(i,j) = 0.0_wp
+         aI(i,j) = 0.0_wp
        enddo
        be(i)  = 0.0_wp
        bi(i)  = 0.0_wp
@@ -3123,6 +3123,8 @@
          bih(i) = beh(i)
        enddo
 
+       ce(:)  = 0.0_wp
+       ci(:)  = 0.0_wp
        do i = 1,ns
          do j = 1,ns
            cE(i) = cE(i) + aE(i,j)

@@ -24,6 +24,8 @@ SRCS = precision_vars.f90\
        Kaps.f90\
        Kreiss.f90\
        Lorenz.f90\
+       Rossler_Chaos.f90\
+       Oregonator.f90\
        problemsub.f90
       
 #OBJS2 = $(SRCS:.F90=.o)
@@ -45,6 +47,8 @@ OBJS = precision_vars.o\
        Kaps.o\
        Kreiss.o\
        Lorenz.o\
+       Rossler_Chaos.o\
+       Oregonator.o\
        problemsub.o
       
 #LINK = gfortran

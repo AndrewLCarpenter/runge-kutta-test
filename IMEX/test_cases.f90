@@ -9,7 +9,7 @@
 !     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     problem 5) Lorenz
 !     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
-!     problem 7) 
+!     problem 7) Oregonator
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -134,6 +134,9 @@
             !**INIT. OUTPUT FILES**
             call init_output_files(nveclen,ep)
 !--------------------------TIMESTEP LOOP----------------------------------------
+! HACK
+!           do iDT = isamp,isamp,1         !  use this loop to set exact solution
+! HACK
             do iDT = 1,isamp,1      
              
 
@@ -152,7 +155,7 @@
                 predvec(:,i) = uvec(:)
               enddo
 !--------------------------TIME ADVANCEMENT LOOP-------------------------------
-              do ktime = 1,1000000                      
+              do ktime = 1,100000000
                 if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
                 tt=t+Ci(1)*dt
                 !**STORE VALUES OF UVEC**
@@ -166,7 +169,8 @@
      
                 ustage(:,1) = uvec(:)
 
-                do L = 2,ns
+                !  ESDIRK Loop
+                do L = 2,ns                        
                 tt=t+Ci(L)*dt
 
                   usum(:) = uveco(:)
@@ -241,6 +245,10 @@
 
             enddo
 !----------------------------END TIMESTEP LOOP---------------------------------
+!  HACK used to write exact solution
+!           write(*,*)'writing exact solution'
+!           write(120,*)uvec
+!  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
             jsamp = 41 
             sig(:) = 0.0_wp

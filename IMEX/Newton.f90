@@ -63,12 +63,12 @@
 
           uveciter(:) = uvec(:) !store old uvec
 
-          call Build_Rnewton(Rnewton,ep,dt,time,aI,iprob,L)
+          call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
  
           !**GET INVERSE JACOBIAN**
           programStep=3
           call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
-     
+
           !          Backsolve to get solution
           
 !----------------------REGULAR NEWTON------------------------------------------          
@@ -114,15 +114,16 @@
       
 !==============================================================================
 !  CREATES RNEWTON FOR NEWTON ITERATION      
-      subroutine Build_Rnewton(Rnewton,ep,dt,time,aI,iprob,L)
+      subroutine Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
             
       real(wp), dimension(:), intent(  out) :: Rnewton
       real(wp),               intent(in   ) :: ep,dt,time,aI
-      integer,                intent(in   ) :: iprob,L
+      integer,                intent(in   ) :: nveclen,iprob,L
 
-      integer  :: iDT, programStep,nveclen
+      integer  :: iDT, programStep
       real(wp) :: tfinal 
       
+     
       programStep=2
       call problemsub(iprob,programStep,nveclen,ep,dt,&
      &                     tfinal,iDT,time,aI,L)!,resE(1,L),resI(1,L)
@@ -155,7 +156,7 @@
       do k = 1,150
         icount = icount + 1
    
-        call Build_Rnewton(Rnewton,ep,dt,time,aI,iprob,L)
+        call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
     
         rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 
@@ -174,7 +175,7 @@
                           !stored so that calculations are done correctly
           uvec(:) = uvec(:) - al*dxi
              
-          call Build_Rnewton(Rnewton,ep,dt,time,aI,iprob,L)
+          call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
     
           rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 

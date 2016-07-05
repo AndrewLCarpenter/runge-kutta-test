@@ -128,6 +128,7 @@
 
       !**GATHER OUTPUT VALUES
       do i = 1,nveclen
+        do k = 1,isamp
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
