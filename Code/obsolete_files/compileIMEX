@@ -1,0 +1,6 @@
+ #! /bin/sh
+
+gfortran -c *.f90
+gfortran *.o -o test_casesIMEX.out
+
+#-Wall
