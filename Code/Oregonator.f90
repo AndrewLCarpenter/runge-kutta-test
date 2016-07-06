@@ -19,9 +19,10 @@
       implicit none
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
-      real(wp), parameter    :: aa= 77.27_wp
-      real(wp), parameter    :: bb= 8.375e-6_wp
-      real(wp), parameter    :: cc= 0.161_wp
+      real(wp), parameter    :: aa= 77.27_wp !small=oscil large=flatline
+      real(wp), parameter    :: bb= 8.375e-6_wp !small=horizontal stretch large=oscil
+      real(wp), parameter    :: cc= 01610.0_wp !small=reduces large t behavior and amplifies low t
+                                             !large=oscil
                  
       integer, intent(in   ) :: programStep
  
@@ -44,8 +45,6 @@
       real(wp)                :: cct
 !------------------------------------------------------------------------------
 
-      !  Stiff component is cc
-      cct = cc / ep
 
       !**Pre-initialization. Get problem name and vector length**
       if (programStep==-1) then
@@ -76,6 +75,9 @@
         
       !**RHS and Jacobian**        
       elseif (programStep>=1) then
+      
+      !  Stiff component is cc
+      cct = cc / ep
 
         select case (Temporal_Splitting)
 

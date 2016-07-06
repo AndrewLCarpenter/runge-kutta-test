@@ -18,7 +18,6 @@
 !     y_t = + x + aa y
 !     z_t = + bb * x + (-cc + x) z
 !
-
       implicit none
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
@@ -55,7 +54,7 @@
         nvecLen = vecl
         probname='Rossler_3'         
         tol=1.0e-14_wp
-        dt_error_tol=1.0e-13_wp
+        dt_error_tol=2.0e-12_wp
         
       !**Initialization of problem information**
       elseif (programStep==0) then
@@ -64,7 +63,7 @@
 !  HACK
 !       dt = 0.0125_wp/10**((iDT-1)/20.0_wp) ! timestep 
 !  HACK
-        dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
+        dt = 1.0_wp/10**((iDT-1)/20.0_wp) ! timestep 
         tfinal = 1.0_wp                    ! final time
 
         !**Exact Solution**
@@ -130,7 +129,7 @@
             elseif (programStep==3) then
               xjac(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
               xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
-              xjac(1,3) = 0.0_wp-akk*dt*(+1.0_wp)
+              xjac(1,3) = 0.0_wp-akk*dt*(-1.0_wp)
 
               xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp)
               xjac(2,2) = 1.0_wp-akk*dt*(aa )

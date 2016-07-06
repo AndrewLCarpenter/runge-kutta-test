@@ -10,6 +10,7 @@
 !     problem 5) Lorenz
 !     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
 !     problem 7) Oregonator
+!     problem 8) 
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -45,7 +46,6 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
-
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
@@ -96,7 +96,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------
-      do icase = 1,18
+      do icase = cases,cases
 
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -138,7 +138,7 @@
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
 !           do iDT =1,1
 ! HACK
-            do iDT = 1,isamp,1      
+            do iDT =1,isamp,1      
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -229,6 +229,11 @@
   
                 t = t + dt                  !increment time
                 if(t >= tfinal) exit
+! HACK output time solution                
+!              write(193,*)t,uvec(1) !!!!!!!!!!!!!!!!!!!!!!!!!!
+!              write(194,*)t,uvec(2) !!!!!!!!!!!!!!!!!!!!!!!!!!
+!              write(195,*)t,uvec(3) !!!!!!!!!!!!!!!!!!!!!!!!!!
+! HACK              
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      
@@ -236,8 +241,8 @@
               
               call output_conv_error(cost(iDT))
               
-!
               tmpvec(:) = abs(uvec(:)-uexact(:))
+
               do i = 1,nvecLen
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo

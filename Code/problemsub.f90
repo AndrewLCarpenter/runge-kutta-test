@@ -49,6 +49,9 @@
       elseif (iprob==7) then 
        call Oregonator(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      elseif (iprob==8) then 
+       call Brusselator(   programStep,nveclen,ep,&
+     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
       endif
       
       if(programStep >= 0) then

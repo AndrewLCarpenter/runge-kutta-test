@@ -67,6 +67,8 @@
         !**IC**
         uvec(1) = 2.0_wp
         uvec(2) = -0.6666654321121172_wp
+ !       uvec(2) = -2.0_wp/3.0_wp+10.0_wp/81.0_wp*ep-292.0_wp/2187.0_wp*ep**2 &
+ !    &            -1814.0_wp/19683.0_wp*ep**3
       
       !**RHS and Jacobian**
       elseif (programStep>=1) then

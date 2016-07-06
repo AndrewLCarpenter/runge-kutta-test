@@ -132,7 +132,7 @@
 
       !**GATHER OUTPUT VALUES
       do i = 1,nveclen
-        do j=1,size(error(:,i))
+        do j=2,size(error(:,i))
           jsamp=j
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
