@@ -1,7 +1,6 @@
       module Burgers_Module 
 
       use precision_vars
-      use SBP_Coef_Module
 
       implicit none
 

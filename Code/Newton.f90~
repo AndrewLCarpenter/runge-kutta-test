@@ -89,7 +89,7 @@
           endif
 !---------------------END QR---------------------------------------------------            
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-          if (k>16) print*,'tmp',tmp,'L',L,'k',k!,'time',time
+          if (k>17) print*,'tmp',tmp,'L',L,'k',k!,'time',time
           !if(tmp < 1.0e-12_wp) then
           if(tmp < tol) then
             ierr = 0

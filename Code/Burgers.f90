@@ -7,23 +7,30 @@
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
 
-      subroutine Brusselator(programStep,nveclen,ep,dt, &
-     &                       tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Burgers(programStep,nveclen,ep,dt, &
+     &                   tfinal,iDT,time,resE_vec,resI_vec,akk)
 
       use precision_vars
       use control_variables
+      use Burgers_Module
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
-      integer,  parameter    :: vecl=2
+      integer,  parameter    :: vecl=32
       integer, intent(in   ) :: programStep
-      real(wp), parameter    :: aa=1.0_wp, bb=1.7_wp
 
       !INIT vars
+      real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
+      real(wp), dimension(vecl) :: x
+      
+      
+      
+      
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
       integer,  intent(  out) :: nveclen
       real(wp), intent(  out) :: tfinal
+      real(wp), intent(in   ) :: time
       integer,  intent(in   ) :: iDT
 
       real(wp), dimension(81,vecl+1) :: ExactTot
@@ -40,67 +47,62 @@
       !**Pre-initialization. Get problem name and vector length**
       if (programStep==-1) then
         nvecLen = vecl
-        probname='Brusselat'     
-        tol=9.9e-11_wp  
-        dt_error_tol=1.0e-13_wp
+        probname='Burgers  '     
+        tol=1.0e-12_wp  
+        dt_error_tol=5.0e-14_wp
         
       !**Initialization of problem information**        
       elseif (programStep==0) then
-      
-        dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep   
-        tfinal = 1.0_wp                   ! final time
-        
-        !**Exact Solution** 
-        open(unit=39,file='exact.brusselator4.data')
-        rewind(39)
-        do i=1,81
-          read(39,*)ExactTot(i,1),ExactTot(i,2)
-          ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp))  !  used for 81 values of ep
-        enddo
-        do i=1,81
-          diff = abs(ExactTot(i,3) - ep)
-          if(diff.le.1.0e-10_wp)then
-            uexact(:) = ExactTot(i,:vecl)
-            exit
-          endif
-        enddo
 
-        !**IC**
-        uvec(1) = 1.0_wp
-        uvec(2) = 1.0_wp
-      
+        call grid(x,xL,xR,vecl)
+        call exact_Burg(vecl,x,uvec,ep,0.0_wp)
+           
+        dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep   
+        dx = x(2)-x(1)
+        tfinal = 0.5_wp                   ! final time
+        
+        call exact_Burg(vecl,x,uexact,ep,tfinal)
+              
       !**RHS and Jacobian**
       elseif (programStep>=1) then
 
         select case (Temporal_Splitting)
+        
+          case('EXPLICIT')
+            if (programStep==1 .or.programStep==2) then
+              call Burgers_dUdt(vecl,x,uvec,resE_vec,time,ep,dt)
+              
+            elseif (programStep==3) then
+              
+            endif
 
           case('IMEX') ! For IMEX schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              resE_vec(1) = dt*(aa-uvec(1)*bb-uvec(1))
-              resE_vec(2) = dt*(uvec(1)*bb)
-              resI_vec(1) = dt*( uvec(1)*uvec(1)*uvec(2)*ep)
-              resI_vec(2) = dt*(-uvec(1)*uvec(1)*uvec(2)*ep)
+              resE_vec(1) = dt*uvec(2)
+              resE_vec(2) = 0.0_wp
+              resI_vec(1) = 0.0_wp
+              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(2.0_wp*uvec(1)*uvec(2)*ep)
-              xjac(1,2) = 0.0_wp-akk*dt*(       uvec(1)*uvec(1)*ep)
-              xjac(2,1) = 0.0_wp-akk*dt*(2.0_wp*uvec(1)*uvec(2)*ep)
-              xjac(2,2) = 1.0_wp-akk*dt*(      -uvec(1)*uvec(1)*ep)
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+              xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
             endif
             
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
               resE_vec(:) = 0.0_wp
-              resI_vec(1) = dt*(aa+uvec(1)*uvec(1)*uvec(2)/ep-uvec(1)*bb-uvec(1))
-              resI_vec(2) = dt*(  -uvec(1)*uvec(1)*uvec(2)/ep+uvec(1)*bb)
+              resI_vec(1) = dt*uvec(2)
+              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(   2.0_wp*uvec(1)*uvec(2)/ep-bb-1.0_wp)
-              xjac(1,2) = 0.0_wp-akk*dt*(          uvec(1)*uvec(1)/ep)
-              xjac(2,1) = 0.0_wp-akk*dt*(bb-2.0_wp*uvec(1)*uvec(2)/ep)
-              xjac(2,2) = 1.0_wp-akk*dt*(         -uvec(1)*uvec(1)/ep)
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
+              xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
             endif
             
           case default ! To catch invald inputs
@@ -112,4 +114,4 @@
         
       endif
       
-      end subroutine Brusselator
+      end subroutine vanderPol

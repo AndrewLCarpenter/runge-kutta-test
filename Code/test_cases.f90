@@ -135,10 +135,10 @@
             call init_output_files(nveclen,ep)
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
-           do iDT = isamp,isamp,1         !  use this loop to set exact solution
+!           do iDT = isamp,isamp,1         !  use this loop to set exact solution
 !           do iDT =1,1
 ! HACK
-  !          do iDT =1,isamp,1      
+            do iDT =1,isamp,1      
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -252,7 +252,7 @@
             enddo
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
-           write(*,*)'writing exact solution'
+!           write(*,*)'writing exact solution'
 !           write(120,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------

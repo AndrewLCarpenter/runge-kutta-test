@@ -51,7 +51,7 @@
 !            2 for newton
 !            3 for QR
 !/////////////////////////////     
-      typ = 2
+      typ = 1
 !----------------LINE SEARCH---------------------------------------------------
       if (typ==1) then
         call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
