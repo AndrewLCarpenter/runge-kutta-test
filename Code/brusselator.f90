@@ -17,7 +17,7 @@
 !-----------------------VARIABLES----------------------------------------------
       integer,  parameter    :: vecl=2
       integer, intent(in   ) :: programStep
-      real(wp), parameter    :: aa=5.0_wp, bb=2.0_wp
+      real(wp), parameter    :: aa=1.0_wp, bb=1.7_wp
 
       !INIT vars
       real(wp), intent(in   ) :: ep
@@ -41,7 +41,7 @@
       if (programStep==-1) then
         nvecLen = vecl
         probname='Brusselat'     
-        tol=5.0e-9_wp  
+        tol=9.9e-11_wp  
         dt_error_tol=1.0e-13_wp
         
       !**Initialization of problem information**        
@@ -51,7 +51,7 @@
         tfinal = 1.0_wp                   ! final time
         
         !**Exact Solution** 
-        open(unit=39,file='exact.brusselator.data')
+        open(unit=39,file='exact.brusselator2.data')
         rewind(39)
         do i=1,81
           read(39,*)ExactTot(i,1),ExactTot(i,2)
