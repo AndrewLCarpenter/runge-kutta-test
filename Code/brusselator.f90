@@ -17,7 +17,7 @@
 !-----------------------VARIABLES----------------------------------------------
       integer,  parameter    :: vecl=2
       integer, intent(in   ) :: programStep
-      real(wp), parameter    :: aa=5.0_wp, bb=2.0_wp
+      real(wp), parameter    :: aa=1.0_wp, bb=1.7_wp
 
       !INIT vars
       real(wp), intent(in   ) :: ep
@@ -41,7 +41,7 @@
       if (programStep==-1) then
         nvecLen = vecl
         probname='Brusselat'     
-        tol=5.0e-9_wp  
+        tol=9.9e-11_wp  
         dt_error_tol=1.0e-13_wp
         
       !**Initialization of problem information**        
@@ -51,7 +51,7 @@
         tfinal = 1.0_wp                   ! final time
         
         !**Exact Solution** 
-        open(unit=39,file='exact.brusselator.data')
+        open(unit=39,file='exact.brusselator4.data')
         rewind(39)
         do i=1,81
           read(39,*)ExactTot(i,1),ExactTot(i,2)
@@ -77,30 +77,30 @@
           case('IMEX') ! For IMEX schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              resE_vec(1) = 0.0_wp
-              resE_vec(2) = 0.0_wp
-              resI_vec(1) = 0.0_wp
-              resI_vec(2) = 0.0_wp
+              resE_vec(1) = dt*(aa-uvec(1)*bb-uvec(1))
+              resE_vec(2) = dt*(uvec(1)*bb)
+              resI_vec(1) = dt*( uvec(1)*uvec(1)*uvec(2)*ep)
+              resI_vec(2) = dt*(-uvec(1)*uvec(1)*uvec(2)*ep)
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
+              xjac(1,1) = 1.0_wp-akk*dt*(2.0_wp*uvec(1)*uvec(2)*ep)
+              xjac(1,2) = 0.0_wp-akk*dt*(       uvec(1)*uvec(1)*ep)
+              xjac(2,1) = 0.0_wp-akk*dt*(2.0_wp*uvec(1)*uvec(2)*ep)
+              xjac(2,2) = 1.0_wp-akk*dt*(      -uvec(1)*uvec(1)*ep)
             endif
             
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
               resE_vec(:) = 0.0_wp
-              resI_vec(1) = dt*(aa+uvec(1)*( uvec(1)*uvec(2)-bb-1))
-              resI_vec(2) = dt*(   uvec(1)*(-uvec(1)*uvec(2)+bb  ))
+              resI_vec(1) = dt*(aa+uvec(1)*uvec(1)*uvec(2)/ep-uvec(1)*bb-uvec(1))
+              resI_vec(2) = dt*(  -uvec(1)*uvec(1)*uvec(2)/ep+uvec(1)*bb)
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(   2.0_wp*uvec(1)*uvec(2)-bb-1)
-              xjac(1,2) = 0.0_wp-akk*dt*(          uvec(1)*uvec(1))
-              xjac(2,1) = 0.0_wp-akk*dt*(bb-2.0_wp*uvec(1)*uvec(2))
-              xjac(2,2) = 1.0_wp-akk*dt*(          uvec(1)*uvec(1))
+              xjac(1,1) = 1.0_wp-akk*dt*(   2.0_wp*uvec(1)*uvec(2)/ep-bb-1.0_wp)
+              xjac(1,2) = 0.0_wp-akk*dt*(          uvec(1)*uvec(1)/ep)
+              xjac(2,1) = 0.0_wp-akk*dt*(bb-2.0_wp*uvec(1)*uvec(2)/ep)
+              xjac(2,2) = 1.0_wp-akk*dt*(         -uvec(1)*uvec(1)/ep)
             endif
             
           case default ! To catch invald inputs

@@ -1,22 +1,26 @@
       module Burgers_Module 
 
       use precision_vars
+      use SBP_Coef_Module
 
       implicit none
 
-      public    ::  grid,init,error,plot
+      public    ::  grid,exact_Burg,error,plot,dx
       private
+      
+      real(wp)  :: dx
 
       contains
 
 !==============================================================================
 
-      subroutine grid(x,nveclen)
+      subroutine grid(x,xL,xR,nveclen)
 
       implicit none
 
       integer,                      intent(in   ) :: nveclen
-      real(wp), dimension(nveclen), intent(inout) :: x
+      real(wp), dimension(nveclen), intent(  out) :: x
+      real(wp),                     intent(in   ) :: xL,xR
 
       integer                                     :: i
 
@@ -29,14 +33,15 @@
 
 !==============================================================================
 
-      subroutine init(nveclen,x,u,time,eps)
+      subroutine exact_Burg(nveclen,x,u,eps,time)
 
       implicit none 
 
       integer,                     intent(in)    :: nveclen
-      real(wp),                    intent(in)    :: time, eps
-      real(wp), dimension(nvec),   intent(inout) :: x,u
-
+      real(wp),                    intent(in)    :: eps,time
+      real(wp), dimension(nvec),   intent(in)    :: x
+      real(wp), dimension(nvec),   intent(  out) :: u
+      
       integer                                    :: i
       real(wp)                                   :: NL_Burg_exactsolution
 
@@ -45,7 +50,7 @@
       enddo
 
       return
-      end subroutine init
+      end subroutine exact_Burg
 
 !==============================================================================
 
@@ -177,14 +182,14 @@
 
 !==============================================================================
 
-      subroutine Burgers_dUdt(nveclen,x,u,dudt,time,eps,dx,dt)
+      subroutine Burgers_dUdt(nveclen,x,u,dudt,time,eps,dt)
 
       implicit none
 
       integer,                      intent(in   ) :: nveclen
       real(wp), dimension(nveclen), intent(in   ) :: x,u
       real(wp), dimension(nveclen), intent(  out) :: dudt
-      real(wp),                     intent(in   ) :: time, eps, dx, dt
+      real(wp),                     intent(in   ) :: time, eps, dt
 
       real(wp)                                    :: NL_Burg_exactsolution
       real(wp)                                    :: NL_Burg_exact_derivative

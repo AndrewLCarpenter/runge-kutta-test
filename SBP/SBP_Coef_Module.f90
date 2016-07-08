@@ -7,9 +7,41 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  D1_242, D2_242
+      public  ::  Define_CSR_Operators,nnz,ia,ja,a,Pmat,Pinv
 
       contains
+!==============================================================================
+      subroutine Define_CSR_Operators(n,nnz,ia,ja,a)
+      
+      implicit none
+      
+      integer,                    intent(in   ) :: n,nnz
+
+      integer,   parameter                      ::   order = 242
+
+!     CSR storage for derivative matrices
+      integer                                   :: nnz_D1, nnz_D2
+      integer,   dimension(n+1)                 :: iD1, iD2
+      integer,   dimension(:), allocatable      :: jD1, jD2
+      real(wp),  dimension(:), allocatable      ::  D1,  D2
+
+      integer                                   :: i,j
+
+      continue
+
+      if(order == 242) then
+        nnz_D1 = 28+4*(n-8)
+        allocate(jD1(nnz_D1),D1(nnz_D1))
+        nnz_D2 = 38+5*(n-8)
+        allocate(jD2(nnz_D2),D2(nnz_D2))
+      endif
+     
+      call D1_242(n,nnz_D1,iD1,jD1,D1,Pmat,Pinv)!makeidt's global not what i have now, will fixc tomorrow
+      call D2_242(n,nnz_D2,iD2,jD2,D2)
+      
+      end subroutine Define_CSR_Operators
+!==============================================================================            
+      
 
       subroutine D1_242(n,nnz,ia,ja,a,Pmat,Pinv)
 
@@ -78,13 +110,12 @@
 
       deallocate(d1mat,D1blk,D2blk,D1blkT)
 
-      return
 
       end subroutine D1_242
 
 ! ======================================================================================
 
-      subroutine D2_242(n,nnz,ia,ja,a,Pmat,Pinv)
+      subroutine D2_242(n,nnz,ia,ja,a)
 
       implicit none
 
@@ -94,7 +125,7 @@
       integer,   dimension(nnz),  intent(  out) :: ja
 
       real(wp),  dimension(nnz),  intent(  out) ::  a
-      real(wp),  dimension(4  )                 ::  Pmat, Pinv
+      real(wp),  dimension(4  )                 ::  Pmat_L, Pinv_L
 
       integer                                   :: i,j,k
       integer                                   :: icnt, jcnt
@@ -120,9 +151,9 @@
 
       h = 1.0_wp / (n - 1)
 
-      Pmat(1:4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
+      Pmat_L(1:4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
 
-      Pinv(:)   = 1.0_wp / Pmat(:)
+      Pinv_L(:)   = 1.0_wp / Pmat_L(:)
 
       d1vec(:) = + reshape((/-24.0_wp/17.0_wp, 59.0_wp/34.0_wp,-4.0_wp/17.0_wp, -3.0_wp/34.0_wp                /),(/4/))
       d2mat(:) = - reshape((/  1.0_wp/12.0_wp,-16.0_wp/12.0_wp,30.0_wp/12.0_wp,-16.0_wp/12.0_wp,1.0_wp/12.0_wp /),(/5/))
@@ -153,8 +184,8 @@
         M2blk(4,7-j) = M2blk(4,7-j) - d1vec(j)
       enddo
       do i = 1,4
-        D1blk(i,:) = Pinv(  i)*M1blk(i,:)
-        D2blk(i,:) = Pinv(5-i)*M2blk(i,:)
+        D1blk(i,:) = Pinv_L(  i)*M1blk(i,:)
+        D2blk(i,:) = Pinv_L(5-i)*M2blk(i,:)
       enddo
 
       call CSR_Filler(n,nnz,d2mat,D1blk,D2blk, ia,ja,a)
@@ -306,7 +337,6 @@
          if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
       endif
 
-      return
 
       end subroutine test_error
 
