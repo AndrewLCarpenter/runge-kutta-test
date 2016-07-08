@@ -95,7 +95,7 @@
       read(*,*)cases
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
-!-------------------------ALGORITHMS LOOP--------------------------------------
+!-------------------------ALGORITHMS LOOP--------------------------------------  
       do icase = cases,cases
 
         !**initilizations?**
@@ -126,7 +126,7 @@
 
 !         call Allocata_CSR_Storage(problem,nveclen)
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
+          do jepsil = 1,1!1,jactual,1     
                          
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -136,9 +136,9 @@
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
-!           do iDT =1,1
+           do iDT =1,1
 ! HACK
-            do iDT =1,isamp,1      
+!            do iDT =1,isamp,1      
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -184,8 +184,15 @@
                   if(ipred/=2) uvec(:) = predvec(:,L)  
 
 !---------------BEG NEWTON ITERATION ------------------------------------------
-                  call Newton_Iteration(iprob,L,ep,dt,&
-     &                                  nveclen,tt,aI(L,L),icount,k)
+                  !select case (temporal_splitting)
+                  !  case default
+                  call Newton_Iteration(iprob,L,ep,dt,nveclen,&
+     &                                      tt,aI(L,L),icount,k)
+                 !   case('EXPLICIT')
+                    !Skip newton iteration
+                 !     call problemsub
+                 !   k=0
+                !  end select
 !---------------END NEWTON ITERATION-------------------------------------------
 
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
@@ -207,11 +214,14 @@
 !-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
                 uvec(:) = uveco(:)
-
+  !              print*,uvec(1:2)
                 do LL = 1,ns 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
+   !               print*,'resE',resE(:,LL)
                 enddo
-
+   !             print*,uvec(1:2)
+   !             print*,dt
+    !            if(uvec(1)>=1e5_wp) stop
 !-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
@@ -233,7 +243,8 @@
 !              write(193,*)t,uvec(1) !!!!!!!!!!!!!!!!!!!!!!!!!!
 !              write(194,*)t,uvec(2) !!!!!!!!!!!!!!!!!!!!!!!!!!
 !              write(195,*)t,uvec(3) !!!!!!!!!!!!!!!!!!!!!!!!!!
-! HACK              
+! HACK             
+ 
               enddo                                          
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      
@@ -242,13 +253,13 @@
               call output_conv_error(cost(iDT))
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
-
+              print*,iDT,uvec(1)
+              print*,'ex',uexact(1)
               do i = 1,nvecLen
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-
             enddo
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution

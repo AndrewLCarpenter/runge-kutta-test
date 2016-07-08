@@ -29,7 +29,7 @@
       real(wp), dimension(nveclen) :: resE_vec,resI_vec
 
       if     (iprob==1) then
-       call vanderPol(programStep,nveclen,ep,&
+       call vanderPol(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==2) then
        call Pureschi(    programStep,nveclen,ep,&
@@ -52,6 +52,9 @@
       elseif (iprob==8) then 
        call Brusselator(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      elseif (iprob==9) then
+       call Burgers(       programStep,nveclen,ep,&
+     &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       endif
       
       if(programStep >= 0) then

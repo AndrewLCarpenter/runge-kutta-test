@@ -62,32 +62,39 @@
           icount = icount + 1
 
           uveciter(:) = uvec(:) !store old uvec
-
-          call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
- 
-          !**GET INVERSE JACOBIAN**
-          programStep=3
-          call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
-
-          !          Backsolve to get solution
           
-!----------------------REGULAR NEWTON------------------------------------------          
-          if (typ==2) then
-            xjacinv=Mat_invert(xjac)
+          select case(temporal_splitting)
+            case default        
+              call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
 
-           !temp=matmul(xjacinv,Rnewton) !**want to use this but there is a different truncation/round off error compared to the explicit do loop
-           !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
-            do i = 1,nvecLen
-              do j = 1,nvecLen
-                uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
-              enddo
-            enddo
+              !**GET INVERSE JACOBIAN**
+              programStep=3
+              call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
+
+              !          Backsolve to get solution
+              
+!----------------------REGULAR NEWTON------------------------------------------          
+              if (typ==2) then
+                xjacinv=Mat_invert(xjac)
+
+!temp=matmul(xjacinv,Rnewton) !**want to use this but there is a different truncation/round off error compared to the explicit do loop
+               !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
+                do i = 1,nvecLen
+                  do j = 1,nvecLen
+                    uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
+                  enddo
+                enddo
 !----------------------END REGULAR NEWTON--------------------------------------            
 !----------------------QR------------------------------------------------------             
-          elseif (typ==3) then
-            call QR_decomp(xjac,nveclen,rnewton)
-          endif
-!---------------------END QR---------------------------------------------------            
+              elseif (typ==3) then
+                call QR_decomp(xjac,nveclen,rnewton)
+              endif
+!---------------------END QR---------------------------------------------------    
+        
+            case('EXPLICIT')
+              uvec(:)=usum(:)
+          end select
+          
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
           if (k>17) print*,'tmp',tmp,'L',L,'k',k!,'time',time
           !if(tmp < 1.0e-12_wp) then
@@ -126,7 +133,7 @@
      
       programStep=2
       call problemsub(iprob,programStep,nveclen,ep,dt,&
-     &                     tfinal,iDT,time,aI,L)!,resE(1,L),resI(1,L)
+     &                     tfinal,iDT,time,aI,L)
   
       Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
       

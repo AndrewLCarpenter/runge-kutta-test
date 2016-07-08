@@ -15,9 +15,9 @@
       public    
         
 !--------------------------VARIABLES-------------------------------------------
-    !  character(len=80) :: Temporal_Splitting = 'IMEX'
-      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
-!!!!! character(len=80) :: Temporal_Splitting = 'EXPLICIT'
+  !    character(len=80) :: Temporal_Splitting = 'IMEX'
+   !   character(len=80) :: Temporal_Splitting = 'IMPLICIT'
+      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)  :: probname
       
       integer, parameter :: isamp=71   

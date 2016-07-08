@@ -37,7 +37,7 @@
         allocate(jD2(nnz_D2),D2(nnz_D2))
       endif
      
-      call D1_242(n,nnz_D1,iD1,jD1,D1,Pmat,Pinv)
+      call D1_242(n,nnz_D1,iD1,jD1,D1,Pmat,Pinv)!makeidt's global not what i have now, will fixc tomorrow
       call D2_242(n,nnz_D2,iD2,jD2,D2)
       
       end subroutine Define_CSR_Operators

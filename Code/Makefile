@@ -18,6 +18,8 @@ SRCS = precision_vars.f90\
        Stage_Value_module.f90\
        QR_Module.f90\
        Newton.f90\
+       SBP_Coef_Module.f90\
+       Burgers_Mod.f90\
        test_cases.f90\
        vanderPol.f90\
        Pureschi.f90\
@@ -27,6 +29,7 @@ SRCS = precision_vars.f90\
        Rossler_Chaos.f90\
        Oregonator.f90\
        bruesselator.f90\
+       Burgers.f90\
        problemsub.f90
       
 #OBJS2 = $(SRCS:.F90=.o)
@@ -42,6 +45,8 @@ OBJS = precision_vars.o\
        Stage_Value_module.o\
        QR_Module.o\
        Newton.o\
+       SBP_Coef_Module.o\
+       Burgers_Mod.o\
        test_cases.o\
        vanderPol.o\
        Pureschi.o\
@@ -51,6 +56,7 @@ OBJS = precision_vars.o\
        Rossler_Chaos.o\
        Oregonator.o\
        brusselator.o\
+       Burgers.o\
        problemsub.o
       
 #LINK = gfortran

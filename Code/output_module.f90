@@ -123,7 +123,7 @@
       
       real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
-      integer                        :: i,j
+      integer                        :: i,j,k   
       integer                        :: jsamp
       real(wp), dimension(isamp)     :: sig
       
@@ -131,6 +131,10 @@
 
 
       !**GATHER OUTPUT VALUES
+      do k=1,size(error(1,:))
+        write(240,*)error(1,k)      
+      enddo
+
       do i = 1,nveclen
         do j=2,size(error(:,i))
           jsamp=j

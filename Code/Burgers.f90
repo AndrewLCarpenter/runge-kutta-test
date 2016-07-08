@@ -16,7 +16,7 @@
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
-      integer,  parameter    :: vecl=32
+      integer,  parameter    :: vecl=256
       integer, intent(in   ) :: programStep
 
       !INIT vars
@@ -34,7 +34,7 @@
       integer,  intent(in   ) :: iDT
 
       real(wp), dimension(81,vecl+1) :: ExactTot
-      real(wp)                       :: diff
+      real(wp)                       :: diff,tinitial
       integer                        :: i,j
 
       !RHS vars
@@ -55,9 +55,11 @@
       elseif (programStep==0) then
 
         call grid(x,xL,xR,vecl)
-        call exact_Burg(vecl,x,uvec,ep,0.0_wp)
+        
+        tinitial=0.0_wp
+        call exact_Burg(vecl,x,uvec,ep,tinitial)
            
-        dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep   
+        dt = 0.25_wp*0.25_wp*0.0001_wp/10**((iDT-1)/20.0_wp) ! timestep   
         dx = x(2)-x(1)
         tfinal = 0.5_wp                   ! final time
         
@@ -69,9 +71,12 @@
         select case (Temporal_Splitting)
         
           case('EXPLICIT')
+            !**RHS**
             if (programStep==1 .or.programStep==2) then
               call Burgers_dUdt(vecl,x,uvec,resE_vec,time,ep,dt)
               
+              resI_vec(:)=0.0_wp
+            !**Jacobian**              
             elseif (programStep==3) then
               
             endif
@@ -79,30 +84,19 @@
           case('IMEX') ! For IMEX schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              resE_vec(1) = dt*uvec(2)
-              resE_vec(2) = 0.0_wp
-              resI_vec(1) = 0.0_wp
-              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
-              xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
+
             endif
             
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              resE_vec(:) = 0.0_wp
-              resI_vec(1) = dt*uvec(2)
-              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+
             !**Jacobian**
             elseif (programStep==3) then
-              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-              xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
-              xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
-              xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
+
             endif
             
           case default ! To catch invald inputs
@@ -114,4 +108,4 @@
         
       endif
       
-      end subroutine vanderPol
+      end subroutine Burgers

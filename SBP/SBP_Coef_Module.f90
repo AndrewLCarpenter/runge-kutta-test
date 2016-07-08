@@ -4,31 +4,28 @@
 
       implicit none
 
-     ! integer,   parameter                      :: wp = 8
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,nnz,ia,ja,a,Pmat,Pinv
+      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2
+      
+      real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2 
+      integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2
+      
 
       contains
 !==============================================================================
-      subroutine Define_CSR_Operators(n,nnz,ia,ja,a)
+      subroutine Define_CSR_Operators(n)
       
       implicit none
       
-      integer,                    intent(in   ) :: n,nnz
-
-      integer,   parameter                      ::   order = 242
+      integer, intent(in) :: n
+      integer, parameter  :: order = 242
 
 !     CSR storage for derivative matrices
-      integer                                   :: nnz_D1, nnz_D2
-      integer,   dimension(n+1)                 :: iD1, iD2
-      integer,   dimension(:), allocatable      :: jD1, jD2
-      real(wp),  dimension(:), allocatable      ::  D1,  D2
-
-      integer                                   :: i,j
-
-      continue
+      integer             :: nnz_D1, nnz_D2
+ 
+      allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
       if(order == 242) then
         nnz_D1 = 28+4*(n-8)
@@ -37,14 +34,14 @@
         allocate(jD2(nnz_D2),D2(nnz_D2))
       endif
      
-      call D1_242(n,nnz_D1,iD1,jD1,D1,Pmat,Pinv)!makeidt's global not what i have now, will fixc tomorrow
+      call D1_242(n,nnz_D1,iD1,jD1,D1)
       call D2_242(n,nnz_D2,iD2,jD2,D2)
       
       end subroutine Define_CSR_Operators
 !==============================================================================            
       
 
-      subroutine D1_242(n,nnz,ia,ja,a,Pmat,Pinv)
+      subroutine D1_242(n,nnz,ia,ja,a)
 
       implicit none
 
@@ -54,7 +51,6 @@
       integer,   dimension(nnz),  intent(  out) :: ja
 
       real(wp),  dimension(nnz),  intent(  out) ::  a
-      real(wp),  dimension(n  ),  intent(  out) ::  Pmat, Pinv
 
       integer                                   :: i,j,k
       integer                                   :: icnt, jcnt
@@ -114,7 +110,7 @@
 
       end subroutine D1_242
 
-! ======================================================================================
+! =============================================================================
 
       subroutine D2_242(n,nnz,ia,ja,a)
 
