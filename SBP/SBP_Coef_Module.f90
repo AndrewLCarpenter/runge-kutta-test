@@ -1,8 +1,9 @@
       module SBP_Coef_Module
 
+      use precision_vars
+
       implicit none
 
-      integer,   parameter                      :: wp = 8
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
@@ -86,8 +87,6 @@
       subroutine D2_242(n,nnz,ia,ja,a,Pmat,Pinv)
 
       implicit none
-
-      integer,   parameter                      :: wp = 8
 
       integer,                    intent(in   ) :: n,nnz
 
