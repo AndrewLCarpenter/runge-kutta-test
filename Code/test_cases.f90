@@ -126,7 +126,7 @@
 
 !         call Allocata_CSR_Storage(problem,nveclen)
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,1!1,jactual,1     
+          do jepsil = 1,jactual,1     
                          
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -136,9 +136,9 @@
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
-           do iDT =1,1
+ !          do iDT =1,1
 ! HACK
-!            do iDT =1,isamp,1      
+            do iDT =1,isamp,1      
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -253,8 +253,9 @@
               call output_conv_error(cost(iDT))
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
-              print*,iDT,uvec(1)
-              print*,'ex',uexact(1)
+!              print*,sqrt(1.0_wp/nveclen*dot_product(uvec(:)-uexact(:),uvec(:)-uexact(:)))
+!              print*,iDT,uvec(1)
+!              print*,'ex',uexact(1)
               do i = 1,nvecLen
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo

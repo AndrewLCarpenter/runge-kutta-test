@@ -258,7 +258,8 @@
       uL = NL_Burg_exactsolution(x(1),time,eps)
       uR = u(1)
 
-      a0 = third*(uR + abs(uR))
+!      a0 = third*(uR + abs(uR))
+      a0 = third*(uR + sqrt(uR**2+1.0e-28_wp))
       g0 = a0 * NL_Burg_exactsolution(x(1),time,eps)                &
          - eps* NL_Burg_exact_derivative(x(1),time,eps)
 
@@ -270,7 +271,8 @@
       uL = u(nveclen)
       uR = NL_Burg_exactsolution(x(nveclen),time,eps)
 
-      a1 = third*(uL - abs(uL))
+!      a1 = third*(uL - abs(uL))
+      a1 = third*(uL - sqrt(uL**2+1.0e-28_wp))
       g1 = a1 * NL_Burg_exactsolution(x(nveclen),time,eps)                &
          - eps* NL_Burg_exact_derivative(x(nveclen),time,eps)
       du1 = dot_product(d1vec1(1:4),u(nveclen-3:nveclen)) / dx

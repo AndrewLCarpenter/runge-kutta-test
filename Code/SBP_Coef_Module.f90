@@ -76,6 +76,9 @@
       Pmat(5:n-4) = 1.0_wp
       Pmat(n-3:n) = reshape((/49.0_wp/48.0_wp,43.0_wp/48.0_wp,59.0_wp/48.0_wp,17.0_wp/48.0_wp/),(/4/))
 
+      Pmat(:)=Pmat(:)*h
+
+
       Pinv(:) = 1.0_wp / Pmat(:)
 
       d1mat(:)= reshape((/1.0_wp/12.0_wp,-8.0_wp/12.0_wp,0.0_wp,8.0_wp/12.0_wp,-1.0_wp/12.0_wp/),(/5/))

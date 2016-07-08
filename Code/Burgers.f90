@@ -16,7 +16,7 @@
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
-      integer,  parameter    :: vecl=256
+      integer,  parameter    :: vecl=16
       integer, intent(in   ) :: programStep
 
       !INIT vars
@@ -59,7 +59,7 @@
         tinitial=0.0_wp
         call exact_Burg(vecl,x,uvec,ep,tinitial)
            
-        dt = 0.25_wp*0.25_wp*0.0001_wp/10**((iDT-1)/20.0_wp) ! timestep   
+        dt = 0.25_wp*0.0001_wp/10**((iDT-1)/20.0_wp) ! timestep   
         dx = x(2)-x(1)
         tfinal = 0.5_wp                   ! final time
         
