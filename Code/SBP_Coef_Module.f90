@@ -15,16 +15,17 @@
 
       contains
 !==============================================================================
-      subroutine Define_CSR_Operators(n)
+      subroutine Define_CSR_Operators(n,h)
       
       implicit none
       
-      integer, intent(in) :: n
-      integer, parameter  :: order = 242
+      integer,  intent(in) :: n
+      real(wp), intent(in) :: h
+      integer,  parameter  :: order = 242
 
 !     CSR storage for derivative matrices
       integer             :: nnz_D1, nnz_D2
- 
+
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
       if(order == 242) then
@@ -34,14 +35,14 @@
         allocate(jD2(nnz_D2),D2(nnz_D2))
       endif
      
-      call D1_242(n,nnz_D1,iD1,jD1,D1)
-      call D2_242(n,nnz_D2,iD2,jD2,D2)
+      call D1_242(n,nnz_D1,iD1,jD1,D1,h)
+      call D2_242(n,nnz_D2,iD2,jD2,D2,h)
 
       end subroutine Define_CSR_Operators
 !==============================================================================            
       
 
-      subroutine D1_242(n,nnz,ia,ja,a)
+      subroutine D1_242(n,nnz,ia,ja,a,h)
 
       implicit none
 
@@ -51,10 +52,11 @@
       integer,   dimension(nnz),  intent(  out) :: ja
 
       real(wp),  dimension(nnz),  intent(  out) ::  a
+      real(wp),                   intent(in   ) :: h
 
       integer                                   :: i,j,k
       integer                                   :: icnt, jcnt
-      real(wp)                                  :: h, tnorm
+      real(wp)                                  :: tnorm
       real(wp),  allocatable, dimension(:)      :: d1mat
       real(wp),  allocatable, dimension(:,:)    :: D1blk, D2blk, D1blkT
 
@@ -69,7 +71,7 @@
       allocate(D2blk(1:4,1:6))
       allocate(D1blkT(1:6,1:4))
 
-      h = 1.0_wp / (n - 1)
+    !  h = 1.0_wp / (n - 1)
 
       !  Diagonal matrix norm needed for 1st- and 2nd-order derivatives 
       Pmat(1:  4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
@@ -115,7 +117,7 @@
 
 ! =============================================================================
 
-      subroutine D2_242(n,nnz,ia,ja,a)
+      subroutine D2_242(n,nnz,ia,ja,a,h)
 
       implicit none
 
@@ -127,11 +129,13 @@
       integer,   dimension(nnz),  intent(  out) :: ja
 
       real(wp),  dimension(nnz),  intent(  out) ::  a
+      real(wp),                   intent(in   ) :: h
+      
       real(wp),  dimension(4  )                 ::  Pmat_L, Pinv_L
 
       integer                                   :: i,j,k
       integer                                   :: icnt, jcnt
-      real(wp)                                  :: h, tnorm, m24
+      real(wp)                                  :: tnorm, m24
       real(wp),  allocatable, dimension(:)      :: d1vec, d2mat
       real(wp),  allocatable, dimension(:,:)    :: M1blk, M2blk, M1blkT1, M1blkT2
       real(wp),  allocatable, dimension(:,:)    :: D1blk, D2blk
@@ -151,7 +155,7 @@
       allocate(M1blkT1(1:6,1:4),M1blkT2(1:6,1:4))
       allocate(D1blk(1:4,1:6),D2blk(1:4,1:6))
 
-      h = 1.0_wp / (n - 1)
+  !    h = 1.0_wp / (n - 1)
 
       Pmat_L(1:4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
 

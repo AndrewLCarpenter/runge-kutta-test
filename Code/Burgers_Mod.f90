@@ -2,11 +2,12 @@
 
       use precision_vars
       use SBP_Coef_Module
+      use unary_mod, only: aplb,aplsca,amudia,diamua 
 
       implicit none
       
       private
-      public    ::  grid,exact_Burg,error,plot,dx,Burgers_dudt
+      public    ::  grid,exact_Burg,error,plot,dx,Burgers_dudt,Build_Jac
 
       
       real(wp)  :: dx
@@ -44,7 +45,6 @@
       real(wp), dimension(nveclen),   intent(  out) :: u
       
       integer                                    :: i
-     ! real(wp)                                   :: NL_Burg_exactsolution
 
       do i = 1,nveclen
         u(i) =  NL_Burg_exactsolution(x(i),time,eps)
@@ -62,7 +62,6 @@
       real(wp), dimension(nveclen), intent(inout) :: x,u
 
       integer                                    :: i
-     ! real(wp)                                   :: NL_Burg_exactsolution
       real(wp)                                   :: errL2,errLinf,wrk,psum
 
 !     calculate the rms residual over the domain                        
@@ -93,7 +92,6 @@
       real(wp), dimension(nveclen), intent(inout) :: x,u
 
       integer                                    :: i
-      !real(wp)                                   :: NL_Burg_exactsolution
       real(wp)                                   :: wrk,err
 
 !     write to plotter file                                             
@@ -179,20 +177,10 @@
       real(wp), dimension(nveclen), intent(  out) :: dudt
       real(wp),                     intent(in   ) :: time, eps, dt
 
-  !    real(wp)                                    :: NL_Burg_exactsolution
-  !    real(wp)                                    :: NL_Burg_exact_derivative
-
       real(wp), dimension(nveclen)                :: f, df, dfv, gsat,wrk
       
-  !    real(wp),  dimension(size(D1)) :: a1_242 
-  !    real(wp),  dimension(size(D2)) :: a2_242      
-  !    integer,   dimension(33) :: ia1_242
-  !    integer,   dimension(size(iD2)) :: ia2_242
-  !    integer,   dimension(size(jD1)) :: ja1_242
-  !    integer,   dimension(size(jD2)) :: ja2_242
-
       integer                                     :: i
-      real(wp)                                    ::  uL,  uR
+      real(wp)                                    ::  uL,  uR, dx
       real(wp)                                    :: du0, du1
       real(wp)                                    ::  a0,  a1
       real(wp)                                    ::  g0,  g1
@@ -210,23 +198,9 @@
                                                                       &  +24.0_wp/17.0_wp/),&
                                                                       & (/4/))
 
-
-      call Define_CSR_Operators(nveclen)
-      !iD#=ia#_242
-      !jD#=ja#_242
-      !D#=a#_242
-      !=Pmat
-      !=Pinv
-!      D1=D1
-!      D2=D2
-!      print*,'sd',size(iD1)
-!!      print*,'sa',size(iD1)
- !     iD1=iD1
- !     print*,'iD1',iD1
-  !    print*,'ia1',iD1
-   !   iD2=iD2
-    !  jD1=jD1
-     ! jD2=jD2
+      dx=x(2)-x(1)
+!      print*,'calling in dudt'
+      call Define_CSR_Operators(nveclen,dx)
 
       gsat = 0.0_wp ; df  = 0.0_wp ; dfv = 0.0_wp ;
 
@@ -245,13 +219,6 @@
       !  Viscous Flux in Burgers eqn
 
       call amux_local(nveclen,u,dfv,D2,jD2,iD2)
- !     print*,'u',u
- !     print*,'dfv',dfv
-!      stop
-!      print*,'id2',id2
-! !     print*,'jd2',jd2
- !     print*,'d2',d2
-!      stop
 
       !  Inflow Boundary Condition
 
@@ -282,10 +249,78 @@
       !  Sum all terms
 
       dudt(:) = dt*(eps*dfv(:) - df(:) + gsat(:))
- !     print*,'dudt',dudt
+
       !dudt(:)=-df(:)
+!      print*,'de in dudt'
       deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)     
 
       end subroutine Burgers_dUdt
+!==============================================================================
+      subroutine Build_Jac(nveclen,u,x,eps,dt,akk,iaxJac,jaxJac,axJac)
+      
+      integer,                         intent(in   ) :: nveclen
+      real(wp), dimension(nveclen),    intent(in   ) :: u,x
+      real(wp),                        intent(in   ) :: eps,dt,akk
+      integer,  dimension(nveclen+1),  intent(  out) :: iaxJac
+      integer,  dimension(nveclen**2), intent(  out) :: jaxJac
+      real(wp), dimension(nveclen**2), intent(  out) :: axJac
+      
+      integer,  dimension(nveclen+1)  :: iwrk1,iwrk2,iwrk3,iJac
+      integer,  dimension(nveclen**2) :: jwrk1,jwrk2,jwrk3,jJac
+      real(wp), dimension(nveclen**2) :: wrk1,wrk2,wrk3a,wrk3b,Jac,wrk4,eps_d2      
+      
+      integer,  dimension(nveclen)                :: iw
+      integer,  dimension(2)                      :: ierr
+      real(wp)                                    :: dx
+      integer :: i
 
+      dx=x(2)-x(1)
+
+      call Define_CSR_Operators(nveclen,dx)
+
+!      jac=eps*d2-(onethird)*(d1*u+u*d1)  ||   +dgsat/du => not included yet
+!      wrk1=d1*u
+!      wrk2=u*d1
+!      wrk3a=wrk1+wrk2
+!      wrk3b=-1/3*wrk3a
+!      eps_d2=eps*d2
+!      jac=eps_d2+wrk3b
+
+!      wrk4=-akk*dt*jac
+!      xjac=I-akk*dt*jac=-akk*dt*jac+(1)*I
+!      xjac=wrk4+(1)*I
+! 
+!      xjac-> wrk4, iJac, jJac
+
+       call amudia(nveclen,1,D1,jD1,iD1,u,wrk1,jwrk1,iwrk1)
+       call diamua(nveclen,1,D1,jD1,iD1,u,wrk2,jwrk2,iwrk2)
+       call aplb(nveclen,nveclen,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3a,&
+     &           jwrk3,iwrk3,nveclen**2,iw,ierr(1))
+       wrk3b=-onethird*wrk3a(:)
+       eps_d2=eps*D2(:)
+       call aplb(nveclen,nveclen,1,eps_d2,jD2,iD2,wrk3b,jwrk3,iwrk3,Jac,&
+     &           jJac,iJac,nveclen**2,iw,ierr(2))
+     
+       wrk4=-akk*dt*Jac
+       call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)
+
+       iaxJac=iJac
+ !      iaxJac(:)=0
+   !    do i=1,17
+
+    !    iaxJac(i)=0
+
+       jaxJac=jJac
+       axJac=wrk4
+
+       if (sum(ierr)/=0) then
+         print*,'Error building Jacobian'
+         stop
+       endif
+      
+!      print*,'de in jac'
+      deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)  
+      
+      end subroutine Build_Jac
+!==============================================================================
       end module Burgers_Module

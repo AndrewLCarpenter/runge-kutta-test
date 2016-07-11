@@ -15,11 +15,11 @@
       public    
         
 !--------------------------VARIABLES-------------------------------------------
-  !    character(len=80) :: Temporal_Splitting = 'IMEX'
-   !   character(len=80) :: Temporal_Splitting = 'IMPLICIT'
-      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
+!      character(len=80) :: Temporal_Splitting = 'IMEX'
+      character(len=80) :: Temporal_Splitting = 'IMPLICIT'
+!      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)  :: probname
-      
+      character(len=5)  :: Jac_case='DENSE ' !default value
       integer, parameter :: isamp=71   
       integer, parameter :: jmax=81     
       
@@ -28,7 +28,10 @@
       real(wp), dimension(:),   ALLOCATABLE :: uvec,uexact,b,usum,uveco
       real(wp), dimension(:),   allocatable :: errvec,errvecT,tmpvec
       real(wp), dimension(:,:), allocatable :: resE,resI,error,errorP,xjac
-      real(wp), dimension(:,:), allocatable :: b1save,b1Psave,ustage,predvec     
+      real(wp), dimension(:,:), allocatable :: b1save,b1Psave,ustage,predvec
+      
+  !    integer,  dimension(:),   allocatable :: iaJac,jaJac
+   !   real(wp), dimension(:),   allocatable :: aJac
 !------------------------------------------------------------------------------
  
       contains

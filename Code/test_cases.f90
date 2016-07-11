@@ -136,9 +136,9 @@
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
- !          do iDT =1,1
+           do iDT =1,1
 ! HACK
-            do iDT =1,isamp,1      
+!            do iDT =1,isamp,1      
 
 
               !**INITIALIZE PROBLEM INFORMATION**

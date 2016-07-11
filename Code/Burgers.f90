@@ -1,10 +1,11 @@
 !******************************************************************************
 ! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
-! of the Kaps problem (Hairer II, pp 403)
+! of the Burgers problem 
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! BURGERS_MOD.F90           *CONTAINS ROUTINES TO BUILD BURGER
 !******************************************************************************
 
       subroutine Burgers(programStep,nveclen,ep,dt, &
@@ -13,6 +14,7 @@
       use precision_vars
       use control_variables
       use Burgers_Module
+      use Jacobian_CSR_Mod
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
@@ -22,9 +24,7 @@
       !INIT vars
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
       real(wp), dimension(vecl) :: x
-      
-      
-      
+
       
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
@@ -33,10 +33,8 @@
       real(wp), intent(in   ) :: time
       integer,  intent(in   ) :: iDT
 
-      real(wp), dimension(81,vecl+1) :: ExactTot
-      real(wp)                       :: diff,tinitial
-      integer                        :: i,j
-
+      real(wp)                :: tinitial
+      
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
       
@@ -93,14 +91,19 @@
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
+              call Burgers_dUdt(vecl,x,uvec,resI_vec,time,ep,dt)
+              resE_vec(:)=0.0_wp
 
             !**Jacobian**
             elseif (programStep==3) then
+              jac_case='SPARSE'
+              call Allocate_CSR_Storage(vecl)
+              call Build_Jac(vecl,uvec,x,ep,dt,akk,iaJac,jaJac,aJac)            
 
             endif
             
           case default ! To catch invald inputs
-            write(*,*)'Invaild case entered. Enter "IMEX" or "IMPLICIT"'
+            write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMEX", or "IMPLICIT"'
             write(*,*)'Exiting'
             stop
             

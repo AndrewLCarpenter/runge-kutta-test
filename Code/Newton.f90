@@ -15,7 +15,6 @@
       use QR_Module
       use control_variables
       use Runge_Kutta
-      
       implicit none
       
       public :: Newton_Iteration
@@ -64,6 +63,7 @@
           uveciter(:) = uvec(:) !store old uvec
           
           select case(temporal_splitting)
+          
             case default        
               call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
 
