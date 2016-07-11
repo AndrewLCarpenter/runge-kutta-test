@@ -98,7 +98,7 @@
             elseif (programStep==3) then
               jac_case='SPARSE'
               call Allocate_CSR_Storage(vecl)
-              call Build_Jac(vecl,uvec,x,ep,dt,akk,iaJac,jaJac,aJac)            
+              call Build_Jac(vecl,uvec,x,ep,dt,akk,iaJac,jaJac,aJac,time)            
 
             endif
             

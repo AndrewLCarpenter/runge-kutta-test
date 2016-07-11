@@ -19,7 +19,7 @@
       character(len=80) :: Temporal_Splitting = 'IMPLICIT'
 !      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)  :: probname
-      character(len=5)  :: Jac_case='DENSE ' !default value
+      character(len=6)  :: Jac_case='DENSE' !default value
       integer, parameter :: isamp=71   
       integer, parameter :: jmax=81     
       

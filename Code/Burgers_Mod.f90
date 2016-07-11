@@ -13,6 +13,19 @@
       real(wp)  :: dx
       character(120), parameter :: exact_solution = 'tanh'
 !      character(120), parameter :: exact_solution = 'Oliver'
+      real(wp),  parameter                        :: sig0 = -1.0_wp
+      real(wp),  parameter                        :: sig1 = +1.0_wp
+
+      real(wp), dimension(4), parameter           :: d1vec0= + reshape((/-24.0_wp/17.0_wp,  &
+                                                                      &  +59.0_wp/34.0_wp,  &
+                                                                      &   -4.0_wp/17.0_wp,  &
+                                                                      &   -3.0_wp/34.0_wp/),&
+                                                                      & (/4/))
+      real(wp), dimension(4), parameter           :: d1vec1= + reshape((/+ 3.0_wp/34.0_wp,  &
+                                                                      &  + 4.0_wp/17.0_wp,  &
+                                                                      &  -59.0_wp/34.0_wp,  &
+                                                                      &  +24.0_wp/17.0_wp/),&
+                                                                      & (/4/))
       
       contains
 
@@ -184,19 +197,7 @@
       real(wp)                                    :: du0, du1
       real(wp)                                    ::  a0,  a1
       real(wp)                                    ::  g0,  g1
-      real(wp),  parameter                        :: sig0 = -1.0_wp
-      real(wp),  parameter                        :: sig1 = +1.0_wp
 
-      real(wp), dimension(4), parameter           :: d1vec0= + reshape((/-24.0_wp/17.0_wp,  &
-                                                                      &  +59.0_wp/34.0_wp,  &
-                                                                      &   -4.0_wp/17.0_wp,  &
-                                                                      &   -3.0_wp/34.0_wp/),&
-                                                                      & (/4/))
-      real(wp), dimension(4), parameter           :: d1vec1= + reshape((/+ 3.0_wp/34.0_wp,  &
-                                                                      &  + 4.0_wp/17.0_wp,  &
-                                                                      &  -59.0_wp/34.0_wp,  &
-                                                                      &  +24.0_wp/17.0_wp/),&
-                                                                      & (/4/))
 
       dx=x(2)-x(1)
 !      print*,'calling in dudt'
@@ -231,7 +232,12 @@
          - eps* NL_Burg_exact_derivative(x(1),time,eps)
 
       du0 = dot_product(d1vec0(1:4),u(1:4)) / dx
-      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - eps*du0 - g0)
+! Hack
+!      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - eps*du0 - g0)
+!      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - g0)
+      g0=0.0_wp
+      gsat(1) = gsat(1) + sig0 * Pinv(1) * (- eps*du0 - g0)
+! HACK      
 
       !  Outflow Boundary Condition
 
@@ -244,8 +250,10 @@
          - eps* NL_Burg_exact_derivative(x(nveclen),time,eps)
       du1 = dot_product(d1vec1(1:4),u(nveclen-3:nveclen)) / dx
 
+! HACK
+      g1=0.0_wp
       gsat(nveclen) = gsat(nveclen) + sig1 * Pinv(nveclen) * (a1*uL - eps*du1 - g1)
-  !    gsat(:)=0.0_wp
+! HACK      
       !  Sum all terms
 
       dudt(:) = dt*(eps*dfv(:) - df(:) + gsat(:))
@@ -256,35 +264,49 @@
 
       end subroutine Burgers_dUdt
 !==============================================================================
-      subroutine Build_Jac(nveclen,u,x,eps,dt,akk,iaxJac,jaxJac,axJac)
+      subroutine Build_Jac(nveclen,u,x,eps,dt,akk,iaxJac,jaxJac,axJac,time)
       
       integer,                         intent(in   ) :: nveclen
       real(wp), dimension(nveclen),    intent(in   ) :: u,x
       real(wp),                        intent(in   ) :: eps,dt,akk
       integer,  dimension(nveclen+1),  intent(  out) :: iaxJac
-      integer,  dimension(nveclen**2), intent(  out) :: jaxJac
-      real(wp), dimension(nveclen**2), intent(  out) :: axJac
+      integer,  dimension(nnz_D2), intent(  out) :: jaxJac
+      real(wp), dimension(nnz_D2), intent(  out) :: axJac
       
       integer,  dimension(nveclen+1)  :: iwrk1,iwrk2,iwrk3,iJac
-      integer,  dimension(nveclen**2) :: jwrk1,jwrk2,jwrk3,jJac
-      real(wp), dimension(nveclen**2) :: wrk1,wrk2,wrk3a,wrk3b,Jac,wrk4,eps_d2      
+      integer,  dimension(nnz_D2) :: jwrk1,jwrk2,jwrk3,jJac
+      real(wp), dimension(nnz_D2) :: wrk1,wrk2,wrk3a,wrk3b,Jac,wrk4,eps_d2      
       
       integer,  dimension(nveclen)                :: iw
       integer,  dimension(2)                      :: ierr
-      real(wp)                                    :: dx
-      integer :: i
-
+      real(wp)                                    :: dx,uL,a1,uR,a0,g1
+      
+      
+      !!!!
+     ! real(wp) :: time
+      real(wp), dimension(nveclen) :: dudt,wrk_rhs,wrk_Ju
+      real(wp), intent(in) :: time
+      
       dx=x(2)-x(1)
+      call Define_CSR_Operators(nveclen,dx)      
 
-      call Define_CSR_Operators(nveclen,dx)
+      uL=u(nveclen)
+      a1=sig1*Pinv(nveclen)*-onethird*((uL-sqrt(1.0e-28_wp+uL**2))**2)/sqrt(1.0e-28_wp+uL**2)
+!      g1=sig1*Pinv(nveclen)* (onethird*( uL/sqrt(1.0e-28_wp+uL**2)+1.0_wp)*NL_Burg_exactsolution(x(nveclen),time,eps)+&
+!                              onethird*( uL-sqrt(uL**2+1.0e-28_wp))    *NL_Burg_exact_derivative(x(nveclen),time,eps))-&
+!                              eps*0.5_wp*tanh(0.5_wp*x(nveclen)/eps)/(cosh(0.5_wp*x(nveclen)/eps)**2)/eps**2
+      
+      uR=u(1)
+      a0=sig0 * Pinv(1) * onethird*((uR+sqrt(1.0e-28_wp+uR**2))**2)/sqrt(1.0e-28_wp+uR**2)
 
-!      jac=eps*d2-(onethird)*(d1*u+u*d1)  ||   +dgsat/du => not included yet
+
+!      jac=eps*d2-(onethird)*(d1*u+u*d1)+dgsat/du
 !      wrk1=d1*u
 !      wrk2=u*d1
 !      wrk3a=wrk1+wrk2
 !      wrk3b=-1/3*wrk3a
 !      eps_d2=eps*d2
-!      jac=eps_d2+wrk3b
+!      jac=eps_d2+wrk3b+dgsat/du
 
 !      wrk4=-akk*dt*jac
 !      xjac=I-akk*dt*jac=-akk*dt*jac+(1)*I
@@ -295,21 +317,24 @@
        call amudia(nveclen,1,D1,jD1,iD1,u,wrk1,jwrk1,iwrk1)
        call diamua(nveclen,1,D1,jD1,iD1,u,wrk2,jwrk2,iwrk2)
        call aplb(nveclen,nveclen,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3a,&
-     &           jwrk3,iwrk3,nveclen**2,iw,ierr(1))
+     &           jwrk3,iwrk3,nnz_D2,iw,ierr(1))
        wrk3b=-onethird*wrk3a(:)
        eps_d2=eps*D2(:)
        call aplb(nveclen,nveclen,1,eps_d2,jD2,iD2,wrk3b,jwrk3,iwrk3,Jac,&
-     &           jJac,iJac,nveclen**2,iw,ierr(2))
-     
+     &           jJac,iJac,nnz_D2,iw,ierr(2))
+  !     print*,'jac',jac
+  !     print*,'iJac',ijac
+ !      print*,'jjac',jjac
+       
+       Jac(nnz_D2)=Jac(nnz_D2)+a1!-g1
+       Jac(1:4)=Jac(1:4)+sig0 * Pinv(1) * (-eps) * d1vec0(:) / dx
+       Jac(nnz_D2-3:nnz_D2)=Jac(nnz_D2-3:nnz_D2)+sig1*Pinv(nveclen)*(-eps) * d1vec1(:) / dx
+     !  Jac(1)=Jac(1)+a0
+       
        wrk4=-akk*dt*Jac
        call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)
 
        iaxJac=iJac
- !      iaxJac(:)=0
-   !    do i=1,17
-
-    !    iaxJac(i)=0
-
        jaxJac=jJac
        axJac=wrk4
 
@@ -317,9 +342,23 @@
          print*,'Error building Jacobian'
          stop
        endif
-      
-!      print*,'de in jac'
+       
       deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)  
+      
+   
+!      
+ !     call Burgers_dUdt(nveclen,x,u,dudt,time,eps,dt)
+!      wrk_rhs(:)=u(:)-akk*dt*dudt(:)
+!      wrk_rhs(:)=u(:)-akk*dudt(:)
+      
+ !     call amux_local(nveclen,u,wrk_Ju,axJac,jaxJac,iaxJac)
+      
+  !    print*,'rhs',wrk_rhs
+  !    print*,'jac*u',wrk_Ju
+!      print*,wrk_rhs - wrk_Ju
+    !  
+   !   stop
+ 
       
       end subroutine Build_Jac
 !==============================================================================

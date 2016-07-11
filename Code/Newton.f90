@@ -15,6 +15,8 @@
       use QR_Module
       use control_variables
       use Runge_Kutta
+      use Jacobian_CSR_Mod, only:iaJac,jaJac,aJac
+      
       implicit none
       
       public :: Newton_Iteration
@@ -62,38 +64,54 @@
 
           uveciter(:) = uvec(:) !store old uvec
           
-          select case(temporal_splitting)
+          select case(temporal_splitting) !####################################
           
-            case default        
+            case default  !***IMEX AND IMPLICIT********************************    
+
               call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
 
-              !**GET INVERSE JACOBIAN**
+              !**GET JACOBIAN**
               programStep=3
               call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
 
               !          Backsolve to get solution
+              select case(Jac_case) !==========================================
               
-!----------------------REGULAR NEWTON------------------------------------------          
-              if (typ==2) then
-                xjacinv=Mat_invert(xjac)
+                case('DENSE')  !******DENSE************************************
+               
+                  if (typ==2) then  !---------REGULAR NEWTON-------------------
+                    xjacinv=Mat_invert(xjac)
 
-!temp=matmul(xjacinv,Rnewton) !**want to use this but there is a different truncation/round off error compared to the explicit do loop
-               !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
-                do i = 1,nvecLen
-                  do j = 1,nvecLen
-                    uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
-                  enddo
-                enddo
-!----------------------END REGULAR NEWTON--------------------------------------            
-!----------------------QR------------------------------------------------------             
-              elseif (typ==3) then
-                call QR_decomp(xjac,nveclen,rnewton)
-              endif
-!---------------------END QR---------------------------------------------------    
+                   !temp=matmul(xjacinv,Rnewton) 
+                   !**want to use this but there is a different truncation/round off error compared to the explicit do loop
+                   !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
+                   
+                    do i = 1,nvecLen
+                      do j = 1,nvecLen
+                        uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
+                      enddo
+                    enddo  !--------------END REGULAR NEWTON-------------------
+               
+                  elseif (typ==3) then  !----------QR--------------------------
+                    call QR_decomp(xjac,nveclen,rnewton)
+                  endif  !---------------------END QR--------------------------
+                 
+                !*********************DENSE************************************
+                
+                 case('SPARSE') !****SPARSE************************************
+                   !use lusol, ilu0
+               
+                 !*******************SPARSE************************************
+                 
+               end select !====================================================
+               
+             !************END IMEX AND IMPLICIT********************************
         
-            case('EXPLICIT')
+            case('EXPLICIT') !***EXPLICIT**************************************
               uvec(:)=usum(:)
-          end select
+            !********************EXPLICIT**************************************
+            
+          end select !#########################################################
           
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
        !   if (k>17) print*,'tmp',tmp,'L',L,'k',k!,'time',time

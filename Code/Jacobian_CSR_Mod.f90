@@ -1,6 +1,7 @@
       module Jacobian_CSR_Mod
       
       use precision_vars
+      use SBP_Coef_Module, only:nnz_D2
       
       implicit none
       
@@ -29,13 +30,11 @@
       subroutine Allocate_CSR_Storage(nJac)
 
       integer, intent(in)  :: nJac !nJac=nveclen
-      integer              :: nnzJac
       if(.not.allo_test) then
-        nnzJac = nJac**2
 
         allocate(iaJac(nJac+1))
-        allocate(jaJac(nnzJac))
-        allocate( aJac(nnzJac))
+        allocate(jaJac(nnz_D2))
+        allocate( aJac(nnz_D2))
 ! Not used yet
 !        allocate( juJac(nJac+1))
 !       allocate(jLUJac(nnzJac))

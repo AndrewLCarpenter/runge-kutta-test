@@ -17,11 +17,11 @@ SRCS = precision_vars.f90\
        output_module.f90\
        Stage_Value_module.f90\
        QR_Module.f90\
+       Jacobian_CSR_Mod.f90\
        Newton.f90\
        SBP_Coef_Module.f90\
        unary_mod.f90\
        Burgers_Mod.f90\
-       Jacobian_CSR_Mod.f90\
        test_cases.f90\
        vanderPol.f90\
        Pureschi.f90\
@@ -46,11 +46,11 @@ OBJS = precision_vars.o\
        output_module.o\
        Stage_Value_module.o\
        QR_Module.o\
+       Jacobian_CSR_Mod.o\
        Newton.o\
        SBP_Coef_Module.o\
        unary_mod.o\
        Burgers_Mod.o\
-       Jacobian_CSR_Mod.o\
        test_cases.o\
        vanderPol.o\
        Pureschi.o\

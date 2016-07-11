@@ -7,10 +7,11 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,amux_local
+      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,amux_local,nnz_D2
       
       real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2 
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2
+      integer                              :: nnz_D2
       
 
       contains
@@ -24,7 +25,7 @@
       integer,  parameter  :: order = 242
 
 !     CSR storage for derivative matrices
-      integer             :: nnz_D1, nnz_D2
+      integer             :: nnz_D1
 
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
