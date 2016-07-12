@@ -7,6 +7,8 @@
 ! QR_MODULE.F90                 *CONTAINS QR ROUTINES
 ! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
 ! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
+! JACOBIAN_CSR_MOD.F90          *CONTAINS CSR JACOBIAN VARIABLES
+! ILUT_MODULE.F90               *PERFORMS LU FACTORIZATION AND SOLVING
 !******************************************************************************
 
       module Newton
@@ -15,7 +17,8 @@
       use QR_Module
       use control_variables
       use Runge_Kutta
-      use Jacobian_CSR_Mod, only:iaJac,jaJac,aJac
+      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw
+      use ilut_module, only: ilu0,lusol
       
       implicit none
       
@@ -40,7 +43,7 @@
       integer                              :: programStep !input to problemsub
       integer                              :: ierr,typ,iDT 
       real(wp)                             :: tfinal !output of problemsub (not needed)
-      real(wp), dimension(nveclen)         :: Rnewton,uveciter !Newton 
+      real(wp), dimension(nveclen)         :: Rnewton,uveciter,r_wrk !Newton 
       real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobian
 
       real(wp)                             :: tmp !temp variable for accuracy
@@ -66,6 +69,9 @@
           
           select case(temporal_splitting) !####################################
           
+          
+          
+          
             case default  !***IMEX AND IMPLICIT********************************    
 
               call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
@@ -75,47 +81,73 @@
               call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
 
               !          Backsolve to get solution
-              select case(Jac_case) !==========================================
               
+              
+              
+              select case(Jac_case) !==========================================
                 case('DENSE')  !******DENSE************************************
                
                   if (typ==2) then  !---------REGULAR NEWTON-------------------
                     xjacinv=Mat_invert(xjac)
 
                    !temp=matmul(xjacinv,Rnewton) 
-                   !**want to use this but there is a different truncation/round off error compared to the explicit do loop
+                   !**want to use this but there is a different round off error compared to the explicit do loop
                    !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
                    
                     do i = 1,nvecLen
                       do j = 1,nvecLen
                         uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
                       enddo
-                    enddo  !--------------END REGULAR NEWTON-------------------
+                    enddo 
                
                   elseif (typ==3) then  !----------QR--------------------------
                     call QR_decomp(xjac,nveclen,rnewton)
-                  endif  !---------------------END QR--------------------------
+                  endif  
                  
                 !*********************DENSE************************************
                 
+                
+                
+                
                  case('SPARSE') !****SPARSE************************************
-                   !use lusol, ilu0
-               
-                 !*******************SPARSE************************************
-                 
+                   !use lusol, ilu0 from ilut_module
+!                   print*,'ajac',ajac,'size',size(ajac)
+!                   print*,'jajac',jajac,'size',size(jajac)
+!                   print*,'iajac',iajac,'size',size(iajac)
+                   call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)                  
+!                   print*,'alujac',alujac,'size',size(alujac)
+!                   print*,'jlujac',jlujac,'size',size(jlujac)
+!                   print*,'jujac',jujac,'size',size(jujac)
+!                   print*,uvec,'uvec1'
+                   call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
+!                   call lusol(nveclen,uvec(:)-aI*resI(:,L),uvec,aLUJac,jLUJac,jUJac)
+!                  print*,r_wrk,'r_wrk'
+                   uvec(:)=uvec(:)-r_wrk(:)
+!                   print*,uvec,'uvec2'      
+                 !  print*,'fixed'
+!                   stop         
+                 !*******************SPARSE************************************             
                end select !====================================================
                
+               
+               
              !************END IMEX AND IMPLICIT********************************
+             
+             
         
             case('EXPLICIT') !***EXPLICIT**************************************
               uvec(:)=usum(:)
             !********************EXPLICIT**************************************
             
+            
+            
           end select !#########################################################
-          
+
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-       !   if (k>17) print*,'tmp',tmp,'L',L,'k',k!,'time',time
-          !if(tmp < 1.0e-12_wp) then
+          if (k>=15) print*,'tmp',tmp,'L',L,'k',k!,'time',time
+!          print*,rnewton
+          if (tmp/=tmp) stop
+
           if(tmp < tol) then
             ierr = 0
             exit 
@@ -134,7 +166,6 @@
         enddo
       endif
 !     if(ierr == 0) write(*,*)'Newton Iteration did not converge to machine precision'
-!----------------END NEWTON AND QR---------------------------------------------      
       end subroutine Newton_Iteration
       
 !==============================================================================
@@ -150,8 +181,7 @@
       
      
       programStep=2
-      call problemsub(iprob,programStep,nveclen,ep,dt,&
-     &                     tfinal,iDT,time,aI,L)
+      call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
   
       Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
       
@@ -282,7 +312,7 @@
         det = - x13*x22*x31 + x12*x23*x31 +  x13*x21*x32& 
      &        - x11*x23*x32 - x12*x21*x33 +  x11*x22*x33
 
-        detI = 1./det
+        detI = 1.0_wp/det
 
         xinv(1,1) =  (- x23*x32 + x22*x33) * detI
         xinv(1,2) =  (+ x13*x32 - x12*x33) * detI
@@ -327,7 +357,7 @@
      &   x13*x21*x32*x44 - x11*x23*x32*x44 - &
      &   x12*x21*x33*x44 + x11*x22*x33*x44)
 
-        detI = 1./det
+        detI = 1.0_wp/det
 
         xinv(1,1) = (&
      & -(x24*x33*x42) + x23*x34*x42 + x24*x32*x43 - &

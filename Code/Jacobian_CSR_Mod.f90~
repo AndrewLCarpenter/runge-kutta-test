@@ -1,10 +1,11 @@
       module Jacobian_CSR_Mod
       
       use precision_vars
+      use SBP_Coef_Module, only:nnz_D2
       
       implicit none
       
-      public :: iaJac,jaJac,aJac,Allocate_CSR_Storage
+      public :: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw,Allocate_CSR_Storage
       private
       
       real(wp),    parameter              ::   toljac = 1.0e-13_wp
@@ -16,12 +17,12 @@
       integer,  allocatable, dimension(:) ::  iaJac
       integer,  allocatable, dimension(:) ::  jaJac
       real(wp), allocatable, dimension(:) ::   aJac
-! Not used yet
-!      integer,  allocatable, dimension(:) ::   juJac
-!      integer,  allocatable, dimension(:) ::  jLUJac
-!      real(wp), allocatable, dimension(:) ::  aLUJac
+
+      integer,  allocatable, dimension(:) ::  jUJac
+      integer,  allocatable, dimension(:) ::  jLUJac
+      real(wp), allocatable, dimension(:) ::  aLUJac
 !      integer                             ::   ierr
-!      integer,  allocatable, dimension(:) ::  iw         
+      integer,  allocatable, dimension(:) ::  iw         
       
       contains
       
@@ -29,19 +30,18 @@
       subroutine Allocate_CSR_Storage(nJac)
 
       integer, intent(in)  :: nJac !nJac=nveclen
-      integer              :: nnzJac
       if(.not.allo_test) then
-        nnzJac = nJac**2
-
+      
         allocate(iaJac(nJac+1))
-        allocate(jaJac(nnzJac))
-        allocate( aJac(nnzJac))
-! Not used yet
-!        allocate( juJac(nJac+1))
-!       allocate(jLUJac(nnzJac))
-!       allocate(aLUJac(nnzJac))
+        allocate(jaJac(nnz_D2))
+        allocate( aJac(nnz_D2))
 
-!        allocate(iw(nJac))
+        allocate(jUJac(nJac))
+        allocate(jLUJac(nnz_D2))
+        allocate(aLUJac(nnz_D2))
+
+        allocate(iw(nJac))
+        
       endif
       allo_test=.true.
       end subroutine
@@ -57,14 +57,12 @@
 !==============================================================================
       subroutine Jacobian_CSR(nJac,xjac,iaJac,jaJac,aJac)
  
-      integer,                        intent(in   ) :: nJac
-      real(wp), dimension(nJac,nJac), intent(in   ) :: xjac
-      real(wp), dimension(:),         intent(  out) :: iaJac,jaJac,aJac
-      integer                                       :: i,j,icnt,jcnt
+      integer,                  intent(in   ) :: nJac
+      real(wp), dimension(:,:), intent(in   ) :: xjac
+      real(wp), dimension(:),   intent(  out) :: iaJac,jaJac,aJac
+      integer                                 :: i,j,icnt,jcnt
 
-      print*,'in it'
       call Allocate_CSR_Storage(nJac)
-      print*,'out'
       
 !     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
 

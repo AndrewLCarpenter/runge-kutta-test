@@ -47,8 +47,6 @@
       real(wp), parameter :: realsmall = 1.d-20, big = 1.d10, realbig = 1.d20
       real(wp), parameter :: pi = &
      &         3.1415926535897932384626433832795028841971693993751058209749_wp
-      real(wp), parameter :: onethird = one/three
-      real(wp), parameter :: twothirds = two/three
  !-----------------------------------------------------------------------------
 
       contains

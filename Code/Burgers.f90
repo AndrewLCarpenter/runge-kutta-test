@@ -6,6 +6,7 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 ! BURGERS_MOD.F90           *CONTAINS ROUTINES TO BUILD BURGER
+! JACOBIAN_CSR_MOD.F90      *CONTAINS CSR JACOBIAN VARIABLES
 !******************************************************************************
 
       subroutine Burgers(programStep,nveclen,ep,dt, &
@@ -14,11 +15,11 @@
       use precision_vars
       use control_variables
       use Burgers_Module
-      use Jacobian_CSR_Mod
+      use Jacobian_CSR_Mod, only:iaJac,jaJac,aJac,Allocate_CSR_Storage
 
       implicit none
 !-----------------------VARIABLES----------------------------------------------
-      integer,  parameter    :: vecl=16
+      integer,  parameter    :: vecl=32
       integer, intent(in   ) :: programStep
 
       !INIT vars
@@ -57,7 +58,7 @@
         tinitial=0.0_wp
         call exact_Burg(vecl,x,uvec,ep,tinitial)
            
-        dt = 0.25_wp*0.0001_wp/10**((iDT-1)/20.0_wp) ! timestep   
+        dt = 1.0_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep   
         dx = x(2)-x(1)
         tfinal = 0.5_wp                   ! final time
         

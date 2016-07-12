@@ -54,7 +54,7 @@
       use Stage_value_module
       use control_variables
       use runge_kutta
-      use Newton
+      use Newton,               only : Newton_Iteration
 !------------------------------VARIABLES---------------------------------------
       implicit none     
 !------------------------------PARAMETERS--------------------------------------
@@ -70,7 +70,7 @@
              
       !do loops
       integer            :: icase,i,iprob,jepsil,iDT 
-      integer            :: j,k,istage,ktime,L,LL
+      integer            :: j,k,istage,ktime,L,LL,qqq
       
       !counters      
       integer            :: icount,jcount                    
@@ -124,10 +124,9 @@
           call create_file_paths
           call output_names                           
 
-!         call Allocata_CSR_Storage(problem,nveclen)
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,1!1,jactual,1     
-                         
+          do jepsil = 1,jactual,1     
+                                 
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -136,9 +135,9 @@
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
- !          do iDT =1,1
+!           do iDT =1,1
 ! HACK
-            do iDT =1,isamp,1      
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -233,7 +232,7 @@
 
                   enddo
                   errvec(:) = abs(errvec(:))
-                endif                            
+                endif               
   
                 errvecT(:) = errvecT(:) + errvec(:)
   
@@ -243,9 +242,16 @@
 !              write(193,*)t,uvec(1) !!!!!!!!!!!!!!!!!!!!!!!!!!
 !              write(194,*)t,uvec(2) !!!!!!!!!!!!!!!!!!!!!!!!!!
 !              write(195,*)t,uvec(3) !!!!!!!!!!!!!!!!!!!!!!!!!!
+!               do qqq=1,nveclen
+!                 write(190+qqq,*),uvec(qqq),uexact(qqq)
+!               enddo
 ! HACK             
  
-              enddo                                          
+              enddo  
+! HACK
+!              write(*,*)sqrt(dot_product(uvec-uexact,uvec-uexact)/nveclen)
+!              write(*,*)sqrt(dot_product(errvec,errvec)/nveclen)
+!Hack                                                      
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
@@ -266,6 +272,7 @@
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
 !           write(120,*)uvec
+!           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
 

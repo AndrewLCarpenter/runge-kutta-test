@@ -7,7 +7,7 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,amux_local,nnz_D2
+      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
       
       real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2 
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2
