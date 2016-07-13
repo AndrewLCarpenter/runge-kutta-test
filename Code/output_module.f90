@@ -70,15 +70,17 @@
       character(len=1)     :: istr        !loop index placeholder
       integer              :: i
           
-      do i = 1,nveclen
-        write(istr,"(I1.1)")i
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
-        open(49+i,file=trim(fileloc)//filename)
-        write(49+i,*)'zone T = "ep = ',ep,'",'
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
-        open(59+i,file=trim(fileloc)//filename)
-        write(59+i,*)'zone T = "ep = ',ep,'",'
-      enddo
+      if(nveclen <= 9) then
+        do i = 1,nveclen
+          write(istr,"(I1.1)")i
+          filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
+          open(49+i,file=trim(fileloc)//filename)
+          write(49+i,*)'zone T = "ep = ',ep,'",'
+          filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+          open(59+i,file=trim(fileloc)//filename)
+          write(59+i,*)'zone T = "ep = ',ep,'",'
+        enddo
+      endif
 
       end subroutine init_output_files
       

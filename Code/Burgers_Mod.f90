@@ -12,7 +12,7 @@
 
       use precision_vars
       use SBP_Coef_Module
-      use unary_mod,      only : aplb,aplsca,amudia,diamua 
+      use unary_mod,      only : aplb,aplsca,amudia,diamua,apldia
       use matvec_module , only : amux
 
       implicit none
@@ -292,6 +292,7 @@
       integer,  dimension(2)          :: ierr
       real(wp)                        :: dx,uL,a1_d,uR,a0_d,a0,a1
      
+      real(wp), dimension(nveclen)    :: diag
       real(wp), dimension(nveclen) :: dudt,wrk_rhs,wrk_Ju,u_p,dudt_p !Hack variables
 !------------------------------------------------------------------------------ 
     
@@ -325,13 +326,19 @@
 !******************************
 ! --------------Make xjac -----------------------------------------------------
       call amudia(nveclen,1,D1,jD1,iD1,u,wrk1,jwrk1,iwrk1)                   !1
+
       call diamua(nveclen,1,D1,jD1,iD1,u,wrk2,jwrk2,iwrk2)                   !2
+
       call aplb(nveclen,nveclen,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3a,&  !3
      &          jwrk3,iwrk3,nnz_D2,iw,ierr(1))                               !3
-      wrk3b=-third*wrk3a(:)! HACK wrk3b(:)=0.0_wp                            !4
+      wrk3b(:)=-third*wrk3a(:)
+
       eps_d2=eps*D2(:)                                                       !5
       call aplb(nveclen,nveclen,1,eps_d2,jD2,iD2,wrk3b,jwrk3,iwrk3,Jac,&    !6a
      &          jJac,iJac,nnz_D2,iw,ierr(2))                                !6a
+
+      call amux(nveclen,u,diag,D1,jD1,iD1)   !  First-derivative of u vec
+      call apldia(nveclen,0,Jac,jJac,iJac,diag,Jac,jJac,iJac,iw)
 
      ! R - 6b
       Jac(1)=Jac(1)+sig0*Pinv(1)*(a0+a0_d*(uR- &
@@ -344,7 +351,6 @@
       Jac(nnz_D2-3:nnz_D2)=Jac(nnz_D2-3:nnz_D2)+ &
      &                     sig1*Pinv(nveclen)*(-eps)*d1vec1(:)/dx
      
-! HACK     print*,'Jac(1,1)',dt*Jac(1:9:4)
       wrk4=-akk*dt*Jac                                                       !7
       call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)                          !8
 
