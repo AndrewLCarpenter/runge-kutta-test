@@ -185,17 +185,9 @@
                
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
                   if(ipred/=2) uvec(:) = predvec(:,L)  
-
 !---------------BEG NEWTON ITERATION ------------------------------------------
-                  !select case (temporal_splitting)
-                  !  case default
                   call Newton_Iteration(iprob,L,ep,dt,nveclen,&
      &                                      tt,aI(L,L),icount,k)
-                 !   case('EXPLICIT')
-                    !Skip newton iteration
-                 !     call problemsub
-                 !   k=0
-                !  end select
 !---------------END NEWTON ITERATION-------------------------------------------
 
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
@@ -217,14 +209,9 @@
 !-----------------------------END of A_{k,j} portion of RK LOOP----------------
      
                 uvec(:) = uveco(:)
-  !              print*,uvec(1:2)
                 do LL = 1,ns 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
-   !               print*,'resE',resE(:,LL)
                 enddo
-   !             print*,uvec(1:2)
-   !             print*,dt
-    !            if(uvec(1)>=1e5_wp) stop
 !-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
@@ -241,21 +228,9 @@
                 errvecT(:) = errvecT(:) + errvec(:)
   
                 t = t + dt                  !increment time
-                if(t >= tfinal) exit
-! HACK output time solution                
-!              write(193,*)t,uvec(1) !!!!!!!!!!!!!!!!!!!!!!!!!!
-!              write(194,*)t,uvec(2) !!!!!!!!!!!!!!!!!!!!!!!!!!
-!              write(195,*)t,uvec(3) !!!!!!!!!!!!!!!!!!!!!!!!!!
-!               do qqq=1,nveclen
-!                 write(190+qqq,*),uvec(qqq),uexact(qqq)
-!               enddo
-! HACK             
+                if(t >= tfinal) exit        
  
-              enddo  
-! HACK
-!              write(*,*)sqrt(dot_product(uvec-uexact,uvec-uexact)/nveclen)
-!              write(*,*)sqrt(dot_product(errvec,errvec)/nveclen)
-!Hack                                                      
+              enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
@@ -263,9 +238,7 @@
               call output_conv_error(cost(iDT))
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
-!              print*,sqrt(1.0_wp/nveclen*dot_product(uvec(:)-uexact(:),uvec(:)-uexact(:)))
-!              print*,iDT,uvec(1)
-!              print*,'ex',uexact(1)
+
               do i = 1,nvecLen
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
@@ -279,7 +252,7 @@
 !           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
-  !          print*,cost
+
             call output_terminal_iteration(cost,0,ep,nveclen)
 
             epsave(jepsil) = log10(ep)
@@ -287,9 +260,8 @@
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
-     !     print*,'bottom of stiffness'
+            
           enddo  
-      !    print*,'outside stiffness'
 !---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
           call output_conv_stiff(nveclen,jactual,epsave)
@@ -301,12 +273,10 @@
           write(*,*)'Total time elapsed for this case: ',cputime2-cputime1,'sec'  
 
 !----------------------END OUTPUTS---------------------------------------------
-
           call deallocate_vars
         enddo                                       
 !----------------------END PROBLEMS LOOP---------------------------------------
       enddo                                 
 !----------------------END ALGORITHMS LOOP-------------------------------------
 !----------------------END PROGRAM---------------------------------------------
-
       END PROGRAM test_cases

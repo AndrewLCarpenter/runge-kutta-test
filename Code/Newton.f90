@@ -32,6 +32,7 @@
       subroutine Newton_Iteration(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
       integer, parameter :: iter_max=20
+      logical, parameter :: Line_search=.false. !set to TRUE for line search
 
       integer,                         intent(in   ) :: iprob,L
       real(wp),                        intent(in   ) :: ep,dt
@@ -50,12 +51,43 @@
       real(wp), dimension(5:iter_max)      :: tmp_list
       
       ierr = 0 
-!////////////////////////////
-!set typ to 1 for line search
-!            2 for newton
-!            3 for QR
-!/////////////////////////////     
-      typ = 2
+      typ=2
+!------------------------------------------------------------------------------
+!!      select case(temporal_splitting)
+!!        case('EXPLICIT')
+!!          uvec(:)=usum(:)
+!!        case default !IMEX or IMPLICIT
+!!          select case(Jac_case)
+!!            case('SPARSE')
+!!              do k = 1,iter_max
+!!                icount = icount + 1
+!!                uveciter(:) = uvec(:) !store old uvec
+!!                call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
+!!                programStep=3
+!!                call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
+!!                call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)                  
+!!                call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
+!!                uvec(:)=uvec(:)-r_wrk(:)   
+!!                            
+!!                tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
+!!                if (k>=15) write(*,*),'tmp',tmp,'L',L,'k',k!,'time',time,'ep',ep
+!!                if (tmp/=tmp) then
+!!                  print*,'stopping NaN k=',k,' t=',time
+!!                  stop
+!!                endif      
+!!                if(tmp < tol) then
+!!                  exit 
+!!                endif
+!!                
+!!              enddo  
+!!            case('DENSE')
+!!              if (Line_search) then
+!!                call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
+!!              elseif (nveclen<=4) then
+!!            
+!!          end select    
+!!      end select
+       
 !----------------LINE SEARCH---------------------------------------------------
       if (typ==1) then
         call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
@@ -136,7 +168,7 @@
 
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
           if (k>=15) write(*,*),'tmp',tmp,'L',L,'k',k!,'time',time,'ep',ep
-         ! print*,rnewton
+
           if (tmp/=tmp) then
             print*,'stopping NaN k=',k,' t=',time
             stop

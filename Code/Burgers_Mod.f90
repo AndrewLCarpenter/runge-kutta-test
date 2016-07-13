@@ -23,11 +23,11 @@
 !--------------------------------VARIABLES-------------------------------------         
       real(wp)  :: dx
       character(120),         parameter :: exact_solution = 'tanh'
-!      character(120),         parameter :: exact_solution = 'Oliver'
+!      character(120),         parameter :: exact_solution = 'Olver'
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
       
-      integer,  parameter    :: vecl=16      
+      integer,  parameter    :: vecl=128      
       real(wp), dimension(vecl) :: x      
       integer :: nveclen
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
@@ -62,16 +62,10 @@
       use control_variables
       use Jacobian_CSR_Mod, only:iaJac,jaJac,aJac,Allocate_CSR_Storage
 
-      implicit none
 !-----------------------VARIABLES----------------------------------------------
-!      integer,  parameter    :: vecl=16
       integer, intent(in   ) :: programStep
 
-      !INIT vars
-!      real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
-!      real(wp), dimension(vecl) :: x
-
-      
+      !INIT vars     
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
       integer,  intent(  out) :: nveclen_tmp
@@ -99,16 +93,14 @@
       !**Initialization of problem information**        
       elseif (programStep==0) then
 
-        call grid()!(x,xL,xR,vecl)
+        call grid() !creates x vector
         
-        tinitial=0.0_wp
-        call exact_Burg(uvec,ep,tinitial)!vecl,x,
-           
+        tinitial=0.0_wp  ! initial time
+        tfinal = 0.5_wp  ! final time           
         dt = 0.5_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep   
-!        dx = x(2)-x(1)
-        tfinal = 0.5_wp                   ! final time
-        
-        call exact_Burg(uexact,ep,tfinal)!vecl,x,
+
+        call exact_Burg(uvec,ep,tinitial) !set initial conditions   
+        call exact_Burg(uexact,ep,tfinal) !set exact solution at tfinal
               
       !**RHS and Jacobian**
       elseif (programStep>=1) then
@@ -138,22 +130,14 @@
           case('IMPLICIT') ! For fully implicit schemes
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-!              print*,'in rhs'
-!              print*,'vecl',vecl
-!              print*,'x',x
-!              print*,'uvec',uvec
-!              print*,'time',time
-!              print*,'ep',ep
-!              print*,'dt',dt
-              call Burgers_dUdt(uvec,resI_vec,time,ep,dt)!vecl,x,
-!              print*,'resI',resI_vec
+              call Burgers_dUdt(uvec,resI_vec,time,ep,dt)
               resE_vec(:)=0.0_wp
 
             !**Jacobian**
             elseif (programStep==3) then
               jac_case='SPARSE'
               call Allocate_CSR_Storage(vecl)
-              call Build_Jac(uvec,ep,dt,akk,iaJac,jaJac,aJac,time)!vecl, x,           
+              call Build_Jac(uvec,ep,dt,akk,iaJac,jaJac,aJac,time)          
 
             endif
             
@@ -171,14 +155,7 @@
 !==============================================================================
 !==============================================================================
 ! PRODUCES GRID
-      subroutine grid()!(x,xL,xR,nveclen)
-
-      implicit none
-
-!      integer,                      intent(in   ) :: nveclen
-!      real(wp), dimension(nveclen), intent(  out) :: x
-!      real(wp),                     intent(in   ) :: xL,xR
-
+      subroutine grid()
       integer                                     :: i
       
       do i=1,nveclen
@@ -189,14 +166,11 @@
 
       return
       end subroutine grid
-
 !==============================================================================
 ! RETURNS VECTOR WITH EXACT SOLUTION
-      subroutine exact_Burg(u,eps,time)!nveclen,x,
+      subroutine exact_Burg(u,eps,time)
 
-!      integer,                      intent(in   ) :: nveclen
       real(wp),                     intent(in   ) :: eps,time
-!      real(wp), dimension(nveclen), intent(in   ) :: x
       real(wp), dimension(nveclen), intent(  out) :: u
       integer                                     :: i
 
@@ -206,14 +180,12 @@
 
       return
       end subroutine exact_Burg
-
 !==============================================================================
 ! 
-      subroutine error(u,time,eps,dt)!nveclen,x,
+      subroutine error(u,time,eps,dt)
 
-!      integer,                      intent(in   ) :: nveclen
       real(wp),                     intent(in   ) :: time, eps, dt
-      real(wp), dimension(nveclen), intent(inout) :: u!x,
+      real(wp), dimension(nveclen), intent(inout) :: u
 
       integer                                    :: i
       real(wp)                                   :: errL2,errLinf,wrk,psum
@@ -236,20 +208,18 @@
 
       return
       end subroutine error
-
 !==============================================================================
 !
-      subroutine plot(punit,u,time,eps)!nveclen,x,
+      subroutine plot(punit,u,time,eps)
 
-      integer,                      intent(in)    :: punit!,nveclen
-      real(wp),                     intent(in)    :: time, eps
-      real(wp), dimension(nveclen), intent(inout) :: u!x,
+      integer,                      intent(in   ) :: punit
+      real(wp),                     intent(in   ) :: time, eps
+      real(wp), dimension(nveclen), intent(inout) :: u
 
       integer                                    :: i
       real(wp)                                   :: wrk,err
 
 !     write to plotter file                                             
-
       do i=1,nveclen
         wrk = NL_Burg_exactsolution(x(i),time,eps)
         err = ( abs( wrk - u(i) ) + 1.0e-15 )
@@ -258,11 +228,9 @@
     2 format(4(1x,e15.7))
       return
       end subroutine plot
-
 !==============================================================================
 ! DEFINES EXACT SOLUTION FOR PARTICULAR x AND t VALUE
       function NL_Burg_exactsolution(xin,tin,eps)
-
 
       real(wp), intent(in) :: xin, tin, eps
       real(wp), parameter  ::  a = -0.40_wp, b = 1.0_wp , d = +0.50_wp
@@ -289,7 +257,6 @@
       end select
 
       end function NL_Burg_exactsolution
-
 !==============================================================================
 ! DEFINES EXACT DERIVATIVE FOR PARTICULAR x AND t VALUE
       function NL_Burg_exact_derivative(xin,tin,eps)
@@ -321,27 +288,23 @@
        end select
 
       end function NL_Burg_exact_derivative
-
-
 !==============================================================================
 ! DEFINES RHS 
-      subroutine Burgers_dUdt(u,dudt,time,eps,dt)!nveclen,x,
+      subroutine Burgers_dUdt(u,dudt,time,eps,dt)
 
-!      integer,                      intent(in   ) :: nveclen
-      real(wp), dimension(nveclen), intent(in   ) ::  u!x,
+      real(wp), dimension(nveclen), intent(in   ) ::  u
       real(wp), dimension(nveclen), intent(  out) :: dudt
       real(wp),                     intent(in   ) :: time, eps, dt
 
       real(wp), dimension(nveclen)                :: f, df, dfv, gsat, wrk
       
       integer                                     :: i
-      real(wp)                                    :: uL,  uR !dx
+      real(wp)                                    :: uL,  uR
       real(wp)                                    :: du0, du1
       real(wp)                                    :: a0,  a1
       real(wp)                                    :: g0,  g1
 !------------------------------------------------------------------------------
 
-!      dx=x(2)-x(1)
       call Define_CSR_Operators(nveclen,dx)
    
       gsat = 0.0_wp ; df  = 0.0_wp ; dfv = 0.0_wp ;
@@ -365,7 +328,6 @@
 
 !--------------Inflow Boundary Condition---------------------------------------
 
-      uL = NL_Burg_exactsolution(x(1),time,eps)
       uR = u(1)
 
       a0 = third*(uR + sqrt(uR**2+1.0e-28_wp))    !a0 = third*(uR + abs(uR))
@@ -373,43 +335,32 @@
          - eps* NL_Burg_exact_derivative(x(1),time,eps)
 
       du0 = dot_product(d1vec0(1:4),u(1:4)) / dx
-! Hack
-!      g0=0.0_wp
-      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - eps*du0 - g0)
-! HACK      
+
+      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - eps*du0 - g0) 
 
 !---------------Outflow Boundary Condition-------------------------------------
 
       uL = u(nveclen)
-      uR = NL_Burg_exactsolution(x(nveclen),time,eps)
 
-!      a1 = third*(uL - abs(uL))
-      a1 = third*(uL - sqrt(uL**2+1.0e-28_wp))
+      a1 = third*(uL - sqrt(uL**2+1.0e-28_wp)) !a1 = third*(uL - abs(uL))
       g1 = a1 * NL_Burg_exactsolution(x(nveclen),time,eps)                &
          - eps* NL_Burg_exact_derivative(x(nveclen),time,eps)
       du1 = dot_product(d1vec1(1:4),u(nveclen-3:nveclen)) / dx
 
-! HACK
-!      g1=0.0_wp
-      gsat(nveclen) = gsat(nveclen) + sig1 * Pinv(nveclen) * (a1*uL - eps*du1 - g1)
-! HACK      
+      gsat(nveclen) = gsat(nveclen) + sig1 * Pinv(nveclen) * (a1*uL-eps*du1-g1)
 
 !--------------------Sum all terms---------------------------------------------
 
-! HACK
       dudt(:) = dt*(eps*dfv(:) - df(:) + gsat(:))
-!      dudt(:) = dt*(eps*dfv(:)+gsat(:))
-! HACK
 
       deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)    
 
       end subroutine Burgers_dUdt
 !==============================================================================
 ! CREATES JACOBIAN
-      subroutine Build_Jac(u,eps,dt,akk,iaxJac,jaxJac,axJac,time)!x,nveclen,
+      subroutine Build_Jac(u,eps,dt,akk,iaxJac,jaxJac,axJac,time)
       
-!      integer,                        intent(in   ) :: nveclen
-      real(wp), dimension(nveclen),   intent(in   ) :: u!,x
+      real(wp), dimension(nveclen),   intent(in   ) :: u
       real(wp),                       intent(in   ) :: eps,dt,akk
       integer,  dimension(nveclen+1), intent(  out) :: iaxJac
       integer,  dimension(nnz_D2),    intent(  out) :: jaxJac
@@ -420,15 +371,12 @@
       integer,  dimension(nnz_D2)     :: jwrk1,jwrk2,jwrk3,jJac
       real(wp), dimension(nnz_D2)     :: wrk1,wrk2,wrk3,Jac,wrk4,eps_d2      
       
-      integer,  dimension(nveclen)    :: iw
+      integer,  dimension(nveclen)    :: iw,diag
       integer,  dimension(2)          :: ierr
-      real(wp)                        :: uL,a1_d,uR,a0_d,a0,a1!dx,
-     
-      real(wp), dimension(nveclen)    :: diag
-      real(wp), dimension(nveclen) :: dudt,wrk_rhs,wrk_Ju,u_p,dudt_p !Hack variables
-!------------------------------------------------------------------------------ 
+      real(wp)                        :: uL,a1_d,uR,a0_d,a0,a1
     
-!      dx=x(2)-x(1)
+!------------------------------------------------------------------------------ 
+
       call Define_CSR_Operators(nveclen,dx)      
 
 !---------------------dgsat/dt-------------------------------------------------
@@ -439,7 +387,6 @@
       uR=u(1)
       a0 = third*(uR + sqrt(uR**2+1.0e-28_wp))
       a0_d=third*(1+uR/sqrt(uR**2+1.0e-28_wp))
-
 
 !******Steps to make xjac******
 !       jac=eps*d2-2/3*d1*u-1/3*u*d1-1/3*diag(d1*u)+dgsat/du
@@ -483,8 +430,6 @@
       Jac(nnz_D2-3:nnz_D2)=Jac(nnz_D2-3:nnz_D2)+ &
      &                     sig1*Pinv(nveclen)*(-eps)*d1vec1(:)/dx
      
-!      print*,'Jac',dt*Jac(1:9:4),dt*Jac(14)
-       
       wrk4=-akk*dt*Jac                                                       !6
       call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)                          !7
 
@@ -500,28 +445,7 @@
       endif
        
       deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)  
-  
-! Hack /////////////////////////////////
-!      u_p(:)=u(:)
-!      u_p(1)=u_p(1) + 1e-8_wp
-!       
-!      call Burgers_dudt(u_p,dudt_p,time,eps,dt)!nveclen,x,
-!      call Burgers_dudt(u  ,dudt  ,time,eps,dt)!nveclen,x,
-!
-!      print*,'test',(dudt_p-dudt)/1e-8_wp
-!      stop
-!Hack   /////////////////////////////////   
-   
-! HACK Test===============================================    
-!      call Burgers_dUdt(nveclen,x,u,dudt,time,eps,dt)
-!      wrk_rhs(:)=u(:)-akk*dudt(:)
-!      call amux(nveclen,u,wrk_Ju,axJac,jaxJac,iaxJac)   
-!      print*,'rhs',wrk_rhs
-!      print*,'jac*u',wrk_Ju
-!      print*,wrk_rhs - wrk_Ju      
-!      stop 
-! HACK ===================================================
-      
+     
       end subroutine Build_Jac
 !==============================================================================
       end module Burgers_Module

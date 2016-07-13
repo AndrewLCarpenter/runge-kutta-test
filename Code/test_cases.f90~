@@ -10,7 +10,8 @@
 !     problem 5) Lorenz
 !     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
 !     problem 7) Oregonator
-!     problem 8) 
+!     problem 8) Brusselator
+!     problem 9) Burgers
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -130,14 +131,17 @@
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
+            
+            
             !**INIT. OUTPUT FILES**
             call init_output_files(nveclen,ep)
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
-!           do iDT =1,1
+            cost(:)=0.0_wp !turn this on when doing 1 iDT value
+            do iDT =1,1
 ! HACK
-            do iDT =1,isamp,1   
+!            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -260,8 +264,8 @@
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
 !              print*,sqrt(1.0_wp/nveclen*dot_product(uvec(:)-uexact(:),uvec(:)-uexact(:)))
-!              print*,iDT,uvec(1)
-!              print*,'ex',uexact(1)
+              print*,' u',uvec(:)
+              print*,'ex',uexact(:)
               do i = 1,nvecLen
                 if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
@@ -275,15 +279,17 @@
 !           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
-
+  !          print*,cost
             call output_terminal_iteration(cost,0,ep,nveclen)
-              
+
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
+     !     print*,'bottom of stiffness'
           enddo  
+      !    print*,'outside stiffness'
 !---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
           call output_conv_stiff(nveclen,jactual,epsave)
