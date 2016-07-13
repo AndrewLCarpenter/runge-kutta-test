@@ -2,7 +2,7 @@
 
 CC = gcc
 FC = ifort
-# FC = gfortran
+#FC = gfortran
 
 #FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 # FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
@@ -35,7 +35,6 @@ SRCS = precision_vars.f90\
        Rossler_Chaos.f90\
        Oregonator.f90\
        bruesselator.f90\
-       Burgers.f90\
        problemsub.f90
       
 #OBJS2 = $(SRCS:.F90=.o)
@@ -68,7 +67,6 @@ OBJS = precision_vars.o\
        Rossler_Chaos.o\
        Oregonator.o\
        brusselator.o\
-       Burgers.o\
        problemsub.o
       
 #LINK = gfortran

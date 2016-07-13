@@ -6,6 +6,7 @@
       implicit none
       
       public :: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw,Allocate_CSR_Storage
+      public :: Jacobian_CSR
       private
       
       real(wp),    parameter              ::   toljac = 1.0e-13_wp
@@ -31,7 +32,7 @@
 
       integer, intent(in)  :: nJac !nJac=nveclen
       if(.not.allo_test) then
-      
+
         allocate(iaJac(nJac+1))
         allocate(jaJac(nnz_D2))
         allocate( aJac(nnz_D2))
@@ -47,15 +48,17 @@
       end subroutine
 
 !==============================================================================
-      subroutine Jacobian_CSR(nJac,xjac,iaJac,jaJac,aJac)
+      subroutine Jacobian_CSR(nJac,xjac)
  
       integer,                  intent(in   ) :: nJac
       real(wp), dimension(:,:), intent(in   ) :: xjac
-      real(wp), dimension(:),   intent(  out) :: iaJac,jaJac,aJac
       integer                                 :: i,j,icnt,jcnt
 
+!      print*,'calling2'
+      nnz_D2=nJac**2
       call Allocate_CSR_Storage(nJac)
-      
+ !     print*,'called2'
+ !     print*,size(iaJac),size(jaJac),size(aJac)
 !     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
 
       ! Initialize CSR

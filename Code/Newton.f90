@@ -17,7 +17,7 @@
       use QR_Module
       use control_variables
       use Runge_Kutta
-      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw
+      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw,Jacobian_CSR
       use ilut_module, only: ilu0,lusol
       
       implicit none
@@ -68,14 +68,16 @@
           uveciter(:) = uvec(:) !store old uvec
           
           select case(temporal_splitting) !####################################
-          
-          
-          
-          
+        
+            case('EXPLICIT') !***EXPLICIT**************************************
+              uvec(:)=usum(:)
+            !********************EXPLICIT**************************************   
+  
             case default  !***IMEX AND IMPLICIT********************************    
 
               call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
-
+              !print*,'uvec',uvec
+             ! print*,rnewton
               !**GET JACOBIAN**
               programStep=3
               call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
@@ -86,30 +88,30 @@
               
               select case(Jac_case) !==========================================
                 case('DENSE')  !******DENSE************************************
-               
-                  if (typ==2) then  !---------REGULAR NEWTON-------------------
-                    xjacinv=Mat_invert(xjac)
+                   call Jacobian_CSR(nveclen,xjac) !convert dense xjac to csr
+              end select !HACK               
+!!                  if (typ==2) then  !---------REGULAR NEWTON-------------------
+!!                    xjacinv=Mat_invert(xjac)
 
                    !temp=matmul(xjacinv,Rnewton) 
                    !**want to use this but there is a different round off error compared to the explicit do loop
                    !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
                    
-                    do i = 1,nvecLen
-                      do j = 1,nvecLen
-                        uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
-                      enddo
-                    enddo 
+!!                    do i = 1,nvecLen
+!!                      do j = 1,nvecLen
+!!                        uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
+!!                      enddo
+!!                    enddo 
                
-                  elseif (typ==3) then  !----------QR--------------------------
-                    call QR_decomp(xjac,nveclen,rnewton)
-                  endif  
+!!                  elseif (typ==3) then  !----------QR--------------------------
+!!                    call QR_decomp(xjac,nveclen,rnewton)
+!!                  endif  
                  
-                !*********************DENSE************************************
-                
-                
-                
-                
-                 case('SPARSE') !****SPARSE************************************
+                !*********************DENSE************************************ 
+
+
+
+!!                 case('SPARSE') !****SPARSE************************************
                    !use lusol, ilu0 from ilut_module
 !                   print*,'ajac',ajac,'size',size(ajac)
 !                   print*,'jajac',jajac,'size',size(jajac)
@@ -118,35 +120,27 @@
 !                   print*,'alujac',alujac,'size',size(alujac)
 !                   print*,'jlujac',jlujac,'size',size(jlujac)
 !                   print*,'jujac',jujac,'size',size(jujac)
-!                   print*,uvec,'uvec1'
+!                   print*,'uvec1',uvec
                    call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
-!                   call lusol(nveclen,uvec(:)-aI*resI(:,L),uvec,aLUJac,jLUJac,jUJac)
 !                  print*,r_wrk,'r_wrk'
                    uvec(:)=uvec(:)-r_wrk(:)
-!                   print*,uvec,'uvec2'      
+!                   print*,'uvec2',uvec  
+!                   print*,'uexact',uexact    
                  !  print*,'fixed'
 !                   stop         
                  !*******************SPARSE************************************             
-               end select !====================================================
-               
-               
-               
+!!               end select !====================================================
+          
              !************END IMEX AND IMPLICIT********************************
-             
-             
-        
-            case('EXPLICIT') !***EXPLICIT**************************************
-              uvec(:)=usum(:)
-            !********************EXPLICIT**************************************
-            
-            
-            
           end select !#########################################################
 
           tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-          if (k>=15) print*,'tmp',tmp,'L',L,'k',k!,'time',time
-!          print*,rnewton
-          if (tmp/=tmp) stop
+          if (k>=15) write(*,*),'tmp',tmp,'L',L,'k',k!,'time',time,'ep',ep
+         ! print*,rnewton
+          if (tmp/=tmp) then
+            print*,'stopping NaN k=',k,' t=',time
+            stop
+          endif
 
           if(tmp < tol) then
             ierr = 0
@@ -182,9 +176,9 @@
      
       programStep=2
       call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
-  
+
       Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
-      
+
       end subroutine Build_Rnewton
       
 !==============================================================================

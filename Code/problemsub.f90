@@ -13,6 +13,7 @@
       use precision_vars
       use control_variables
       use runge_kutta
+      use Burgers_Module, only:Burgers
 
       implicit none
     

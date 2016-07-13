@@ -18,7 +18,7 @@
       implicit none
   
       private
-      public    ::  grid,exact_Burg,error,plot,dx,Burgers_dudt,Build_Jac
+      public    ::  Burgers
 
 !--------------------------------VARIABLES-------------------------------------         
       real(wp)  :: dx
@@ -26,6 +26,11 @@
 !      character(120),         parameter :: exact_solution = 'Oliver'
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
+      
+      integer,  parameter    :: vecl=16      
+      real(wp), dimension(vecl) :: x      
+      integer :: nveclen
+      real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 
       real(wp), dimension(4), parameter :: d1vec0= (/-24.0_wp/17.0_wp,  &
                                                   &  +59.0_wp/34.0_wp,  &
@@ -38,33 +43,160 @@
                                                   &  +24.0_wp/17.0_wp/)
 !------------------------------------------------------------------------------      
       contains
+      
+!==============================================================================
+!******************************************************************************
+! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
+! of the Burgers problem 
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! BURGERS_MOD.F90           *CONTAINS ROUTINES TO BUILD BURGER
+! JACOBIAN_CSR_MOD.F90      *CONTAINS CSR JACOBIAN VARIABLES
+!******************************************************************************
 
+      subroutine Burgers(programStep,nveclen_tmp,ep,dt, &
+     &                   tfinal,iDT,time,resE_vec,resI_vec,akk)
+
+      use control_variables
+      use Jacobian_CSR_Mod, only:iaJac,jaJac,aJac,Allocate_CSR_Storage
+
+      implicit none
+!-----------------------VARIABLES----------------------------------------------
+!      integer,  parameter    :: vecl=16
+      integer, intent(in   ) :: programStep
+
+      !INIT vars
+!      real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
+!      real(wp), dimension(vecl) :: x
+
+      
+      real(wp), intent(in   ) :: ep
+      real(wp), intent(inout) :: dt
+      integer,  intent(  out) :: nveclen_tmp
+      real(wp), intent(  out) :: tfinal
+      real(wp), intent(in   ) :: time
+      integer,  intent(in   ) :: iDT
+
+      real(wp)                :: tinitial
+      
+      !RHS vars
+      real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
+      
+      !Jacob vars
+      real(wp), intent(in   ) :: akk
+!------------------------------------------------------------------------------
+
+      !**Pre-initialization. Get problem name and vector length**
+      if (programStep==-1) then
+        nvecLen_tmp = vecl
+        nveclen = vecl
+        probname='Burgers  '     
+        tol=1.0e-12_wp  
+        dt_error_tol=5.0e-14_wp
+        
+      !**Initialization of problem information**        
+      elseif (programStep==0) then
+
+        call grid()!(x,xL,xR,vecl)
+        
+        tinitial=0.0_wp
+        call exact_Burg(uvec,ep,tinitial)!vecl,x,
+           
+        dt = 0.5_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep   
+!        dx = x(2)-x(1)
+        tfinal = 0.5_wp                   ! final time
+        
+        call exact_Burg(uexact,ep,tfinal)!vecl,x,
+              
+      !**RHS and Jacobian**
+      elseif (programStep>=1) then
+
+        select case (Temporal_Splitting)
+        
+          case('EXPLICIT')
+            !**RHS**
+            if (programStep==1 .or.programStep==2) then
+              call Burgers_dUdt(uvec,resE_vec,time,ep,dt)!vecl,x,
+              
+              resI_vec(:)=0.0_wp
+            !**Jacobian**              
+            elseif (programStep==3) then
+              
+            endif
+
+          case('IMEX') ! For IMEX schemes
+            !**RHS**
+            if (programStep==1 .or.programStep==2) then
+
+            !**Jacobian**
+            elseif (programStep==3) then
+
+            endif
+            
+          case('IMPLICIT') ! For fully implicit schemes
+            !**RHS**
+            if (programStep==1 .or.programStep==2) then
+!              print*,'in rhs'
+!              print*,'vecl',vecl
+!              print*,'x',x
+!              print*,'uvec',uvec
+!              print*,'time',time
+!              print*,'ep',ep
+!              print*,'dt',dt
+              call Burgers_dUdt(uvec,resI_vec,time,ep,dt)!vecl,x,
+!              print*,'resI',resI_vec
+              resE_vec(:)=0.0_wp
+
+            !**Jacobian**
+            elseif (programStep==3) then
+              jac_case='SPARSE'
+              call Allocate_CSR_Storage(vecl)
+              call Build_Jac(uvec,ep,dt,akk,iaJac,jaJac,aJac,time)!vecl, x,           
+
+            endif
+            
+          case default ! To catch invald inputs
+            write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMEX", or "IMPLICIT"'
+            write(*,*)'Exiting'
+            stop
+            
+        end select
+        
+      endif
+      
+      end subroutine Burgers
+!==============================================================================
+!==============================================================================
 !==============================================================================
 ! PRODUCES GRID
-      subroutine grid(x,xL,xR,nveclen)
+      subroutine grid()!(x,xL,xR,nveclen)
 
       implicit none
 
-      integer,                      intent(in   ) :: nveclen
-      real(wp), dimension(nveclen), intent(  out) :: x
-      real(wp),                     intent(in   ) :: xL,xR
+!      integer,                      intent(in   ) :: nveclen
+!      real(wp), dimension(nveclen), intent(  out) :: x
+!      real(wp),                     intent(in   ) :: xL,xR
 
       integer                                     :: i
       
       do i=1,nveclen
         x(i)= xL + (xR-xL)*(i-1.0_wp)/(nveclen-1.0_wp)
       enddo
+      
+      dx=x(2)-x(1)
 
       return
       end subroutine grid
 
 !==============================================================================
 ! RETURNS VECTOR WITH EXACT SOLUTION
-      subroutine exact_Burg(nveclen,x,u,eps,time)
+      subroutine exact_Burg(u,eps,time)!nveclen,x,
 
-      integer,                      intent(in   ) :: nveclen
+!      integer,                      intent(in   ) :: nveclen
       real(wp),                     intent(in   ) :: eps,time
-      real(wp), dimension(nveclen), intent(in   ) :: x
+!      real(wp), dimension(nveclen), intent(in   ) :: x
       real(wp), dimension(nveclen), intent(  out) :: u
       integer                                     :: i
 
@@ -77,11 +209,11 @@
 
 !==============================================================================
 ! 
-      subroutine error(nveclen,x,u,time,eps,dt)
+      subroutine error(u,time,eps,dt)!nveclen,x,
 
-      integer,                      intent(in   ) :: nveclen
+!      integer,                      intent(in   ) :: nveclen
       real(wp),                     intent(in   ) :: time, eps, dt
-      real(wp), dimension(nveclen), intent(inout) :: x,u
+      real(wp), dimension(nveclen), intent(inout) :: u!x,
 
       integer                                    :: i
       real(wp)                                   :: errL2,errLinf,wrk,psum
@@ -107,11 +239,11 @@
 
 !==============================================================================
 !
-      subroutine plot(punit,nveclen,x,u,time,eps)
+      subroutine plot(punit,u,time,eps)!nveclen,x,
 
-      integer,                      intent(in)    :: punit,nveclen
+      integer,                      intent(in)    :: punit!,nveclen
       real(wp),                     intent(in)    :: time, eps
-      real(wp), dimension(nveclen), intent(inout) :: x,u
+      real(wp), dimension(nveclen), intent(inout) :: u!x,
 
       integer                                    :: i
       real(wp)                                   :: wrk,err
@@ -193,23 +325,23 @@
 
 !==============================================================================
 ! DEFINES RHS 
-      subroutine Burgers_dUdt(nveclen,x,u,dudt,time,eps,dt)
+      subroutine Burgers_dUdt(u,dudt,time,eps,dt)!nveclen,x,
 
-      integer,                      intent(in   ) :: nveclen
-      real(wp), dimension(nveclen), intent(in   ) :: x, u
+!      integer,                      intent(in   ) :: nveclen
+      real(wp), dimension(nveclen), intent(in   ) ::  u!x,
       real(wp), dimension(nveclen), intent(  out) :: dudt
       real(wp),                     intent(in   ) :: time, eps, dt
 
       real(wp), dimension(nveclen)                :: f, df, dfv, gsat, wrk
       
       integer                                     :: i
-      real(wp)                                    :: uL,  uR, dx
+      real(wp)                                    :: uL,  uR !dx
       real(wp)                                    :: du0, du1
       real(wp)                                    :: a0,  a1
       real(wp)                                    :: g0,  g1
 !------------------------------------------------------------------------------
 
-      dx=x(2)-x(1)
+!      dx=x(2)-x(1)
       call Define_CSR_Operators(nveclen,dx)
    
       gsat = 0.0_wp ; df  = 0.0_wp ; dfv = 0.0_wp ;
@@ -274,10 +406,10 @@
       end subroutine Burgers_dUdt
 !==============================================================================
 ! CREATES JACOBIAN
-      subroutine Build_Jac(nveclen,u,x,eps,dt,akk,iaxJac,jaxJac,axJac,time)
+      subroutine Build_Jac(u,eps,dt,akk,iaxJac,jaxJac,axJac,time)!x,nveclen,
       
-      integer,                        intent(in   ) :: nveclen
-      real(wp), dimension(nveclen),   intent(in   ) :: u,x
+!      integer,                        intent(in   ) :: nveclen
+      real(wp), dimension(nveclen),   intent(in   ) :: u!,x
       real(wp),                       intent(in   ) :: eps,dt,akk
       integer,  dimension(nveclen+1), intent(  out) :: iaxJac
       integer,  dimension(nnz_D2),    intent(  out) :: jaxJac
@@ -286,17 +418,17 @@
         
       integer,  dimension(nveclen+1)  :: iwrk1,iwrk2,iwrk3,iJac
       integer,  dimension(nnz_D2)     :: jwrk1,jwrk2,jwrk3,jJac
-      real(wp), dimension(nnz_D2)     :: wrk1,wrk2,wrk3a,wrk3b,Jac,wrk4,eps_d2      
+      real(wp), dimension(nnz_D2)     :: wrk1,wrk2,wrk3,Jac,wrk4,eps_d2      
       
       integer,  dimension(nveclen)    :: iw
       integer,  dimension(2)          :: ierr
-      real(wp)                        :: dx,uL,a1_d,uR,a0_d,a0,a1
+      real(wp)                        :: uL,a1_d,uR,a0_d,a0,a1!dx,
      
       real(wp), dimension(nveclen)    :: diag
       real(wp), dimension(nveclen) :: dudt,wrk_rhs,wrk_Ju,u_p,dudt_p !Hack variables
 !------------------------------------------------------------------------------ 
     
-      dx=x(2)-x(1)
+!      dx=x(2)-x(1)
       call Define_CSR_Operators(nveclen,dx)      
 
 !---------------------dgsat/dt-------------------------------------------------
@@ -310,51 +442,53 @@
 
 
 !******Steps to make xjac******
-!       jac=eps*d2-(third)*(d1*u+u*d1)+dgsat/du
-!1      wrk1=d1*u
-!2      wrk2=u*d1
-!3      wrk3a=wrk1+wrk2
-!4      wrk3b=-1/3*wrk3a
-!5      eps_d2=eps*d2
-!6      jac=eps_d2+wrk3b+dgsat/du
-!7      wrk4=-akk*dt*jac
+!       jac=eps*d2-2/3*d1*u-1/3*u*d1-1/3*diag(d1*u)+dgsat/du
+!1      wrk1=-2/3*d1*u
+!2      wrk2=-1/3*u*d1
+!3      wrk3=wrk1+wrk2
+!4      eps_d2=eps*d2
+!5      jac=eps_d2+wrk3-1/3*diag(d1*u)+dgsat/du
+!6      wrk4=-akk*dt*jac
 !
 !       xjac=I-akk*dt*jac=-akk*dt*jac+(1)*I
-!8      xjac=wrk4+(1)*I
+!7      xjac=wrk4+(1)*I
 ! 
-!9      xjac-> wrk4, iJac, jJac
+!8      xjac-> wrk4, iJac, jJac
 !******************************
 ! --------------Make xjac -----------------------------------------------------
       call amudia(nveclen,1,D1,jD1,iD1,u,wrk1,jwrk1,iwrk1)                   !1
-
+      wrk1(:)=-twothird*wrk1(:)                                              !1
+      
       call diamua(nveclen,1,D1,jD1,iD1,u,wrk2,jwrk2,iwrk2)                   !2
-
-      call aplb(nveclen,nveclen,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3a,&  !3
+      wrk2(:)=-third*wrk2(:)                                                 !2
+      
+      call aplb(nveclen,nveclen,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3,&   !3
      &          jwrk3,iwrk3,nnz_D2,iw,ierr(1))                               !3
-      wrk3b(:)=-third*wrk3a(:)
 
-      eps_d2=eps*D2(:)                                                       !5
-      call aplb(nveclen,nveclen,1,eps_d2,jD2,iD2,wrk3b,jwrk3,iwrk3,Jac,&    !6a
-     &          jJac,iJac,nnz_D2,iw,ierr(2))                                !6a
+      eps_d2=eps*D2(:)                                                       !4
+      call aplb(nveclen,nveclen,1,eps_d2,jD2,iD2,wrk3,jwrk3,iwrk3,Jac,&     !5a
+     &          jJac,iJac,nnz_D2,iw,ierr(2))                                !5a
 
-      call amux(nveclen,u,diag,D1,jD1,iD1)   !  First-derivative of u vec
-      call apldia(nveclen,0,Jac,jJac,iJac,diag,Jac,jJac,iJac,iw)
+      call amux(nveclen,-third*u,diag,D1,jD1,iD1) !First-derivative of u vec!5b
+      call apldia(nveclen,0,Jac,jJac,iJac,diag,Jac,jJac,iJac,iw)            !5b
 
-     ! R - 6b
+     ! R - 5c
       Jac(1)=Jac(1)+sig0*Pinv(1)*(a0+a0_d*(uR- &
      &       NL_Burg_exactsolution(x(1),time,eps))) 
       Jac(1:4)=Jac(1:4)+sig0*Pinv(1)*(-eps)*d1vec0(:)/dx
       
-      ! L - 6b
+      ! L - 5c
       Jac(nnz_D2)=Jac(nnz_D2)+sig1*Pinv(nveclen)*(a1+a1_d*(uL- &
      &            NL_Burg_exactsolution(x(nveclen),time,eps))) 
       Jac(nnz_D2-3:nnz_D2)=Jac(nnz_D2-3:nnz_D2)+ &
      &                     sig1*Pinv(nveclen)*(-eps)*d1vec1(:)/dx
      
-      wrk4=-akk*dt*Jac                                                       !7
-      call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)                          !8
+!      print*,'Jac',dt*Jac(1:9:4),dt*Jac(14)
+       
+      wrk4=-akk*dt*Jac                                                       !6
+      call aplsca(nveclen,wrk4,jJac,iJac,1.0_wp,iw)                          !7
 
-      !9
+      !8
       iaxJac=iJac
       jaxJac=jJac
       axJac=wrk4
@@ -366,14 +500,13 @@
       endif
        
       deallocate(iD1,iD2,Pmat,Pinv,jD1,jD2,D1,D2)  
-
-      
+  
 ! Hack /////////////////////////////////
 !      u_p(:)=u(:)
 !      u_p(1)=u_p(1) + 1e-8_wp
 !       
-!      call Burgers_dudt(nveclen,x,u_p,dudt_p,time,eps,dt)
-!      call Burgers_dudt(nveclen,x,u  ,dudt  ,time,eps,dt)
+!      call Burgers_dudt(u_p,dudt_p,time,eps,dt)!nveclen,x,
+!      call Burgers_dudt(u  ,dudt  ,time,eps,dt)!nveclen,x,
 !
 !      print*,'test',(dudt_p-dudt)/1e-8_wp
 !      stop

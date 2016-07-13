@@ -140,8 +140,13 @@
       do i = 1,nveclen
         do j=2,size(error(:,i))
           jsamp=j
+   !       print*,'error(',j,',',i,')=',error(j,i)
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
+ 
+   !     print*,size(cost)
+  !      print*,error(:,1)
+   !     print*,jsamp
 
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
