@@ -13,26 +13,26 @@
 
       module  output_module
 
-      use precision_vars     , only : wp
-      use poly_fit_Mod
-      use control_variables
-      use runge_kutta
+      use precision_vars,    only : wp
 
-      implicit none
+      implicit none; save
       
       public :: create_file_paths, output_names, init_output_files
       public :: output_conv_stiff,output_terminal_iteration
       public :: output_terminal_final,output_conv_error
       
       private
-      character(len=80) :: fileloc   !file  location
-      character(len=4)             :: ext='.dat'  !file extension
+      character(len=80)            :: fileloc   !file  location
+      character(len=4), parameter  :: ext='.dat'  !file extension
 
       contains
       
 !==============================================================================
 !  SETS FILE LOCATION VARIABLE
       subroutine set_file_loc()
+      
+      use control_variables, only : temporal_splitting,probname
+      use runge_kutta,       only : casename
       
       fileloc=trim(temporal_splitting)//'/'// &
      &        trim(probname)//'/'//trim(casename)//'/' ! get file location  
@@ -54,6 +54,9 @@
 !==============================================================================  
 !  WRITES PROBLEM NAME AND CASE NAME TO THE TOP OF THE TERMIINAL OUTPUT
       subroutine output_names()
+
+      use control_variables, only : probname
+      use runge_kutta,       only : casename
        
       write(*,*)'Problem name: ',trim(probname)
       write(*,*)'Casename: ', trim(casename)
@@ -63,6 +66,9 @@
 !==============================================================================
 !  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
       subroutine init_output_files(nveclen,ep)
+
+      use control_variables, only : probname
+      use runge_kutta,       only : casename
      
       integer,  intent(in) :: nveclen
       real(wp), intent(in) :: ep
@@ -86,9 +92,13 @@
       
 !==============================================================================      
 !  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
-      subroutine output_conv_stiff(nveclen,jactual,epsave)
+      subroutine output_conv_stiff(nveclen,epsave)
       
-      integer,                intent(in) :: nveclen,jactual
+      use control_variables, only : temporal_splitting,probname,jactual, &
+     &                              b1save,b1Psave  
+      use runge_kutta,       only : casename    
+      
+      integer,                intent(in) :: nveclen
       real(wp), dimension(:), intent(in) :: epsave
       
       character(len=1)  :: istr        !loop index placeholder
@@ -116,6 +126,9 @@
 !==============================================================================
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
       subroutine output_terminal_iteration(cost,mwt,ep,nveclen)
+      
+      use poly_fit_mod,      only : fit
+      use control_variables, only : isamp,dt_error_tol,b,error,errorP
             
       real(wp), dimension(:),   intent(in) :: cost
 
@@ -133,21 +146,13 @@
 
 
       !**GATHER OUTPUT VALUES
-      do k=1,size(error(1,:))
-        write(240,*)error(1,k)      
-      enddo
 
       do i = 1,nveclen
         do j=2,size(error(:,i))
           jsamp=j
-   !       print*,'error(',j,',',i,')=',error(j,i)
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
  
-   !     print*,size(cost)
-  !      print*,error(:,1)
-   !     print*,jsamp
-
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
@@ -168,6 +173,8 @@
 !==============================================================================
 !  OUTPUTS FINAL DATA BLOCK TO TERMINAL. ITERATION INFORMATION
       subroutine output_terminal_final(icount,jcount,stageE,stageI,maxiter)
+      
+      use runge_kutta, only : ns
       
       integer,                intent(in   ) :: icount,jcount
       real(wp), dimension(:), intent(inout) :: stageE,stageI,maxiter
@@ -191,6 +198,9 @@
 !==============================================================================
 !  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
       subroutine output_conv_error(cost)
+      
+      use control_variables, only : uvec,uexact,errvecT
+      
       real(wp),               intent(in) :: cost
       
       integer  :: i

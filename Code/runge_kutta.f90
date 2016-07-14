@@ -7,16 +7,18 @@
 
       module runge_kutta
       
-      use precision_vars
+      use precision_vars, only : wp     
+             
+      implicit none; save
       
-      implicit none
-      
-      public 
+      private
+      public :: casename, is, rungeadd
+      public :: aE,aI,bE,bI,bEH,bIH,cI,alpha,ns
       
 !-------------------VARIABLES--------------------------------------------------
-
       integer,   parameter              :: is=9
-      
+      character(len=25)                 :: casename    
+        
       real(wp),   dimension(is,is)      :: aE
       real(wp),   dimension(is,is)      :: aI
       real(wp),   dimension(is)         :: bE
@@ -33,16 +35,14 @@
       real(wp),   dimension(is,is)      :: al3D
       real(wp),   dimension(is,is)      :: al4N
       real(wp),   dimension(is,is)      :: al4D
-      character(len=25)                 :: casename
 !------------------------------------------------------------------------------
       
       contains
       
-!==============================================================================      
+!==============================================================================
+! DEFINE RK CONSTANTS      
       subroutine rungeadd(icase)
-      
-      implicit none
-
+     
       integer,                             intent(in   ) :: icase
       real(wp),   dimension(is)                          :: bdsum
       integer                                            :: i,j

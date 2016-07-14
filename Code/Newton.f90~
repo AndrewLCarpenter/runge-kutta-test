@@ -13,14 +13,9 @@
 
       module Newton
             
-      use precision_vars
-      use QR_Module
-      use control_variables
-      use Runge_Kutta
-      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw,Jacobian_CSR
-      use ilut_module, only: ilu0,lusol
-      
-      implicit none
+      use precision_vars, only:wp
+
+      implicit none; save
       
       public :: Newton_Iteration
       private      
@@ -31,198 +26,181 @@
 !  PERFORMS NEWTON ITERATION
       subroutine Newton_Iteration(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
+      use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
+      use Jacobian_CSR_Mod,  only: Jacobian_CSR
+
       integer, parameter :: iter_max=20
       logical, parameter :: Line_search=.false. !set to TRUE for line search
+      logical, parameter :: QR=.false. !set to TRUE for QR factorization
 
-      integer,                         intent(in   ) :: iprob,L
-      real(wp),                        intent(in   ) :: ep,dt
-      integer,                         intent(in   ) :: nveclen
-      real(wp),                        intent(in   ) :: time,aI
-      integer,                         intent(inout) :: icount,k
+      integer,  intent(in   ) :: iprob,L
+      real(wp), intent(in   ) :: ep,dt
+      integer,  intent(in   ) :: nveclen
+      real(wp), intent(in   ) :: time,aI
+      integer,  intent(inout) :: icount
+      integer,  intent(  out) :: k
       
       integer                              :: i,j  !Do loop variables
-      integer                              :: programStep !input to problemsub
-      integer                              :: ierr,typ,iDT 
-      real(wp)                             :: tfinal !output of problemsub (not needed)
-      real(wp), dimension(nveclen)         :: Rnewton,uveciter,r_wrk !Newton 
+      real(wp), dimension(nveclen)         :: Rnewton,uveciter!Newton 
       real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobian
 
-      real(wp)                             :: tmp !temp variable for accuracy
-      real(wp), dimension(5:iter_max)      :: tmp_list
-      
-      ierr = 0 
-      typ=2
 !------------------------------------------------------------------------------
       select case(temporal_splitting)
         case('EXPLICIT')
-          uvec(:)=usum(:)
+          do k = 1,iter_max
+            icount = icount + 1
+            uveciter(:) = uvec(:)
+            uvec(:)=usum(:)
+            if(check_exit(uveciter,k)) exit            
+          enddo   
         case default !IMEX or IMPLICIT
           select case(Jac_case)
             case('SPARSE')
               do k = 1,iter_max
                 icount = icount + 1
                 uveciter(:) = uvec(:) !store old uvec
-                call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
-                programStep=3
-                call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
-                call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)                  
-                call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
-                uvec(:)=uvec(:)-r_wrk(:)   
-                            
-                tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-                if (k>=15) write(*,*),'tmp',tmp,'L',L,'k',k!,'time',time,'ep',ep
-                if (tmp/=tmp) then
-                  print*,'stopping NaN k=',k,' t=',time
-                  stop
-                endif      
-                if(tmp < tol) then
-                  exit 
-                endif
                 
+                Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+                call Build_Jac(ep,dt,time,aI,iprob,L)
+                
+                call LU_solver(Rnewton)
+                
+                if(check_exit(uveciter,k)) exit
+                            
               enddo  
             case('DENSE')
               if (Line_search) then
                 call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
-              elseif (nveclen<=4) then
-           
-            
+              else
+              
+                do k = 1,iter_max
+                  icount = icount + 1
+                  uveciter(:) = uvec(:) !store old uvec   
+                              
+                  Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+                  call Build_Jac(ep,dt,time,aI,iprob,L)
+                  
+                  if (nveclen>4 .and. .not. QR) then !No explicit inverse
+                    call Jacobian_CSR(nveclen,xjac) !convert dense xjac to csr
+                    call LU_solver(Rnewton)
+                    
+                  elseif (nveclen>4 .and. QR) then
+                    call QR_decomp(xjac,nveclen,rnewton) 
+                     
+                  elseif (nveclen<=4) then !Explicit inverse
+                    xjacinv=Mat_invert(xjac)                  
+                    do i = 1,nvecLen
+                      do j = 1,nvecLen
+                        uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
+                      enddo
+                    enddo  
+                  endif
+                  
+                  if(check_exit(uveciter,k)) exit
+                  
+                enddo
+                
+              endif                
           end select    
       end select
-       
-!----------------LINE SEARCH---------------------------------------------------
-      if (typ==1) then
-        call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
-!-------------------NEWTON AND QR----------------------------------------------
-      else      
-        tmp_list(:)=0.0_wp
-        do k = 1,iter_max
-          icount = icount + 1
-
-          uveciter(:) = uvec(:) !store old uvec
-          
-          select case(temporal_splitting) !####################################
-        
-            case('EXPLICIT') !***EXPLICIT**************************************
-              uvec(:)=usum(:)
-            !********************EXPLICIT**************************************   
-  
-            case default  !***IMEX AND IMPLICIT********************************    
-
-              call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
-              !print*,'uvec',uvec
-             ! print*,rnewton
-              !**GET JACOBIAN**
-              programStep=3
-              call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
-
-              !          Backsolve to get solution
-              
-              
-              
-              select case(Jac_case) !==========================================
-                case('DENSE')  !******DENSE************************************
-                   call Jacobian_CSR(nveclen,xjac) !convert dense xjac to csr
-              end select !HACK               
-!!                  if (typ==2) then  !---------REGULAR NEWTON-------------------
-!!                    xjacinv=Mat_invert(xjac)
-
-                   !temp=matmul(xjacinv,Rnewton) 
-                   !**want to use this but there is a different round off error compared to the explicit do loop
-                   !uvec(:)=uvec(:)-temp(:) !**temp is needed or newt doesn't converge (unsure of reason)
-                   
-!!                    do i = 1,nvecLen
-!!                      do j = 1,nvecLen
-!!                        uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
-!!                      enddo
-!!                    enddo 
-               
-!!                  elseif (typ==3) then  !----------QR--------------------------
-!!                    call QR_decomp(xjac,nveclen,rnewton)
-!!                  endif  
-                 
-                !*********************DENSE************************************ 
-
-
-
-!!                 case('SPARSE') !****SPARSE************************************
-                   !use lusol, ilu0 from ilut_module
-!                   print*,'ajac',ajac,'size',size(ajac)
-!                   print*,'jajac',jajac,'size',size(jajac)
-!                   print*,'iajac',iajac,'size',size(iajac)
-                   call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)                  
-!                   print*,'alujac',alujac,'size',size(alujac)
-!                   print*,'jlujac',jlujac,'size',size(jlujac)
-!                   print*,'jujac',jujac,'size',size(jujac)
-!                   print*,'uvec1',uvec
-                   call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
-!                  print*,r_wrk,'r_wrk'
-                   uvec(:)=uvec(:)-r_wrk(:)
-!                   print*,'uvec2',uvec  
-!                   print*,'uexact',uexact    
-                 !  print*,'fixed'
-!                   stop         
-                 !*******************SPARSE************************************             
-!!               end select !====================================================
-          
-             !************END IMEX AND IMPLICIT********************************
-          end select !#########################################################
-
-          tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-          if (k>=15) write(*,*),'tmp',tmp,'L',L,'k',k!,'time',time,'ep',ep
-
-          if (tmp/=tmp) then
-            print*,'stopping NaN k=',k,' t=',time
-            stop
-          endif
-
-          if(tmp < tol) then
-            ierr = 0
-            exit 
-          endif
-          !**Check for convergence at a lesser tolerance
-          !if (k>=5) tmp_list(k)=tmp
-          !if (k>=9) then
-          !  tmp_list(:k:2)=(-1.0_wp)*tmp_list(:k:2) !turn every other value <0   
-          !  if (abs(sum(tmp_list))<=1.0e-11) then
-          !    print*,'exiting newton iteration!',sum(tmp_list)
-          !    exit
-          !  endif
-          !endif
-          !tmp_list=abs(tmp_list) !reset tracking array
-
-        enddo
-      endif
-!     if(ierr == 0) write(*,*)'Newton Iteration did not converge to machine precision'
       end subroutine Newton_Iteration
       
 !==============================================================================
-!  CREATES RNEWTON FOR NEWTON ITERATION      
-      subroutine Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
-            
-      real(wp), dimension(:), intent(  out) :: Rnewton
-      real(wp),               intent(in   ) :: ep,dt,time,aI
-      integer,                intent(in   ) :: nveclen,iprob,L
-
-      integer  :: iDT, programStep
-      real(wp) :: tfinal 
+! EXITS NEWTON ITERATION
+      function check_exit(uveciter,k)
       
-     
+      use control_variables, only: tol,uvec
+      
+      real(wp), dimension(:), intent(in) :: uveciter
+      integer,                intent(in) :: k
+      real(wp)                           :: tmp
+      logical                            :: check_exit
+      
+      check_exit=.false.
+      tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
+      if (k>=15) write(*,*),'tmp',tmp,'k',k
+      if (tmp/=tmp) then
+        print*,'stopping NaN k=',k
+        stop
+      endif      
+      if(tmp < tol) check_exit=.true. 
+      
+      end function check_exit
+!==============================================================================
+!  CREATES RNEWTON FOR NEWTON ITERATION      
+      function Build_Rnewton(ep,dt,time,aI,iprob,L)
+      
+      use control_variables, only: uvec,usum,resI
+      use problemsub_mod,    only: problemsub
+            
+      real(wp), dimension(size(uvec))       :: Build_Rnewton
+      real(wp),               intent(in   ) :: ep,dt,time,aI
+      integer,                intent(in   ) :: iprob,L
+
+      integer  :: iDT, programStep,nveclen
+      real(wp) :: tfinal     
+      
       programStep=2
       call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
+      Build_Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
-      Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
-
-      end subroutine Build_Rnewton
+      end function Build_Rnewton
+!==============================================================================
+!  CREATES JACOBIAN FOR NEWTON ITERATION      
+      subroutine Build_Jac(ep,dt,time,aI,iprob,L)
       
+      use problemsub_mod,    only: problemsub     
+       
+      real(wp), intent(in) :: ep,dt,time,aI
+      integer,  intent(in) :: iprob,L
+    
+      integer  :: nveclen
+      real(wp) :: tfinal,dt_in,time_in
+      integer  :: programstep,iDT
+      
+      dt_in=dt
+      time_in=time
+  
+      programStep=3
+      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time_in,aI,L)
+      
+      end subroutine Build_Jac
+      
+!==============================================================================
+! PERFORMS LU DECOMPOSITION AND SOLVING
+      subroutine LU_solver(Rnewton)
+      
+      use control_variables, only: uvec      
+      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw
+      use ilut_module, only: ilu0,lusol
+      
+      real(wp), dimension(:)              :: Rnewton
+      integer                             :: nveclen,ierr=0
+      real(wp),  dimension(size(Rnewton)) :: r_wrk
+            
+      nveclen=size(Rnewton)      
+            
+      call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)              
+      call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
+      uvec(:)=uvec(:)-r_wrk(:)  
+      if (ierr/=0) then 
+        print*,'Error in LU_solver!'
+        stop
+      endif
+      
+      end subroutine LU_solver 
+
 !==============================================================================
 !  PERFORMS LINE SEARCH AND NEWTON ITERATION 
       subroutine newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
-      integer,                         intent(in   ) :: iprob,L
-      real(wp),                        intent(in   ) :: ep,dt
-      integer,                         intent(in   ) :: nveclen
-      real(wp),                        intent(in   ) :: time,aI!from aI(L,L)
-      integer,                         intent(inout) :: icount,k
+      use control_variables, only: uvec,xjac
+      
+      integer,  intent(in   ) :: iprob,L
+      real(wp), intent(in   ) :: ep,dt
+      integer,  intent(in   ) :: nveclen
+      real(wp), intent(in   ) :: time,aI
+      integer,  intent(inout) :: icount,k
       
       integer                              :: j  !Do loop variables
       integer                              :: programStep !input to problemsub
@@ -238,13 +216,11 @@
       do k = 1,150
         icount = icount + 1
    
-        call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
+        Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
     
         rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 
-        programStep=3
-        call problemsub(iprob,programStep,nveclen,&
-      &          ep,dt,tfinal,iDT,time,aI,L)!resE(1,L),resI(1,L),
+        call Build_Jac(ep,dt,time,aI,iprob,L)
 
         xjacinv=Mat_invert(xjac)
 
@@ -257,7 +233,7 @@
                           !stored so that calculations are done correctly
           uvec(:) = uvec(:) - al*dxi
              
-          call Build_Rnewton(nveclen,Rnewton,ep,dt,time,aI,iprob,L)
+          Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
     
           rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 
@@ -284,6 +260,9 @@
 !==============================================================================
 !  PEFORMS QR DECOMPOSITION USING QR MODULE       
       subroutine QR_decomp(mat,nveclen,Rnewton)
+      
+      use control_variables, only: uvec
+      use QR_Module, only:qrdcmp,qrsolv
       
       real(wp), dimension(:,:), intent(inout) :: mat
       integer,                  intent(in   ) :: nveclen

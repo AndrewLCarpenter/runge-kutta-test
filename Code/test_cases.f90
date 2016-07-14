@@ -12,6 +12,7 @@
 !     problem 7) Oregonator
 !     problem 8) Brusselator
 !     problem 9) Burgers
+!     problem 10)B 1 
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -50,16 +51,21 @@
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
-      use precision_vars
-      use output_module
-      use Stage_value_module
-      use control_variables
-      use runge_kutta
-      use Newton,               only : Newton_Iteration
-!------------------------------VARIABLES---------------------------------------
+      use precision_vars,     only: wp,twothird
+      use output_module,      only: create_file_paths, output_names,          & 
+     &                               init_output_files, output_conv_stiff,    &
+     &                               output_terminal_iteration,               &
+     &                               output_terminal_final,output_conv_error
+      use Stage_value_module, only: Stage_Value_Predictor,xnorm
+      use control_variables,  only: isamp,jmax,jactual,uvec,uexact,b,usum,    &
+     &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
+     &                              error,errorP,b1save,b1Psave,ustage,       &
+     &                              predvec,allocate_vars,deallocate_vars 
+      use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
+      use Newton,             only: Newton_Iteration
+      use problemsub_mod,     only: problemsub
+      
       implicit none     
-!------------------------------PARAMETERS--------------------------------------
-      integer, parameter :: jactual=81         !?
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
       real(wp)                              :: itmp,t,time,dto,tt
@@ -87,7 +93,7 @@
       real(wp), dimension(isamp)            :: cost         
       integer                               :: jsamp
       real(wp), dimension(is)               :: stageE,stageI,maxiter
-                    
+                          
 !-----------------------------USER INPUT---------------------------------------
 
       write(*,*)'what is ipred?' !input predictor number
@@ -113,14 +119,14 @@
         do iprob = problem,problem
         
           call cpu_time(cputime1)
-
+              
           !**CALL FOR PROBNAME & NVECLEN**
           programStep=-1
           call problemsub(iprob,programStep,nveclen,ep,&
      &                    dt,tfinal,iDT,tt,aI(1,1),1)
-                              
-          call allocate_vars(nveclen,is)
-          
+        
+          call allocate_vars(nveclen,is) 
+                                      
           !**INIT. FILE PATH FOR OUTPUTS**
           call create_file_paths
           call output_names                           
@@ -135,6 +141,7 @@
             
             !**INIT. OUTPUT FILES**
             call init_output_files(nveclen,ep)
+
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
@@ -154,7 +161,7 @@
 
               !**INIT. ERROR VECTOR**
               errvecT(:) = 0.0_wp
-
+        
               do i = 1,ns            !initialize stage value preditor
                 predvec(:,i) = uvec(:)
               enddo
@@ -164,13 +171,13 @@
                 tt=t+Ci(1)*dt
                 !**STORE VALUES OF UVEC**
                 uveco(:) = uvec(:)
-
+             
                 jcount = jcount + (ns-1)    !keep track of total RK stages  
 !--------------------------------RK LOOP---------------------------------------
                 programStep=1
                 call problemsub(iprob,programStep,nveclen,ep, &
      &                          dt,tfinal,iDT,tt,aI(1,1),1) 
-     
+
                 ustage(:,1) = uvec(:)
 
                 !  ESDIRK Loop
@@ -182,7 +189,7 @@
                     usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
      &                                + aE(L,LL)*resE(:,LL)
                   enddo
-               
+              
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
                   if(ipred/=2) uvec(:) = predvec(:,L)  
 !---------------BEG NEWTON ITERATION ------------------------------------------
@@ -244,7 +251,8 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-            enddo
+           
+            enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
@@ -261,10 +269,10 @@
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
             
-          enddo  
+          enddo      
 !---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          call output_conv_stiff(nveclen,jactual,epsave)
+          call output_conv_stiff(nveclen,epsave)
           
           !**OUTPUT TO TERMINAL**
           call output_terminal_final(icount,jcount,stageE,stageI,maxiter)

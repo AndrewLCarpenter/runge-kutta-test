@@ -3,7 +3,7 @@
       use precision_vars, only : wp
       use matvec_module , only : amux
 
-      implicit none
+      implicit none; save
 
       private
 

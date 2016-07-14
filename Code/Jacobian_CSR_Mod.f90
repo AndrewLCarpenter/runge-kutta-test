@@ -1,9 +1,8 @@
       module Jacobian_CSR_Mod
       
-      use precision_vars
-      use SBP_Coef_Module, only:nnz_D2
+      use precision_vars,  only: wp
       
-      implicit none
+      implicit none; save
       
       public :: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw,Allocate_CSR_Storage
       public :: Jacobian_CSR
@@ -28,18 +27,20 @@
       contains
       
 !==============================================================================
-      subroutine Allocate_CSR_Storage(nJac)
-
-      integer, intent(in)  :: nJac !nJac=nveclen
+      subroutine Allocate_CSR_Storage(nJac,nnz)
+      
+      integer, intent(in) :: nJac !nJac=nveclen
+      integer, intent(in) :: nnz 
+      
       if(.not.allo_test) then
-
+      
         allocate(iaJac(nJac+1))
-        allocate(jaJac(nnz_D2))
-        allocate( aJac(nnz_D2))
+        allocate(jaJac(nnz))
+        allocate( aJac(nnz))
 
         allocate(jUJac(nJac))
-        allocate(jLUJac(nnz_D2))
-        allocate(aLUJac(nnz_D2))
+        allocate(jLUJac(nnz))
+        allocate(aLUJac(nnz))
 
         allocate(iw(nJac))
         
@@ -52,13 +53,12 @@
  
       integer,                  intent(in   ) :: nJac
       real(wp), dimension(:,:), intent(in   ) :: xjac
-      integer                                 :: i,j,icnt,jcnt
+      integer                                 :: i,j,icnt,jcnt,nnz
+      
+      nnz=nJac
 
-!      print*,'calling2'
-      nnz_D2=nJac**2
-      call Allocate_CSR_Storage(nJac)
- !     print*,'called2'
- !     print*,size(iaJac),size(jaJac),size(aJac)
+      call Allocate_CSR_Storage(nJac,nnz)
+
 !     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
 
       ! Initialize CSR

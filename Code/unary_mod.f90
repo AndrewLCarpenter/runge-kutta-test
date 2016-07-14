@@ -1,6 +1,6 @@
 module unary_mod 
 
-  use precision_vars
+  use precision_vars, only : wp
 
   private 
   public  :: amubdg , aplbdg, amub, aplb, aplb1, csort, qsorti, qsortd, transp,  &

@@ -7,7 +7,7 @@
 
       module QR_Module
 
-      use precision_vars
+      use precision_vars, only : wp
 
       implicit none
 

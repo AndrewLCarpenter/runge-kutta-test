@@ -9,11 +9,9 @@
 
       module Stage_value_module
   
-      use precision_vars
-      use control_variables
-      use runge_kutta
+      use precision_vars, only : wp
 
-      implicit none
+      implicit none; save
     
       public :: Stage_Value_Predictor,xnorm
       private
@@ -37,6 +35,9 @@
 !==============================================================================
       
       subroutine Stage_Value_Predictor1(L)
+      
+      use control_variables, only : ustage,predvec
+      use runge_kutta,       only : ns
       
 !  The SVP routine is called after the newton iteration has converged.  (stage L)
 !  Thus, it is predicting the starting guesses of the next stage (L+1)
@@ -91,6 +92,9 @@
 !==============================================================================
 
       subroutine Stage_Value_Predictor2(L,ktime)
+      
+      use control_variables, only : uvec,uveco,ustage
+      use runge_kutta,       only : alpha
       
       integer,                  intent(in  )  :: L,ktime
       !real(wp), dimension(:,:), intent(in   ) :: ustage

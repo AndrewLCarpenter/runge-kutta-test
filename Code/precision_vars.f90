@@ -4,9 +4,10 @@
 
      module precision_vars
       
-      implicit none
+      implicit none; save
       
-      public      
+      private
+      public :: third, half, twothird, pi, wp
       
 !--------------------VARIABLES-------------------------------------------------
       ! Generates the kind number for double precision

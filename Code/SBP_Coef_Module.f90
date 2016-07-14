@@ -1,8 +1,8 @@
       module SBP_Coef_Module
 
-      use precision_vars 
+      use precision_vars, only: wp
 
-      implicit none
+      implicit none; save
 
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
@@ -18,7 +18,6 @@
 !==============================================================================
       subroutine Define_CSR_Operators(n,h)
       
-      implicit none
       
       integer,  intent(in) :: n
       real(wp), intent(in) :: h
@@ -41,11 +40,8 @@
 
       end subroutine Define_CSR_Operators
 !==============================================================================            
-      
-
+     
       subroutine D1_242(n,nnz,ia,ja,a,h)
-
-      implicit none
 
       integer,                    intent(in   ) :: n,nnz
 
@@ -119,10 +115,6 @@
 ! =============================================================================
 
       subroutine D2_242(n,nnz,ia,ja,a,h)
-
-      implicit none
-
-      integer,   parameter                      :: wp = 8
 
       integer,                    intent(in   ) :: n,nnz
 

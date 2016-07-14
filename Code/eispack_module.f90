@@ -2,7 +2,7 @@
 
       use precision_vars      , only : wp
 
-      implicit none
+      implicit none; save
 
       private
 

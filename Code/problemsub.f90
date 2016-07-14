@@ -6,17 +6,23 @@
 ! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
 ! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
 !******************************************************************************
-
+      module problemsub_mod
+      
+      use precision_vars,    only: wp      
+      
+      implicit none;save
+      
+      private
+      public :: problemsub
+      
+      contains
+      
       subroutine problemsub(iprob,programStep,nveclen,ep,&
      &                      dt,tfinal,iDT,time,akk,L)
 
-      use precision_vars
-      use control_variables
-      use runge_kutta
-      use Burgers_Module, only:Burgers
-
-      implicit none
-    
+      use control_variables, only: resE,resI,uvec
+      use Burgers_Module,    only: Burgers
+   
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob, programStep
       integer,  intent(inout) :: nveclen
@@ -24,10 +30,10 @@
       real(wp), intent(inout) :: dt
       real(wp), intent(  out) :: tfinal
       integer,  intent(in   ) :: iDT
-      real(wp), intent(inout) :: time
+      real(wp), intent(in   ) :: time
       real(wp), intent(in   ) :: akk
       integer,  intent(in   ) :: L
-      real(wp), dimension(nveclen) :: resE_vec,resI_vec
+      real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
       if     (iprob==1) then
        call vanderPol(   programStep,nveclen,ep,&
@@ -59,8 +65,10 @@
       endif
       
       if(programStep >= 0) then
+  
         resE(:,L)=resE_vec(:)
         resI(:,L)=resI_vec(:)
       endif
 
       end subroutine problemsub
+      end module problemsub_mod
