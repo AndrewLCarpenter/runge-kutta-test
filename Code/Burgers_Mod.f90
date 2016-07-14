@@ -369,9 +369,10 @@
         
       integer,  dimension(nveclen+1)  :: iwrk1,iwrk2,iwrk3,iJac
       integer,  dimension(nnz_D2)     :: jwrk1,jwrk2,jwrk3,jJac
-      real(wp), dimension(nnz_D2)     :: wrk1,wrk2,wrk3,Jac,wrk4,eps_d2      
+      real(wp), dimension(nnz_D2)     :: wrk1,wrk2,wrk3,wrk4,Jac,eps_d2
+      real(wp), dimension(nveclen)    :: diag
       
-      integer,  dimension(nveclen)    :: iw,diag
+      integer,  dimension(nveclen)    :: iw
       integer,  dimension(2)          :: ierr
       real(wp)                        :: uL,a1_d,uR,a0_d,a0,a1
     
