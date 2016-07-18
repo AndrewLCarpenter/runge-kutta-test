@@ -6,14 +6,18 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-
+      module Kreiss_mod
+      private
+      public :: Kreiss
+      contains
       subroutine Kreiss(programStep,nveclen,ep,dt, &
      &                  tfinal,iDT,time,rese_vec,resi_vec,akk)
 
-      use precision_vars
-      use control_variables
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=2
       integer, intent(in   ) :: programStep
@@ -126,6 +130,7 @@
       endif
       
       end subroutine Kreiss
+      end module Kreiss_mod
 
       
 

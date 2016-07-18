@@ -12,7 +12,7 @@
 !     problem 7) Oregonator
 !     problem 8) Brusselator
 !     problem 9) Burgers
-!     problem 10)B 1 
+!     problem 10)Boscarino31 
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------

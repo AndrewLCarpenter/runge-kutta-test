@@ -118,7 +118,7 @@
       
       check_exit=.false.
       tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-      if (k>=15) write(*,*),'tmp',tmp,'k',k
+      if (k>=1) write(*,*),'tmp',tmp,'k',k
       if (tmp/=tmp) then
         print*,'stopping NaN k=',k
         stop
@@ -138,10 +138,12 @@
       integer,                intent(in   ) :: iprob,L
 
       integer  :: iDT, programStep,nveclen
-      real(wp) :: tfinal     
+      real(wp) :: tfinal,dt_in  
+      
+      dt_in=dt
       
       programStep=2
-      call problemsub(iprob,programStep,nveclen,ep,dt,tfinal,iDT,time,aI,L)
+      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
       Build_Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
       end function Build_Rnewton
@@ -155,14 +157,13 @@
       integer,  intent(in) :: iprob,L
     
       integer  :: nveclen
-      real(wp) :: tfinal,dt_in,time_in
+      real(wp) :: tfinal,dt_in
       integer  :: programstep,iDT
       
       dt_in=dt
-      time_in=time
   
       programStep=3
-      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time_in,aI,L)
+      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
       
       end subroutine Build_Jac
       
@@ -177,7 +178,7 @@
       real(wp), dimension(:)              :: Rnewton
       integer                             :: nveclen,ierr=0
       real(wp),  dimension(size(Rnewton)) :: r_wrk
-            
+    
       nveclen=size(Rnewton)      
             
       call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)              

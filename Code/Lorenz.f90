@@ -6,13 +6,17 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-
+      module Lorenz_mod
+      private
+      public :: Lorenz
+      contains
       subroutine Lorenz(programStep,nveclen,ep,dt, &
      &                  tfinal,iDT,rese_vec,resi_vec,akk)
-      use precision_vars
-      use control_variables
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
       real(wp), parameter    :: sigma=5.0_wp
@@ -160,3 +164,4 @@
       endif
 
       end subroutine Lorenz
+      end module Lorenz_mod

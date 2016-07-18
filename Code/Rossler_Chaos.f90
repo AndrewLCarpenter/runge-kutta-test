@@ -6,11 +6,15 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-
+      module Rossler_mod
+      private
+      public :: Rossler_Chaos
+      contains
       subroutine Rossler_Chaos(programStep,nveclen,ep,dt, &
      &                  tfinal,iDT,rese_vec,resi_vec,akk)
-      use precision_vars
-      use control_variables
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 
 !     Rossler system
 !     
@@ -18,7 +22,7 @@
 !     y_t = + x + aa y
 !     z_t = + bb * x + (-cc + x) z
 !
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
       real(wp), parameter    :: aa= 0.15_wp
@@ -150,3 +154,4 @@
       endif
 
       end subroutine Rossler_Chaos
+      end module Rossler_mod

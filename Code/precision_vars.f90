@@ -7,7 +7,7 @@
       implicit none; save
       
       private
-      public :: third, half, twothird, pi, wp
+      public :: third, half, twothird, pi, wp, two
       
 !--------------------VARIABLES-------------------------------------------------
       ! Generates the kind number for double precision

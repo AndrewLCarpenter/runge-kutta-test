@@ -21,8 +21,16 @@
      &                      dt,tfinal,iDT,time,akk,L)
 
       use control_variables, only: resE,resI,uvec
-   !   use runge_kutta!,       only:
+      use vanderPol_mod,     only: vanderPol
+      use Pureschi_mod,      only: Pureschi
+      use Kaps_mod,          only: Kaps
+      use Kreiss_mod,        only: Kreiss
+      use Lorenz_mod,        only: Lorenz
+      use Rossler_mod,       only: Rossler_Chaos
+      use Oregonator_mod,    only: Oregonator
+      use Brusselator_mod,   only: Brusselator
       use Burgers_Module,    only: Burgers
+      use Boscarino31_mod,   only: Boscarino31
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob, programStep
@@ -62,6 +70,8 @@
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==9) then
        call Burgers(       programStep,nveclen,ep,&
+     &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Boscarino31(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       endif
       

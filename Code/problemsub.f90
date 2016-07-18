@@ -21,7 +21,16 @@
      &                      dt,tfinal,iDT,time,akk,L)
 
       use control_variables, only: resE,resI,uvec
+      use vanderPol_mod,     only: vanderPol
+      use Pureschi_mod,      only: Pureschi
+      use Kaps_mod,          only: Kaps
+      use Kreiss_mod,        only: Kreiss
+      use Lorenz_mod,        only: Lorenz
+      use Rossler_mod,       only: Rossler_Chaos
+      use Oregonator_mod,    only: Oregonator
+      use Brusselator_mod,   only: Brusselator
       use Burgers_Module,    only: Burgers
+      use Boscarino31_mod,   only: Boscarino31
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob, programStep
@@ -35,32 +44,35 @@
       integer,  intent(in   ) :: L
       real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
-      if     (iprob==1) then
+      if     (iprob==1)  then
        call vanderPol(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==2) then
+      elseif (iprob==2)  then
        call Pureschi(    programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==3) then
+      elseif (iprob==3)  then
        call Kaps(        programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==4) then
+      elseif (iprob==4)  then
        call Kreiss(      programStep,nveclen,ep,&
      &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
-      elseif (iprob==5) then 
+      elseif (iprob==5)  then 
        call Lorenz(       programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==6) then 
+      elseif (iprob==6)  then 
        call Rossler_Chaos(programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==7) then 
+      elseif (iprob==7)  then 
        call Oregonator(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==8) then 
+      elseif (iprob==8)  then 
        call Brusselator(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
-      elseif (iprob==9) then
+      elseif (iprob==9)  then
        call Burgers(       programStep,nveclen,ep,&
+     &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+      elseif (iprob==10) then
+       call Boscarino31(   programStep,nveclen,ep,&
      &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       endif
       

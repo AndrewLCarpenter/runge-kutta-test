@@ -5,7 +5,7 @@
 # The format is:
 #       TAG = value [value, ...]
 # Values that contain spaces should be placed between quotes (" ")
-GENERATE_TREEVIEW = YES
+
 #---------------------------------------------------------------------------
 # General configuration options
 #---------------------------------------------------------------------------
@@ -184,7 +184,7 @@ INPUT_FILTER         =
 # generate HTML output
 
 GENERATE_HTML        = YES
-
+GENERATE_TREEVIEW = YES
 # The HTML_OUTPUT tag is used to specify where the HTML docs will be put.
 # If a relative path is entered the value of OUTPUT_DIRECTORY will be
 # put in front of it. If left blank `html' will be used as the default path.

@@ -6,17 +6,20 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-
+      module Oregonator_mod
+      private
+      public :: Oregonator
+      contains
       subroutine Oregonator(programStep,nveclen,ep,dt, &
      &                  tfinal,iDT,rese_vec,resi_vec,akk)
-      use precision_vars
-      use control_variables
-
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 !     Oregonator system
 !     
 
 
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer, parameter     :: vecl=3
       real(wp), parameter    :: aa= 77.27_wp !small=oscil large=flatline
@@ -136,3 +139,4 @@
       endif
 
       end subroutine Oregonator
+      end module Oregonator_mod

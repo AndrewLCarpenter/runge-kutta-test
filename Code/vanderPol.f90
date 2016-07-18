@@ -6,14 +6,19 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
+      MODULE vanderPol_mod
+      private
+      public :: vanderPol
+      contains
 
       subroutine vanderPol(programStep,nveclen,ep,dt, &
      &                     tfinal,iDT,resE_vec,resI_vec,akk)
 
-      use precision_vars
-      use control_variables
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer,  parameter    :: vecl=2
       integer, intent(in   ) :: programStep
@@ -114,3 +119,4 @@
       endif
       
       end subroutine vanderPol
+      end module vanderPol_mod

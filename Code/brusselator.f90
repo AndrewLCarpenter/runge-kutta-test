@@ -6,14 +6,18 @@
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-
+      module Brusselator_mod
+      private
+      public :: Brusselator
+      contains
       subroutine Brusselator(programStep,nveclen,ep,dt, &
      &                       tfinal,iDT,resE_vec,resI_vec,akk)
 
-      use precision_vars
-      use control_variables
+      use precision_vars,    only: wp
+      use control_variables, only: temporal_splitting,probname,xjac, &
+     &                             tol,dt_error_tol,uvec,uexact
 
-      implicit none
+      implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer,  parameter    :: vecl=2
       integer, intent(in   ) :: programStep
@@ -113,3 +117,4 @@
       endif
       
       end subroutine Brusselator
+      end module Brusselator_mod
