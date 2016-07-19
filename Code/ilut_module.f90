@@ -7,7 +7,7 @@
 
       private
 
-      public ::   ilut, ilutp, ilu0, iluk, lusol, ilud
+      public ::   ilut, ilutp, ilu0, iluk, lusol, ilud, iludp
       public ::   ilu0_csr, lusol_csr, msrcsr
       public ::   lusol_M_rhs
 

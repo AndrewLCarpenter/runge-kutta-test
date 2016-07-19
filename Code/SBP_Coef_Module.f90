@@ -7,11 +7,11 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
+      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2,nnz_D1_per
       
       real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2 
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2
-      integer                              :: nnz_D2
+      integer                              :: nnz_D2,nnz_D1_per
       
 
       contains
@@ -34,12 +34,77 @@
         nnz_D2 = 38+5*(n-8)
         allocate(jD2(nnz_D2),D2(nnz_D2))
       endif
+      
+      nnz_D1_per=4*n
      
       call D1_242(n,nnz_D1,iD1,jD1,D1,h)
       call D2_242(n,nnz_D2,iD2,jD2,D2,h)
+!      call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
 
       end subroutine Define_CSR_Operators
-!==============================================================================            
+!==============================================================================         
+      subroutine D1_periodic(n,nnz,ia,ja,a,h)
+
+      integer,                    intent(in   ) :: n,nnz
+
+      integer,   dimension(n+1),  intent(  out) :: ia
+      integer,   dimension(nnz),  intent(  out) :: ja
+
+      real(wp),  dimension(nnz),  intent(  out) ::  a
+      real(wp),                   intent(in   ) :: h
+
+      integer                                   :: i,j
+      integer                                   :: icnt, jcnt
+
+      real(wp),  dimension(5)      :: d1mat
+      real(wp) :: tol
+      
+      
+       !  Diagonal matrix norm needed for 1st- and 2nd-order derivatives 
+      Pmat(:) = 1.0_wp*h
+      Pinv(:) = 1.0_wp / Pmat(:)
+      
+      d1mat(:)= reshape((/1.0_wp/12.0_wp,-8.0_wp/12.0_wp,0.0_wp,8.0_wp/12.0_wp,-1.0_wp/12.0_wp/),(/5/))     
+      
+      tol=1.0e-12_wp
+      
+      ia(:) = (/ (i, i=1,n*4+1,4) /)
+      ja(:) = 0      ;
+      a(:) = 0.0_wp ;
+      ia(1) = 1      ! start at beginning of array   
+         
+      a(1:2)=d1mat(4:5)
+      a(3:4)=d1mat(1:2)
+      a(5)  =d1mat(2)
+      a(6:7)=d1mat(4:5)
+      a(8)  =d1mat(1)
+      
+      icnt  = 9 
+      
+
+          
+      do i = 3,n-2
+        jcnt = 0 
+        do j = 1,5
+          if(abs(d1mat(j)) >= tol) then
+              icnt = icnt + 1 ; jcnt = jcnt + 1 ;
+          ja(icnt) = i-3+j
+           a(icnt) = d1mat(j)
+          endif
+        enddo
+!        ia(i+1) = ia(i) + jcnt
+      enddo
+      
+      a(icnt+1)       =d1mat(5)
+      a(icnt+2:icnt+3)=d1mat(1:2)
+      a(icnt+4)       =d1mat(4)
+      a(icnt+5:icnt+6)=d1mat(4:5)            
+      a(icnt+7:icnt+8)=d1mat(1:2)
+  
+       
+      
+      end subroutine D1_periodic
+!===============================================================================   
      
       subroutine D1_242(n,nnz,ia,ja,a,h)
 

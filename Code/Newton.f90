@@ -172,16 +172,21 @@
       subroutine LU_solver(Rnewton)
       
       use control_variables, only: uvec      
-      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac,iw
-      use ilut_module, only: ilu0,lusol
+      use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac!,iw
+      use SBP_Coef_Module,   only: nnz_D2
+      use ilut_module,       only: lusol,iludp!,ilu0
       
-      real(wp), dimension(:)              :: Rnewton
-      integer                             :: nveclen,ierr=0
-      real(wp),  dimension(size(Rnewton)) :: r_wrk
+      real(wp), dimension(:)               :: Rnewton
+      integer                              :: nveclen,ierr=0
+      real(wp), dimension(size(Rnewton))   :: r_wrk
+      real(wp), dimension(2*size(Rnewton)) :: w
+      integer,  dimension(2*size(Rnewton)) :: jw,iperm
     
       nveclen=size(Rnewton)      
             
-      call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)              
+!      call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)     
+      call iludp(nveclen,aJac,jaJac,iaJac,0.0_wp,1e-13_wp,1e-10_wp,nveclen, &
+     &           aLUJac,jLUJac,jUJac,nnz_D2,w,jw,iperm,ierr)
       call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
       uvec(:)=uvec(:)-r_wrk(:)  
       if (ierr/=0) then 

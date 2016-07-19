@@ -104,7 +104,7 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
       do icase = cases,cases
-
+  
         !**initilizations?**
         stageE(:) = 0.0_wp
         stageI(:) = 0.0_wp
@@ -132,7 +132,7 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
+          do jepsil = 1,1!1,jactual,1     
                                  
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -233,10 +233,13 @@
                 endif               
   
                 errvecT(:) = errvecT(:) + errvec(:)
-  
+
                 t = t + dt                  !increment time
+                write(843,*)t,uvec(1:nveclen:2)
+                write(844,*)t,uvec(2:nveclen:2)
                 if(t >= tfinal) exit        
  
+
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
      

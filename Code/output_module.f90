@@ -206,12 +206,14 @@
       integer  :: i
       real(wp) :: tmp
   
-      do i = 1,size(uvec)
-        tmp=abs(uvec(i)-uexact(i))
-        if (tmp==0.0_wp)tmp=1.0e-15_wp
-        write(49+i,*)cost,log10(tmp)
-        write(59+i,*)cost,log10(errvecT(i))
-      enddo
+      if (size(uvec)<=9) then
+        do i = 1,size(uvec)
+          tmp=abs(uvec(i)-uexact(i))
+          if (tmp==0.0_wp)tmp=1.0e-15_wp
+          write(49+i,*)cost,log10(tmp)
+          write(59+i,*)cost,log10(errvecT(i))
+        enddo
+      endif
       
       end subroutine output_conv_error
 

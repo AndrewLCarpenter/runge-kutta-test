@@ -5,7 +5,7 @@ module unary_mod
   private 
   public  :: amubdg , aplbdg, amub, aplb, aplb1, csort, qsorti, qsortd, transp,  &
             & csrcsc, clncsr, csort_block, clean_CSR, aplsca, amudia, diamua,    &
-            & apldia,                                                            &
+            & apldia, cperm,                                                     &
             & a_bl_mu_b_bl, a_sc_mu_b_bl, a_bl_mu_b_sc, a_bl_pl_b_bl1, a_bl_mu_x,&
             & a_bl_pl_b_bl_scal, a_bl_pl_b_bl_diag
 

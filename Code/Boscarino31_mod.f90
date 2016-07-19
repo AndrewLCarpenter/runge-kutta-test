@@ -24,9 +24,9 @@
       real(wp),               parameter :: a=0.5_wp, c=1.0_wp
       real(wp),               parameter :: b=-0.25_wp*(a+c)**2
       
-      integer,  parameter    :: vecl=32 !must be even     
+      integer,  parameter    :: vecl=128 !must be even     
       real(wp), dimension(vecl/2) :: x      
-      real(wp), parameter :: xL=0.0_wp,xR=2.0_wp
+      real(wp), parameter :: xL=-1.0_wp,xR=1.0_wp
 
       real(wp), dimension(4), parameter :: d1vec0= (/-24.0_wp/17.0_wp,  &
                                                   &  +59.0_wp/34.0_wp,  &
@@ -87,27 +87,21 @@
         Jac_case='SPARSE'
         
         call grid()           
-        
+
       !**Initialization of problem information**        
       elseif (programStep==0) then
 
         if(.not. allocated(D1)) call Define_CSR_Operators(vecl/2,dx)   
 
         tinitial=0.0_wp  ! initial time
-        tfinal = 0.5_wp  ! final time           
+        tfinal = 0.2_wp  ! final time           
         dt = 0.0005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep
         
         ! Set IC's
         uvec(1:vecl:2)=sin(two*pi*x(:))
-
-        !uvec(2:vecl:2)=a*uvec(1:vecl:2)+ep*
-        uexact(:)=0.0_wp
- 
-        stop
-      !  uvec(2:vecl:2)=
-        
-!        call exact_Bosc(uvec,ep,tinitial) !set initial conditions   
-!        call exact_Bosc(uexact,ep,tfinal) !set exact solution at tfinal
+        uvec(2:vecl:2)=a*sin(two*pi*x(:))+(a**2 - 1)*two*pi*cos(two*pi*x(:))
+         
+        call exact_Bosc(uexact,ep,tfinal) !set exact solution at tfinal
               
       !**RHS and Jacobian**
       elseif (programStep>=1) then
@@ -117,40 +111,36 @@
           case('EXPLICIT')
             !**RHS**
             if (programStep==1 .or.programStep==2) then
-              call Bosc_dUdt(uvec,resE_vec,time,ep,dt)
+              call Bosc_dUdt(uvec,resE_vec,ep,dt)
               resI_vec(:)=0.0_wp
-              
-            !**Jacobian**              
-            elseif (programStep==3) then
-              
             endif
-            
-          case('IMPLICIT') ! For fully implicit schemes
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
-              call Bosc_dUdt(uvec,resI_vec,time,ep,dt)
-              resE_vec(:)=0.0_wp
-
-            !**Jacobian**
-            elseif (programStep==3) then
-
-              call Allocate_CSR_Storage(vecl,nnz_D2)
-              call Build_Jac(uvec,ep,dt,akk,time)          
-
-            endif
-          
-          case('IMEX')
-            if (programstep==1 .or. programstep==2) then
-              call Bosc_dUDt(uvec,resI_vec,time,ep,dt)
-              resE_vec(:)=0.0_wp
-
-            elseif( programStep==3) then
-            
-              call Allocate_CSR_Storage(vecl,nnz_D2)
-              call Build_Jac(uvec,ep,dt,akk,time)
-              
-            endif
-                      
+!                          
+!          case('IMPLICIT') ! For fully implicit schemes
+!            !**RHS**
+!            if (programStep==1 .or.programStep==2) then
+!               call Bosc_dUdt(uvec,resI_vec,ep,dt)
+!               resE_vec(:)=0.0_wp
+!      
+!            !**Jacobian**
+!            elseif (programStep==3) then
+!
+!               call Allocate_CSR_Storage(vecl,nnz_D2)
+!               call Build_Jac(uvec,ep,dt,akk,time)          
+!
+!            endif
+!          
+!          case('IMEX')
+!            if (programstep==1 .or. programstep==2) then
+!               call Bosc_dUDt(uvec,resI_vec,ep,dt)
+!               resE_vec(:)=0.0_wp
+!
+!            elseif( programStep==3) then
+!            
+!               call Allocate_CSR_Storage(vecl,nnz_D2)
+!              call Build_Jac(uvec,ep,dt,akk,time)
+!              
+!            endif
+!                      
           case default ! To catch invald inputs
             write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMPLICIT", or "IMEX"'
             write(*,*)'Exiting'
@@ -169,7 +159,7 @@
       integer :: i
       
       do i=1,vecl/2
-        x(i)= xL + (xR-xL)*(i-1.0_wp)/(vecl-1.0_wp)
+        x(i)= xL + (xR-xL)*(i-1.0_wp)/(vecl/2-1.0_wp)
       enddo
       
       dx=x(2)-x(1)
@@ -193,58 +183,135 @@
 
 !==============================================================================
 ! DEFINES RHS 
-      subroutine Bosc_dUdt(u,dudt,time,eps,dt)
+      subroutine Bosc_dUdt(u,dudt,eps,dt)
       
-      use SBP_Coef_Module, only: D1,D2,jD1,jD2,iD1,iD2! Pinv,
+      use SBP_Coef_Module, only: D1,jD1,iD1
       use matvec_module,   only: amux
+      use unary_mod,       only: aplb, cperm
 
       real(wp), dimension(vecl), intent(in   ) :: u
       real(wp), dimension(vecl), intent(  out) :: dudt
-      real(wp),                  intent(in   ) :: time, eps, dt
-
-      real(wp), dimension(vecl)                :: f, df, df2, gsat, wrk    
-      integer                                  :: i
-      real(wp)                                 :: uL,uR,du0,du1,a0,a1,g0,g1
+      real(wp),                  intent(in   ) :: eps, dt
+           
+      real(wp), dimension(vecl/2) :: wrk1,wrk2
+      integer,  dimension(vecl/2) :: jwrk1,jwrk2
       
-      gsat = 0.0_wp ; df  = 0.0_wp ; df2 = 0.0_wp ;
-
-     ! M
-
-!     !dudt + a*u_x = eps*(1-a^2)*u_xx
+      real(wp), dimension(size( D1)) :: UR_D1,LL_D1
+      integer,  dimension(size(jD1)) :: UR_jD1,LL_jD1
+       
+      real(wp), dimension(vecl) :: wrk3
+      integer,  dimension(vecl) :: jwrk3,j_perm
+      
+      real(wp), dimension(2*size( D1)) :: wrk4
+      integer,  dimension(2*size( D1)) :: jwrk4
+      
+      real(wp), dimension(2*size(D1)+vecl-2) :: a_mat,ap_mat
+      integer,  dimension(2*size(D1)+vecl-2) :: ja_mat,iw,jap_mat
+      
+      integer,  dimension(vecl+1) :: iwrk1,iwrk2,UR_iD1,LL_iD1,iwrk3,iwrk4
+      integer,  dimension(vecl+1) :: ia_mat,iap_mat 
+           
+      integer,dimension(3) :: ierr
+      integer              :: i
 !------------------------------------------------------------------------------
-   !   call amux(vecl,u,df,D1,jD1,iD1)
-    !  call amux(vecl,u,df2,D2,jD2,iD2)
+! Set lower right diagaonal
+! | | |
+! | |x|
+      wrk1(:)=-1.0_wp/eps
+      iwrk1(:vecl/2)   = 1
+      iwrk1(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
+      jwrk1(:)=(/ (i, i=vecl/2+1, vecl) /)
+!      print*,wrk1
+!      print*,'iwrk1',iwrk1
+!      print*,'jwrk1',jwrk1
+
+! Set lower left diagonal
+! | | |
+! |x| |
+      wrk2(:)=a/eps
+      iwrk2(:vecl/2)   = 1
+      iwrk2(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
+      jwrk2(:)=(/ (i, i=1, vecl/2) /)      
+!      print*,wrk2
+!      print*,'iwrk2',iwrk2
+!      print*,'jwrk2',jwrk2
       
-!-----------------BC-----------------------------------------------------------
-
-
+! Set upper right D1
+! | |x|
+! | | |      
+      UR_D1=(-1.0_wp)*D1
+      UR_iD1(:vecl/2+1)=iD1
+      UR_iD1(vecl/2+2:)=iD1(vecl/2+1)
+      UR_jD1=jD1(:)+vecl/2
+!      print*,'UR  D1',UR_D1
+!      print*,'UR iD1',UR_iD1
+!      print*,'UR jD1',UR_jD1
       
+! Set lower left D1
+! | | |
+! |x| |      
+      LL_D1=(-1.0_wp)*D1
+      LL_iD1(:vecl/2)=1
+      LL_iD1(vecl/2+1:)=iD1
+      LL_jD1=jD1
+!      print*,'LL  D1',LL_D1
+!      print*,'LL iD1',LL_iD1
+!      print*,'LL jD1',LL_jD1
 
-!      uR = u(1)
+! Add all matricies
+      ! combine both diagonals
+      ! | | |
+      ! |x|x|
+      call aplb(vecl,vecl,1,wrk2,jwrk2,iwrk2,wrk1,jwrk1,iwrk1,wrk3,jwrk3,iwrk3,vecl,iw,ierr(1))
+!      print*,'wrk3',wrk3
+!      print*,'iwrk3',iwrk3
+!      print*,'jwrk3',jwrk3
+      
+      ! combine both D1's
+      ! | |x|
+      ! |x| |
+      call aplb(vecl,vecl,1,LL_D1,LL_jD1,LL_iD1,UR_D1,UR_jD1,UR_iD1,wrk4,jwrk4,iwrk4,2*size(D1),iw,ierr(2))
+!      print*,'wrk4',wrk4
+!      print*,'iwrk4',iwrk4
+!      print*,'jwrk4',jwrk4      
+       
+      ! combine diagonals and D1's
+      ! | |x|
+      ! |x|x|
+      call aplb(vecl,vecl,1,wrk3,jwrk3,iwrk3,wrk4,jwrk4,iwrk4,a_mat,ja_mat,ia_mat,2*size(D1)+vecl-2,iw,ierr(3))      
+!      print*,' a',a_mat
+!      print*,'ia',ia_mat
+!      print*,'ja',ja_mat     
+      
+!      print*,'ierr',ierr
 
-!      a0 = third*(uR + sqrt(uR**2+1.0e-28_wp))    !a0 = third*(uR + abs(uR))
-!      g0 = a0 * NL_Burg_exactsolution(x(1),time,eps)                &
-!         - eps* NL_Burg_exact_derivative(x(1),time,eps)
+! permiate matrix into:
+! |x| |
+! | |x|
+      j_perm(1)=1
+      j_perm(vecl/2+1)=2
+      do i=2,vecl
+        if (i==vecl/2+1) cycle
+        j_perm(i)=j_perm(i-1) + 2
+      enddo
+!      print*,'jperm',j_perm
+      call cperm(vecl,a_mat,ja_mat,ia_mat,ap_mat,jap_mat,iap_mat,j_perm,1)
+!      print*,' ap_mat',ap_mat
+!      print*,'jap_mat',jap_mat
+!      print*,'iap_mat',iap_mat
 
-!      du0 = dot_product(d1vec0(1:4),u(1:4)) / dx
+! get dudt
+      call amux(vecl,u,dudt,ap_mat,jap_mat,iap_mat)
+ 
+      dudt(:)=dt*dudt(:)
 
-!      gsat(1) = gsat(1) + sig0 * Pinv(1) * (a0*uR - eps*du0 - g0) 
-
-!---------------Outflow Boundary Condition-------------------------------------
-
-!      uL = u(vecl)
-
-!      a1 = third*(uL - sqrt(uL**2+1.0e-28_wp)) !a1 = third*(uL - abs(uL))
-!      g1 = a1 * NL_Burg_exactsolution(x(vecl),time,eps)                &
-!         - eps* NL_Burg_exact_derivative(x(vecl),time,eps)
-!      du1 = dot_product(d1vec1(1:4),u(vecl-3:vecl)) / dx
-
-!      gsat(vecl) = gsat(vecl) + sig1 * Pinv(vecl) * (a1*uL-eps*du1-g1)
-
-!--------------------Sum all terms---------------------------------------------
-
-     ! dudt(:) = dt*(eps*(1-a**2)*df2(:) - a*df(:))! + gsat(:))
-
+!      print*,dudt
+!      stop
+      if (sum(ierr)/=0) then ! Catch errors
+        print*,'Error building dudt'
+        stop
+      endif
+      
       end subroutine Bosc_dUdt
       
 !==============================================================================
@@ -338,116 +405,5 @@
    
       end subroutine Build_Jac
       
-!==============================================================================
-! 
-      subroutine error(u,time,eps,dt)
-
-      use SBP_Coef_Module, only: Pmat
-
-      real(wp),                     intent(in   ) :: time, eps, dt
-      real(wp), dimension(vecl), intent(inout) :: u
-
-      integer                                    :: i
-      real(wp)                                   :: errL2,errLinf,wrk,psum
-
-!     calculate the rms residual over the domain                        
-
-      psum    = 0.0_wp
-      errL2   = 0.0_wp
-      errLinf = 0.0_wp
-      do i=1,vecl
-             ! wrk = abs(u(i) - NL_Burg_exactsolution(x(i),time,eps))
-             wrk=0.0_wp
-            errL2 =  errL2 +  pmat(i)*wrk * wrk
-          errLinf =  max(errLinf,wrk)
-             psum = psum + pmat(i)
-      enddo
-      errL2  = ( sqrt(errL2/vecl/psum) )
-      errLinf= ( errLinf)
-!!      write( *,89)ixd-1,errL2,errLinf
-   89 format('P=',I4,' ,,  L2',e18.10,' ,,  Linf',e18.10,' ,,')
-
-      end subroutine error
-!==============================================================================
-!
-      subroutine plot(punit,u,time,eps)
-
-      integer,                   intent(in   ) :: punit
-      real(wp),                  intent(in   ) :: time, eps
-      real(wp), dimension(vecl), intent(inout) :: u
-
-      integer                                    :: i
-      real(wp)                                   :: wrk,err
-
-!     write to plotter file                                             
-      do i=1,vecl
-        !wrk = NL_Burg_exactsolution(x(i),time,eps)
-        wrk=0.0+wp
-        err = ( abs( wrk - u(i) ) + 1.0e-15 )
-        write(punit,2)x(i),wrk,u(i),err
-      enddo
-    2 format(4(1x,e15.7))
-
-      end subroutine plot
-!==============================================================================
-! DEFINES EXACT SOLUTION FOR PARTICULAR x AND t VALUE
-      function NL_Burg_exactsolution(xin,tin,eps)
-
-      real(wp), intent(in) :: xin, tin, eps
-      real(wp), parameter  ::  a = -0.40_wp, b = 1.0_wp , d = +0.50_wp
-      real(wp)             ::  c = (a+b)/2
-
-      real(wp) :: NL_Burg_exactsolution
-
-      integer  :: i
-      real(wp) :: t1,t2, x0
-
-!      select case (exact_solution)
-!        case('Olver')         !          pp. 1190   Peter J. Olver
-
-          t1  = (xin - c*tin - d )
-          t2  = exp((b-a)*t1/(2.0_wp*eps))
-
-          NL_Burg_exactsolution = (a * t2  + b ) / (1.0_wp * t2 + 1.0_wp)
-
-!        case('tanh')
-
-          x0 =  0.1_wp
-          NL_Burg_exactsolution = 1.1_wp - tanh(0.5_wp*(xin-1.1_wp*tin-x0)/eps)
-
-!      end select
-
-      end function NL_Burg_exactsolution
-!==============================================================================
-! DEFINES EXACT DERIVATIVE FOR PARTICULAR x AND t VALUE
-      function NL_Burg_exact_derivative(xin,tin,eps)
-
-       real(wp), intent(in) :: xin, tin, eps
-       real(wp), parameter  ::  a = -0.40_wp, b = 1.0_wp , d = +0.50_wp
-       real(wp)             ::  c = (a+b)/2
-
-       real(wp) :: NL_Burg_exact_derivative
-
-       integer  :: i
-       real(wp) :: t1,t2,t3, x0
-
-!       select case (exact_solution)
-!         case('Olver')         !          pp. 1190   Peter J. Olver
-
-           t1  = (xin - c*tin - d )
-           t2  = ((a - b)*t1)/(4.0_wp*eps)
-           t3  = 2.0_wp / (exp(t2)+exp(-t2))
-
-           NL_Burg_exact_derivative =  -((a - b)**2* t3**2) /(8.0_wp*eps)
-
-!         case('tanh')
-
-           x0 =  0.1_wp
-           NL_Burg_exact_derivative =  -1.0_wp/cosh((-1.1_wp*tin+xin-x0)/ &
-     &                                 (2.0_wp*eps))**2 / (2.0_wp * eps)
-
-!       end select
-
-      end function NL_Burg_exact_derivative
 !==============================================================================
       end module Boscarino31_mod

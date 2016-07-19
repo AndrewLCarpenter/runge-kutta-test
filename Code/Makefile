@@ -6,7 +6,7 @@ FC = ifort
 
 #FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 # FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
-FCFLAGS = -check uninit -WB -O3 $(INCLUDESDIR)
+FCFLAGS = -check uninit -no-wrap-margin -WB -O3 $(INCLUDESDIR)
 #FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
