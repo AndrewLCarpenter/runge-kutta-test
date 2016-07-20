@@ -7,10 +7,11 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2,nnz_D1_per
+      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
+      public  ::  nnz_D1_per,iD1_per,jD1_per,D1_per
       
-      real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2 
-      integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2
+      real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2,D1_per
+      integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2,iD1_per,jD1_per
       integer                              :: nnz_D2,nnz_D1_per
       
 
@@ -28,18 +29,19 @@
 
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
-      if(order == 242) then
+!      if(order == 242) then
         nnz_D1 = 28+4*(n-8)
         allocate(jD1(nnz_D1),D1(nnz_D1))
         nnz_D2 = 38+5*(n-8)
         allocate(jD2(nnz_D2),D2(nnz_D2))
-      endif
+ !     endif
       
       nnz_D1_per=4*n
-     
-      call D1_242(n,nnz_D1,iD1,jD1,D1,h)
-      call D2_242(n,nnz_D2,iD2,jD2,D2,h)
-!      call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
+      allocate(iD1_per(n+1),jD1_per(nnz_D1_per),D1_per(nnz_D1_per))
+      
+ !     call D1_242(n,nnz_D1,iD1,jD1,D1,h)
+ !     call D2_242(n,nnz_D2,iD2,jD2,D2,h)
+      call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
 
       end subroutine Define_CSR_Operators
 !==============================================================================         
@@ -64,7 +66,8 @@
       Pmat(:) = 1.0_wp*h
       Pinv(:) = 1.0_wp / Pmat(:)
       
-      d1mat(:)= reshape((/1.0_wp/12.0_wp,-8.0_wp/12.0_wp,0.0_wp,8.0_wp/12.0_wp,-1.0_wp/12.0_wp/),(/5/))     
+      d1mat(:)= (/1.0_wp/12.0_wp,-8.0_wp/12.0_wp,0.0_wp, &
+     &            8.0_wp/12.0_wp,-1.0_wp/12.0_wp/)
       
       tol=1.0e-12_wp
       
@@ -73,15 +76,12 @@
       a(:) = 0.0_wp ;
       ia(1) = 1      ! start at beginning of array   
          
-      a(1:2)=d1mat(4:5)
-      a(3:4)=d1mat(1:2)
-      a(5)  =d1mat(2)
-      a(6:7)=d1mat(4:5)
-      a(8)  =d1mat(1)
-      
-      icnt  = 9 
-      
-
+      a(1:2)=d1mat(4:5); ja(1:2)=(/2,3/)
+      a(3:4)=d1mat(1:2); ja(3:4)=(/n-1,n/)
+      a(5)  =d1mat(2)  ; ja(5)  =1
+      a(6:7)=d1mat(4:5); ja(6:7)=(/3,4/)
+      a(8)  =d1mat(1)  ; ja(8)  =n
+      icnt  = 8
           
       do i = 3,n-2
         jcnt = 0 
@@ -95,13 +95,11 @@
 !        ia(i+1) = ia(i) + jcnt
       enddo
       
-      a(icnt+1)       =d1mat(5)
-      a(icnt+2:icnt+3)=d1mat(1:2)
-      a(icnt+4)       =d1mat(4)
-      a(icnt+5:icnt+6)=d1mat(4:5)            
-      a(icnt+7:icnt+8)=d1mat(1:2)
-  
-       
+      a(icnt+1)       =d1mat(5)  ; ja(icnt+1)       =1
+      a(icnt+2:icnt+3)=d1mat(1:2); ja(icnt+2:icnt+3)=(/n-3,n-2/)
+      a(icnt+4)       =d1mat(4)  ; ja(icnt+4)       =n
+      a(icnt+5:icnt+6)=d1mat(4:5); ja(icnt+5:icnt+6)=(/1,2/)            
+      a(icnt+7:icnt+8)=d1mat(1:2); ja(icnt+7:icnt+8)=(/n-2,n-1/)     
       
       end subroutine D1_periodic
 !===============================================================================   

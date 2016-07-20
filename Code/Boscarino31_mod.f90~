@@ -21,10 +21,10 @@
       real(wp)  :: dx
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
-      real(wp),               parameter :: a=0.5_wp, c=1.0_wp
-      real(wp),               parameter :: b=-0.25_wp*(a+c)**2
+      real(wp),               parameter :: a=0.5_wp!, c=1.0_wp
+!      real(wp),               parameter :: b=-0.25_wp*(a+c)**2
       
-      integer,  parameter    :: vecl=32 !must be even     
+      integer,  parameter    :: vecl=256 !must be even     
       real(wp), dimension(vecl/2) :: x      
       real(wp), parameter :: xL=-1.0_wp,xR=1.0_wp
 
@@ -37,6 +37,10 @@
                                                   &  + 4.0_wp/17.0_wp,  &
                                                   &  -59.0_wp/34.0_wp,  &
                                                   &  +24.0_wp/17.0_wp/)
+
+      integer, dimension(:), allocatable ::  jap_mat 
+      real(wp), dimension(:), allocatable :: ap_mat
+      integer, dimension(vecl+1) :: iap_mat
 !------------------------------------------------------------------------------      
       contains    
 !==============================================================================
@@ -54,9 +58,9 @@
 
       use control_variables, only: temporal_splitting,probname,Jac_case, &
      &                             tol,dt_error_tol,uvec,uexact
-      use SBP_Coef_Module,   only: Define_CSR_Operators,nnz_D2,D1,jD1,iD1
-      use matvec_module,     only: amux
-      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage
+      use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
+      use unary_mod,         only: rperm,aplsca
+      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage,  iaJac, jaJac,  aJac
 
 !-----------------------VARIABLES----------------------------------------------
       integer,  intent(in   ) :: programStep
@@ -70,12 +74,22 @@
       integer,  intent(in   ) :: iDT
 
       real(wp)                :: tinitial
+      integer, dimension(vecl+1) :: itemp,itemp2
+      integer, dimension(vecl)   :: jtemp,perm,jtemp2
+      integer                    :: i
       
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
       
       !Jacob vars
       real(wp), intent(in   ) :: akk
+      integer, dimension(vecl) :: iw
+      real(wp), dimension(size(ap_mat)+vecl/2) :: wrk
+      integer,  dimension(size(ap_mat)+vecl/2) :: jwrk
+      integer,  dimension(vecl+1)              :: iwrk
+      
+
+      integer :: nnz_Jac
 !------------------------------------------------------------------------------
 
       !**Pre-initialization. Get problem name and vector length**
@@ -91,16 +105,39 @@
       !**Initialization of problem information**        
       elseif (programStep==0) then
 
-        if(.not. allocated(D1)) call Define_CSR_Operators(vecl/2,dx)   
+        if(.not. allocated(D1_per)) call Define_CSR_Operators(vecl/2,dx)   
 
         tinitial=0.0_wp  ! initial time
         tfinal = 0.2_wp  ! final time           
-        dt = 0.0005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep
+!        dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep
+        dt = 0.50_wp*0.1_wp/10**((iDT-1)/20.0_wp)
         
         ! Set IC's
-        uvec(1:vecl:2)=sin(two*pi*x(:))
-        uvec(2:vecl:2)=a*sin(two*pi*x(:))+(a**2 - 1)*two*pi*cos(two*pi*x(:))
-         
+        uvec(1:vecl/2)=sin(two*pi*x(:))
+        uvec(vecl/2+1:vecl)=a*sin(two*pi*x(:))+(a**2 - 1)*two*pi*cos(two*pi*x(:))
+        
+ !       itemp=(/ (i, i=1,vecl+1) /)
+!        jtemp=(/ (i, i=1,vecl) /)
+!        perm(1)=1
+!        do i=2,vecl
+!          !even
+!          if (MOD(i,2)==0) then
+!            perm(i)=perm(i-1)+vecl/2
+!          !odd
+!          elseif (MOD(i,2)==1) then
+!            perm(i)=perm(i-1)+1-vecl/2
+!          endif
+!        enddo          
+!        perm(vecl/2+1)=2
+!        do i=2,vecl
+!          if (i==vecl/2+1) cycle
+!          perm(i)=perm(i-1) + 2
+!        enddo
+!        print*,perm
+!        print*,'uvec',uvec
+!        call rperm(vecl,uvec,jtemp,itemp,uvec,jtemp2,itemp2,perm,1)
+!        print*,'uvec',uvec
+!        stop 
         call exact_Bosc(uexact,ep,tfinal) !set exact solution at tfinal
               
       !**RHS and Jacobian**
@@ -114,20 +151,54 @@
               call Bosc_dUdt(uvec,resE_vec,ep,dt)
               resI_vec(:)=0.0_wp
             endif
-!                          
-!          case('IMPLICIT') ! For fully implicit schemes
-!            !**RHS**
-!            if (programStep==1 .or.programStep==2) then
-!               call Bosc_dUdt(uvec,resI_vec,ep,dt)
-!               resE_vec(:)=0.0_wp
-!      
-!            !**Jacobian**
-!            elseif (programStep==3) then
-!
-!               call Allocate_CSR_Storage(vecl,nnz_D2)
+                          
+          case('IMPLICIT') ! For fully implicit schemes
+            !**RHS**
+            if (programStep==1 .or.programStep==2) then
+               call Bosc_dUdt(uvec,resI_vec,ep,dt)
+               resE_vec(:)=0.0_wp
+      
+            !**Jacobian**
+            elseif (programStep==3) then
+            
+               nnz_Jac=size(ap_mat)+vecl/2
+
+
+               call Allocate_CSR_Storage(vecl,nnz_Jac)
+               
+           !    allocate(wrk(size(ap_mat)))
+              
+              wrk=-akk*dt*ap_mat   
+              jwrk(1:size(jap_mat))=jap_mat
+              jwrk(size(jap_mat)+1:)=0
+              iwrk=iap_mat
+              
+       !        print*,size(wrk),size(jap_mat),size(iap_mat),size(iw),vecl                                             !6
+               call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)                          !7       
+                   
+       !         print*,wrk
+               iaJac=iwrk
+               jaJac=jwrk
+               aJac= wrk!ap_mat!
+       !        print*,size(aJac),size(iajac),size(jajac)
+               
+        !      stop
+       !  !      deallocate(wrk)
+    !          stop
+          !      print*,'size ap_mat',size(ap_mat)
+          !      print*,ap_mat
+                
+          !      do i=1,size(ap_mat)
+                 ! if (abs(ap_mat(i))>1e-10) then
+          !          print*,ap_mat(i),jap_mat(i)
+                 ! endif
+           !     enddo
+                
+                
+         !      stop
 !               call Build_Jac(uvec,ep,dt,akk,time)          
-!
-!            endif
+
+            endif
 !          
 !          case('IMEX')
 !            if (programstep==1 .or. programstep==2) then
@@ -142,7 +213,7 @@
 !            endif
 !                      
           case default ! To catch invald inputs
-            write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMPLICIT", or "IMEX"'
+            write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMPLICIT"'!, or "IMEX"'
             write(*,*)'Exiting'
             stop
             
@@ -183,11 +254,11 @@
 
 !==============================================================================
 ! DEFINES RHS 
-      subroutine Bosc_dUdt(u,dudt,eps,dt)
+      subroutine Bosc_dUdt(u,dudt,eps,dt)!,ap_mat,jap_mat,iap_mat)
       
-      use SBP_Coef_Module, only: D1,jD1,iD1
+      use SBP_Coef_Module, only: D1_per,jD1_per,iD1_per, Pinv
       use matvec_module,   only: amux
-      use unary_mod,       only: aplb, cperm
+      use unary_mod,       only: aplb, dperm, csort
 
       real(wp), dimension(vecl), intent(in   ) :: u
       real(wp), dimension(vecl), intent(  out) :: dudt
@@ -196,24 +267,33 @@
       real(wp), dimension(vecl/2) :: wrk1,wrk2
       integer,  dimension(vecl/2) :: jwrk1,jwrk2
       
-      real(wp), dimension(size( D1)) :: UR_D1,LL_D1
-      integer,  dimension(size(jD1)) :: UR_jD1,LL_jD1
+      real(wp), dimension(size( D1_per)) :: UR_D1,LL_D1
+      integer,  dimension(size(jD1_per)) :: UR_jD1,LL_jD1
        
       real(wp), dimension(vecl) :: wrk3
       integer,  dimension(vecl) :: jwrk3,j_perm
       
-      real(wp), dimension(2*size( D1)) :: wrk4
-      integer,  dimension(2*size( D1)) :: jwrk4
+      real(wp), dimension(2*size( D1_per)) :: wrk4
+      integer,  dimension(2*size( D1_per)) :: jwrk4
       
-      real(wp), dimension(2*size(D1)+vecl-2) :: a_mat,ap_mat
-      integer,  dimension(2*size(D1)+vecl-2) :: ja_mat,iw,jap_mat
+!      real(wp), dimension(2*size(D1_per)+vecl), intent(out) :: ap_mat
+!      integer,  dimension(2*size(D1_per)+vecl), intent(out) :: jap_mat
+      
+      real(wp), dimension(2*size(D1_per)+vecl) :: a_mat
+      integer,  dimension(2*size(D1_per)+vecl) :: iw,ja_mat
       
       integer,  dimension(vecl+1) :: iwrk1,iwrk2,UR_iD1,LL_iD1,iwrk3,iwrk4
-      integer,  dimension(vecl+1) :: ia_mat,iap_mat 
+      integer,  dimension(vecl+1) :: ia_mat
+ !     integer, dimension(vecl+1), intent(out) :: iap_mat 
+           
+      integer,  dimension(4*size(D1_per)+2*vecl) :: iwork           
            
       integer,dimension(3) :: ierr
       integer              :: i
+
 !------------------------------------------------------------------------------
+      if (.not. allocated(ap_mat)) then
+      allocate(ap_mat(2*size(D1_per)+vecl),jap_mat(2*size(D1_per)+vecl))
 ! Set lower right diagaonal
 ! | | |
 ! | |x|
@@ -239,10 +319,10 @@
 ! Set upper right D1
 ! | |x|
 ! | | |      
-      UR_D1=(-1.0_wp)*D1
-      UR_iD1(:vecl/2+1)=iD1
-      UR_iD1(vecl/2+2:)=iD1(vecl/2+1)
-      UR_jD1=jD1(:)+vecl/2
+      UR_D1=(-1.0_wp)*D1_per
+      UR_iD1(:vecl/2+1)=iD1_per
+      UR_iD1(vecl/2+2:)=iD1_per(vecl/2+1)
+      UR_jD1=jD1_per(:)+vecl/2
 !      print*,'UR  D1',UR_D1
 !      print*,'UR iD1',UR_iD1
 !      print*,'UR jD1',UR_jD1
@@ -250,10 +330,10 @@
 ! Set lower left D1
 ! | | |
 ! |x| |      
-      LL_D1=(-1.0_wp)*D1
+      LL_D1=(-1.0_wp)*D1_per
       LL_iD1(:vecl/2)=1
-      LL_iD1(vecl/2+1:)=iD1
-      LL_jD1=jD1
+      LL_iD1(vecl/2+1:)=iD1_per
+      LL_jD1=jD1_per
 !      print*,'LL  D1',LL_D1
 !      print*,'LL iD1',LL_iD1
 !      print*,'LL jD1',LL_jD1
@@ -263,14 +343,14 @@
       ! | | |
       ! |x|x|
       call aplb(vecl,vecl,1,wrk2,jwrk2,iwrk2,wrk1,jwrk1,iwrk1,wrk3,jwrk3,iwrk3,vecl,iw,ierr(1))
-!      print*,'wrk3',wrk3
+!     print*,'wrk3',wrk3
 !      print*,'iwrk3',iwrk3
 !      print*,'jwrk3',jwrk3
       
       ! combine both D1's
       ! | |x|
       ! |x| |
-      call aplb(vecl,vecl,1,LL_D1,LL_jD1,LL_iD1,UR_D1,UR_jD1,UR_iD1,wrk4,jwrk4,iwrk4,2*size(D1),iw,ierr(2))
+      call aplb(vecl,vecl,1,LL_D1,LL_jD1,LL_iD1,UR_D1,UR_jD1,UR_iD1,wrk4,jwrk4,iwrk4,2*size(D1_per),iw,ierr(2))
 !      print*,'wrk4',wrk4
 !      print*,'iwrk4',iwrk4
 !      print*,'jwrk4',jwrk4      
@@ -278,16 +358,15 @@
       ! combine diagonals and D1's
       ! | |x|
       ! |x|x|
-      call aplb(vecl,vecl,1,wrk3,jwrk3,iwrk3,wrk4,jwrk4,iwrk4,a_mat,ja_mat,ia_mat,2*size(D1)+vecl-2,iw,ierr(3))      
+      call aplb(vecl,vecl,1,wrk3,jwrk3,iwrk3,wrk4,jwrk4,iwrk4,a_mat,ja_mat,ia_mat,2*size(D1_per)+vecl,iw,ierr(3)) 
 !      print*,' a',a_mat
 !      print*,'ia',ia_mat
 !      print*,'ja',ja_mat     
       
-!      print*,'ierr',ierr
-
 ! permiate matrix into:
 ! |x| |
 ! | |x|
+
       j_perm(1)=1
       j_perm(vecl/2+1)=2
       do i=2,vecl
@@ -295,23 +374,34 @@
         j_perm(i)=j_perm(i-1) + 2
       enddo
 !      print*,'jperm',j_perm
-      call cperm(vecl,a_mat,ja_mat,ia_mat,ap_mat,jap_mat,iap_mat,j_perm,1)
+
+!HACK
+      call dperm(vecl,a_mat,ja_mat,ia_mat,ap_mat,jap_mat,iap_mat,j_perm,j_perm,1)
+!      iap_mat=ia_mat
+!      jap_mat=ja_mat
+!      ap_mat=a_mat
+!HACK
+
+      call csort(vecl,ap_mat,jap_mat,iap_mat,iwork,.true.)     
 !      print*,' ap_mat',ap_mat
 !      print*,'jap_mat',jap_mat
 !      print*,'iap_mat',iap_mat
 
 ! get dudt
-      call amux(vecl,u,dudt,ap_mat,jap_mat,iap_mat)
- 
-      dudt(:)=dt*dudt(:)
 
-!      print*,dudt
-!      stop
+      endif
+
+
+      
+      call amux(vecl,u,dudt,ap_mat,jap_mat,iap_mat)
+   
+      dudt(:)=dt*dudt(:)      
+      
       if (sum(ierr)/=0) then ! Catch errors
         print*,'Error building dudt'
         stop
       endif
-      
+  
       end subroutine Bosc_dUdt
       
 !==============================================================================
@@ -339,15 +429,6 @@
       nnz_max=size(aJac)
      
 
-!---------------------dgsat/dt-------------------------------------------------
-!      uL=u(vecl)
-!      a1 = third*(uL - sqrt(uL**2+1.0e-28_wp))
-!      a1_d=third*(1-uL/sqrt(uL**2+1.0e-28_wp))
-!   
-!      uR=u(1)
-!      a0 = third*(uR + sqrt(uR**2+1.0e-28_wp))
-!      a0_d=third*(1+uR/sqrt(uR**2+1.0e-28_wp))
-!
 !******Steps to make xjac******
 !       jac=eps*d2-2/3*d1*u-1/3*u*d1-1/3*diag(d1*u)+dgsat/du
 !1      wrk1=-2/3*d1*u

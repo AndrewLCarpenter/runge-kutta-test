@@ -132,7 +132,7 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,1!1,jactual,1     
+          do jepsil = 81,81!1,jactual,1     
                                  
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -235,8 +235,8 @@
                 errvecT(:) = errvecT(:) + errvec(:)
 
                 t = t + dt                  !increment time
-                write(843,*)t,uvec(1:nveclen:2)
-                write(844,*)t,uvec(2:nveclen:2)
+                write(843,*)t,uvec(1:nveclen/2)
+                write(844,*)t,uvec(nveclen/2+1:)
                 if(t >= tfinal) exit        
  
 
@@ -254,7 +254,7 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-           
+            print*,sqrt(dot_product(errvec(:),errvec(:))/nveclen)
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution

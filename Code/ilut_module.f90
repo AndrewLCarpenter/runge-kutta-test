@@ -1452,7 +1452,7 @@
 !                                                                       
 !     store inverse of diagonal element of u                            
 !                                                                       
-        if (w(ii)  ==  0.0) w(ii) = (1.0D-4 + droptol)*tnorm 
+        if (w(ii)  ==  0.0_wp) w(ii) = (1.0e-4_wp + droptol)*tnorm 
 !                                                                       
         alu(ii) = 1.0_wp/ w(ii) 
 !                                                                       

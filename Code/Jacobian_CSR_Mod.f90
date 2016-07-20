@@ -39,10 +39,12 @@
         allocate( aJac(nnz))
 
         allocate(jUJac(nJac))
-        allocate(jLUJac(nnz))
-        allocate(aLUJac(nnz))
+        allocate(jLUJac(nnz*4))
+        allocate(aLUJac(nnz*4))
 
         allocate(iw(nJac))
+        
+        jLUJac(:)=0.0_wp ; aLUJac(:)=0.0_wp; aJac=0.0_wp
         
       endif
       allo_test=.true.
