@@ -59,10 +59,10 @@
               do k = 1,iter_max
                 icount = icount + 1
                 uveciter(:) = uvec(:) !store old uvec
-                
+
                 Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
                 call Build_Jac(ep,dt,time,aI,iprob,L)
-                
+              
                 call LU_solver(Rnewton)
                 
                 if(check_exit(uveciter,k)) exit
@@ -172,65 +172,22 @@
       subroutine LU_solver(Rnewton)
       
       use control_variables, only: uvec      
-      use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac!,iw
-      use SBP_Coef_Module,   only: nnz_D1_per
-      use ilut_module,       only: lusol,ilutp!,ilu0
+      use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac
+      use ilut_module,       only: lusol,ilutp
       
       real(wp), dimension(:)               :: Rnewton
       integer                              :: nveclen,ierr=0
       real(wp), dimension(size(Rnewton))   :: r_wrk
-      real(wp), dimension(size(Rnewton)) :: w
+      real(wp), dimension(size(Rnewton))   :: w
       integer,  dimension(2*size(Rnewton)) :: jw,iperm
       
       integer :: i,k
     
       nveclen=size(Rnewton)   
-         
-      
-!     print*,'nveclen',nveclen
-!     print*,'aJac',size(aJac)
-!     print*,'jaJac',size(jaJac)
-!     print*,'iaJac',size(iaJac)
-!     print*,'aluJac',size(aluJac)
-!     print*,'jluJac',size(jluJac)
-!     print*,'juJac',size(juJac)
-!     print*,'nnz_d1',nnz_d1_per
-!     print*,'w',size(w)
-!     print*,'jw',size(jw)
-!      do 100 i = 1,nveclen
- 
-!     compute the inner product of row i with vector x
-  
-!         do 99 k=iajac(i), iajac(i+1)-1 
-!            print*,'i',i,'jajac',jajac(k),'ajac',ajac(k)
-! 99      continue
-! 100     continue
-    !     do i=1,nveclen+1
-   
-    !     print*,ajac(i),jajac(i)
-    
-    ! enddo
-!
 
-!      call ilu0(nveclen,aJac,jaJac,iaJac,aLUJac,jLUJac,jUJac,iw,ierr)     
       call ilutp(nveclen,aJac,jaJac,iaJac,nveclen,1e-13_wp,0.1_wp,nveclen, &
      &           aLUJac,jLUJac,jUJac,size(alujac),w,jw,iperm,ierr)
 
-!     print*,'ajac',ajac 
-!     print*,'aLUjac',alujac    
-                
- !            do i=1,size(alujac)
- !          
- !                print*,alujac(i),jlujac(i)
- !           
- !            enddo
-                
-!      do i=1,size(jlujac)
-!        if (jlujac(i)/=0) print*,'i',i,'jlujac',jlujac(i)
-!      enddo
-!      print*,'size',size(jlujac)
-!      stop
-     
       call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
       uvec(:)=uvec(:)-r_wrk(:)        
 

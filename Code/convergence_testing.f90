@@ -3,23 +3,36 @@
       implicit none
 
       integer, parameter      :: wp = 8
-      integer, parameter      :: vLen = 3, samps = 81
+      integer, parameter      :: vLen = 32, samps = 1
 
       real(wp), dimension(vLen,samps) :: uexact, tester
 
       integer                         :: i,j
       real(wp)                        :: norm_2
+      character(3) :: istr
+      character(8) :: filename
 
 
-      open(unit=40,file='fort.exact.data')
-      open(unit=50,file='fort.test.data')
+        do i=121,190
+        write(istr,"(I3.1)") (i+1)
+
+        open(unit=40,file='fort.'//istr)
+        write(istr,"(I3.1)")i
+        open(unit=50,file='fort.'//istr)
 
       norm_2 = 0.0_wp
       do j = 1,samps
          read(40,*) uexact(:,j)
          read(50,*) tester(:,j)
+      
         norm_2 = norm_2 + dot_product(uexact(:,j)-tester(:,j),uexact(:,j)-tester(:,j))
       enddo
       write(*,*)'L2 norm of error =  ',sqrt(norm_2)
-
+    
+      close(unit=40)
+      close(unit=50)
+      
+      enddo
+      
+      
       end program

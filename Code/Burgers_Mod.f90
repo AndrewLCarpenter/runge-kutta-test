@@ -24,7 +24,7 @@
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
       
-      integer,  parameter    :: vecl=16     
+      integer,  parameter    :: vecl=128    
       real(wp), dimension(vecl) :: x      
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 
@@ -95,7 +95,7 @@
         tinitial=0.0_wp  ! initial time
         tfinal = 0.5_wp  ! final time           
 !        dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
-        dt = 0.5_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  implcit
+        dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  implcit
         call exact_Burg(uvec,ep,tinitial) !set initial conditions   
         call exact_Burg(uexact,ep,tfinal) !set exact solution at tfinal
               
@@ -191,7 +191,12 @@
       !     f(u)_x = 2/3 (u u/2)_x + 1/3 u u_x
 
       f(:) = half*u(:)*u(:)
-
+!      print*,'f',f
+!      print*,'vec',vecl
+!      print*,'wrk',wrk,'s',size(wrk)
+!      print*,' d1',D1,'s',size(D1)
+!      print*,'jd1',jD1,'s',size(jD1)
+!      print*,'iD1',iD1,'s',size(iD1)
       call amux(vecl,f,wrk,D1,jD1,iD1)
 
       df(:) = df(:) + twothird*wrk(:)
@@ -325,53 +330,53 @@
       
 !==============================================================================
 ! 
-      subroutine error(u,time,eps,dt)
-
-      use SBP_Coef_Module, only: Pmat
-
-      real(wp),                     intent(in   ) :: time, eps, dt
-      real(wp), dimension(vecl), intent(inout) :: u
-
-      integer                                    :: i
-      real(wp)                                   :: errL2,errLinf,wrk,psum
-
-!     calculate the rms residual over the domain                        
-
-      psum    = 0.0_wp
-      errL2   = 0.0_wp
-      errLinf = 0.0_wp
-      do i=1,vecl
-              wrk = abs(u(i) - NL_Burg_exactsolution(x(i),time,eps))
-            errL2 =  errL2 +  pmat(i)*wrk * wrk
-          errLinf =  max(errLinf,wrk)
-             psum = psum + pmat(i)
-      enddo
-      errL2  = ( sqrt(errL2/vecl/psum) )
-      errLinf= ( errLinf)
-!!      write( *,89)ixd-1,errL2,errLinf
-   89 format('P=',I4,' ,,  L2',e18.10,' ,,  Linf',e18.10,' ,,')
-
-      end subroutine error
+!!      subroutine error(u,time,eps,dt)
+!!
+!!      use SBP_Coef_Module, only: Pmat
+!!
+!!      real(wp),                     intent(in   ) :: time, eps, dt
+!!      real(wp), dimension(vecl), intent(inout) :: u
+!!
+!!      integer                                    :: i
+!!      real(wp)                                   :: errL2,errLinf,wrk,psum
+!!
+!!!     calculate the rms residual over the domain                        
+!!
+!!      psum    = 0.0_wp
+!!      errL2   = 0.0_wp
+!!      errLinf = 0.0_wp
+!!      do i=1,vecl
+!!              wrk = abs(u(i) - NL_Burg_exactsolution(x(i),time,eps))
+!!            errL2 =  errL2 +  pmat(i)*wrk * wrk
+!!          errLinf =  max(errLinf,wrk)
+!!             psum = psum + pmat(i)
+!!      enddo
+!!      errL2  = ( sqrt(errL2/vecl/psum) )
+!!      errLinf= ( errLinf)
+!!!!      write( *,89)ixd-1,errL2,errLinf
+!!   89 format('P=',I4,' ,,  L2',e18.10,' ,,  Linf',e18.10,' ,,')
+!!
+!!      end subroutine error
 !==============================================================================
 !
-      subroutine plot(punit,u,time,eps)
-
-      integer,                      intent(in   ) :: punit
-      real(wp),                     intent(in   ) :: time, eps
-      real(wp), dimension(vecl), intent(inout) :: u
-
-      integer                                    :: i
-      real(wp)                                   :: wrk,err
-
-!     write to plotter file                                             
-      do i=1,vecl
-        wrk = NL_Burg_exactsolution(x(i),time,eps)
-        err = ( abs( wrk - u(i) ) + 1.0e-15 )
-        write(punit,2)x(i),wrk,u(i),err
-      enddo
-    2 format(4(1x,e15.7))
-
-      end subroutine plot
+!!      subroutine plot(punit,u,time,eps)
+!!
+!!      integer,                      intent(in   ) :: punit
+!!      real(wp),                     intent(in   ) :: time, eps
+!!      real(wp), dimension(vecl), intent(inout) :: u
+!!
+!!      integer                                    :: i
+!!      real(wp)                                   :: wrk,err
+!!
+!!!     write to plotter file                                             
+!!      do i=1,vecl
+!!        wrk = NL_Burg_exactsolution(x(i),time,eps)
+!!        err = ( abs( wrk - u(i) ) + 1.0e-15 )
+!!        write(punit,2)x(i),wrk,u(i),err
+!!      enddo
+!!    2 format(4(1x,e15.7))
+!!
+!!      end subroutine plot
 !==============================================================================
 ! DEFINES EXACT SOLUTION FOR PARTICULAR x AND t VALUE
       function NL_Burg_exactsolution(xin,tin,eps)

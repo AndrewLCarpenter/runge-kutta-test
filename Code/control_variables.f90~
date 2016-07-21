@@ -22,8 +22,8 @@
       public :: allocate_vars,deallocate_vars
 !--------------------------VARIABLES-------------------------------------------
 !      character(len=80) :: Temporal_Splitting = 'IMEX'
-!      character(len=80)  :: Temporal_Splitting = 'IMPLICIT'
-      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
+      character(len=80)  :: Temporal_Splitting = 'IMPLICIT'
+!      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)   :: probname
       character(len=6)   :: Jac_case='DENSE' !default value
       integer, parameter :: isamp=71   
@@ -68,7 +68,8 @@
 ! DEALLOCATE GLOBAL VARIABLES
       subroutine deallocate_vars()
       
-      use SBP_Coef_Module, only: Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2
+      use SBP_Coef_Module, only: Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,D1_per,&
+     &                           iD1_per,jD1_per
       
       !**DEALLOCATE VARIABLES**
       !problemsub
@@ -85,7 +86,8 @@
       DEALLOCATE(errvec,errvecT,tmpvec,b1save,b1Psave)
       
       !CSR
-      if(allocated(D1)) deallocate(Pmat,Pinv,jD1,jD2,iD1,iD2,D1,D2) 
+      if(allocated(D1)) deallocate(Pmat,Pinv,jD1,jD2,iD1,iD2,D1,D2,D1_per,&
+     &                              iD1_per,jD1_per) 
       
       end subroutine deallocate_vars
       

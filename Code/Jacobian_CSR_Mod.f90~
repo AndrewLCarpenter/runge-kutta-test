@@ -1,11 +1,11 @@
       module Jacobian_CSR_Mod
       
-      use precision_vars
-      use SBP_Coef_Module, only:nnz_D2
+      use precision_vars,  only: wp
       
-      implicit none
+      implicit none; save
       
       public :: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw,Allocate_CSR_Storage
+      public :: Jacobian_CSR
       private
       
       real(wp),    parameter              ::   toljac = 1.0e-13_wp
@@ -27,43 +27,40 @@
       contains
       
 !==============================================================================
-      subroutine Allocate_CSR_Storage(nJac)
-
-      integer, intent(in)  :: nJac !nJac=nveclen
+      subroutine Allocate_CSR_Storage(nJac,nnz)
+      
+      integer, intent(in) :: nJac !nJac=nveclen
+      integer, intent(in) :: nnz 
+      
       if(.not.allo_test) then
       
         allocate(iaJac(nJac+1))
-        allocate(jaJac(nnz_D2))
-        allocate( aJac(nnz_D2))
+        allocate(jaJac(nnz))
+        allocate( aJac(nnz))
 
         allocate(jUJac(nJac))
-        allocate(jLUJac(nnz_D2))
-        allocate(aLUJac(nnz_D2))
+        allocate(jLUJac(nnz*2))
+        allocate(aLUJac(nnz*2))
 
         allocate(iw(nJac))
+        
+        jLUJac(:)=0.0_wp ; aLUJac(:)=0.0_wp; aJac=0.0_wp
         
       endif
       allo_test=.true.
       end subroutine
-!==============================================================================
- !     subroutine Deallocate_CSR_Storage()
-      
- !     deallocate(iaJac,jaJac,aJac)
-! Not used yet
-!      deallocate(juJac,jLUJac,aLUJac,iw)     
-
-  !    end subroutine Deallocate_CSR_Storage
 
 !==============================================================================
-      subroutine Jacobian_CSR(nJac,xjac,iaJac,jaJac,aJac)
+      subroutine Jacobian_CSR(nJac,xjac)
  
       integer,                  intent(in   ) :: nJac
       real(wp), dimension(:,:), intent(in   ) :: xjac
-      real(wp), dimension(:),   intent(  out) :: iaJac,jaJac,aJac
-      integer                                 :: i,j,icnt,jcnt
-
-      call Allocate_CSR_Storage(nJac)
+      integer                                 :: i,j,icnt,jcnt,nnz
       
+      nnz=nJac
+
+      call Allocate_CSR_Storage(nJac,nnz)
+
 !     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
 
       ! Initialize CSR

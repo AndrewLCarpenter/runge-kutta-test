@@ -22,7 +22,7 @@
       public :: allocate_vars,deallocate_vars
 !--------------------------VARIABLES-------------------------------------------
 !      character(len=80) :: Temporal_Splitting = 'IMEX'
-      character(len=80)  :: Temporal_Splitting = 'IMPLICIT'
+      character(len=80)  :: Temporal_Splitting = 'IMPLICIT' 
 !      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)   :: probname
       character(len=6)   :: Jac_case='DENSE' !default value

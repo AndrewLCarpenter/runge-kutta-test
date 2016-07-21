@@ -132,12 +132,10 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 81,81!1,jactual,1     
+          do jepsil = 1,jactual,1     
                                  
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
-            
-            
             
             !**INIT. OUTPUT FILES**
             call init_output_files(nveclen,ep)
@@ -146,9 +144,9 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT =1,1
+!            do iDT =65,65
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -235,13 +233,17 @@
                 errvecT(:) = errvecT(:) + errvec(:)
 
                 t = t + dt                  !increment time
-                write(843,*)t,uvec(1:nveclen/2)
-                write(844,*)t,uvec(nveclen/2+1:)
+!                write(843,*)t,uvec(1:nveclen/2)
+!                write(844,*)t,uvec(nveclen/2+1:)
                 if(t >= tfinal) exit        
  
 
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
+! HACK exact solution for each dt
+!              write(120+iDT,*)uvec
+
+              
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
@@ -254,7 +256,7 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-            print*,sqrt(dot_product(errvec(:),errvec(:))/nveclen)
+
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution

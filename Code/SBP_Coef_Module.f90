@@ -29,18 +29,18 @@
 
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
-!      if(order == 242) then
+      if(order == 242) then
         nnz_D1 = 28+4*(n-8)
         allocate(jD1(nnz_D1),D1(nnz_D1))
         nnz_D2 = 38+5*(n-8)
         allocate(jD2(nnz_D2),D2(nnz_D2))
- !     endif
+      endif
       
       nnz_D1_per=4*n
       allocate(iD1_per(n+1),jD1_per(nnz_D1_per),D1_per(nnz_D1_per))
       
- !     call D1_242(n,nnz_D1,iD1,jD1,D1,h)
- !     call D2_242(n,nnz_D2,iD2,jD2,D2,h)
+!      call D1_242(n,nnz_D1,iD1,jD1,D1,h)
+!      call D2_242(n,nnz_D2,iD2,jD2,D2,h)
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
 
       end subroutine Define_CSR_Operators
@@ -99,7 +99,8 @@
       a(icnt+2:icnt+3)=d1mat(1:2); ja(icnt+2:icnt+3)=(/n-3,n-2/)
       a(icnt+4)       =d1mat(4)  ; ja(icnt+4)       =n
       a(icnt+5:icnt+6)=d1mat(4:5); ja(icnt+5:icnt+6)=(/1,2/)            
-      a(icnt+7:icnt+8)=d1mat(1:2); ja(icnt+7:icnt+8)=(/n-2,n-1/)     
+      a(icnt+7:icnt+8)=d1mat(1:2); ja(icnt+7:icnt+8)=(/n-2,n-1/)  
+      a(:)=a(:)/h   
       
       end subroutine D1_periodic
 !===============================================================================   
