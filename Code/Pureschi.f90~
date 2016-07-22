@@ -95,6 +95,7 @@
               xjac(2,1) = 0.0_wp-akk*dt*(cos(uvec(1)) )/ep
               xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
             case('IMPLICIT') ! For fully implicit schemes
+            print*,'implicit'
               xjac(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
               xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp + cos(uvec(1))/ep)

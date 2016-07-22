@@ -41,18 +41,15 @@
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
 
-      subroutine Boscarino31(programStep,nveclen,ep,dt, &
-     &                   tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Boscarino31(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use control_variables, only: temporal_splitting,probname,Jac_case, &
-     &                             tol,dt_error_tol,uvec,uexact
+     &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
       use unary_mod,         only: aplsca
       use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage,  iaJac, jaJac,  aJac
 
 !-----------------------VARIABLES----------------------------------------------
-      integer,  intent(in   ) :: programStep
-
       !INIT vars     
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
@@ -74,94 +71,70 @@
       integer,  dimension(vecl+1)              :: iwrk
       integer                                  :: nnz_Jac
       
+!------------------------------------------------------------------------------   
       
-      real(wp), dimension(vecl) :: test
-!------------------------------------------------------------------------------
+      Program_Step_Select: select case(programstep)
+        !**Pre-initialization. Get problem name, vector length and grid**
+        case('INITIALIZE_PROBLEM_INFORMATION')
+          nveclen = vecl
+          probname='Boscar_31'     
+          Jac_case='SPARSE'
+          tol=1.0e-12_wp  
+          dt_error_tol=5.0e-14_wp
+          call grid()           
 
-      !**Pre-initialization. Get problem name and vector length**
-      if (programStep==-1) then
-        nveclen = vecl
-        probname='Boscar_31'     
-        Jac_case='SPARSE'
-        
-        tol=1.0e-12_wp  
-        dt_error_tol=5.0e-14_wp
-        call grid()           
+        !**Initialization of problem information**        
+        case('SET_INITIAL_CONDITIONS')
 
-      !**Initialization of problem information**        
-      elseif (programStep==0) then
+          !Allocate derivative operators
+          if(.not. allocated(D1_per)) call Define_CSR_Operators(vecl/2,dx)   
 
-        if(.not. allocated(D1_per)) call Define_CSR_Operators(vecl/2,dx)   
-
-        tfinal = 0.2_wp  ! final time   
-        select case(temporal_splitting)
-          case('EXPLICIT'); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
-          case default    ; dt = 0.2_wp/10**((iDT-1)/20.0_wp)             ! implicit timestep      
-        end select
-        
-        ! Set IC's
-        uvec(1:vecl:2)=sin(two*pi*x(:))
-        uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2 - 1)*two*pi*cos(two*pi*x(:))
-        
-        call exact_Bosc(uexact,ep) !set exact solution at tfinal
-              
-      !**RHS and Jacobian**
-      elseif (programStep>=1) then
-
-        select case (Temporal_Splitting)
-        
-          case('EXPLICIT')
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
-              call Bosc_dUdt(uvec,resE_vec,ep,dt)
-              resI_vec(:)=0.0_wp
-            endif
-                          
-          case('IMPLICIT') ! For fully implicit schemes
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
-               call Bosc_dUdt(uvec,resI_vec,ep,dt)
-               resE_vec(:)=0.0_wp
-    
-            !**Jacobian**
-            elseif (programStep==3) then
-
-               nnz_Jac=size(ap_mat)+vecl/2
-               call Allocate_CSR_Storage(vecl,nnz_Jac)
-                            
-               wrk=-akk*dt*ap_mat   
-               jwrk(:size(jap_mat))=jap_mat
-               jwrk(size(jap_mat)+1:)=0
-               iwrk=iap_mat
-
-               call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
-
-               iaJac=iwrk
-               jaJac=jwrk
-               aJac = wrk
-            endif
+          !Time information
+          tfinal = 0.2_wp  ! final time   
+          choose_dt: select case(temporal_splitting)
+            case('EXPLICIT'); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
+            case default    ; dt = 0.2_wp/10**((iDT-1)/20.0_wp)             ! implicit timestep      
+          end select choose_dt
           
-          case('IMEX')
-            if (programstep==1 .or. programstep==2) then
-               call Bosc_dUDt(uvec,resI_vec,ep,dt)
-               resE_vec(:)=0.0_wp
-
-            elseif(programStep==3) then
-            
-               nnz_Jac=10!temporary value to allow compilation - should be removed for IMEX to work
-               call Allocate_CSR_Storage(vecl,nnz_Jac)
+          ! Set IC's
+          uvec(1:vecl:2)=sin(two*pi*x(:))
+          uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2 - 1)*two*pi*cos(two*pi*x(:))
+         
+          !set exact solution at tfinal
+          call exact_Bosc(uexact,ep) 
               
-            endif
-                      
-          case default ! To catch invald inputs
-            write(*,*)'Invaild case entered. Enter "EXPLICIT", "IMPLICIT", or "IMEX"'
-            write(*,*)'Exiting'
-            stop
+        case('BUILD_RHS')
+          choose_RHS_type: select case (Temporal_Splitting)       
+            case('EXPLICIT')
+                call Bosc_dUdt(uvec,resE_vec,ep,dt)
+                resI_vec(:)=0.0_wp                         
+            case('IMPLICIT')
+                 call Bosc_dUdt(uvec,resI_vec,ep,dt)
+                 resE_vec(:)=0.0_wp
+            case('IMEX')
+          end select choose_RHS_type
+       
+        case('BUILD_JACOBIAN')
+          choose_Jac_type: select case(temporal_splitting)
+            case('IMPLICIT')
+              nnz_Jac=size(ap_mat)+vecl/2
+              call Allocate_CSR_Storage(vecl,nnz_Jac)
+                            
+              wrk=-akk*dt*ap_mat   
+              jwrk(:size(jap_mat))=jap_mat
+              jwrk(size(jap_mat)+1:)=0
+              iwrk=iap_mat
+
+              call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
+
+              iaJac=iwrk
+              jaJac=jwrk
+              aJac = wrk
+            case('IMEX')
             
-        end select
-        
-      endif
-      
+          end select choose_Jac_type
+          
+      end select Program_Step_Select     
       end subroutine Boscarino31
 !==============================================================================
 !==============================================================================
@@ -247,8 +220,6 @@
         allocate(ap_mat(2*size(D1_per)+vecl),jap_mat(2*size(D1_per)+vecl))
       endif
 
-!      print*,eps
- !     print*,'epst',ep_store
       if (.not. abs(eps-ep_store)<=1.0e-12_wp) then !epsilon value has changed
         ep_store=eps
         

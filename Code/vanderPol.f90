@@ -11,17 +11,15 @@
       public :: vanderPol
       contains
 
-      subroutine vanderPol(programStep,nveclen,ep,dt, &
-     &                     tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine vanderPol(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use precision_vars,    only: wp
       use control_variables, only: temporal_splitting,probname,xjac, &
-     &                             tol,dt_error_tol,uvec,uexact
+     &                             tol,dt_error_tol,uvec,uexact,programstep
 
       implicit none; save
 !-----------------------VARIABLES----------------------------------------------
       integer,  parameter    :: vecl=2
-      integer, intent(in   ) :: programStep
 
       !INIT vars
       real(wp), intent(in   ) :: ep
@@ -40,83 +38,70 @@
       !Jacob vars
       real(wp), intent(in   ) :: akk
 !------------------------------------------------------------------------------
-
-      !**Pre-initialization. Get problem name and vector length**
-      if (programStep==-1) then
-        nvecLen = vecl
-        probname='vanderPol'     
-        tol=1.0e-12_wp  
-        dt_error_tol=5.0e-14_wp
+    
+      Program_Step_Select: select case(programstep)
+        !**Pre-initialization. Get problem name and vector length**
+        case('INITIALIZE_PROBLEM_INFORMATION')
+          nvecLen = vecl
+          probname='vanderPol'     
+          tol=1.0e-12_wp  
+          dt_error_tol=5.0e-14_wp
         
-      !**Initialization of problem information**        
-      elseif (programStep==0) then
+        !**Initialization of problem information**        
+        case('SET_INITIAL_CONDITIONS')
       
-        dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep   
-        tfinal = 0.5_wp                   ! final time
-        
-        !**Exact Solution** 
-        open(unit=39,file='exact.vanderpol.data')
-        rewind(39)
-        do i=1,81
-          read(39,*)ExactTot(i,1),ExactTot(i,2)
-          ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp))  !  used for 81 values of ep
-        enddo
-        do i=1,81
-          diff = abs(ExactTot(i,3) - ep)
-          if(diff.le.1.0e-10_wp)then
-            uexact(:) = ExactTot(i,:vecl)
-            exit
-          endif
-        enddo
+          ! Time information
+          dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep   
+          tfinal = 0.5_wp                   ! final time
+          
+          !**Exact Solution** 
+          open(unit=39,file='exact.vanderpol.data')
+          rewind(39)
+          do i=1,81
+            read(39,*)ExactTot(i,1),ExactTot(i,2)
+            ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp))  !  used for 81 values of ep
+          enddo
+          do i=1,81
+            diff = abs(ExactTot(i,3) - ep)
+            if(diff.le.1.0e-10_wp)then
+              uexact(:) = ExactTot(i,:vecl)
+              exit
+            endif
+          enddo
 
-        !**IC**
-        uvec(1) = 2.0_wp
-        uvec(2) = -0.6666654321121172_wp
- !       uvec(2) = -2.0_wp/3.0_wp+10.0_wp/81.0_wp*ep-292.0_wp/2187.0_wp*ep**2 &
- !    &            -1814.0_wp/19683.0_wp*ep**3
-      
-      !**RHS and Jacobian**
-      elseif (programStep>=1) then
+          !**IC**
+          uvec(1) = 2.0_wp
+          uvec(2) = -0.6666654321121172_wp
+!          uvec(2) = -2.0_wp/3.0_wp+10.0_wp/81.0_wp*ep-292.0_wp/2187.0_wp*ep**2 &
+!     &            -1814.0_wp/19683.0_wp*ep**3
 
-        select case (Temporal_Splitting)
-
-          case('IMEX') ! For IMEX schemes
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
+        case('BUILD_RHS')
+          choose_RHS_type: select case (Temporal_Splitting)
+            case('IMEX') ! For IMEX schemes
               resE_vec(1) = dt*uvec(2)
               resE_vec(2) = 0.0_wp
               resI_vec(1) = 0.0_wp
               resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
-            !**Jacobian**
-            elseif (programStep==3) then
+            case('IMPLICIT') ! For fully implicit schemes
+              resE_vec(:) = 0.0_wp
+              resI_vec(1) = dt*uvec(2)
+              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
+          end select choose_RHS_type
+        
+        case('BUILD_JACOBIAN')
+          choose_Jac_type: select case(temporal_splitting)
+            case('IMEX') ! For IMEX schemes
               xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
               xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
               xjac(2,2) = 1.0_wp-akk*dt*(1-uvec(1)*uvec(1))/ep
-            endif
-            
-          case('IMPLICIT') ! For fully implicit schemes
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
-              resE_vec(:) = 0.0_wp
-              resI_vec(1) = dt*uvec(2)
-              resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
-            !**Jacobian**
-            elseif (programStep==3) then
+            case('IMPLICIT') ! For fully implicit schemes
               xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)
               xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
               xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
-            endif
-            
-          case default ! To catch invald inputs
-            write(*,*)'Invaild case entered. Enter "IMEX" or "IMPLICIT"'
-            write(*,*)'Exiting'
-            stop
-            
-        end select
-        
-      endif
-      
+          end select choose_Jac_type
+          
+      end select Program_Step_Select
       end subroutine vanderPol
       end module vanderPol_mod

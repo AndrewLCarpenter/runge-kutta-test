@@ -72,7 +72,6 @@
               if (Line_search) then
                 call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
               else
-              
                 do k = 1,iter_max
                   icount = icount + 1
                   uveciter(:) = uvec(:) !store old uvec   
@@ -84,7 +83,7 @@
                     call Jacobian_CSR(nveclen,xjac) !convert dense xjac to csr
                     call LU_solver(Rnewton)
                     
-                  elseif (nveclen>4 .and. QR) then
+                  elseif (nveclen>4 .and. QR) then !QR factorization
                     call QR_decomp(xjac,nveclen,rnewton) 
                      
                   elseif (nveclen<=4) then !Explicit inverse
@@ -95,7 +94,7 @@
                       enddo
                     enddo  
                   endif
-                  
+        
                   if(check_exit(uveciter,k)) exit
                   
                 enddo
@@ -130,20 +129,20 @@
 !  CREATES RNEWTON FOR NEWTON ITERATION      
       function Build_Rnewton(ep,dt,time,aI,iprob,L)
       
-      use control_variables, only: uvec,usum,resI
+      use control_variables, only: uvec,usum,resI,programstep
       use problemsub_mod,    only: problemsub
             
       real(wp), dimension(size(uvec))       :: Build_Rnewton
       real(wp),               intent(in   ) :: ep,dt,time,aI
       integer,                intent(in   ) :: iprob,L
 
-      integer  :: iDT, programStep,nveclen
-      real(wp) :: tfinal,dt_in  
+      integer  :: iDT,nveclen
+      real(wp) :: tfinal,dt_in
       
       dt_in=dt
       
-      programStep=2
-      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
+      programStep='BUILD_RHS'
+      call problemsub(iprob,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
       Build_Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
       end function Build_Rnewton
@@ -151,6 +150,7 @@
 !  CREATES JACOBIAN FOR NEWTON ITERATION      
       subroutine Build_Jac(ep,dt,time,aI,iprob,L)
       
+      use control_variables, only: programstep
       use problemsub_mod,    only: problemsub     
        
       real(wp), intent(in) :: ep,dt,time,aI
@@ -158,12 +158,12 @@
     
       integer  :: nveclen
       real(wp) :: tfinal,dt_in
-      integer  :: programstep,iDT
+      integer  :: iDT
       
       dt_in=dt
   
-      programStep=3
-      call problemsub(iprob,programStep,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
+      programStep='BUILD_JACOBIAN'
+      call problemsub(iprob,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
       
       end subroutine Build_Jac
       
@@ -211,7 +211,6 @@
       integer,  intent(inout) :: icount,k
       
       integer                              :: j  !Do loop variables
-      integer                              :: programStep !input to problemsub
       integer                              :: ierr,iDT
       real(wp)                             :: tfinal !output of problemsub (not needed)
       real(wp), dimension(nveclen)         :: Rnewton,ustor !Newton 

@@ -20,12 +20,14 @@
       public :: resE,resI,error,errorP,xjac
       public :: b1save,b1Psave,ustage,predvec 
       public :: allocate_vars,deallocate_vars
+      public :: programstep
 !--------------------------VARIABLES-------------------------------------------
 !      character(len=80) :: Temporal_Splitting = 'IMEX'
       character(len=80)  :: Temporal_Splitting = 'IMPLICIT' 
 !      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)   :: probname
       character(len=6)   :: Jac_case='DENSE' !default value
+      character(len=80)  :: programstep
       integer, parameter :: isamp=71   
       integer, parameter :: jmax=81     
       integer, parameter :: jactual=81     

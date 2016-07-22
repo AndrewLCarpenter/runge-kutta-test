@@ -9,6 +9,7 @@
       module problemsub_mod
       
       use precision_vars,    only: wp      
+      use control_variables, only: programstep
       
       implicit none;save
       
@@ -17,10 +18,9 @@
       
       contains
       
-      subroutine problemsub(iprob,programStep,nveclen,ep,&
-     &                      dt,tfinal,iDT,time,akk,L)
+      subroutine problemsub(iprob,nveclen,ep,dt,tfinal,iDT,time,akk,L)
 
-      use control_variables, only: resE,resI,uvec
+      use control_variables, only: resE,resI,uvec,programstep
       use vanderPol_mod,     only: vanderPol
       use Pureschi_mod,      only: Pureschi
       use Kaps_mod,          only: Kaps
@@ -33,8 +33,8 @@
       use Boscarino31_mod,   only: Boscarino31
    
       !PROBLEM PARAMETERS
-      integer,  intent(in   ) :: iprob, programStep
-      integer,  intent(inout) :: nveclen
+      integer,  intent(in   ) :: iprob
+      integer,  intent(  out) :: nveclen
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
       real(wp), intent(  out) :: tfinal
@@ -45,42 +45,32 @@
       real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
       if     (iprob==1)  then
-       call vanderPol(   programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call vanderPol(    nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==2)  then
-       call Pureschi(    programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Pureschi(     nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==3)  then
-       call Kaps(        programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Kaps(         nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==4)  then
-       call Kreiss(      programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Kreiss(       nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==5)  then 
-       call Lorenz(       programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Lorenz(       nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==6)  then 
-       call Rossler_Chaos(programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Rossler_Chaos(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==7)  then 
-       call Oregonator(   programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Oregonator(   nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==8)  then 
-       call Brusselator(   programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Brusselator(  nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       elseif (iprob==9)  then
-       call Burgers(       programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Burgers(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
-       call Boscarino31(   programStep,nveclen,ep,&
-     &                dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Boscarino31(  nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       endif
       
-      if(programStep >= 0) then
-  
-        resE(:,L)=resE_vec(:)
-        resI(:,L)=resI_vec(:)
-      endif
+      select case(programstep)
+        case('BUILD_RHS')  
+          resE(:,L)=resE_vec(:)
+          resI(:,L)=resI_vec(:)
+      end select
 
       end subroutine problemsub
       end module problemsub_mod

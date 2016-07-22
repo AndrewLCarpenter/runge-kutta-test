@@ -24,7 +24,7 @@
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
       
-      integer,  parameter    :: vecl=12   
+      integer,  parameter    :: vecl=128    
       real(wp), dimension(vecl) :: x      
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 
@@ -51,17 +51,14 @@
 ! JACOBIAN_CSR_MOD.F90      *CONTAINS CSR JACOBIAN VARIABLES
 !******************************************************************************
 
-      subroutine Burgers(programStep,nveclen,ep,dt, &
-     &                   tfinal,iDT,time,resE_vec,resI_vec,akk)
+      subroutine Burgers(nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
 
       use control_variables, only: temporal_splitting,probname,Jac_case, &
-     &                             tol,dt_error_tol,uvec,uexact
+     &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,nnz_D2,D1
       use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage
 
 !-----------------------VARIABLES----------------------------------------------
-      integer, intent(in   ) :: programStep
-
       !INIT vars     
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
@@ -78,66 +75,52 @@
       !Jacob vars
       real(wp), intent(in   ) :: akk
 !------------------------------------------------------------------------------
+      
+      Program_Step_Select: select case(programstep)
+        !**Pre-initialization. Get problem name, vector length and grid**
+        case('INITIALIZE_PROBLEM_INFORMATION')
+          nveclen = vecl
+          probname='Burgers  '     
+          tol=1.0e-12_wp  
+          dt_error_tol=5.0e-14_wp
+          jac_case='SPARSE'
+          call grid()           
+ 
+        !**Initialization of problem information**        
+        case('SET_INITIAL_CONDITIONS')
 
-      !**Pre-initialization. Get problem name and vector length**
-      if (programStep==-1) then
-        nveclen = vecl
-        probname='Burgers  '     
-        tol=1.0e-12_wp  
-        dt_error_tol=5.0e-14_wp
-        jac_case='SPARSE'
-        call grid()           
-      !**Initialization of problem information**        
-      elseif (programStep==0) then
+          !Allocate derivative operators
+          if(.not. allocated(D1)) call Define_CSR_Operators(vecl,dx)   
 
-        if(.not. allocated(D1)) call Define_CSR_Operators(vecl,dx)   
-
-        tinitial=0.0_wp  ! initial time
-        tfinal = 0.5_wp  ! final time           
-!        dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
-        dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  implcit
-        call exact_Burg(uvec,ep,tinitial) !set initial conditions   
-        call exact_Burg(uexact,ep,tfinal) !set exact solution at tfinal
-              
-      !**RHS and Jacobian**
-      elseif (programStep>=1) then
-
-        select case (Temporal_Splitting)
-        
-          case('EXPLICIT')
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
+          !Time information
+          tinitial=0.0_wp  ! initial time
+          tfinal = 0.5_wp  ! final time    
+          choose_dt: select case(temporal_splitting)       
+            case('EXPLICIT'); dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
+            case default    ; dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp)    ! timestep  implcit
+          end select choose_dt
+          
+          call exact_Burg(uvec,ep,tinitial) !set initial conditions   
+          call exact_Burg(uexact,ep,tfinal) !set exact solution at tfinal
+                
+        case('BUILD_RHS')
+          choose_RHS_type: select case (Temporal_Splitting)   
+            case('EXPLICIT')
               call Burgers_dUdt(uvec,resE_vec,time,ep,dt)
               resI_vec(:)=0.0_wp
-              
-            !**Jacobian**              
-            elseif (programStep==3) then
-              
-            endif
-            
-          case('IMPLICIT') ! For fully implicit schemes
-            !**RHS**
-            if (programStep==1 .or.programStep==2) then
+            case('IMPLICIT') ! For fully implicit schemes
               call Burgers_dUdt(uvec,resI_vec,time,ep,dt)
               resE_vec(:)=0.0_wp
-
-            !**Jacobian**
-            elseif (programStep==3) then
-
+          end select choose_RHS_type
+       
+        case('BUILD_JACOBIAN')
+          choose_Jac_type: select case(temporal_splitting)
+            case('IMPLICIT') ! For fully implicit schemes
               call Allocate_CSR_Storage(vecl,nnz_D2)
               call Build_Jac(uvec,ep,dt,akk,time)          
-
-            endif
-            
-          case default ! To catch invald inputs
-            write(*,*)'Invaild case entered. Enter "EXPLICIT", or "IMPLICIT"'
-            write(*,*)'Exiting'
-            stop
-            
-        end select
+          end select choose_Jac_type
         
-      endif
-      
+      end select Program_Step_select
       end subroutine Burgers
 !==============================================================================
 !==============================================================================
@@ -152,7 +135,6 @@
       
       dx=x(2)-x(1)
 
-      return
       end subroutine grid
 !==============================================================================
 ! RETURNS VECTOR WITH EXACT SOLUTION
@@ -166,9 +148,7 @@
         u(i) =  NL_Burg_exactsolution(x(i),time,eps)
       enddo
 
-      return
       end subroutine exact_Burg
-
 !==============================================================================
 ! DEFINES RHS 
       subroutine Burgers_dUdt(u,dudt,time,eps,dt)

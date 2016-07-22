@@ -51,7 +51,7 @@
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
-      use precision_vars,     only: wp,twothird
+      use precision_vars,     only: wp
       use output_module,      only: create_file_paths, output_names,          & 
      &                               init_output_files, output_conv_stiff,    &
      &                               output_terminal_iteration,               &
@@ -60,7 +60,8 @@
       use control_variables,  only: isamp,jmax,jactual,uvec,uexact,b,usum,    &
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
      &                              error,errorP,b1save,b1Psave,ustage,       &
-     &                              predvec,allocate_vars,deallocate_vars 
+     &                              predvec,allocate_vars,deallocate_vars,    &
+     &                              programstep
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
@@ -83,7 +84,6 @@
       integer            :: icount,jcount                    
       
       !problemsub variables
-      integer                               :: programStep
       real(wp)                              :: ep
       real(wp)                              :: dt
       integer                               :: nveclen
@@ -121,9 +121,8 @@
           call cpu_time(cputime1)
               
           !**CALL FOR PROBNAME & NVECLEN**
-          programStep=-1
-          call problemsub(iprob,programStep,nveclen,ep,&
-     &                    dt,tfinal,iDT,tt,aI(1,1),1)
+          programStep='INITIALIZE_PROBLEM_INFORMATION'
+          call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1)
         
           call allocate_vars(nveclen,is) 
                                       
@@ -144,15 +143,14 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-!            do iDT =65,65
+            do iDT =1,1
 ! HACK
-            do iDT =1,isamp,1   
+!            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
-              programStep=0
-              call problemsub(iprob,programStep,nveclen,ep, &
-     &                        dt,tfinal,iDT,tt,aI(1,1),1)  
+              programStep='SET_INITIAL_CONDITIONS'
+              call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
 
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
@@ -172,9 +170,8 @@
              
                 jcount = jcount + (ns-1)    !keep track of total RK stages  
 !--------------------------------RK LOOP---------------------------------------
-                programStep=1
-                call problemsub(iprob,programStep,nveclen,ep, &
-     &                          dt,tfinal,iDT,tt,aI(1,1),1) 
+                programStep='BUILD_RHS'
+                call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1) 
 
                 ustage(:,1) = uvec(:)
 
@@ -198,9 +195,8 @@
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                  
                   ! Fill in resE and resI with the converged data
-                  programStep=2
-                  call problemsub(iprob,programStep,nveclen,ep,&
-     &                            dt,tfinal,iDT,tt,aI(1,1),L)
+                  programStep='BUILD_RHS'
+                  call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),L)
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,ktime)
 

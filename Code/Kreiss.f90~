@@ -29,8 +29,8 @@
       real(wp),                  intent(in   ) :: time
 
       real(wp) :: epi,lambda_p,lambda_m,sin_t,cos_t  
-      real(wp), dimension(vecl,vecl) :: E_mat,wrk_matrix
-      real(wp), dimension(vecl)         :: wrk_vec   
+      real(wp), dimension(nveclen,nveclen) :: E_mat,wrk_matrix
+      real(wp), dimension(nveclen)         :: wrk_vec   
       
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: rese_vec,resi_vec

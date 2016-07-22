@@ -25,7 +25,7 @@
       !INIT vars
       real(wp),        intent(in   ) :: ep
       real(wp),        intent(inout) :: dt
-      integer,         intent(  out) :: nveclen
+      integer,         intent(n  out) :: nveclen
       real(wp),        intent(  out) :: tfinal
       integer,         intent(in   ) :: iDT
 
