@@ -141,7 +141,7 @@
                 call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,    &
      &                    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p, &
      &                    wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_wrk,iw,ierr) 
-              !  if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop 
+                if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
               endif
               call Bosc_Jac(uvec,ep,dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
                         

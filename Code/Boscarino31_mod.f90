@@ -223,12 +223,11 @@
       real(wp), dimension(2*size( D1_per))       :: Deriv_comb
       integer,  dimension(2*size( D1_per))       :: jDeriv_comb
             
-      real(wp), dimension(2*size(D1_per)+vecl)   :: a_mat
-      integer,  dimension(2*size(D1_per)+vecl)   :: iw,ja_mat
+      integer,  dimension(2*size(D1_per)+vecl)   :: iw
       
       integer,  dimension(vecl+1)                :: iLR_Source,iLL_Source
       integer,  dimension(vecl+1)                :: UR_iD1,LL_iD1,iSource
-      integer,  dimension(vecl+1)                :: ia_mat,iDeriv_comb
+      integer,  dimension(vecl+1)                :: iDeriv_comb
            
       integer,  dimension(4*size(D1_per)+2*vecl) :: iwork           
            
