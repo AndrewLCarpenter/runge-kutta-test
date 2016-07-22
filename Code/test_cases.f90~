@@ -95,7 +95,6 @@
       real(wp), dimension(is)               :: stageE,stageI,maxiter
                           
 !-----------------------------USER INPUT---------------------------------------
-
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
       write(*,*)'what is case?'  !input range of runge kutta cases
@@ -262,7 +261,8 @@
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-!           write(120,*)uvec
+           write(122,*)uvec(1:nveclen:2)
+           write(123,*)uvec(2:nveclen:2)
 !           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------

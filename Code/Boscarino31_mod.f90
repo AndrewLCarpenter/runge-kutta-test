@@ -25,10 +25,15 @@
       real(wp), dimension(vecl/2) :: x      
       real(wp)                    :: dx
 
-      integer,  dimension(:), allocatable :: jap_mat 
-      real(wp), dimension(:), allocatable ::  ap_mat
-      integer,  dimension(vecl+1)         :: iap_mat
-      real(wp)                            :: ep_store=0.0_wp
+      integer,  dimension(:), allocatable :: jDeriv_comb_p
+      real(wp), dimension(:), allocatable :: Deriv_comb_p,wrk_Jac
+      integer,  dimension(vecl+1)         :: iSource_p,iDeriv_comb_p
+      integer,  dimension(:), allocatable :: iwrk_Jac,jwrk_Jac
+
+      real(wp), dimension(vecl)           :: Source_p
+      integer,  dimension(vecl)           :: jSource_p
+      integer :: nnz_wrk
+      logical :: update_RHS,update_Jac
 !------------------------------------------------------------------------------      
       contains    
 !==============================================================================
@@ -46,8 +51,8 @@
       use control_variables, only: temporal_splitting,probname,Jac_case, &
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
-      use unary_mod,         only: aplsca
-      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage,  iaJac, jaJac,  aJac
+      use unary_mod,         only: aplb
+      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage!,  iaJac, jaJac,  aJac
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -61,16 +66,12 @@
       
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
+      real(wp), dimension(vecl)                :: dudt_D1,dudt_Source
       
       !Jacob vars
-      real(wp), intent(in   ) :: akk
-      
-      integer,  dimension(vecl)                :: iw
-      real(wp), dimension(size(ap_mat)+vecl/2) :: wrk
-      integer,  dimension(size(ap_mat)+vecl/2) :: jwrk
-      integer,  dimension(vecl+1)              :: iwrk
-      integer                                  :: nnz_Jac
-      
+      real(wp), intent(in   )  :: akk
+      integer                  :: nnz_Jac,ierr=0
+      integer, dimension(vecl) :: iw
 !------------------------------------------------------------------------------   
       
       Program_Step_Select: select case(programstep)
@@ -85,10 +86,20 @@
 
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')
-
+          
+          !Update=true for Jac/RHS updates
+          update_RHS=.true.; update_Jac=.true. !reset every new epsilon/dt
+          
           !Allocate derivative operators
-          if(.not. allocated(D1_per)) call Define_CSR_Operators(vecl/2,dx)   
-
+          if(.not. allocated(D1_per)) then
+            call Define_CSR_Operators(vecl/2,dx)   
+            !needed for implicit jacobian
+            nnz_wrk=2*size(D1_per)+vecl
+            allocate(wrk_Jac(nnz_wrk))
+            allocate(iwrk_Jac(vecl+1))
+            allocate(jwrk_Jac(nnz_wrk))          
+          endif
+          
           !Time information
           tfinal = 0.2_wp  ! final time   
           choose_dt: select case(temporal_splitting)
@@ -98,7 +109,7 @@
           
           ! Set IC's
           uvec(1:vecl:2)=sin(two*pi*x(:))
-          uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2 - 1)*two*pi*cos(two*pi*x(:))
+          uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2-1)*two*pi*cos(two*pi*x(:))
          
           !set exact solution at tfinal
           call exact_Bosc(uexact,ep) 
@@ -106,33 +117,41 @@
         case('BUILD_RHS')
           choose_RHS_type: select case (Temporal_Splitting)       
             case('EXPLICIT')
-                call Bosc_dUdt(uvec,resE_vec,ep,dt)
-                resI_vec(:)=0.0_wp                         
+              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
+              resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
+              resI_vec(:)=0.0_wp                   
             case('IMPLICIT')
-                 call Bosc_dUdt(uvec,resI_vec,ep,dt)
-                 resE_vec(:)=0.0_wp
+              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
+              resE_vec(:)=0.0_wp
+              resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
             case('IMEX')
+              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
+              resE_vec(:)=dt*dudt_D1(:)
+              resI_vec(:)=dt*dudt_Source(:)
           end select choose_RHS_type
-       
+          update_RHS=.false. !no need to update RHS until next epsilon
+          
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
             case('IMPLICIT')
-              nnz_Jac=size(ap_mat)+vecl/2
-              call Allocate_CSR_Storage(vecl,nnz_Jac)
-                            
-              wrk=-akk*dt*ap_mat   
-              jwrk(:size(jap_mat))=jap_mat
-              jwrk(size(jap_mat)+1:)=0
-              iwrk=iap_mat
-
-              call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
-
-              iaJac=iwrk
-              jaJac=jwrk
-              aJac = wrk
+              if (update_Jac) then
+                nnz_Jac=nnz_wrk+vecl/2
+                call Allocate_CSR_Storage(vecl,nnz_Jac)
+             
+                call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,    &
+     &                    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p, &
+     &                    wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_wrk,iw,ierr) 
+                if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
+              endif
+              call Bosc_Jac(uvec,ep,dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
+                        
             case('IMEX')
-            
+              nnz_Jac=vecl+vecl/2
+              call Allocate_CSR_Storage(vecl,nnz_Jac)
+              call Bosc_Jac(uvec,ep,dt,akk,Source_p,jSource_p,iSource_p)
+              
           end select choose_Jac_type
+          update_Jac=.false.  !no need to update matrix that forms Jacobian until next epsilon/dt
           
       end select Program_Step_Select     
       end subroutine Boscarino31
@@ -182,24 +201,24 @@
 
 !==============================================================================
 ! DEFINES RHS 
-      subroutine Bosc_dUdt(u,dudt,eps,dt)
+      subroutine Bosc_dUdt(u,dudt_D1,dudt_source,eps)
       
       use SBP_Coef_Module, only: D1_per,jD1_per,iD1_per
       use matvec_module,   only: amux
       use unary_mod,       only: aplb, dperm, csort
 
       real(wp), dimension(vecl), intent(in   ) :: u
-      real(wp), dimension(vecl), intent(  out) :: dudt
-      real(wp),                  intent(in   ) :: eps, dt
+      real(wp), dimension(vecl), intent(  out) :: dudt_D1,dudt_source
+      real(wp),                  intent(in   ) :: eps
            
-      real(wp), dimension(vecl/2)                :: LR_Diag,LL_Diag
-      integer,  dimension(vecl/2)                :: jLR_Diag,jLL_Diag
+      real(wp), dimension(vecl/2)                :: LR_Source,LL_Source
+      integer,  dimension(vecl/2)                :: jLR_Source,jLL_Source
       
       real(wp), dimension(size( D1_per))         :: UR_D1,LL_D1
       integer,  dimension(size(jD1_per))         :: UR_jD1,LL_jD1
        
-      real(wp), dimension(vecl)                  :: Diags
-      integer,  dimension(vecl)                  :: jDiags,j_perm
+      real(wp), dimension(vecl)                  :: Source
+      integer,  dimension(vecl)                  :: jSource,j_perm
         
       real(wp), dimension(2*size( D1_per))       :: Deriv_comb
       integer,  dimension(2*size( D1_per))       :: jDeriv_comb
@@ -207,8 +226,9 @@
       real(wp), dimension(2*size(D1_per)+vecl)   :: a_mat
       integer,  dimension(2*size(D1_per)+vecl)   :: iw,ja_mat
       
-      integer,  dimension(vecl+1)                :: iLR_Diag,iLL_Diag,UR_iD1,LL_iD1
-      integer,  dimension(vecl+1)                :: iDiags,iDeriv_comb,ia_mat
+      integer,  dimension(vecl+1)                :: iLR_Source,iLL_Source
+      integer,  dimension(vecl+1)                :: UR_iD1,LL_iD1,iSource
+      integer,  dimension(vecl+1)                :: ia_mat,iDeriv_comb
            
       integer,  dimension(4*size(D1_per)+2*vecl) :: iwork           
            
@@ -216,28 +236,27 @@
       integer              :: i
 
 !------------------------------------------------------------------------------
-      if (.not. allocated(ap_mat)) then
-        allocate(ap_mat(2*size(D1_per)+vecl),jap_mat(2*size(D1_per)+vecl))
+      if (.not. allocated(Deriv_comb_p)) then
+        allocate(Deriv_comb_p(2*size(D1_per)),jDeriv_comb_p(2*size(D1_per)))
       endif
-
-      if (.not. abs(eps-ep_store)<=1.0e-12_wp) then !epsilon value has changed
-        ep_store=eps
+      
+      if (update_RHS) then
         
-! Set lower right diagaonal
+! Set lower right diageaonal
 ! | | |
 ! | |x|
-        LR_Diag(:)=-1.0_wp/eps
-        iLR_Diag(:vecl/2)   = 1
-        iLR_Diag(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
-        jLR_Diag(:)=(/ (i, i=vecl/2+1, vecl) /)
+        LR_Source(:)=-1.0_wp/eps
+        iLR_Source(:vecl/2)   = 1
+        iLR_Source(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
+        jLR_Source(:)=(/ (i, i=vecl/2+1, vecl) /)
 
 ! Set lower left diagonal
 ! | | |
 ! |x| |
-        LL_Diag(:)=a/eps
-        iLL_Diag(:vecl/2)   = 1
-        iLL_Diag(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
-        jLL_Diag(:)=(/ (i, i=1, vecl/2) /)      
+        LL_Source(:)=a/eps
+        iLL_Source(:vecl/2)   = 1
+        iLL_Source(vecl/2+1:) = (/ (i, i=1, vecl/2+1) /)
+        jLL_Source(:)=(/ (i, i=1, vecl/2) /)      
       
 ! Set upper right D1
 ! | |x|
@@ -259,22 +278,16 @@
       ! combine both diagonals
       ! | | |
       ! |x|x|
-        call aplb(vecl,vecl,1,LL_Diag,jLL_Diag,iLL_Diag,LR_Diag,jLR_Diag, &
-     &            iLR_Diag,Diags,jDiags,iDiags,vecl,iw,ierr(1))
+        call aplb(vecl,vecl,1,LL_Source,jLL_Source,iLL_Source,LR_Source, &
+     &            jLR_Source,iLR_Source,Source,jSource,iSource,vecl,iw,ierr(1))
       
       ! combine both D1's
       ! | |x|
       ! |x| |
         call aplb(vecl,vecl,1,LL_D1,LL_jD1,LL_iD1,UR_D1,UR_jD1,UR_iD1,    &
      &            Deriv_comb,jDeriv_comb,iDeriv_comb,2*size(D1_per),iw,ierr(2))   
-       
-      ! combine diagonals and D1's
-      ! | |x|
-      ! |x|x|
-        call aplb(vecl,vecl,1,Diags,jDiags,iDiags,Deriv_comb,jDeriv_comb, &
-     &          iDeriv_comb,a_mat,ja_mat,ia_mat,2*size(D1_per)+vecl,iw,ierr(3)) 
-  
-! permiate matrix into:
+          
+! permute matrix into:
 ! |x| |
 ! | |x|
         j_perm(1)=1
@@ -283,22 +296,57 @@
           if (i==vecl/2+1) cycle
           j_perm(i)=j_perm(i-1) + 2
         enddo
-
-        call dperm(vecl,a_mat,ja_mat,ia_mat,ap_mat,jap_mat,iap_mat,j_perm,j_perm,1)
-        call csort(vecl,ap_mat,jap_mat,iap_mat,iwork,.true.)     
+        
+      ! permute source's matrix    
+        call dperm(vecl,Source,jSource,iSource,Source_p,jSource_p,iSource_p, &
+     &             j_perm,j_perm,1)
+        call csort(vecl,Source_p,jSource_p,iSource_p,iwork,.true.)  
+   
+      ! permute D1's matrix   
+        call dperm(vecl,Deriv_comb,jDeriv_comb,iDeriv_comb,Deriv_comb_p,      &
+     &             jDeriv_comb_p,iDeriv_comb_p,j_perm,j_perm,1)
+        call csort(vecl,Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p,iwork,.true.)           
+   
       endif
       
  ! get dudt     
-      call amux(vecl,u,dudt,ap_mat,jap_mat,iap_mat)
-   
-      dudt(:)=dt*dudt(:)      
-      
+      call amux(vecl,u,dudt_source,Source_p,    jSource_p,    iSource_p    )
+      call amux(vecl,u,dudt_D1,    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p)                 
+
       if (sum(ierr)/=0) then ! Catch errors
         print*,'Error building dudt'
         stop
       endif
   
       end subroutine Bosc_dUdt
+!==============================================================================
+      subroutine Bosc_Jac(u,eps,dt,akk,a,ja,ia)
       
+      use unary_mod,         only: aplsca
+      use Jacobian_CSR_Mod,  only: iaJac, jaJac,  aJac
+     
+      real(wp), dimension(vecl), intent(in) :: u
+      real(wp),                  intent(in) :: eps,dt,akk
+      real(wp), dimension(:),    intent(in) :: a
+      integer,  dimension(:),    intent(in) :: ja,ia
+      
+      integer,  dimension(vecl)             :: iw
+      real(wp), dimension(size(a)+vecl/2)   :: wrk
+      integer,  dimension(size(a)+vecl/2)   :: jwrk
+      integer,  dimension(vecl+1)           :: iwrk      
+      
+      
+      wrk=-akk*dt*a   
+      jwrk(:size(ja))=ja
+      jwrk(size(ja)+1:)=0
+      iwrk=ia
+
+      call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
+
+      iaJac=iwrk
+      jaJac=jwrk
+      aJac = wrk
+      
+      end subroutine Bosc_Jac      
 !==============================================================================
       end module Boscarino31_mod

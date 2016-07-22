@@ -228,8 +228,10 @@
                 errvecT(:) = errvecT(:) + errvec(:)
 
                 t = t + dt                  !increment time
+! HACK - time depentent solution
 !                write(843,*)t,uvec(1:nveclen/2)
 !                write(844,*)t,uvec(nveclen/2+1:)
+! HACK
                 if(t >= tfinal) exit        
 ! HACK
 ! L2 norm and Linf norms                
@@ -261,7 +263,8 @@
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-!           write(120,*)uvec
+!           write(122,*)uvec(1:nveclen:2)
+!           write(123,*)uvec(2:nveclen:2)
 !           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------

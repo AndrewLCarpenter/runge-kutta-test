@@ -4144,7 +4144,7 @@ contains
 
           jcol = jb(kb)
           jpos = iw(jcol)
-
+   
           if ( jpos == 0 ) then
 
              len = len + 1
@@ -4166,7 +4166,7 @@ contains
           end if
 
        end do
-
+  
        do k = ic(ii), len
          iw(jc(k)) = 0
        end do

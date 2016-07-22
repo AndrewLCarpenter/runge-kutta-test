@@ -20,6 +20,7 @@
       public :: resE,resI,error,errorP,xjac
       public :: b1save,b1Psave,ustage,predvec 
       public :: allocate_vars,deallocate_vars
+      public :: programstep
 !--------------------------VARIABLES-------------------------------------------
 !      character(len=80) :: Temporal_Splitting = 'IMEX'
       character(len=80)  :: Temporal_Splitting = 'IMPLICIT' 
