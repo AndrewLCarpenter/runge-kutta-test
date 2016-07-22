@@ -178,7 +178,7 @@
       real(wp), dimension(:)               :: Rnewton
       integer                              :: nveclen,ierr=0
       real(wp), dimension(size(Rnewton))   :: r_wrk
-      real(wp), dimension(size(Rnewton))   :: w
+      real(wp), dimension(size(Rnewton))   :: w  
       integer,  dimension(2*size(Rnewton)) :: jw,iperm
       
       integer :: i,k

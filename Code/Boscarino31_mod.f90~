@@ -82,10 +82,10 @@
       if (programStep==-1) then
         nveclen = vecl
         probname='Boscar_31'     
-        tol=1.0e-12_wp  
-        dt_error_tol=5.0e-14_wp
         Jac_case='SPARSE'
         
+        tol=1.0e-12_wp  
+        dt_error_tol=5.0e-14_wp
         call grid()           
 
       !**Initialization of problem information**        
@@ -93,30 +93,17 @@
 
         if(.not. allocated(D1_per)) call Define_CSR_Operators(vecl/2,dx)   
 
-        tfinal = 0.2_wp  ! final time           
-!        dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
-        dt = 0.2_wp/10**((iDT-1)/20.0_wp)     ! implicit timestep
-!        dt=1.0_wp        
+        tfinal = 0.2_wp  ! final time   
+        select case(temporal_splitting)
+          case('EXPLICIT'); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
+          case default    ; dt = 0.2_wp/10**((iDT-1)/20.0_wp)             ! implicit timestep      
+        end select
+        
         ! Set IC's
         uvec(1:vecl:2)=sin(two*pi*x(:))
         uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2 - 1)*two*pi*cos(two*pi*x(:))
         
         call exact_Bosc(uexact,ep) !set exact solution at tfinal
-        
-!        call Bosc_dUdt(uvec,test,ep,dt)
-        
-!        print*,'----u-----',test(1:vecl:2)
-!        print*,'----v-----',test(2:vecl:2)
-!        print*,'x',x
-!        print*,'dudt',(-1.0_wp)*a*two*pi*cos(two*pi*x(:))+ep*two*two*pi*pi*(a**2-1)*sin(two*pi*x(:))
-!        print*,'dvdt',(-1.0_wp)*(a**2)*two*pi*cos(two*pi*x(:))
-!        print*,'diff u----=',test(1:vecl:2)-((-1.0_wp)*a*two*pi*cos(two*pi*x(:))+ &
-!       &   ep*two*two*pi*pi*(a**2-1)*sin(two*pi*x(:)))
-!        print*,'diff v----=',test(2:vecl:2)-(-1.0_wp)*(a**2)*two*pi*cos(two*pi*x(:))
-!        print*,maxval(abs(test(1:vecl:2)-dt*((-1.0_wp)*a*two*pi*cos(two*pi*x(:))+ &
-!       &   ep*two*two*pi*pi*(a**2-1)*sin(two*pi*x(:)))))
-!        print*,maxval(abs(test(2:vecl:2)-dt*(-1.0_wp)*(a**2)*two*pi*cos(two*pi*x(:))))
-        
               
       !**RHS and Jacobian**
       elseif (programStep>=1) then
@@ -143,15 +130,15 @@
                call Allocate_CSR_Storage(vecl,nnz_Jac)
                             
                wrk=-akk*dt*ap_mat   
-               jwrk(1:size(jap_mat))=jap_mat
+               jwrk(:size(jap_mat))=jap_mat
                jwrk(size(jap_mat)+1:)=0
                iwrk=iap_mat
 
                call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
 
-                iaJac=iwrk
-                jaJac=jwrk
-                aJac= wrk
+               iaJac=iwrk
+               jaJac=jwrk
+               aJac = wrk
             endif
           
           case('IMEX')
@@ -212,7 +199,7 @@
       enddo
       do i=1,81
         diff = abs(ExactTot(i,vecl+1) - eps)
-        if(diff.le.1.0e-10_wp)then
+        if(diff <= 1.0e-10_wp)then
           u(:) = ExactTot(i,:vecl)
           exit
         endif

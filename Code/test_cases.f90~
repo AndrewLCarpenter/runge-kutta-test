@@ -144,9 +144,9 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT =65,65
+!            do iDT =65,65
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -236,13 +236,18 @@
 !                write(843,*)t,uvec(1:nveclen/2)
 !                write(844,*)t,uvec(nveclen/2+1:)
                 if(t >= tfinal) exit        
- 
-
+! HACK
+! L2 norm and Linf norms                
+!                print*,'u- errorL2',sqrt(dot_product(errvec(1:nveclen:2),errvec(1:nveclen:2))/(nveclen/2))
+!                print*,'u- errorLinf',maxval(errvec(1:nveclen:2))
+!                print*,'v- errorL2',sqrt(dot_product(errvec(2:nveclen:2),errvec(2:nveclen:2))/(nveclen/2))
+!                print*,'v- errorLinf',maxval(errvec(2:nveclen:2))
+! HACK
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
 ! HACK exact solution for each dt
 !              write(120+iDT,*)uvec
-
+! HACK
               
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages

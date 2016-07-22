@@ -39,8 +39,8 @@
       nnz_D1_per=4*n
       allocate(iD1_per(n+1),jD1_per(nnz_D1_per),D1_per(nnz_D1_per))
       
-!      call D1_242(n,nnz_D1,iD1,jD1,D1,h)
-!      call D2_242(n,nnz_D2,iD2,jD2,D2,h)
+      call D1_242(n,nnz_D1,iD1,jD1,D1,h)
+      call D2_242(n,nnz_D2,iD2,jD2,D2,h)
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
 
       end subroutine Define_CSR_Operators

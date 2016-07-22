@@ -99,7 +99,8 @@
       a(icnt+2:icnt+3)=d1mat(1:2); ja(icnt+2:icnt+3)=(/n-3,n-2/)
       a(icnt+4)       =d1mat(4)  ; ja(icnt+4)       =n
       a(icnt+5:icnt+6)=d1mat(4:5); ja(icnt+5:icnt+6)=(/1,2/)            
-      a(icnt+7:icnt+8)=d1mat(1:2); ja(icnt+7:icnt+8)=(/n-2,n-1/)     
+      a(icnt+7:icnt+8)=d1mat(1:2); ja(icnt+7:icnt+8)=(/n-2,n-1/)  
+      a(:)=a(:)/h   
       
       end subroutine D1_periodic
 !===============================================================================   
