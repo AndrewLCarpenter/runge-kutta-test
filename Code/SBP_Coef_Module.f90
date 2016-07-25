@@ -1,3 +1,9 @@
+!******************************************************************************
+! Module containing routines to create derivative operators
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90      *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
       module SBP_Coef_Module
 
       use precision_vars, only: wp
@@ -26,7 +32,7 @@
 
 !     CSR storage for derivative matrices
       integer             :: nnz_D1
-
+      
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
       if(order == 242) then
@@ -42,7 +48,6 @@
       call D1_242(n,nnz_D1,iD1,jD1,D1,h)
       call D2_242(n,nnz_D2,iD2,jD2,D2,h)
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
-
       end subroutine Define_CSR_Operators
 !==============================================================================         
       subroutine D1_periodic(n,nnz,ia,ja,a,h)

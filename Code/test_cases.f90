@@ -83,7 +83,9 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
-      do icase = cases,cases
+
+      !do icase = cases,cases
+      do icase = 1,18
   
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -123,9 +125,9 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT =1,1
+!            do iDT =5,8
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -161,8 +163,7 @@
 
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
-                    usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
-     &                                + aE(L,LL)*resE(:,LL)
+                    usum(:) = usum(:)+ aI(L,LL)*resI(:,LL)+ aE(L,LL)*resE(:,LL)                               
                   enddo
               
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
@@ -171,7 +172,6 @@
                   call Newton_Iteration(iprob,L,ep,dt,nveclen,&
      &                                      tt,aI(L,L),icount,k)
 !---------------END NEWTON ITERATION-------------------------------------------
-
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                  
                   ! Fill in resE and resI with the converged data

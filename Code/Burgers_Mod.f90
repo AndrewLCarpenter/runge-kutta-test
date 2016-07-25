@@ -25,7 +25,7 @@
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
       
-      integer,  parameter    :: vecl=128    
+      integer,  parameter    :: vecl=16   
       real(wp), dimension(vecl) :: x      
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 
@@ -97,13 +97,18 @@
           tinitial=0.0_wp  ! initial time
           tfinal = 0.5_wp  ! final time    
           choose_dt: select case(temporal_splitting)       
-            case('EXPLICIT'); dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
-            case default    ; dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp)    ! timestep  implcit
+            case('EXPLICIT')
+              dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
+            case('IMPLICIT')
+              dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp)    ! timestep  implcit
+            case default
+              print*,'Wrong case!'
+              stop
           end select choose_dt
           
           call exact_Burg(uvec,ep,tinitial) !set initial conditions   
           call exact_Burg(uexact,ep,tfinal) !set exact solution at tfinal
-                
+              
         case('BUILD_RHS')
           choose_RHS_type: select case (Temporal_Splitting)   
             case('EXPLICIT')
@@ -113,14 +118,13 @@
               call Burgers_dUdt(uvec,resI_vec,time,ep,dt)
               resE_vec(:)=0.0_wp
           end select choose_RHS_type
-       
+      !  PRINT*,'BUILDRHS'
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
             case('IMPLICIT') ! For fully implicit schemes
               call Allocate_Jac_CSR_Storage(vecl,nnz_D2)
               call Build_Jac(uvec,ep,dt,akk,time)          
           end select choose_Jac_type
-        
       end select Program_Step_select
       end subroutine Burgers
 !==============================================================================
@@ -215,7 +219,7 @@
 ! CREATES JACOBIAN
       subroutine Build_Jac(u,eps,dt,akk,time)
 
-      use SBP_Coef_Module,  only: Pinv,D1,D2,jD1,jD2,iD1,iD2       
+      use SBP_Coef_Module,  only: Pinv,D1,D2,jD1,jD2,iD1,iD2,nnz_D2       
       use matvec_module,    only: amux
       use unary_mod,        only: aplb,aplsca,amudia,diamua,apldia
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac
@@ -223,19 +227,15 @@
       real(wp), dimension(vecl), intent(in) :: u
       real(wp),                  intent(in) :: eps,dt,akk,time    
         
-      integer,  dimension(size(iaJac))  :: iwrk1,iwrk2,iwrk3,iJac
-      integer,  dimension(size(jaJac))  :: jwrk1,jwrk2,jwrk3,jJac
-      real(wp), dimension(size( aJac))  :: wrk1,wrk2,wrk3,Jac,wrk4,eps_d2      
+      integer,  dimension(vecl+1) :: iwrk1,iwrk2,iwrk3,iJac
+      integer,  dimension(nnz_D2) :: jwrk1,jwrk2,jwrk3,jJac
+      real(wp), dimension(nnz_D2) :: wrk1,wrk2,wrk3,Jac,wrk4,eps_d2      
       
       integer,  dimension(vecl)  :: iw
       real(wp), dimension(vecl)  :: diag
       integer,  dimension(2)     :: ierr
       real(wp)                   :: uL,a1_d,uR,a0_d,a0,a1
-      integer                    :: nnz_max
-!------------------------------------------------------------------------------ 
-      nnz_max=size(aJac)
      
-
 !---------------------dgsat/dt-------------------------------------------------
       uL=u(vecl)
       a1 = third*(uL - sqrt(uL**2+1.0e-28_wp))
@@ -267,11 +267,11 @@
       wrk2(:)=-third*wrk2(:)                                                 !2
       
       call aplb(vecl,vecl,1,wrk1,jwrk1,iwrk1,wrk2,jwrk2,iwrk2,wrk3,&   !3
-     &          jwrk3,iwrk3,nnz_max,iw,ierr(1))                               !3
+     &          jwrk3,iwrk3,nnz_D2,iw,ierr(1))                               !3
 
       eps_d2=eps*D2(:)                                                       !4
       call aplb(vecl,vecl,1,eps_d2,jD2,iD2,wrk3,jwrk3,iwrk3,Jac,&     !5a
-     &          jJac,iJac,nnz_max,iw,ierr(2))                                !5a
+     &          jJac,iJac,nnz_D2,iw,ierr(2))                                !5a
 
       call amux(vecl,-third*u,diag,D1,jD1,iD1) !First-derivative of u vec!5b
       call apldia(vecl,0,Jac,jJac,iJac,diag,Jac,jJac,iJac,iw)            !5b
@@ -282,9 +282,9 @@
       Jac(1:4)=Jac(1:4)+sig0*Pinv(1)*(-eps)*d1vec0(:)/dx
       
       ! L - 5c
-      Jac(nnz_max)=Jac(nnz_max)+sig1*Pinv(vecl)*(a1+a1_d*(uL- &
+      Jac(nnz_D2)=Jac(nnz_D2)+sig1*Pinv(vecl)*(a1+a1_d*(uL- &
      &            NL_Burg_exactsolution(x(vecl),time,eps))) 
-      Jac(nnz_max-3:nnz_max)=Jac(nnz_max-3:nnz_max)+ &
+      Jac(nnz_D2-3:nnz_D2)=Jac(nnz_D2-3:nnz_D2)+ &
      &                     sig1*Pinv(vecl)*(-eps)*d1vec1(:)/dx
      
       wrk4=-akk*dt*Jac                                                       !6

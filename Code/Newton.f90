@@ -42,7 +42,7 @@
       real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobian
 
 !------------------------------------------------------------------------------
-      select case(temporal_splitting)
+      temporal_select: select case(temporal_splitting)
         case('EXPLICIT')
           do k = 1,iter_max
             icount = icount + 1
@@ -51,7 +51,7 @@
             if(check_exit(uveciter,k)) exit            
           enddo   
         case default !IMEX or IMPLICIT
-          select case(Jac_case)
+          Jac_select: select case(Jac_case)
             case('SPARSE')
               do k = 1,iter_max
                 icount = icount + 1
@@ -97,8 +97,8 @@
                 enddo
                 
               endif                
-          end select    
-      end select
+          end select Jac_select 
+      end select temporal_select
       end subroutine Newton_Iteration
       
 !==============================================================================

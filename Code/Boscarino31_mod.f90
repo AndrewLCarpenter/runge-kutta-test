@@ -15,7 +15,7 @@
 
       use precision_vars, only: wp,two,pi
 
-      implicit none; save
+      implicit none; save 
   
       private
       public  :: Boscarino31
@@ -28,14 +28,14 @@
       real(wp), dimension(vecl/2) :: x      
       real(wp)                    :: dx
 
-      integer,  dimension(:), allocatable :: jDeriv_comb_p
-      real(wp), dimension(:), allocatable :: Deriv_comb_p,wrk_Jac
-      integer,  dimension(vecl+1)         :: iSource_p,iDeriv_comb_p
-      integer,  dimension(:), allocatable :: iwrk_Jac,jwrk_Jac
-
-      real(wp), dimension(vecl)           :: Source_p
-      integer,  dimension(vecl)           :: jSource_p
-      integer :: nnz_wrk
+      integer,  dimension(4*vecl) :: jDeriv_comb_p
+      real(wp), dimension(4*vecl) :: Deriv_comb_p
+      real(wp), dimension(5*vecl) :: wrk_Jac
+      integer,  dimension(vecl+1) :: iSource_p,iDeriv_comb_p,iwrk_Jac
+      integer,  dimension(5*vecl) :: jwrk_Jac
+      
+      real(wp), dimension(vecl)   :: Source_p
+      integer,  dimension(vecl)   :: jSource_p
       logical :: update_RHS,update_Jac
 !------------------------------------------------------------------------------      
       contains    
@@ -55,7 +55,7 @@
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
       use unary_mod,         only: aplb
-      use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage!,  iaJac, jaJac,  aJac
+      use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -92,14 +92,7 @@
           update_RHS=.true.; update_Jac=.true. !reset every new epsilon/dt
           
           !Allocate derivative operators
-          if(.not. allocated(D1_per)) then
-            call Define_CSR_Operators(vecl/2,dx)   
-            !needed for implicit jacobian
-            nnz_wrk=2*size(D1_per)+vecl
-            allocate(wrk_Jac(nnz_wrk))
-            allocate(iwrk_Jac(vecl+1))
-            allocate(jwrk_Jac(nnz_wrk))          
-          endif
+          if(.not. allocated(D1_per))call Define_CSR_Operators(vecl/2,dx)   
           
           !Time information
           tfinal = 0.2_wp  ! final time   
@@ -136,12 +129,12 @@
           choose_Jac_type: select case(temporal_splitting)
             case('IMPLICIT')
               if (update_Jac) then
-                nnz_Jac=nnz_wrk+vecl/2
+                nnz_Jac=5*vecl+vecl/2
                 call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
              
                 call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,    &
-     &                    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p, &
-     &                    wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_wrk,iw,ierr) 
+     &                    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p,    &
+     &                    wrk_Jac,jwrk_Jac,iwrk_Jac,5*vecl,iw,ierr) 
                 if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
               endif
               call Bosc_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
@@ -184,7 +177,7 @@
       u(:)=0.0_wp
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Bosc_31_512.data')
+      open(unit=39,file='exact.Bosc_31_256.data')
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl)
@@ -212,34 +205,29 @@
       real(wp), dimension(vecl), intent(  out) :: dudt_D1,dudt_source
       real(wp),                  intent(in   ) :: eps
            
-      real(wp), dimension(vecl/2)                :: LR_Source,LL_Source
-      integer,  dimension(vecl/2)                :: jLR_Source,jLL_Source
+      real(wp), dimension(vecl/2)  :: LR_Source,LL_Source
+      integer,  dimension(vecl/2)  :: jLR_Source,jLL_Source
       
-      real(wp), dimension(size( D1_per))         :: UR_D1,LL_D1
-      integer,  dimension(size(jD1_per))         :: UR_jD1,LL_jD1
+      real(wp), dimension(2*vecl)  :: UR_D1,LL_D1
+      integer,  dimension(2*vecl)  :: UR_jD1,LL_jD1
        
-      real(wp), dimension(vecl)                  :: Source
-      integer,  dimension(vecl)                  :: jSource,j_perm
+      real(wp), dimension(vecl)    :: Source
+      integer,  dimension(vecl)    :: jSource,j_perm
         
-      real(wp), dimension(2*size( D1_per))       :: Deriv_comb
-      integer,  dimension(2*size( D1_per))       :: jDeriv_comb
+      real(wp), dimension(4*vecl)  :: Deriv_comb
+      integer,  dimension(4*vecl)  :: jDeriv_comb
             
-      integer,  dimension(2*size(D1_per)+vecl)   :: iw
+      integer,  dimension(5*vecl)  :: iw
       
-      integer,  dimension(vecl+1)                :: iLR_Source,iLL_Source
-      integer,  dimension(vecl+1)                :: UR_iD1,LL_iD1,iSource
-      integer,  dimension(vecl+1)                :: iDeriv_comb
+      integer,  dimension(vecl+1)  :: iLR_Source,iLL_Source,UR_iD1,LL_iD1
+      integer,  dimension(vecl+1)  :: iDeriv_comb,iSource
            
-      integer,  dimension(4*size(D1_per)+2*vecl) :: iwork           
+      integer,  dimension(10*vecl) :: iwork           
            
       integer,dimension(3) :: ierr
       integer              :: i
 
-!------------------------------------------------------------------------------
-      if (.not. allocated(Deriv_comb_p)) then
-        allocate(Deriv_comb_p(2*size(D1_per)),jDeriv_comb_p(2*size(D1_per)))
-      endif
-      
+!------------------------------------------------------------------------------     
       if (update_RHS) then
         
 ! Set lower right diageaonal
@@ -285,7 +273,7 @@
       ! | |x|
       ! |x| |
         call aplb(vecl,vecl,1,LL_D1,LL_jD1,LL_iD1,UR_D1,UR_jD1,UR_iD1,    &
-     &            Deriv_comb,jDeriv_comb,iDeriv_comb,2*size(D1_per),iw,ierr(2))   
+     &            Deriv_comb,jDeriv_comb,iDeriv_comb,4*vecl,iw,ierr(2))   
           
 ! permute matrix into:
 ! |x| |
