@@ -89,7 +89,6 @@
       real(wp),   intent(in   )  ::  xx
       real(wp)                   ::  gammln
 
-      real(wp)                   ::  gamser,gln,gammcf
       integer                    ::  j
       real(wp)                   ::  ser,stp,tmp,x,y
       real(wp),   dimension(6)   ::  cof

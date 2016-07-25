@@ -1,10 +1,18 @@
 !******************************************************************************
-! Subroutine to take in the problem number and all the appropriate problem
+! Subroutine to take in the problem number and call the appropriate problem
 !******************************************************************************
 ! REQUIRED FILES:
-! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
-! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
-! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
+! PRECISION_VARS.F90     *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90  *CONTAINS VARIABLES USED IN THE PROGRAM
+! VANDERPOL.F90          *PROBLEM CONSTANTS FOR VANDERPOL
+! PURESCHI.F90           *PROBLEM CONSTANTS FOR PURESCHI & RUSSO
+! KAPS.F90               *PROBLEM CONSTANTS FOR KAPS
+! KREISS.F90             *PROBLEM CONSTANTS FOR KREISS'
+! ROSSLER_CHAOS.F90      *PROBLEM CONSTANTS FOR Rossler_Chaos
+! OREGONATOR.F90         *PROBLEM CONSTANTS FOR OREGONATOR
+! BRUSSELATOR.F90        *PROBLEM CONSTANTS FOR BRUSSELATOR 
+! BURGERS_MOD.F90        *PROBLEM CONSTANTS AND ROUTINES FOR BURGERS
+! BOSCARINO31_MOD.F90    *PROBLEM CONSTANTS AND ROUTINES FOR BOSCARINO-31
 !******************************************************************************
       module problemsub_mod
       
@@ -20,7 +28,7 @@
       
       subroutine problemsub(iprob,nveclen,ep,dt,tfinal,iDT,time,akk,L)
 
-      use control_variables, only: resE,resI,uvec,programstep
+      use control_variables, only: resE,resI,uvec
       use vanderPol_mod,     only: vanderPol
       use Pureschi_mod,      only: Pureschi
       use Kaps_mod,          only: Kaps
@@ -30,7 +38,7 @@
       use Oregonator_mod,    only: Oregonator
       use Brusselator_mod,   only: Brusselator
       use Burgers_Module,    only: Burgers
-      use Boscarino31_mod,   only: Boscarino31
+      use Boscarino31_Mod,   only: Boscarino31
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
@@ -45,25 +53,25 @@
       real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
       if     (iprob==1)  then
-       call vanderPol(    nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call vanderPol(    nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==2)  then
-       call Pureschi(     nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Pureschi(     nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==3)  then
-       call Kaps(         nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Kaps(         nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==4)  then
        call Kreiss(       nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==5)  then 
-       call Lorenz(       nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Lorenz(       nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==6)  then 
-       call Rossler_Chaos(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Rossler_Chaos(nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==7)  then 
-       call Oregonator(   nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Oregonator(   nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==8)  then 
-       call Brusselator(  nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Brusselator(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==9)  then
        call Burgers(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
-       call Boscarino31(  nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+       call Boscarino31(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       endif
       
       select case(programstep)

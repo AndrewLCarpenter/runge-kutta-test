@@ -4,7 +4,7 @@ CC = gcc
 FC = ifort
 #FC = gfortran
 
-#FCFLAGS = -Wmaybe-uninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+#FCFLAGS = -Wuninitialized -Wunused -pedantic -Wall -Wsurprising -fbacktrace -fbounds-check -W -O3 $(INCLUDESDIR)
 # FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 FCFLAGS = -check uninit -no-wrap-margin -WB -O3 $(INCLUDESDIR)
 #FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
@@ -20,8 +20,6 @@ SRCS = precision_vars.f90\
        QR_Module.f90\
        Jacobian_CSR_Mod.f90\
        matvec_module.f90\
-       blas_module.f90\
-       eispack_module.f90\
        ilut_module.f90\
        unary_mod.f90\
        Burgers_Mod.f90\
@@ -55,8 +53,6 @@ OBJS = precision_vars.o\
        QR_Module.o\
        Jacobian_CSR_Mod.o\
        matvec_module.o\
-       blas_module.o\
-       eispack_module.o\
        ilut_module.o\
        unary_mod.o\
        Burgers_Mod.o\

@@ -101,7 +101,6 @@
       integer,                intent(in) :: nveclen
       real(wp), dimension(:), intent(in) :: epsave
       
-      character(len=1)  :: istr        !loop index placeholder
       integer           :: i,j
       character(len=80) :: filename   !file name and location
       
@@ -138,7 +137,7 @@
       
       real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
-      integer                        :: i,j,k   
+      integer                        :: i,j
       integer                        :: jsamp
       real(wp), dimension(isamp)     :: sig
       

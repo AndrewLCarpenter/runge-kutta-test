@@ -38,6 +38,7 @@
 !----------sample-accelerator-and-LU-solvers---------------------------c
 !                                                                      c
 ! PGMRES  : preconditioned GMRES solver                                c
+! **NOTE: PGMRES HAS BEEN COMMENTED OUT**
 ! LUSOL   : forward followed by backward triangular solve (Precond.)   c
 ! LUTSOL  : solving v = (LU)^{-T} u (used for preconditioning)         c
 !                                                                      c
@@ -2236,22 +2237,22 @@
       end subroutine ilu0_csr
 
 !=============================================================================80
-
-       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,        &
-     &  aa, ja, ia, alu, jlu, ju, ierr)
-
-       use eispack_module,   only : epslon
-       use blas_module,      only : daxpy,ddot,dnrm2
-
-       implicit none
-
-       integer n, im, maxits, iout, ierr, ja(*), ia(n+1), jlu(*), ju(n)
-       real(wp) vv(n,*), rhs(n), sol(n), aa(*), alu(*)
-
-       integer                   :: n1,its,j,ro,i,i1,k,k1,ii,jj,kmax
-       real(wp),          intent(in)        :: eps
-       real(wp)                             :: eps1,gam
-
+!! HACK HACK
+!       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,        &
+!     &  aa, ja, ia, alu, jlu, ju, ierr)
+!
+!       use eispack_module,   only : epslon
+!       use blas_module,      only : daxpy,ddot,dnrm2
+!
+!       implicit none
+!
+!       integer n, im, maxits, iout, ierr, ja(*), ia(n+1), jlu(*), ju(n)
+!       real(wp) vv(n,*), rhs(n), sol(n), aa(*), alu(*)
+!
+!       integer                   :: n1,its,j,ro,i,i1,k,k1,ii,jj,kmax
+!       real(wp),          intent(in)        :: eps
+!       real(wp)                             :: eps1,gam
+!
 !!!-----------------------------------------------------------------------
 !!       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,        &
 !!     &                    aa, ja, ia, alu, jlu, ju, ierr)               
@@ -2342,152 +2343,152 @@
 ! lusol : combined forward and backward solves (Preconditioning ope.) * 
 ! BLAS1  routines.                                                     *
 !----------------------------------------------------------------------*
-       parameter (kmax=50) 
-       real(wp) hh(kmax+1,kmax), c(kmax), s(kmax), rs(kmax+1),t 
+!       parameter (kmax=50) 
+!       real(wp) hh(kmax+1,kmax), c(kmax), s(kmax), rs(kmax+1),t 
 !-------------------------------------------------------------          
 ! arnoldi size should not exceed kmax=50 in this version..              
 ! to reset modify paramter kmax accordingly.                            
 !-------------------------------------------------------------          
 !      data epsmac/1.d-16/ 
-       n1 = n + 1 
-       its = 0 
+!       n1 = n + 1 
+!       its = 0 
 !-------------------------------------------------------------          
 ! outer loop starts here..                                              
 !-------------- compute initial residual vector --------------          
-       call amux (n, sol, vv, aa, ja, ia) 
-       do 21 j=1,n 
-          vv(j,1) = rhs(j) - vv(j,1) 
-   21  continue 
+!       call amux (n, sol, vv, aa, ja, ia) 
+!       do 21 j=1,n 
+!          vv(j,1) = rhs(j) - vv(j,1) 
+!   21  continue 
 !-------------------------------------------------------------          
-   20  ro = dnrm2(n, vv, 1) 
-       if (iout  >  0 .and. its  ==  0)                                &
-     &      write(iout, 199) its, ro                                    
-       if (ro  ==  0.0_wp) goto 999 
-       t = 1.0_wp/ ro 
-       do 210 j=1, n 
-          vv(j,1) = vv(j,1)*t 
-  210  continue 
-       if (its  ==  0) eps1=eps*ro 
+!   20  ro = dnrm2(n, vv, 1) 
+!       if (iout  >  0 .and. its  ==  0)                                &
+!     &      write(iout, 199) its, ro                                    
+!       if (ro  ==  0.0_wp) goto 999 
+!       t = 1.0_wp/ ro 
+!       do 210 j=1, n 
+!          vv(j,1) = vv(j,1)*t 
+!  210  continue 
+!       if (its  ==  0) eps1=eps*ro 
 !     ** initialize 1-st term  of rhs of hessenberg system..            
-       rs(1) = ro 
-       i = 0 
-    4  i=i+1 
-       its = its + 1 
-       i1 = i + 1 
-       call lusol (n, vv(1,i), rhs, alu, jlu, ju) 
-       call amux (n, rhs, vv(1,i1), aa, ja, ia) 
+!       rs(1) = ro 
+!       i = 0 
+!    4  i=i+1 
+!       its = its + 1 
+!       i1 = i + 1 
+!       call lusol (n, vv(1,i), rhs, alu, jlu, ju) 
+!       call amux (n, rhs, vv(1,i1), aa, ja, ia) 
 !-----------------------------------------                              
 !     modified gram - schmidt...                                        
 !-----------------------------------------                              
-       do 55 j=1, i 
-          t = ddot(n, vv(1,j),1,vv(1,i1),1) 
-          hh(j,i) = t 
-          call daxpy(n, -t, vv(1,j), 1, vv(1,i1), 1) 
-   55  continue 
-       t = dnrm2(n, vv(1,i1), 1) 
-       hh(i1,i) = t 
-       if ( t  ==  0.0_wp) goto 58 
-       t = 1.0_wp/t 
-       do 57  k=1,n 
-          vv(k,i1) = vv(k,i1)*t 
-   57  continue 
+!       do 55 j=1, i 
+!          t = ddot(n, vv(1,j),1,vv(1,i1),1) 
+!          hh(j,i) = t 
+!          call daxpy(n, -t, vv(1,j), 1, vv(1,i1), 1) 
+!   55  continue 
+!       t = dnrm2(n, vv(1,i1), 1) 
+!       hh(i1,i) = t 
+!       if ( t  ==  0.0_wp) goto 58 
+!       t = 1.0_wp/t 
+!       do 57  k=1,n 
+!          vv(k,i1) = vv(k,i1)*t 
+!   57  continue 
 !                                                                       
 !     done with modified gram schimd and arnoldi step..                 
 !     now  update factorization of hh                                   
 !                                                                       
-   58  if (i  ==  1) goto 121 
+!   58  if (i  ==  1) goto 121 
 !--------perfrom previous transformations  on i-th column of h          
-       do 66 k=2,i 
-          k1 = k-1 
-          t = hh(k1,i) 
-          hh(k1,i) = c(k1)*t + s(k1)*hh(k,i) 
-          hh(k,i) = -s(k1)*t + c(k1)*hh(k,i) 
-   66  continue 
-  121  gam = sqrt(hh(i,i)**2 + hh(i1,i)**2) 
+!       do 66 k=2,i 
+!          k1 = k-1 
+!          t = hh(k1,i) 
+!          hh(k1,i) = c(k1)*t + s(k1)*hh(k,i) 
+!          hh(k,i) = -s(k1)*t + c(k1)*hh(k,i) 
+!   66  continue 
+!  121  gam = sqrt(hh(i,i)**2 + hh(i1,i)**2) 
 !                                                                       
 !     if gamma is zero then any small value will do...                  
 !     will affect only residual estimate                                
 !                                                                       
-       if (gam  ==  0.0_wp) gam = epslon(1.0_wp)
+!       if (gam  ==  0.0_wp) gam = epslon(1.0_wp)
 !                                                                       
 !     get  next plane rotation                                          
 !                                                                       
-       c(i) = hh(i,i)/gam 
-       s(i) = hh(i1,i)/gam 
-       rs(i1) = -s(i)*rs(i) 
-       rs(i) =  c(i)*rs(i) 
+!       c(i) = hh(i,i)/gam 
+!       s(i) = hh(i1,i)/gam 
+!       rs(i1) = -s(i)*rs(i) 
+!       rs(i) =  c(i)*rs(i) 
 !                                                                       
 !     detrermine residual norm and test for convergence-                
 !                                                                       
-       hh(i,i) = c(i)*hh(i,i) + s(i)*hh(i1,i) 
-       ro = abs(rs(i1)) 
-  131  format(1h ,2e14.4) 
-       if (iout  >  0)                                                 &
-     &      write(iout, 199) its, ro                                    
-       if (i  <  im .and. (ro  >  eps1))  goto 4 
+!       hh(i,i) = c(i)*hh(i,i) + s(i)*hh(i1,i) 
+!       ro = abs(rs(i1)) 
+!  131  format(1h ,2e14.4) 
+!       if (iout  >  0)                                                 &
+!     &      write(iout, 199) its, ro                                    
+!       if (i  <  im .and. (ro  >  eps1))  goto 4 
 !                                                                       
 !     now compute solution. first solve upper triangular system.        
 !                                                                       
-       rs(i) = rs(i)/hh(i,i) 
-       do 30 ii=2,i 
-          k=i-ii+1 
-          k1 = k+1 
-          t=rs(k) 
-          do 40 j=k1,i 
-             t = t-hh(k,j)*rs(j) 
-   40     continue 
-          rs(k) = t/hh(k,k) 
-   30  continue 
+!       rs(i) = rs(i)/hh(i,i) 
+!       do 30 ii=2,i 
+!          k=i-ii+1 
+!          k1 = k+1 
+!          t=rs(k) 
+!          do 40 j=k1,i 
+!             t = t-hh(k,j)*rs(j) 
+!   40     continue 
+!          rs(k) = t/hh(k,k) 
+!   30  continue 
 !                                                                       
 !     form linear combination of v(*,i)'s to get solution               
 !                                                                       
-       t = rs(1) 
-       do 15 k=1, n 
-          rhs(k) = vv(k,1)*t 
-   15  continue 
-       do 16 j=2, i 
-          t = rs(j) 
-          do 161 k=1, n 
-             rhs(k) = rhs(k)+t*vv(k,j) 
-  161     continue 
-   16  continue 
+!       t = rs(1) 
+!       do 15 k=1, n 
+!          rhs(k) = vv(k,1)*t 
+!   15  continue 
+!       do 16 j=2, i 
+!          t = rs(j) 
+!          do 161 k=1, n 
+!             rhs(k) = rhs(k)+t*vv(k,j) 
+!  161     continue 
+!   16  continue 
 !                                                                       
 !     call preconditioner.                                              
 !                                                                       
-       call lusol (n, rhs, rhs, alu, jlu, ju) 
-       do 17 k=1, n 
-          sol(k) = sol(k) + rhs(k) 
-   17  continue 
+!       call lusol (n, rhs, rhs, alu, jlu, ju) 
+!       do 17 k=1, n 
+!          sol(k) = sol(k) + rhs(k) 
+!   17  continue 
 !                                                                       
 !     restart outer loop  when necessary                                
 !                                                                       
-       if (ro  <=  eps1) goto 990 
-       if (its  >=  maxits) goto 991 
+!       if (ro  <=  eps1) goto 990 
+!       if (its  >=  maxits) goto 991 
 !                                                                       
 !     else compute residual vector and continue..                       
 !                                                                       
-       do 24 j=1,i 
-          jj = i1-j+1 
-          rs(jj-1) = -s(jj-1)*rs(jj) 
-          rs(jj) = c(jj-1)*rs(jj) 
-   24  continue 
-       do 25  j=1,i1 
-          t = rs(j) 
-          if (j  ==  1)  t = t-1.0_wp 
-          call daxpy (n, t, vv(1,j), 1,  vv, 1) 
-   25  continue 
-  199  format('   its =', i4, ' res. norm =', d20.6) 
+!       do 24 j=1,i 
+!          jj = i1-j+1 
+!          rs(jj-1) = -s(jj-1)*rs(jj) 
+!          rs(jj) = c(jj-1)*rs(jj) 
+!   24  continue 
+!       do 25  j=1,i1 
+!          t = rs(j) 
+!          if (j  ==  1)  t = t-1.0_wp 
+!          call daxpy (n, t, vv(1,j), 1,  vv, 1) 
+!   25  continue 
+!  199  format('   its =', i4, ' res. norm =', d20.6) 
 !     restart outer loop.                                               
-       goto 20 
-  990  ierr = 0 
-       return 
-  991  ierr = 1 
-       return 
-  999  continue 
-       ierr = -1 
-       return 
-
-      end subroutine pgmres                                           
+!       goto 20 
+!  990  ierr = 0 
+!       return 
+!  991  ierr = 1 
+!       return 
+!  999  continue 
+!       ierr = -1 
+!       return 
+!
+!      end subroutine pgmres                                           
 
 !=============================================================================80
 

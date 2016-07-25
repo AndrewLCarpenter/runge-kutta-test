@@ -57,7 +57,7 @@
 !     real(wp),   dimension(is,is),        intent(  out) :: al4N
 !     real(wp),   dimension(is,is),        intent(  out) :: al4D
 
-      integer :: j,M
+      integer :: M!,j
 
       M = L+1
 

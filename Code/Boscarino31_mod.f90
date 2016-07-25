@@ -1,4 +1,4 @@
-!*****************************************************************************
+!******************************************************************************
 ! Module containing routines to describe Boscarino's linear system in "ON A 
 ! CLASS OF UNIFORMLY ACCURATE IMEX RUNGE–KUTTA SCHEMES AND APPLICATIONS TO 
 ! HYPERBOLIC SYSTEMS WITH RELAXATION" pg 11, equations 31a/b. 31a was modified 
@@ -6,8 +6,11 @@
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+! SBP_COEF_MODULE.F90           *DEFINES CSR OPERATORS 
+! JACOBIAN_CSR_MOD.F90          *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+! UNARY_MOD.F90                 *PERFORMS SPARSE MATRIX OPERATIONS
+! MATVEC_MODULE.F90             *PERFORMS SPARSE MATRIX*VECTOR OPERATIONS
 !******************************************************************************
-
       module Boscarino31_Mod 
 
       use precision_vars, only: wp,two,pi
@@ -52,7 +55,7 @@
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
       use unary_mod,         only: aplb
-      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage!,  iaJac, jaJac,  aJac
+      use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage!,  iaJac, jaJac,  aJac
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -61,8 +64,6 @@
       integer,  intent(  out) :: nveclen
       real(wp), intent(  out) :: tfinal
       integer,  intent(in   ) :: iDT
-
-      integer                    :: i
       
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
@@ -136,19 +137,19 @@
             case('IMPLICIT')
               if (update_Jac) then
                 nnz_Jac=nnz_wrk+vecl/2
-                call Allocate_CSR_Storage(vecl,nnz_Jac)
+                call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
              
                 call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,    &
      &                    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p, &
      &                    wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_wrk,iw,ierr) 
                 if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
               endif
-              call Bosc_Jac(uvec,ep,dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
+              call Bosc_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
                         
             case('IMEX')
               nnz_Jac=vecl+vecl/2
-              call Allocate_CSR_Storage(vecl,nnz_Jac)
-              call Bosc_Jac(uvec,ep,dt,akk,Source_p,jSource_p,iSource_p)
+              call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
+              call Bosc_Jac(dt,akk,Source_p,jSource_p,iSource_p)
               
           end select choose_Jac_type
           update_Jac=.false.  !no need to update matrix that forms Jacobian until next epsilon/dt
@@ -319,13 +320,12 @@
   
       end subroutine Bosc_dUdt
 !==============================================================================
-      subroutine Bosc_Jac(u,eps,dt,akk,a,ja,ia)
+      subroutine Bosc_Jac(dt,akk,a,ja,ia)
       
       use unary_mod,         only: aplsca
       use Jacobian_CSR_Mod,  only: iaJac, jaJac,  aJac
      
-      real(wp), dimension(vecl), intent(in) :: u
-      real(wp),                  intent(in) :: eps,dt,akk
+      real(wp),                  intent(in) :: dt,akk
       real(wp), dimension(:),    intent(in) :: a
       integer,  dimension(:),    intent(in) :: ja,ia
       

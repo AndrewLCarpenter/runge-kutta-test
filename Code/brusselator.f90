@@ -1,6 +1,5 @@
 !******************************************************************************
-! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
-! of the Kaps problem (Hairer II, pp 403)
+! Subroutine to Initialize, calculate the RHS, and calculate Brusselator
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
@@ -30,7 +29,7 @@
 
       real(wp), dimension(81,vecl+1) :: ExactTot
       real(wp)                       :: diff
-      integer                        :: i,j
+      integer                        :: i
 
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec

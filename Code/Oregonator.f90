@@ -1,6 +1,5 @@
 !******************************************************************************
-! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
-! of the Oregonator problem 
+! Subroutine to Initialize, calculate the RHS, and calculate Oregonator
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
@@ -32,10 +31,6 @@
       integer,         intent(  out) :: nveclen
       real(wp),        intent(  out) :: tfinal
       integer,         intent(in   ) :: iDT
-
-      real(wp), dimension(81,vecl+1) :: ExactTot
-      real(wp)                       :: diff
-      integer                        :: i,j
 
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: rese_vec,resi_vec

@@ -4,6 +4,7 @@
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
+! SBP_COEF_MODULE.F90       *DEFINES CSR DERIVATIVE OPERATORS
 !******************************************************************************
 
       module control_variables
@@ -22,15 +23,15 @@
       public :: allocate_vars,deallocate_vars
       public :: programstep
 !--------------------------VARIABLES-------------------------------------------
-      character(len=80) :: Temporal_Splitting = 'IMEX'
-!      character(len=80)  :: Temporal_Splitting = 'IMPLICIT' 
-!      character(len=80) :: Temporal_Splitting = 'EXPLICIT'
-      character(len=9)   :: probname
-      character(len=6)   :: Jac_case='DENSE' !default value
-      character(len=80)  :: programstep
-      integer, parameter :: isamp=71   
-      integer, parameter :: jmax=81     
-      integer, parameter :: jactual=81     
+      character(len=80), parameter :: Temporal_Splitting = 'IMEX'
+!      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT' 
+!      character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
+      character(len=9)             :: probname
+      character(len=6)             :: Jac_case='DENSE' !default value
+      character(len=80)            :: programstep
+      integer, parameter           :: isamp=71   
+      integer, parameter           :: jmax=81     
+      integer, parameter           :: jactual=81     
       
       real(wp) :: tol,dt_error_tol
 

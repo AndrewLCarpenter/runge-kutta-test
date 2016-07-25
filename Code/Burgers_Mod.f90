@@ -1,9 +1,10 @@
-!*****************************************************************************
+!******************************************************************************
 ! Module containing routines to describe Burger's equation 
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
 ! SBP_COEF_MODULE.F90           *DEFINES CSR OPERATORS 
+! JACOBIAN_CSR_MOD.F90          *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
 ! UNARY_MOD.F90                 *PERFORMS SPARSE MATRIX OPERATIONS
 ! MATVEC_MODULE.F90             *PERFORMS SPARSE MATRIX*VECTOR OPERATIONS
 !******************************************************************************
@@ -56,7 +57,7 @@
       use control_variables, only: temporal_splitting,probname,Jac_case, &
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,nnz_D2,D1
-      use Jacobian_CSR_Mod,  only: Allocate_CSR_Storage
+      use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -116,7 +117,7 @@
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
             case('IMPLICIT') ! For fully implicit schemes
-              call Allocate_CSR_Storage(vecl,nnz_D2)
+              call Allocate_Jac_CSR_Storage(vecl,nnz_D2)
               call Build_Jac(uvec,ep,dt,akk,time)          
           end select choose_Jac_type
         
@@ -161,7 +162,6 @@
       real(wp),                  intent(in   ) :: time, eps, dt
 
       real(wp), dimension(vecl)                :: f, df, dfv, gsat, wrk    
-      integer                                  :: i
       real(wp)                                 :: uL,uR,du0,du1,a0,a1,g0,g1
       
       gsat = 0.0_wp ; df  = 0.0_wp ; dfv = 0.0_wp ;
@@ -360,8 +360,6 @@
       real(wp)             ::  c = (a+b)/2
 
       real(wp) :: NL_Burg_exactsolution
-
-      integer  :: i
       real(wp) :: t1,t2, x0
 
       select case (exact_solution)
@@ -389,8 +387,6 @@
        real(wp)             ::  c = (a+b)/2
 
        real(wp) :: NL_Burg_exact_derivative
-
-       integer  :: i
        real(wp) :: t1,t2,t3, x0
 
        select case (exact_solution)

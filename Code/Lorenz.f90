@@ -31,7 +31,7 @@
 
       real(wp), dimension(81,vecl+1) :: ExactTot
       real(wp)                       :: diff
-      integer                        :: i,j
+      integer                        :: i
 
       !RHS vars
       real(wp), dimension(vecl), intent(  out) :: rese_vec,resi_vec

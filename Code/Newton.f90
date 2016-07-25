@@ -3,14 +3,13 @@
 ! search, or normal Newton Iteration. 
 !******************************************************************************
 ! REQUIRED FILES:
-! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
-! QR_MODULE.F90                 *CONTAINS QR ROUTINES
-! CONTROL_VARIABLES.F90         *ONTAINS VARIABLES USED IN THE PROGRAM
-! RUNGE_KUTTA.F90               *CONTAINS RK CONSTANTS
-! JACOBIAN_CSR_MOD.F90          *CONTAINS CSR JACOBIAN VARIABLES
-! ILUT_MODULE.F90               *PERFORMS LU FACTORIZATION AND SOLVING
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! QR_MODULE.F90             *CONTAINS QR ROUTINES
+! CONTROL_VARIABLES.F90     *ONTAINS VARIABLES USED IN THE PROGRAM
+! ILUT_MODULE.F90           *CONTAINS ROUTINES TO PERFORM LU DECOMPOSITION
+! JACOBIAN_CSR_MOD.F90      *ALLOCATES JACOBIAN CSR VARIABLES
+! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
 !******************************************************************************
-
       module Newton
             
       use precision_vars, only:wp
@@ -20,14 +19,12 @@
       public :: Newton_Iteration
       private      
       
-      contains
-      
+      contains    
 !==============================================================================      
 !  PERFORMS NEWTON ITERATION
       subroutine Newton_Iteration(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
       use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
-      use Jacobian_CSR_Mod,  only: Jacobian_CSR
 
       integer, parameter :: iter_max=20
       logical, parameter :: Line_search=.false. !set to TRUE for line search
@@ -80,7 +77,7 @@
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                   
                   if (nveclen>4 .and. .not. QR) then !No explicit inverse
-                    call Jacobian_CSR(nveclen,xjac) !convert dense xjac to csr
+                    call Convert_to_CSR(xjac) !convert dense xjac to csr
                     call LU_solver(Rnewton)
                     
                   elseif (nveclen>4 .and. QR) then !QR factorization
@@ -117,7 +114,7 @@
       
       check_exit=.false.
       tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-      if (k>=15) write(*,*),'tmp',tmp,'k',k
+      if (k>=15) write(*,*)'tmp',tmp,'k',k
       if (tmp/=tmp) then
         print*,'stopping NaN k=',k
         stop
@@ -180,9 +177,6 @@
       real(wp), dimension(size(Rnewton))   :: r_wrk
       real(wp), dimension(size(Rnewton))   :: w  
       integer,  dimension(2*size(Rnewton)) :: jw,iperm
-      
-      integer :: i,k
-    
       nveclen=size(Rnewton)   
 
       call ilutp(nveclen,aJac,jaJac,iaJac,nveclen,1e-13_wp,0.1_wp,nveclen, &
@@ -211,12 +205,10 @@
       integer,  intent(inout) :: icount,k
       
       integer                              :: j  !Do loop variables
-      integer                              :: ierr,iDT
-      real(wp)                             :: tfinal !output of problemsub (not needed)
+      integer                              :: ierr
       real(wp), dimension(nveclen)         :: Rnewton,ustor !Newton 
       real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobianxjac,
 
-      real(wp) :: tmp !temp variable for accuracy
       real(wp) :: al,rnorm,rnormt
       real(wp), dimension(nveclen) :: dxi
       
@@ -424,5 +416,42 @@
       Mat_invert=xinv
       return
       end function Mat_invert
+!==============================================================================
+      subroutine Convert_to_CSR(a)
+ 
+      use Jacobian_CSR_Mod, only: Allocate_Jac_CSR_Storage,iaJac,jaJac,aJac      
+      
+      real(wp), dimension(:,:), intent(in   ) :: a
+      integer                                 :: i,j,icnt,jcnt,nnz
+      real(wp),    parameter              ::   toljac = 1.0e-13_wp     
+      nnz=size(a(:,1))
+
+      call Allocate_Jac_CSR_Storage(nnz,nnz)
+
+!     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
+
+      ! Initialize CSR
+      iaJac(:) = 0
+      iaJac(1) = 1
+      jaJac(:) = 0 
+      aJac(:) = 0.0_wp
+      
+      ! Store dense matrix into CSR format
+      icnt = 0   
+      do i = 1,nnz
+        jcnt = 0   
+        do j = 1,nnz
+          if(abs(a(i,j)) >= tolJac) then
+            icnt = icnt + 1 
+            jcnt = jcnt + 1 
+             
+            jaJac(icnt) = j
+             aJac(icnt) = a(i,j)
+          endif
+        enddo
+        iaJac(i+1) = iaJac(i) + jcnt
+      enddo
+
+      end subroutine Convert_to_CSR
 !==============================================================================      
       end module Newton

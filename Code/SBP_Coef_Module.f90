@@ -115,9 +115,7 @@
       real(wp),  dimension(nnz),  intent(  out) ::  a
       real(wp),                   intent(in   ) :: h
 
-      integer                                   :: i,j,k
-      integer                                   :: icnt, jcnt
-      real(wp)                                  :: tnorm
+      integer                                   :: i,j
       real(wp),  allocatable, dimension(:)      :: d1mat
       real(wp),  allocatable, dimension(:,:)    :: D1blk, D2blk, D1blkT
 
@@ -169,7 +167,7 @@
       a(:) = a(:) / h
 
       !  Derivative operator must differentiate monomials of sufficient order to be correct.
-      call test_error(1,n,nnz,ia,ja,a)
+      call test_error(1,n,ia,ja,a)
 
       deallocate(d1mat,D1blk,D2blk,D1blkT)
 
@@ -190,15 +188,11 @@
       
       real(wp),  dimension(4  )                 ::  Pmat_L, Pinv_L
 
-      integer                                   :: i,j,k
-      integer                                   :: icnt, jcnt
-      real(wp)                                  :: tnorm, m24
+      integer                                   :: i,j
+      real(wp)                                  :: m24
       real(wp),  allocatable, dimension(:)      :: d1vec, d2mat
       real(wp),  allocatable, dimension(:,:)    :: M1blk, M2blk, M1blkT1, M1blkT2
       real(wp),  allocatable, dimension(:,:)    :: D1blk, D2blk
-      real(wp),  parameter                      :: tol=1.0e-12_wp
-      real(wp),  allocatable, dimension(:)      :: err, x0_vec, x1_vec, x2_vec
-      real(wp),  allocatable, dimension(:)      ::     dx0_vec,dx1_vec,dx2_vec
 
       continue
 
@@ -254,7 +248,7 @@
       call CSR_Filler(n,nnz,d2mat,D1blk,D2blk, ia,ja,a)
 
       a(:) = a(:) / h / h
-      call test_error(2,n,nnz,ia,ja,a)
+      call test_error(2,n,ia,ja,a)
 
       end subroutine D2_242
 
@@ -278,7 +272,6 @@
 
       integer                                  :: i,j,k
       integer                                  :: icnt, jcnt
-      real(wp),  allocatable, dimension(:)     :: err
 
       continue
 
@@ -337,11 +330,11 @@
 
 ! ======================================================================================
 
-      subroutine test_error(order,n,nnz,ia,ja,a)
+      subroutine test_error(order,n,ia,ja,a)
 
       implicit none
 
-      integer,                   intent(in) :: order, n, nnz
+      integer,                   intent(in) :: order, n
       integer,   dimension(:),   intent(in) :: ia
       integer,   dimension(:),   intent(in) :: ja
       real(wp),  dimension(:),   intent(in) ::  a

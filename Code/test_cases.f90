@@ -3,35 +3,26 @@
 !##############################################################################
 !
 !----------------------------PROBLEM LIST--------------------------------------
-!     problem 1) van der Pol (Hairer II, pp 403)
-!     problem 2) Pureschi and Russo 
-!     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
-!     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
-!     problem 5) Lorenz
-!     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
-!     problem 7) Oregonator
-!     problem 8) Brusselator
-!     problem 9) Burgers
-!     problem 10)Boscarino31 
+!     problem 1 ) van der Pol (Hairer II, pp 403)
+!     problem 2 ) Pureschi and Russo 
+!     problem 3 ) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
+!     problem 4 ) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
+!     problem 5 ) Lorenz
+!     problem 6 ) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
+!     problem 7 ) Oregonator
+!     problem 8 ) Brusselator
+!     problem 9 ) Burgers
+!     problem 10) Boscarino31 
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
-! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
-! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES USED IN THE PROGRAM
-! CSR_VARIABLES.F90         *COMPRESSED SPARSE ROW STORAGE VARIABLES
-! ALLOCATE_CSR_STORAGE.F90  *ALLOCATES STOREAGE OF VARIABLES IN CSR
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
-! NEWTON.F90                *PERFORMS NEWTON ITERATION
-! STAGE_VALUE_PREDICTOR.F90 *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
-! VANDERPOL.F90             *PROBLEM CONSTANTS FOR VANDERPOL
-! PURESCHI.F90              *PROBLEM CONSTANTS FOR PURESCHI & RUSSO
-! KAPS.F90                  *PROBLEM CONSTANTS FOR KAPS
-! KREISS.F90                *PROBLEM CONSTANTS FOR KREISS'
-! Rossler_Chaos.F90         *PROBLEM CONSTANTS FOR Rossler_Chaos
-! Oregonator.F90            *PROBLEM CONSTANTS FOR OREGONATOR
+! OUTPUT_MODULE.F90         *CONTAINS ROUTINES TO OUTPUT DATA TO FILES AND TERMINAL
+! STAGE_VALUE_MODULE.F90    *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
+! NEWTON.F90                *PERFORMS NEWTON ITERATION
 !------------------------------------------------------------------------------
 !
 !--------------------------HOW TO USE------------------------------------------
@@ -53,45 +44,35 @@
 
       use precision_vars,     only: wp
       use output_module,      only: create_file_paths, output_names,          & 
-     &                               init_output_files, output_conv_stiff,    &
-     &                               output_terminal_iteration,               &
-     &                               output_terminal_final,output_conv_error
+     &                              init_output_files, output_conv_stiff,     &
+     &                              output_terminal_iteration,                &
+     &                              output_terminal_final,output_conv_error
       use Stage_value_module, only: Stage_Value_Predictor,xnorm
-      use control_variables,  only: isamp,jmax,jactual,uvec,uexact,b,usum,    &
+      use control_variables,  only: allocate_vars,deallocate_vars,isamp,jmax, &
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
      &                              error,errorP,b1save,b1Psave,ustage,       &
-     &                              predvec,allocate_vars,deallocate_vars,    &
+     &                              predvec,jactual,uvec,uexact,b,usum,       &
      &                              programstep
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
-      
+
       implicit none     
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
-      real(wp)                              :: itmp,t,time,dto,tt
+      real(wp)                              :: itmp,t,dto,tt,cputime1,cputime2
       real(wp), dimension(jmax)             :: epsave
-      real(wp)                              :: cputime1,cputime2
      
-      !user inputs
-      integer            :: ipred,problem,cases      
-             
-      !do loops
-      integer            :: icase,i,iprob,jepsil,iDT 
-      integer            :: j,k,istage,ktime,L,LL,qqq
-      
-      !counters      
-      integer            :: icount,jcount                    
+      integer            :: ipred,problem,cases                   !user inputs     
+      integer            :: icase,i,iprob,jepsil,iDT,k,ktime,L,LL !do loops
+      integer            :: icount,jcount                         !counters                     
       
       !problemsub variables
-      real(wp)                              :: ep
-      real(wp)                              :: dt
+      real(wp)                              :: ep,dt,tfinal 
       integer                               :: nveclen
-      real(wp)                              :: tfinal      
 
       !data out variables
       real(wp), dimension(isamp)            :: cost         
-      integer                               :: jsamp
       real(wp), dimension(is)               :: stageE,stageI,maxiter
                           
 !-----------------------------USER INPUT---------------------------------------
