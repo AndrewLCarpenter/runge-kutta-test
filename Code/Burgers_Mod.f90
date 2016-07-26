@@ -25,7 +25,7 @@
       real(wp),               parameter :: sig0 = -1.0_wp
       real(wp),               parameter :: sig1 = +1.0_wp
       
-      integer,  parameter    :: vecl=16   
+      integer,  parameter    :: vecl=128   
       real(wp), dimension(vecl) :: x      
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 

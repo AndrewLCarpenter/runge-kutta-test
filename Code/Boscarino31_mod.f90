@@ -1,8 +1,7 @@
 !******************************************************************************
 ! Module containing routines to describe Boscarino's linear system in "ON A 
 ! CLASS OF UNIFORMLY ACCURATE IMEX RUNGE–KUTTA SCHEMES AND APPLICATIONS TO 
-! HYPERBOLIC SYSTEMS WITH RELAXATION" pg 11, equations 31a/b. 31a was modified 
-! to be of the form "u_t+v_x=(b*u+c*v)/epsilon"
+! HYPERBOLIC SYSTEMS WITH RELAXATION" pg 11, equations 31a/b
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
@@ -21,7 +20,7 @@
       public  :: Boscarino31
 
 !--------------------------------VARIABLES-------------------------------------         
-      integer,  parameter :: vecl=256 !must be even  
+      integer,  parameter :: vecl=16 !must be even  
       real(wp), parameter :: a=0.5_wp
       real(wp), parameter :: xL=-1.0_wp,xR=1.0_wp      
    
@@ -109,17 +108,15 @@
           call exact_Bosc(uexact,ep) 
               
         case('BUILD_RHS')
+          call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)        
           choose_RHS_type: select case (Temporal_Splitting)       
             case('EXPLICIT')
-              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
               resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
               resI_vec(:)=0.0_wp                   
             case('IMPLICIT')
-              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
               resE_vec(:)=0.0_wp
               resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
             case('IMEX')
-              call Bosc_dUdt(uvec,dudt_D1,dudt_Source,ep)
               resE_vec(:)=dt*dudt_D1(:)
               resI_vec(:)=dt*dudt_Source(:)
           end select choose_RHS_type
@@ -230,7 +227,7 @@
 !------------------------------------------------------------------------------     
       if (update_RHS) then
         
-! Set lower right diageaonal
+! Set lower right diagonal
 ! | | |
 ! | |x|
         LR_Source(:)=-1.0_wp/eps

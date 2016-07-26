@@ -30,7 +30,7 @@ SRCS = precision_vars.f90\
        Lorenz.f90\
        Rossler_Chaos.f90\
        Oregonator.f90\
-       brusselator.f90\
+       brusselator_2.f90\
        Boscarino31_mod.f90\
        problemsub.f90\
        Newton.f90\
@@ -63,7 +63,7 @@ OBJS = precision_vars.o\
        Lorenz.o\
        Rossler_Chaos.o\
        Oregonator.o\
-       brusselator.o\
+       brusselator_2.o\
        Boscarino31_mod.o\
        problemsub.o\
        Newton.o\

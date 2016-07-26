@@ -14,11 +14,11 @@
 
       private
       public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
-      public  ::  nnz_D1_per,iD1_per,jD1_per,D1_per
+      public  ::  nnz_D1_per,iD1_per,jD1_per,D1_per,nnz_D1
       
       real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2,D1_per
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2,iD1_per,jD1_per
-      integer                              :: nnz_D2,nnz_D1_per
+      integer                              :: nnz_D2,nnz_D1_per,nnz_D1
       
 
       contains
@@ -31,7 +31,7 @@
       integer,  parameter  :: order = 242
 
 !     CSR storage for derivative matrices
-      integer             :: nnz_D1
+
       
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 

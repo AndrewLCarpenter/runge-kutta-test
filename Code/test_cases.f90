@@ -84,8 +84,7 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
 
-      !do icase = cases,cases
-      do icase = 1,18
+      do icase = cases,cases
   
         !**initilizations?**
         stageE(:) = 0.0_wp
