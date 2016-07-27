@@ -221,9 +221,10 @@
            
       integer,  dimension(10*vecl) :: iwork           
            
-      integer,dimension(3) :: ierr
+      integer,dimension(2) :: ierr
       integer              :: i
 
+      ierr = 0
 !------------------------------------------------------------------------------     
       if (update_RHS) then
         
@@ -294,12 +295,13 @@
    
       endif
       
- ! get dudt     
+      ! get dudt     
       call amux(vecl,u,dudt_source,Source_p,    jSource_p,    iSource_p    )
       call amux(vecl,u,dudt_D1,    Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p)                 
 
       if (sum(ierr)/=0) then ! Catch errors
         print*,'Error building dudt'
+        write(*,*)'ierr',ierr
         stop
       endif
   
@@ -319,8 +321,11 @@
       integer,  dimension(size(a)+vecl/2)   :: jwrk
       integer,  dimension(vecl+1)           :: iwrk      
       
+      integer                               :: nnz
+
+      nnz = size(a)
       
-      wrk=-akk*dt*a   
+      wrk(1:nnz)=-akk*dt*a(1:nnz)   
       jwrk(:size(ja))=ja
       jwrk(size(ja)+1:)=0
       iwrk=ia
