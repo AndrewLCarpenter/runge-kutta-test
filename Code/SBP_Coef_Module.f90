@@ -13,12 +13,15 @@
       real(wp),  parameter                      :: tol=1.0e-12_wp
 
       private
-      public  ::  Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
-      public  ::  nnz_D1_per,iD1_per,jD1_per,D1_per,nnz_D1
+      public  :: Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
+      public  :: nnz_D1_per,iD1_per,jD1_per,D1_per,nnz_D1
+      public  :: nnz_D2_per,iD2_per,jD2_per,D2_per
       
-      real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2,D1_per
+      real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2,D1_per,D2_per
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2,iD1_per,jD1_per
+      integer,   dimension(:), allocatable :: iD2_per,jD2_per
       integer                              :: nnz_D2,nnz_D1_per,nnz_D1
+      integer                              :: nnz_D2_per
       
 
       contains
@@ -44,10 +47,13 @@
       
       nnz_D1_per=4*n
       allocate(iD1_per(n+1),jD1_per(nnz_D1_per),D1_per(nnz_D1_per))
+      nnz_D2_per=5*n
+      allocate(iD2_per(n+1),jD2_per(nnz_D2_per),D2_per(nnz_D2_per))
       
       call D1_242(n,nnz_D1,iD1,jD1,D1,h)
       call D2_242(n,nnz_D2,iD2,jD2,D2,h)
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
+      call D2_periodic(n,nnz_D2_per,iD2_per,jD2_per,D2_per,h)
       end subroutine Define_CSR_Operators
 !==============================================================================         
       subroutine D1_periodic(n,nnz,ia,ja,a,h)
@@ -108,6 +114,57 @@
       a(:)=a(:)/h   
       
       end subroutine D1_periodic
+!==============================================================================         
+      subroutine D2_periodic(n,nnz,ia,ja,a,h)
+
+      integer,                    intent(in   ) :: n,nnz
+
+      integer,   dimension(n+1),  intent(  out) :: ia
+      integer,   dimension(nnz),  intent(  out) :: ja
+
+      real(wp),  dimension(nnz),  intent(  out) ::  a
+      real(wp),                   intent(in   ) :: h
+
+      integer                                   :: i,j
+      integer                                   :: icnt, jcnt
+
+      real(wp),  dimension(5)      :: d2mat
+      real(wp) :: tol
+            
+      d2mat(:) = (/-1.0_wp,16.0_wp,-30.0_wp,16.0_wp,-1.0_wp/)/12.0_wp
+      
+      tol=1.0e-12_wp
+      
+      ia(:) = (/ (i, i=1,n*4+1,4) /)
+      ja(:) = 0      ;
+      a(:) = 0.0_wp ;
+      ia(1) = 1      ! start at beginning of array   
+         
+      a(1:3)=d2mat(3:5); ja(1:3)=(/1,2,3/)
+      a(4:5)=d2mat(1:2); ja(4:5)=(/n-1,n/)
+      a(6:9)=d2mat(2:5); ja(6:9)=(/1,2,3,4/)
+      a(10) =d2mat(1)  ; ja(10) =n
+      icnt  = 10
+          
+      do i = 3,n-2
+        jcnt = 0 
+        do j = 1,5
+          if(abs(d2mat(j)) >= tol) then
+              icnt = icnt + 1 ; jcnt = jcnt + 1 ;
+          ja(icnt) = i-3+j
+           a(icnt) = d2mat(j)
+          endif
+        enddo
+!        ia(i+1) = ia(i) + jcnt
+      enddo
+      
+      a(icnt+1)        =d2mat(5)  ; ja(icnt+1)        =1
+      a(icnt+2:icnt+5) =d2mat(1:4); ja(icnt+2:icnt+5) =(/n-3,n-2,n-1,n/)
+      a(icnt+6:icnt+7) =d2mat(4:5); ja(icnt+6:icnt+7) =(/1,2/)            
+      a(icnt+8:icnt+10)=d2mat(1:3); ja(icnt+8:icnt+10)=(/n-2,n-1,n/)  
+      a(:)=a(:)/h /h  
+      
+      end subroutine D2_periodic
 !===============================================================================   
      
       subroutine D1_242(n,nnz,ia,ja,a,h)
@@ -254,6 +311,8 @@
 
       a(:) = a(:) / h / h
       call test_error(2,n,ia,ja,a)
+
+      deallocate(d1vec,d2mat,M1blk,M2blk,M1blkT1,M1blkT2,D1blk,D2blk)
 
       end subroutine D2_242
 

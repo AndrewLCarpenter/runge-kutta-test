@@ -55,11 +55,12 @@
 !  WRITES PROBLEM NAME AND CASE NAME TO THE TOP OF THE TERMIINAL OUTPUT
       subroutine output_names()
 
-      use control_variables, only : probname
+      use control_variables, only : probname,temporal_splitting
       use runge_kutta,       only : casename
        
       write(*,*)'Problem name: ',trim(probname)
       write(*,*)'Casename: ', trim(casename)
+      write(*,*)'Splitting: ', trim(temporal_splitting)
        
       end subroutine output_names
        
@@ -95,7 +96,7 @@
       subroutine output_conv_stiff(nveclen,epsave)
       
       use control_variables, only : temporal_splitting,probname,jactual, &
-     &                              b1save,b1Psave  
+     &                              b1save,b1Psave,b1L2save  
       use runge_kutta,       only : casename    
       
       integer,                intent(in) :: nveclen
@@ -117,6 +118,13 @@
           write(35,50)epsave(j),b1Psave(j,i)
         enddo
       enddo
+      
+      do i=1,2
+        write(35,*)'zone T = "Var',i,': ',i,'",'
+        do j=1,jactual
+          write(35,50)epsave(j),b1L2save(j,i)
+        enddo
+      enddo
 
       50 format( 10(e12.5,1x))
          
@@ -127,7 +135,7 @@
       subroutine output_terminal_iteration(cost,mwt,ep,nveclen)
       
       use poly_fit_mod,      only : fit
-      use control_variables, only : isamp,dt_error_tol,b,error,errorP
+      use control_variables, only : isamp,dt_error_tol,b,error,errorP,errorL2
             
       real(wp), dimension(:),   intent(in) :: cost
 
@@ -135,7 +143,7 @@
       real(wp),                 intent(in) :: ep
       integer,                  intent(in) :: nveclen
       
-      real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
+      real(wp), dimension(nveclen*2+2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
       integer                        :: i,j
       integer                        :: jsamp
@@ -156,15 +164,26 @@
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
      &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)   
+     enddo
+     
+     do i = 1,2
+        do j=2,size(errorL2(:,i))
+          jsamp=j
+          if (errorL2(j,i)<=log10(dt_error_tol)) exit
+        enddo
+        call fit(cost,errorL2(:,i),jsamp,sig,mwt,a(nveclen*2+i),b(nveclen*2+i),                  &
+     &           siga1(nveclen*2+i),sigb1(nveclen*2+i),chi2(nveclen*2+i),q)
       enddo
 
       !**OUTPUT TO TERMINAL**
       write(*,60,advance="no")ep
-        do i = 1,nveclen*2-1
-          write(*,60,advance="no")a(i),b(i)
-        enddo
-      write(*,60)a(nveclen*2),b(nveclen*2)
-
+! HACK
+!        do i = 1,nveclen*2+1
+!          write(*,60,advance="no")a(i),b(i)
+!        enddo
+!      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
+      write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+1)
+      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
    60 format( e12.5,1x,12(f8.3,1x))
    
       end subroutine output_terminal_iteration

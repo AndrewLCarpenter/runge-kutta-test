@@ -12,13 +12,13 @@ CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\
        SBP_Coef_Module.f90\
+       Jacobian_CSR_Mod.f90\
        control_variables.f90\
        poly_fit_Mod.f90\
        runge_kutta.f90\
        output_module.f90\
        Stage_Value_module.f90\
        QR_Module.f90\
-       Jacobian_CSR_Mod.f90\
        matvec_module.f90\
        ilut_module.f90\
        unary_mod.f90\
@@ -45,13 +45,13 @@ $(OBJS1)
 
 OBJS = precision_vars.o\
        SBP_Coef_Module.o\
+       Jacobian_CSR_Mod.o\
        control_variables.o\
        poly_fit_Mod.o\
        runge_kutta.o\
        output_module.o\
        Stage_Value_module.o\
        QR_Module.o\
-       Jacobian_CSR_Mod.o\
        matvec_module.o\
        ilut_module.o\
        unary_mod.o\

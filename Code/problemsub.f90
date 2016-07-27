@@ -72,6 +72,9 @@
        call Burgers(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
        call Boscarino31(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+      else
+       print*,'Invalid problem number!'
+       stop
       endif
       
       select case(programstep)

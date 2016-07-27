@@ -52,7 +52,7 @@
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
      &                              error,errorP,b1save,b1Psave,ustage,       &
      &                              predvec,jactual,uvec,uexact,b,usum,       &
-     &                              programstep
+     &                              programstep,errorL2,b1L2save
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
@@ -74,6 +74,8 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
+      
+      real(wp),dimension(256) :: tmpv
                           
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
@@ -225,7 +227,15 @@
 ! HACK exact solution for each dt
 !              write(120+iDT,*)uvec
 ! HACK
-              
+! L2 norm and Linf norms          
+!                tmpv=abs(uexact-uvec     )
+!                print*,'u- L2',sqrt(dot_product(tmpv(1:nveclen:2),&
+!     &                            tmpv(1:nveclen:2))/(nveclen/2))
+!                print*,'u- Linf',maxval(uexact(1:nveclen:2))
+!                print*,'v- L2',sqrt(dot_product(tmpv(2:nveclen:2),&
+!     &                            tmpv(2:nveclen:2))/(nveclen/2))
+!                print*,'v- Linf',maxval(uexact(2:nveclen:2))
+! HACK              
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
@@ -238,7 +248,8 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-
+              errorL2(iDT,1)= log10(sqrt(dot_product(tmpvec(1:nveclen:2),tmpvec(1:nveclen:2))/(nveclen/2)))
+              errorL2(iDT,2)= log10(sqrt(dot_product(tmpvec(2:nveclen:2),tmpvec(2:nveclen:2))/(nveclen/2)))
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
@@ -255,6 +266,9 @@
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
+            enddo
+            do i=1,2
+            b1L2save(jepsil,i) = -b(2*nveclen+i)
             enddo
             
           enddo      
