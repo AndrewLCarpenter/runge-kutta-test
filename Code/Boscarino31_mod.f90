@@ -20,7 +20,7 @@
       public  :: Boscarino31
 
 !--------------------------------VARIABLES-------------------------------------         
-      integer,  parameter :: vecl=16 !must be even  
+      integer,  parameter :: vecl=256 !must be even  
       real(wp), parameter :: a=0.5_wp
       real(wp), parameter :: xL=-1.0_wp,xR=1.0_wp      
    
@@ -325,10 +325,11 @@
 
       nnz = size(a)
       
-      wrk(1:nnz)=-akk*dt*a(1:nnz)   
-      jwrk(:size(ja))=ja
-      jwrk(size(ja)+1:)=0
-      iwrk=ia
+      wrk(:nnz)=-akk*dt*a(:)   
+      wrk(nnz+1:)=0.0_wp
+      jwrk(:nnz)=ja(:)
+      jwrk(nnz+1:)=0
+      iwrk(:)=ia(:)
 
       call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
 
