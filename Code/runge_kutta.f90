@@ -3115,7 +3115,9 @@
       ae(8,5) = 4151782504231.0_wp/36106512998704.0_wp
       ae(8,6) = 572599549169.0_wp/6265429158920.0_wp
       ae(8,7) = -457874356192.0_wp/11306498036315.0_wp
-
+      else
+       print*,'Invalid RK case!'
+       stop
       endif                                                  !  end icase loop
 
        do i=1,ns

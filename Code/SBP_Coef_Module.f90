@@ -135,7 +135,7 @@
       
       tol=1.0e-12_wp
       
-      ia(:) = (/ (i, i=1,n*4+1,4) /)
+      ia(:) = (/ (i, i=1,n*5+1,5) /)
       ja(:) = 0      ;
       a(:) = 0.0_wp ;
       ia(1) = 1      ! start at beginning of array   
@@ -163,7 +163,7 @@
       a(icnt+6:icnt+7) =d2mat(4:5); ja(icnt+6:icnt+7) =(/1,2/)            
       a(icnt+8:icnt+10)=d2mat(1:3); ja(icnt+8:icnt+10)=(/n-2,n-1,n/)  
       a(:)=a(:)/h /h  
-      
+
       end subroutine D2_periodic
 !===============================================================================   
      

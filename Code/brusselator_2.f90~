@@ -53,7 +53,6 @@
       use control_variables, only: temporal_splitting,probname,Jac_case, &
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use SBP_Coef_Module,   only: Define_CSR_Operators,D2_per,nnz_D2_per
-      use unary_mod,         only: aplb
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
 !-----------------------VARIABLES----------------------------------------------
 
