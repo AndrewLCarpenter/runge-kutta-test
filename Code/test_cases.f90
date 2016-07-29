@@ -7,12 +7,13 @@
 !     problem 2 ) Pureschi and Russo 
 !     problem 3 ) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4 ) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
-!     problem 5 ) Lorenz
+!     problem 5 ) Lorenz attractor
 !     problem 6 ) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
 !     problem 7 ) Oregonator
 !     problem 8 ) Brusselator
 !     problem 9 ) Burgers
 !     problem 10) Boscarino31 
+!     problem 11) Broadwell Model
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
