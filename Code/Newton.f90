@@ -114,7 +114,7 @@
       
       check_exit=.false.
       tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-      if (k>=8) write(*,*)'tmp',tmp,'k',k
+      if (k>=7) write(*,*)'tmp',tmp,'k',k
       if (tmp/=tmp) then
         print*,'stopping NaN k=',k
         stop

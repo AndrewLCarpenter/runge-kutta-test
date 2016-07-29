@@ -85,7 +85,6 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
-
       do icase = cases,cases
   
         !**initilizations?**
@@ -114,7 +113,7 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
+          do jepsil = 18,18!1,jactual,1     
                                  
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -211,8 +210,8 @@
 
                 t = t + dt                  !increment time
 ! HACK - time depentent solution
-!                write(843,*)t,uvec(1:nveclen/2)
-!                write(844,*)t,uvec(nveclen/2+1:)
+                write(843,*)t,uvec(1:nveclen:2)
+                write(844,*)t,uvec(2:nveclen+1:2)
 ! HACK
                 if(t >= tfinal) exit        
 ! HACK
