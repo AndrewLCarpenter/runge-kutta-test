@@ -141,12 +141,12 @@
               nnz_Jac=12*vecl
               call Allocate_Jac_CSR_Storage(vecl*2,nnz_Jac)
              
-              call aplb(vecl*2,vecl*2,1,Source_p,jSource_p,iSource_p,    &
-     &                  Deriv2_p,jDeriv2_p,iDeriv2_p,    &
-     &                  wrk_Jac,jwrk_Jac,iwrk_Jac,12*vecl,iw,ierr) 
-              if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
+!              call aplb(vecl*2,vecl*2,1,Source_p,jSource_p,iSource_p,    &
+!     &                  Deriv2_p,jDeriv2_p,iDeriv2_p,    &
+!     &                  wrk_Jac,jwrk_Jac,iwrk_Jac,12*vecl,iw,ierr) 
+!              if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
 
-              call Build_Jac(uvec,dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
+              call Build_Jac(uvec,dt,akk,Deriv2_p,jDeriv2_p,iDeriv2_p)       
                         
             case('IMEX')
               nnz_Jac=vecl+vecl/2
@@ -190,23 +190,23 @@
       integer, dimension(vecl*2) :: iw,j_perm
       
       real(wp), dimension(vecl) :: u,v
-      integer,  dimension(vecl*2+1) :: iLR_Source,iLL_Source
-      integer,  dimension(vecl*2+1) :: iUR_Source,iUL_Source
+!      integer,  dimension(vecl*2+1) :: iLR_Source,iLL_Source
+!      integer,  dimension(vecl*2+1) :: iUR_Source,iUL_Source
       integer,  dimension(vecl*2+1) :: iUL_D2,iLR_D2
             
-      real(wp), dimension(vecl) :: LR_Source,LL_Source,UR_Source,UL_Source
-      integer,  dimension(vecl) :: jLR_Source,jLL_Source,jUR_Source,jUL_Source
+!      real(wp), dimension(vecl) :: LR_Source,LL_Source,UR_Source,UL_Source
+!      integer,  dimension(vecl) :: jLR_Source,jLL_Source,jUR_Source,jUL_Source
       
       real(wp), dimension(5*vecl) :: UL_D2,LR_D2
       integer,  dimension(5*vecl) :: jUL_D2,jLR_D2
       
-      real(wp), dimension(2*vecl) :: U_Source,L_Source
-      integer,  dimension(2*vecl) :: jU_Source,jL_Source
-      integer,  dimension(vecl*2+1) :: iU_Source,iL_Source
+!      real(wp), dimension(2*vecl) :: U_Source,L_Source
+!      integer,  dimension(2*vecl) :: jU_Source,jL_Source
+!      integer,  dimension(vecl*2+1) :: iU_Source,iL_Source
       
-      real(wp), dimension(4*vecl) :: Source
-      integer,  dimension(4*vecl) :: jSource
-      integer,  dimension(vecl*2+1) :: iSource
+!      real(wp), dimension(4*vecl) :: Source
+!      integer,  dimension(4*vecl) :: jSource
+!      integer,  dimension(vecl*2+1) :: iSource
       
       real(wp), dimension(10*vecl) :: Deriv2
       integer,  dimension(10*vecl) :: jDeriv2
@@ -215,38 +215,6 @@
       
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
 
-! Set lower right diagonal
-! | | |
-! | |x|
-      LR_Source(:)=-u(:)*u(:)
-      iLR_Source(:vecl)   = 1
-      iLR_Source(vecl+1:) = (/ (i, i=1, vecl+1) /)
-      jLR_Source(:)=(/ (i, i=vecl+1, vecl*2) /)
-
-! Set lower left diagonal
-! | | |
-! |x| |
-      LL_Source(:)=3.0_wp
-      iLL_Source(:vecl)   = 1
-      iLL_Source(vecl+1:) = (/ (i, i=1, vecl+1) /)
-      jLL_Source(:)=(/ (i, i=1, vecl) /)   
-   
-! Set upper right diagonal
-! | |x|
-! | | |        
-      UR_Source(:)=1.0_wp/v(:)
-      iUR_Source(:vecl)=  (/ (i, i=1, vecl) /)
-      iUR_Source(vecl+1:)=vecl+1
-      jUR_Source(:)=(/ (i, i=vecl+1, vecl*2) /)
-   
-! Set upper left diagonal
-! |x| |
-! | | |
-      UL_Source(:)=-4.0_wp+v(:)*v(:)
-      iUL_Source(:vecl)=  (/ (i, i=1, vecl) /)
-      iUL_Source(vecl+1:)=vecl+1
-      jUL_Source(:)=(/ (i, i=1, vecl) /)  
-         
 ! Set upper left D2
 ! |x| |
 ! | | |      
@@ -263,26 +231,10 @@
         iLR_D2(vecl+1:)=iD2_per(:)
         jLR_D2(:)=jD2_per(:)+vecl
 
-! Add all matricies
-      ! combine all source diagonals
-      ! |x|x|
-      ! |x|x|      
-        !UR+UL=US
-        call aplb(vecl*2,vecl*2,1,UL_Source,jUL_Source,iUL_Source,UR_Source,  &
-     &          jUR_Source,iUR_Source,U_Source,jU_Source,iU_Source,vecl*2,iw,ierr(1))
-       
-
-        !LR+LL=LS
-        call aplb(vecl*2,vecl*2,1,LL_Source,jLL_Source,iLL_Source,LR_Source,           &
-     &          jLR_Source,iLR_Source,L_Source,jL_Source,iL_Source,vecl*2,iw,ierr(2))      
-        !US+LS=S
-        call aplb(vecl*2,vecl*2,1,U_Source,jU_Source,iU_Source,L_Source,           &
-     &          jL_Source,iL_Source,Source,jSource,iSource,vecl*4,iw,ierr(3))
-      
-
-      ! combine both D2's
-      ! |x| |
-      ! | |x|
+! Add all matricies   
+! combine both D2's
+! |x| |
+! | |x|
         call aplb(vecl*2,vecl*2,1,LR_D2,jLR_D2,iLR_D2,UL_D2,jUL_D2,iUL_D2,    &
      &            Deriv2,jDeriv2,iDeriv2,vecl*10,iw,ierr(4))   
       
@@ -297,73 +249,119 @@
         enddo
  
       ! permute source's matrix    
-        call dperm(vecl*2,Source,jSource,iSource,Source_p,jSource_p,iSource_p,&
-     &             j_perm,j_perm,1)
+!        call dperm(vecl*2,Source,jSource,iSource,Source_p,jSource_p,iSource_p,&
+!     &             j_perm,j_perm,1)
       ! permute D2's matrix   
         call dperm(vecl*2,Deriv2,jDeriv2,iDeriv2,Deriv2_p,      &
      &             jDeriv2_p,iDeriv2_p,j_perm,j_perm,1)
 
       ! get dudt     
-      call amux(vecl*2,vec,dudt_source,Source_p,jSource_p,iSource_p)
+!      call amux(vecl*2,vec,dudt_source,Source_p,jSource_p,iSource_p)
       call amux(vecl*2,vec,dudt_Deriv2,Deriv2_p,jDeriv2_p,iDeriv2_p)   
       
+      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*v(:)*v(:)
+      dudt_Source(2:2*vecl:2)=       3.0_wp*u(:)-u(:)*u(:)*v(:)
+
       if (sum(ierr)/=0) then ! Catch errors
         print*,'Error building dudt'
         write(*,*)'ierr',ierr
         stop
       endif
-
+    
       end subroutine Bruss_dUdt
 !==============================================================================
 !  CREATES JACOBIAN
       subroutine Build_Jac(vec,dt,akk,a,ja,ia)
 
   !    use SBP_Coef_Module,  only: nnz_D2_per,D2_per!,Pinv,D1_per,jD1_per,iD1_per,nnz_D1_per,jD2_per,iD2_per       
-!      use matvec_module,    only: amux
-      use unary_mod,        only: aplb,aplsca!,amudia,diamua,apldia
+      use matvec_module,    only: amux
+      use unary_mod,        only: aplb,aplsca,dperm!,amudia,diamua,apldia
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac
       
       real(wp), dimension(:), intent(in) :: vec
       real(wp),               intent(in) :: dt,akk
-      real(wp), dimension(:), intent(in) :: a
-      integer,  dimension(:), intent(in) :: ja,ia
+      real(wp), dimension(:), optional, intent(in) :: a
+      integer,  dimension(:), optional, intent(in) :: ja,ia
       
       real(wp), dimension(vecl) :: u,v
-      integer, dimension(2) :: ierr=0
+      integer :: ierr=0
+      integer, dimension(2) :: jArray
+      integer,dimension(4*vecl)::jSource
+      real(wp), dimension(4*vecl)::Source
+      integer,dimension(1+vecl*2)::iSource
+      integer :: i,nnz
       
-      !integer,  dimension(6666666)             :: iw
-      !real(wp), dimension(6666666)   :: wrk
-      !integer,  dimension(6666666)   :: jwrk
-      !integer,  dimension(vecl+1)           :: iwrk      
+      integer,dimension(:),allocatable::jwrk
+      integer,dimension(vecl*2+1)::iwrk
+      real(wp), dimension(:),allocatable::wrk
       
-      !integer                               :: nnz
-  
-      u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)*dt*akk
+      integer,dimension(vecl*2)::iw
+
+          integer, dimension(vecl*2)::j_perm
+       
+       
+      u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
       
+      jArray=(/0,vecl/)
+      
+ !     if(present(ia)) then
+ !       nnz=12*vecl
+ !     else
+ !       nnz=4*vecl
+ !     endif
      
+! Set Source Jacobian
+      Source(1:vecl*2:2)=-4.0_wp+v(:)*v(:)
+      Source(2:vecl*2:2)=2.0_wp*u(:)*v(:)
+      Source(vecl*2+1:vecl*4:2)=3.0_wp-2.0_wp*u(:)*v(:)
+      Source(vecl*2+2:vecl*4:2)=-u(:)*u(:)
+      iSource(:) = (/ (i, i=1, vecl*4+1,2) /)
+      do i=1,vecl
+        jSource(2*i-1:2*i)=jArray(:)+i
+      enddo
+      jSource(vecl*2+1:)=jSource(:vecl*2)
+    
+      j_perm(1)=1
+      j_perm(vecl+1)=2
+      do i=2,vecl*2
+        if (i==vecl+1) cycle
+        j_perm(i)=j_perm(i-1) + 2
+      enddo
 
+      ! permute source's matrix    
+      call dperm(vecl*2,Source,jSource,iSource,Source_p,jSource_p,iSource_p,&
+     &             j_perm,j_perm,1)
 
-     ! nnz = size(a)
+      if(present(ia)) then
+        nnz=12*vecl
+        allocate(wrk(nnz),jwrk(nnz))
+        call aplb(vecl*2,vecl*2,1,Source_p,jSource_p,iSource_p,a,ja,ia,    &
+     &            wrk,jwrk,iwrk,nnz,iw,ierr)
+      else
+        nnz=4*vecl
+        allocate(wrk(nnz),jwrk(nnz))
+        wrk(:)=Source_p(:)
+        jwrk(:)=jSource_p(:)
+        iwrk(:)=iSource_p(:)
+      endif
+
+      wrk(:)=-akk*dt*wrk(:)   
+      call aplsca(vecl*2,wrk,jwrk,iwrk,1.0_wp,iw)      
+
+      iaJac=iwrk
+      jaJac=jwrk
+      aJac = wrk
+
+      deallocate(wrk,jwrk)
       
-     ! wrk(:nnz)=-akk*dt*a(:)   
-    !  wrk(nnz+1:)=0.0_wp
-   !   jwrk(:nnz)=ja(:)
-  !    jwrk(nnz+1:)=0
- !     iwrk(:)=ia(:)
-!
-!      call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
-
-    !  iaJac=iwrk
-    !  jaJac=jwrk
-    !  aJac = wrk
-
 !-----------------------------------------------------------------------------  
-      if (sum(ierr)/=0) then ! Catch errors
+     ! if (sum(ierr)/=0) then ! Catch errors
+      if (ierr/=0) then ! Catch errors
         print*,'Error building Jacobian'
         print*,'ierr=',ierr
         stop
       endif
-      stop
+
       end subroutine Build_Jac
       
       end module Brusselator_mod
