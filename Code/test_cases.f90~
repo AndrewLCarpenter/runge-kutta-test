@@ -3,35 +3,26 @@
 !##############################################################################
 !
 !----------------------------PROBLEM LIST--------------------------------------
-!     problem 1) van der Pol (Hairer II, pp 403)
-!     problem 2) Pureschi and Russo 
-!     problem 3) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
-!     problem 4) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
-!     problem 5) Lorenz
-!     problem 6) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
-!     problem 7) Oregonator
-!     problem 8) Brusselator
-!     problem 9) Burgers
-!     problem 10)Boscarino31 
+!     problem 1 ) van der Pol (Hairer II, pp 403)
+!     problem 2 ) Pureschi and Russo 
+!     problem 3 ) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
+!     problem 4 ) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
+!     problem 5 ) Lorenz
+!     problem 6 ) Rossler_Chaos (Wolf.Swift.Swinney.Vastano. Physica 16D,(1985),285-317
+!     problem 7 ) Oregonator
+!     problem 8 ) Brusselator
+!     problem 9 ) Burgers
+!     problem 10) Boscarino31 
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
-! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
-! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES USED IN THE PROGRAM
-! CSR_VARIABLES.F90         *COMPRESSED SPARSE ROW STORAGE VARIABLES
-! ALLOCATE_CSR_STORAGE.F90  *ALLOCATES STOREAGE OF VARIABLES IN CSR
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
-! NEWTON.F90                *PERFORMS NEWTON ITERATION
-! STAGE_VALUE_PREDICTOR.F90 *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
-! VANDERPOL.F90             *PROBLEM CONSTANTS FOR VANDERPOL
-! PURESCHI.F90              *PROBLEM CONSTANTS FOR PURESCHI & RUSSO
-! KAPS.F90                  *PROBLEM CONSTANTS FOR KAPS
-! KREISS.F90                *PROBLEM CONSTANTS FOR KREISS'
-! Rossler_Chaos.F90         *PROBLEM CONSTANTS FOR Rossler_Chaos
-! Oregonator.F90            *PROBLEM CONSTANTS FOR OREGONATOR
+! OUTPUT_MODULE.F90         *CONTAINS ROUTINES TO OUTPUT DATA TO FILES AND TERMINAL
+! STAGE_VALUE_MODULE.F90    *PREDICTS NEXT STAGE VALUES FOR NEWTON ITERATIONS
 ! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
+! NEWTON.F90                *PERFORMS NEWTON ITERATION
 !------------------------------------------------------------------------------
 !
 !--------------------------HOW TO USE------------------------------------------
@@ -53,46 +44,38 @@
 
       use precision_vars,     only: wp
       use output_module,      only: create_file_paths, output_names,          & 
-     &                               init_output_files, output_conv_stiff,    &
-     &                               output_terminal_iteration,               &
-     &                               output_terminal_final,output_conv_error
+     &                              init_output_files, output_conv_stiff,     &
+     &                              output_terminal_iteration,                &
+     &                              output_terminal_final,output_conv_error
       use Stage_value_module, only: Stage_Value_Predictor,xnorm
-      use control_variables,  only: isamp,jmax,jactual,uvec,uexact,b,usum,    &
+      use control_variables,  only: allocate_vars,deallocate_vars,isamp,jmax, &
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
      &                              error,errorP,b1save,b1Psave,ustage,       &
-     &                              predvec,allocate_vars,deallocate_vars,    &
-     &                              programstep
+     &                              predvec,jactual,uvec,uexact,b,usum,       &
+     &                              programstep,errorL2,b1L2save
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
-      
+
       implicit none     
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
-      real(wp)                              :: itmp,t,time,dto,tt
+      real(wp)                              :: itmp,t,dto,tt,cputime1,cputime2
       real(wp), dimension(jmax)             :: epsave
-      real(wp)                              :: cputime1,cputime2
      
-      !user inputs
-      integer            :: ipred,problem,cases      
-             
-      !do loops
-      integer            :: icase,i,iprob,jepsil,iDT 
-      integer            :: j,k,istage,ktime,L,LL,qqq
-      
-      !counters      
-      integer            :: icount,jcount                    
+      integer            :: ipred,problem,cases                   !user inputs     
+      integer            :: icase,i,iprob,jepsil,iDT,k,ktime,L,LL !do loops
+      integer            :: icount,jcount                         !counters                     
       
       !problemsub variables
-      real(wp)                              :: ep
-      real(wp)                              :: dt
+      real(wp)                              :: ep,dt,tfinal 
       integer                               :: nveclen
-      real(wp)                              :: tfinal      
 
       !data out variables
       real(wp), dimension(isamp)            :: cost         
-      integer                               :: jsamp
       real(wp), dimension(is)               :: stageE,stageI,maxiter
+      
+      real(wp),dimension(256) :: tmpv
                           
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
@@ -102,6 +85,7 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
+
       do icase = cases,cases
   
         !**initilizations?**
@@ -180,8 +164,7 @@
 
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
-                    usum(:) = usum(:) + aI(L,LL)*resI(:,LL) &
-     &                                + aE(L,LL)*resE(:,LL)
+                    usum(:) = usum(:)+ aI(L,LL)*resI(:,LL)+ aE(L,LL)*resE(:,LL)                               
                   enddo
               
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
@@ -190,7 +173,6 @@
                   call Newton_Iteration(iprob,L,ep,dt,nveclen,&
      &                                      tt,aI(L,L),icount,k)
 !---------------END NEWTON ITERATION-------------------------------------------
-
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                  
                   ! Fill in resE and resI with the converged data
@@ -228,8 +210,10 @@
                 errvecT(:) = errvecT(:) + errvec(:)
 
                 t = t + dt                  !increment time
+! HACK - time depentent solution
 !                write(843,*)t,uvec(1:nveclen/2)
 !                write(844,*)t,uvec(nveclen/2+1:)
+! HACK
                 if(t >= tfinal) exit        
 ! HACK
 ! L2 norm and Linf norms                
@@ -243,7 +227,15 @@
 ! HACK exact solution for each dt
 !              write(120+iDT,*)uvec
 ! HACK
-              
+! L2 norm and Linf norms          
+                tmpv=abs(uexact-uvec     )
+                print*,'u- L2',sqrt(dot_product(tmpv(1:nveclen:2),&
+     &                            tmpv(1:nveclen:2))/(nveclen/2))
+!                print*,'u- Linf',maxval(uexact(1:nveclen:2))
+                print*,'v- L2',sqrt(dot_product(tmpv(2:nveclen:2),&
+     &                            tmpv(2:nveclen:2))/(nveclen/2))
+!                print*,'v- Linf',maxval(uexact(2:nveclen:2))
+! HACK              
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
@@ -256,13 +248,14 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-
+              errorL2(iDT,1)= log10(sqrt(dot_product(tmpvec(1:nveclen:2),tmpvec(1:nveclen:2))/(nveclen/2)))
+              errorL2(iDT,2)= log10(sqrt(dot_product(tmpvec(2:nveclen:2),tmpvec(2:nveclen:2))/(nveclen/2)))
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-           write(122,*)uvec(1:nveclen:2)
-           write(123,*)uvec(2:nveclen:2)
+!           write(122,*)uvec(1:nveclen:2)
+!           write(123,*)uvec(2:nveclen:2)
 !           write(121,*)uexact
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
@@ -273,6 +266,9 @@
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
+            enddo
+            do i=1,2
+            b1L2save(jepsil,i) = -b(2*nveclen+i)
             enddo
             
           enddo      
