@@ -10,7 +10,7 @@
 ! J=(b-1 a)
 !   (-b -a)
 !
-! u'=1-4*u+u*v*v+ep*d^2u/dx^2
+! u'=1-4*u+u*u*v+ep*d^2u/dx^2
 ! v'=  3*u-u*u*v+ep*d^2v/dx^2
 ! where:
 ! u(x,t), v(x,t)
@@ -31,14 +31,14 @@
       private
       public :: Brusselator
       
-      integer,  parameter :: vecl=128     ! total uvec length == 2*vecl
+      integer,  parameter :: vecl=120     ! total uvec length == 2*vecl
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
       real(wp), dimension(vecl) :: x
       real(wp)                  :: dx
       
-      integer,  dimension(10*vecl)  :: jDeriv2_p
-      real(wp), dimension(10*vecl)  :: Deriv2_p
+      integer,  dimension(9*vecl)  :: jDeriv2_p
+      real(wp), dimension(9*vecl)  :: Deriv2_p
       integer,  dimension(vecl*2+1) :: iDeriv2_p
       
       contains
@@ -48,7 +48,7 @@
 
       use control_variables, only: temporal_splitting,probname,Jac_case, &
      &                             tol,dt_error_tol,uvec,uexact,programstep
-      use SBP_Coef_Module,   only: Define_CSR_Operators,D2_per,nnz_D2_per
+      use SBP_Coef_Module,   only: Define_CSR_Operators,D2_per,nnz_D2_per,nnz_D1_per
       use unary_mod,         only: aplb
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
 !-----------------------VARIABLES----------------------------------------------
@@ -90,8 +90,8 @@
           if(.not. allocated(D2_per))call Define_CSR_Operators(vecl,dx) 
            
           !Time information
-          dt = 0.005_wp/10**((iDT-1)/20.0_wp) ! timestep   
-          tfinal = 0.5_wp                   ! final time
+          dt = 0.05_wp/10**((iDT-1)/20.0_wp) ! timestep   
+          tfinal = 10.0_wp                   ! final time
  
           !**IC**
           uvec(1:2*vecl:2) = 1.0_wp+sin(two*pi*x(:))
@@ -114,7 +114,7 @@
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
             case('IMPLICIT')
-              nnz_Jac=2*nnz_D2_per+vecl*2
+              nnz_Jac=nnz_D2_per+nnz_D1_per+vecl*3
               call Allocate_Jac_CSR_Storage(vecl*2,nnz_Jac)
               call Build_Jac(uvec,dt,akk,Deriv2_p,jDeriv2_p,iDeriv2_p,nnz_Jac)       
             case('IMEX')
@@ -147,7 +147,8 @@
 ! DEFINES RHS 
       subroutine Bruss_dUdt(vec,dudt_deriv2,dudt_source,eps)
       
-      use SBP_Coef_Module, only: D2_per,jD2_per,iD2_per,nnz_D2_per
+      use SBP_Coef_Module, only: D2_per,jD2_per,iD2_per,nnz_D2_per, &
+     &                           D1_per,jD1_per,iD1_per,nnz_D1_per
       use unary_mod,       only: dperm
       use matvec_module,   only: amux
 
@@ -159,18 +160,18 @@
       integer,  dimension(vecl*2)       :: j_perm
       integer                           :: i      
       integer,  dimension(vecl*2+1)     :: iDeriv2      
-      real(wp), dimension(2*nnz_D2_per) :: Deriv2
-      integer,  dimension(2*nnz_D2_per) :: jDeriv2
+      real(wp), dimension(nnz_D2_per+nnz_D1_per) :: Deriv2
+      integer,  dimension(nnz_D2_per+nnz_D1_per) :: jDeriv2
             
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
 
 ! ---------------------- Dx part of dudt --------------------------------------
-      Deriv2(:nnz_D2_per)    = eps*D2_per(:)
-      Deriv2(nnz_D2_per+1:)  = eps*D2_per(:)
-      iDeriv2(:vecl)         = iD2_per(:)
-      iDeriv2(vecl+1:)       = iD2_per(:)+iD2_per(vecl+1)-1
-      jDeriv2(:nnz_D2_per)   = jD2_per(:)
-      jDeriv2(nnz_D2_per+1:) = jD2_per(:)+vecl
+      Deriv2(:nnz_D1_per)    = eps*D1_per(:)
+      Deriv2(nnz_D1_per+1:)  = eps*D2_per(:)
+      iDeriv2(:vecl)         = iD1_per(:)
+      iDeriv2(vecl+1:)       = iD2_per(:)+iD1_per(vecl+1)-1
+      jDeriv2(:nnz_D1_per)   = jD1_per(:)
+      jDeriv2(nnz_D1_per+1:) = jD2_per(:)+vecl
 
 ! permute matrix into:
 ! |x| |
@@ -181,7 +182,7 @@
         if (i==vecl+1) cycle
         j_perm(i)=j_perm(i-1) + 2
       enddo
- 
+
       ! permute D2's matrix   
       call dperm(vecl*2,Deriv2,jDeriv2,iDeriv2,Deriv2_p, &
      &           jDeriv2_p,iDeriv2_p,j_perm,j_perm,1)
@@ -190,9 +191,9 @@
       call amux(vecl*2,vec,dudt_Deriv2,Deriv2_p,jDeriv2_p,iDeriv2_p)   
 
 !----------------------  Source part of dudt  ---------------------------------      
-      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*v(:)*v(:)
+      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*u(:)*v(:)
       dudt_Source(2:2*vecl:2)=       3.0_wp*u(:)-u(:)*u(:)*v(:)
-
+   
       end subroutine Bruss_dUdt
 !==============================================================================
 !  CREATES JACOBIAN
@@ -220,10 +221,10 @@
       real(wp), dimension(nnz) :: wrk
       
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
-     
+
 ! Set Source Jacobian
-      Source(1:vecl*2:2)=-4.0_wp+v(:)*v(:)
-      Source(2:vecl*2:2)=2.0_wp*u(:)*v(:)
+      Source(1:vecl*2:2)=-4.0_wp+2.0_wp*u(:)*v(:)
+      Source(2:vecl*2:2)=2.0_wp*u(:)
       Source(vecl*2+1:vecl*4:2)=3.0_wp-2.0_wp*u(:)*v(:)
       Source(vecl*2+2:vecl*4:2)=-u(:)*u(:)
       iSource(:) = (/ (i, i=1, vecl*4+1,2) /)
@@ -248,9 +249,13 @@
       call aplb(vecl*2,vecl*2,1,Source_p,jSource_p,iSource_p,a,ja,ia,         &
      &            wrk,jwrk,iwrk,nnz,iw,ierr)
 
+     ! print*,'a',a
+     ! print*,'j',ja
+     ! print*,'i',ia
+
       wrk(:)=-akk*dt*wrk(:)   
       call aplsca(vecl*2,wrk,jwrk,iwrk,1.0_wp,iw)      
-
+      
       iaJac=iwrk
       jaJac=jwrk
       aJac = wrk

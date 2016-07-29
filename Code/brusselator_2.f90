@@ -10,7 +10,7 @@
 ! J=(b-1 a)
 !   (-b -a)
 !
-! u'=1-4*u+u*v*v+ep*d^2u/dx^2
+! u'=1-4*u+u*u*v+ep*d^2u/dx^2
 ! v'=  3*u-u*u*v+ep*d^2v/dx^2
 ! where:
 ! u(x,t), v(x,t)
@@ -31,7 +31,7 @@
       private
       public :: Brusselator
       
-      integer,  parameter :: vecl=128     ! total uvec length == 2*vecl
+      integer,  parameter :: vecl=20     ! total uvec length == 2*vecl
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
       real(wp), dimension(vecl) :: x
@@ -190,7 +190,7 @@
       call amux(vecl*2,vec,dudt_Deriv2,Deriv2_p,jDeriv2_p,iDeriv2_p)   
 
 !----------------------  Source part of dudt  ---------------------------------      
-      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*v(:)*v(:)
+      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*u(:)*v(:)
       dudt_Source(2:2*vecl:2)=       3.0_wp*u(:)-u(:)*u(:)*v(:)
 
       end subroutine Bruss_dUdt
@@ -222,8 +222,8 @@
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
      
 ! Set Source Jacobian
-      Source(1:vecl*2:2)=-4.0_wp+v(:)*v(:)
-      Source(2:vecl*2:2)=2.0_wp*u(:)*v(:)
+      Source(1:vecl*2:2)=-4.0_wp+2.0_wp*u(:)*v(:)
+      Source(2:vecl*2:2)=2.0_wp*u(:)
       Source(vecl*2+1:vecl*4:2)=3.0_wp-2.0_wp*u(:)*v(:)
       Source(vecl*2+2:vecl*4:2)=-u(:)*u(:)
       iSource(:) = (/ (i, i=1, vecl*4+1,2) /)
