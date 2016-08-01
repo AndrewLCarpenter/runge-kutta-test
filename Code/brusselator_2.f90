@@ -31,7 +31,7 @@
       private
       public :: Brusselator
       
-      integer,  parameter :: vecl=20     ! total uvec length == 2*vecl
+      integer,  parameter :: vecl=64     ! total uvec length == 2*vecl
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
       real(wp), dimension(vecl) :: x
@@ -65,11 +65,15 @@
       real(wp), dimension(vecl*2)                :: dudt_Dx,dudt_Source
             
       !Jacob vars
-      real(wp), intent(in   )     :: akk
-      integer                     :: nnz_Jac
-      real(wp), dimension(2)      :: a
-      integer,  dimension(2*vecl) :: ia
-      integer,  dimension(2)      :: ja
+      real(wp), intent(in   )       :: akk
+      integer                       :: nnz_Jac
+      real(wp), dimension(4*vecl)   :: Source      
+      integer,  dimension(4*vecl)   :: jSource
+      integer,  dimension(2*vecl+1) :: iSource,iwrk_Jac
+      real(wp), dimension(12*vecl)  :: wrk_Jac
+      integer,  dimension(12*vecl)  :: jwrk_Jac
+      integer,  dimension(vecl)     :: iw
+      integer                       :: ierr=0
 !------------------------------------------------------------------------------
       
       Program_Step_Select: select case(programstep)
@@ -90,7 +94,10 @@
           if(.not. allocated(D2_per))call Define_CSR_Operators(vecl,dx) 
            
           !Time information
-          dt = 0.05_wp/10**((iDT-1)/20.0_wp) ! timestep   
+          choose_dt: select case(temporal_splitting)
+            case('IMPLICIT');dt = 0.045_wp/10**((iDT-1)/20.0_wp) ! timestep   
+            case('IMEX')    ;dt = 0.00019_wp/10**((iDT-1)/20.0_wp) 
+          end select choose_dt
           tfinal = 10.0_wp                   ! final time
  
           !**IC**
@@ -98,7 +105,7 @@
           uvec(2:2*vecl:2) = 3.0_wp
       
           !**Exact Solution**
-          uexact(:)=0.0_wp
+          uexact=exact_Bruss(ep)
           
         case('BUILD_RHS')
           call Bruss_dudt(uvec,dudt_Dx,dudt_Source,ep)
@@ -116,15 +123,21 @@
             case('IMPLICIT')
               nnz_Jac=2*nnz_D2_per+vecl*2
               call Allocate_Jac_CSR_Storage(vecl*2,nnz_Jac)
-              call Build_Jac(uvec,dt,akk,Deriv2_p,jDeriv2_p,iDeriv2_p,nnz_Jac)       
+              
+              call Build_Source_Jac(uvec,Source,jSource,iSource)
+              
+              call aplb(vecl*2,vecl*2,1,Source,jSource,iSource,               &
+     &                  Deriv2_p,jDeriv2_p,iDeriv2_p,                         &
+     &                  wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_Jac,iw,ierr)
+              if (ierr/=0) then; print*,'Build Jac ierr=',ierr;stop;endif
+              
+              call Build_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_Jac)   
+                  
             case('IMEX')
               nnz_Jac=vecl*4
               call Allocate_Jac_CSR_Storage(vecl*2,nnz_Jac)
-              a(:)=0.0_wp
-              ja(:)=(/1, 2/)
-              ia(:2)=(/1, 3/)
-              ia(3:)=3
-              call Build_Jac(uvec,dt,akk,a,ja,ia,nnz_Jac)
+              call Build_Source_Jac(uvec,Source,jSource,iSource)
+              call Build_Jac(dt,akk,Source,jSource,iSource,nnz_Jac)
           end select choose_Jac_type
           
       end select Program_Step_select
@@ -144,6 +157,37 @@
 
       end subroutine grid
 !==============================================================================
+! RETURNS VECTOR WITH EXACT SOLUTION
+      function exact_Bruss(eps)
+
+      real(wp),                  intent(in) :: eps
+
+      integer                               :: i
+      real(wp), dimension(81,vecl*2+1)      :: ExactTot
+      real(wp)                              :: diff
+      real(wp), dimension(vecl*2)           :: exact_Bruss
+
+      exact_Bruss(:)=0.0_wp
+      
+      !**Exact Solution** 
+      open(unit=39,file='exact.Brusselator_64.data')
+      rewind(39)
+      do i=1,81
+        read(39,*)ExactTot(i,1:vecl*2)
+        ExactTot(i,vecl*2+1) = 1.0_wp/10**((i-1)/(10.0_wp))  !  used for 81 values of ep
+      enddo
+      do i=1,81
+        diff = abs(ExactTot(i,vecl*2+1) - eps)
+        if(diff <= 1.0e-10_wp)then
+          exact_Bruss(:) = ExactTot(i,:vecl*2)
+          exit
+        endif
+      enddo
+
+      return
+      end function exact_Bruss
+
+!==============================================================================
 ! DEFINES RHS 
       subroutine Bruss_dUdt(vec,dudt_deriv2,dudt_source,eps)
       
@@ -155,12 +199,12 @@
       real(wp), dimension(vecl*2), intent(  out) :: dudt_deriv2,dudt_source
       real(wp),                    intent(in   ) :: eps
      
-      real(wp), dimension(vecl)         :: u,v
-      integer,  dimension(vecl*2)       :: j_perm
-      integer                           :: i      
-      integer,  dimension(vecl*2+1)     :: iDeriv2      
-      real(wp), dimension(2*nnz_D2_per) :: Deriv2
-      integer,  dimension(2*nnz_D2_per) :: jDeriv2
+      real(wp), dimension(vecl)                  :: u,v
+      integer,  dimension(vecl*2)                :: j_perm
+      integer                                    :: i      
+      integer,  dimension(vecl*2+1)              :: iDeriv2      
+      real(wp), dimension(2*nnz_D2_per)          :: Deriv2
+      integer,  dimension(2*nnz_D2_per)          :: jDeriv2
             
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
 
@@ -195,29 +239,24 @@
 
       end subroutine Bruss_dUdt
 !==============================================================================
-!  CREATES JACOBIAN
-      subroutine Build_Jac(vec,dt,akk,a,ja,ia,nnz)
+!  CREATES SOURCE JACOBIAN
+      subroutine Build_Source_Jac(vec,Source_p,jSource_p,iSource_p)
+      
+      use unary_mod, only: dperm
 
-      use matvec_module,    only: amux
-      use unary_mod,        only: aplb,aplsca,dperm
-      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac
+      real(wp), dimension(:),        intent(in   ) :: vec
+      real(wp), dimension(4*vecl),   intent(  out) :: Source_p
+      integer,  dimension(4*vecl),   intent(  out) :: jSource_p
+      integer,  dimension(2*vecl+1), intent(  out) :: iSource_p
       
-      real(wp), dimension(:), intent(in) :: vec
-      real(wp),               intent(in) :: dt,akk
-      real(wp), dimension(:), intent(in) :: a
-      integer,  dimension(:), intent(in) :: ja,ia
-      integer,                intent(in) :: nnz
+      real(wp), dimension(4*vecl)   :: Source      
+      integer,  dimension(4*vecl)   :: jSource
+      integer,  dimension(2*vecl+1) :: iSource
       
+      integer,  dimension(vecl*2)   :: j_perm
       real(wp), dimension(vecl)     :: u,v
-      integer,  dimension(vecl*2)   :: iw,j_perm      
-      integer                       :: i,ierr=0
-      
-      integer,  dimension(4*vecl)   :: jSource,jSource_p
-      real(wp), dimension(4*vecl)   :: Source,Source_p
-      integer,  dimension(1+vecl*2) :: iSource,iSource_p,iwrk
-       
-      integer,  dimension(nnz) :: jwrk
-      real(wp), dimension(nnz) :: wrk
+      integer                       :: i
+!------------------------------------------------------------------------------
       
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
      
@@ -245,46 +284,39 @@
       call dperm(vecl*2,Source,jSource,iSource,Source_p,jSource_p,iSource_p,  &
      &             j_perm,j_perm,1)
 
-      call aplb(vecl*2,vecl*2,1,Source_p,jSource_p,iSource_p,a,ja,ia,         &
-     &            wrk,jwrk,iwrk,nnz,iw,ierr)
-
-      wrk(:)=-akk*dt*wrk(:)   
+      end subroutine Build_Source_Jac
+!==============================================================================
+! SET JAC TO GLOBAL    
+      subroutine Build_Jac(dt,akk,a,ja,ia,nnz_Jac)
+      
+      use unary_mod,        only: aplsca
+      use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac
+      
+      real(wp),               intent(in) :: dt,akk
+      real(wp), dimension(:), intent(in) :: a
+      integer,  dimension(:), intent(in) :: ja,ia
+      integer,                intent(in) :: nnz_Jac
+      
+      integer,  dimension(vecl*2)   :: iw    
+      real(wp), dimension(nnz_Jac)  :: wrk
+      integer,  dimension(nnz_Jac)  :: jwrk
+      integer,  dimension(vecl*2+1) :: iwrk
+      integer                       :: nnz_a
+      
+      nnz_a=size(a)
+       
+      wrk(:nnz_a)=-akk*dt*a(:)
+      wrk(nnz_a+1:)=0.0_wp
+      jwrk(:nnz_a)=ja(:)
+      jwrk(nnz_a+1:)=0
+      iwrk(:)=ia(:)  
+      
       call aplsca(vecl*2,wrk,jwrk,iwrk,1.0_wp,iw)      
 
       iaJac=iwrk
       jaJac=jwrk
       aJac = wrk
 
-!-----------------------------------------------------------------------------  
-      if (ierr/=0) then ! Catch errors
-        print*,'Error building Jacobian'
-        print*,'ierr=',ierr
-        stop
-      endif
-
       end subroutine Build_Jac
-!==============================================================================
-!Exact Solution
-
-!      real(wp), dimension(81,vecl+1) :: ExactTot
-!      real(wp)                       :: diff
-!      integer                        :: i
-
-
-          !**Exact Solution** 
-!          open(unit=39,file='exact.brusselator4.data')
-!          rewind(39)
-!          do i=1,81
-!            read(39,*)ExactTot(i,1),ExactTot(i,2)
-!            ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp))  !  used for 81 values of ep
-!          enddo
-!          do i=1,81
-!            diff = abs(ExactTot(i,3) - ep)
-!            if(diff.le.1.0e-10_wp)then
-!              uexact(:) = ExactTot(i,:vecl)
-!              exit
-!            endif
-!          enddo
-  
 !==============================================================================    
       end module Brusselator_mod

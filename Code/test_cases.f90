@@ -76,7 +76,7 @@
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
       
-      real(wp),dimension(256) :: tmpv
+!      real(wp),dimension(40) :: tmpv
                           
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
@@ -114,7 +114,7 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 18,18!1,jactual,1     
+          do jepsil = 1,jactual,1     
                                  
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
@@ -126,9 +126,9 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT =1,1
+!            do iDT = 1,2
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -211,9 +211,10 @@
 
                 t = t + dt                  !increment time
 ! HACK - time depentent solution
-                write(843,*)t,uvec(1:nveclen:2)
-                write(844,*)t,uvec(2:nveclen+1:2)
-! HACK
+!                write(843,*)t,uvec(1:nveclen:2)
+!                write(844,*)t,uvec(2:nveclen+1:2)
+! HACK  
+!                print*,t,iDT,ep
                 if(t >= tfinal) exit        
 ! HACK
 ! L2 norm and Linf norms                
@@ -226,6 +227,7 @@
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
 ! HACK exact solution for each dt
 !              write(120+iDT,*)uvec
+!              print*,iDT
 ! HACK
 ! L2 norm and Linf norms          
 !                tmpv=abs(uexact-uvec     )
@@ -257,6 +259,7 @@
 !           write(122,*)uvec(1:nveclen:2)
 !           write(123,*)uvec(2:nveclen:2)
 !           write(121,*)uexact
+!           write(125,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
 
