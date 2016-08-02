@@ -381,9 +381,16 @@
       jwrk(:nnz)=ja(:)
       jwrk(nnz+1:)=0
       iwrk(:)=ia(:)
-
+  !    print*,'i',iwrk,'s',size(iwrk)
+  !    print*,'j',jwrk,'s',size(jwrk)
+  !    print*,'a',wrk,'s',size(wrk)
+  !    print*,'Going in --------------------------------------'
       call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
-
+  !    print*,'i',iwrk,'s',size(iwrk)
+  !    print*,'j',jwrk,'s',size(jwrk)
+  !    print*,'a',wrk,'s',size(wrk)
+  !    print*,'w',iw,size(iw)
+  !    stop
       iaJac=iwrk
       jaJac=jwrk
        aJac= wrk

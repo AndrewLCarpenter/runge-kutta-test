@@ -3,7 +3,7 @@
       implicit none
 
       integer, parameter      :: wp = 8
-      integer, parameter      :: vLen = 128, samps = 1
+      integer, parameter      :: vLen = 96, samps = 1
 
       real(wp), dimension(vLen,samps) :: uexact, tester
 

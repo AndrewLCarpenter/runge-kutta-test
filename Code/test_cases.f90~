@@ -126,9 +126,9 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT = 1,2
+!            do iDT = 62,62
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
@@ -256,8 +256,9 @@
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-!           write(122,*)uvec(1:nveclen:2)
-!           write(123,*)uvec(2:nveclen:2)
+           write(122,*)uvec(1:nveclen:2)
+           write(123,*)uvec(2:nveclen:2)
+           write(124,*)uvec(3:nveclen:3)
 !           write(121,*)uexact
 !           write(125,*)uvec
 !  HACK used to write exact solution
@@ -270,7 +271,7 @@
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
-            do i=1,2
+            do i=1,3
             b1L2save(jepsil,i) = -b(2*nveclen+i)
             enddo
             

@@ -23,8 +23,8 @@
       public :: allocate_vars,deallocate_vars
       public :: programstep
 !--------------------------VARIABLES-------------------------------------------
-      character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
-!      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
+!      character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
+      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
 !      character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
       character(len=9)             :: probname
       character(len=6)             :: Jac_case='DENSE' !default value
@@ -64,7 +64,9 @@
       !internal
       ALLOCATE(ustage(nveclen,is),predvec(nveclen,is),uveco(nveclen))
       ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
-      ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,2))
+      ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,3))
+      
+      b1L2save(:,:)=0.0_wp
        
        end subroutine allocate_vars
      

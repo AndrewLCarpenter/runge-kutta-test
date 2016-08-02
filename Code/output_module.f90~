@@ -13,26 +13,26 @@
 
       module  output_module
 
-      use precision_vars     , only : wp
-      use poly_fit_Mod
-      use control_variables
-      use runge_kutta
+      use precision_vars,    only : wp
 
-      implicit none
+      implicit none; save
       
       public :: create_file_paths, output_names, init_output_files
       public :: output_conv_stiff,output_terminal_iteration
       public :: output_terminal_final,output_conv_error
       
       private
-      character(len=80) :: fileloc   !file  location
-      character(len=4)             :: ext='.dat'  !file extension
+      character(len=80)            :: fileloc   !file  location
+      character(len=4), parameter  :: ext='.dat'  !file extension
 
       contains
       
 !==============================================================================
 !  SETS FILE LOCATION VARIABLE
       subroutine set_file_loc()
+      
+      use control_variables, only : temporal_splitting,probname
+      use runge_kutta,       only : casename
       
       fileloc=trim(temporal_splitting)//'/'// &
      &        trim(probname)//'/'//trim(casename)//'/' ! get file location  
@@ -54,15 +54,22 @@
 !==============================================================================  
 !  WRITES PROBLEM NAME AND CASE NAME TO THE TOP OF THE TERMIINAL OUTPUT
       subroutine output_names()
+
+      use control_variables, only : probname,temporal_splitting
+      use runge_kutta,       only : casename
        
       write(*,*)'Problem name: ',trim(probname)
       write(*,*)'Casename: ', trim(casename)
+      write(*,*)'Splitting: ', trim(temporal_splitting)
        
       end subroutine output_names
        
 !==============================================================================
 !  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
       subroutine init_output_files(nveclen,ep)
+
+      use control_variables, only : probname
+      use runge_kutta,       only : casename
      
       integer,  intent(in) :: nveclen
       real(wp), intent(in) :: ep
@@ -70,26 +77,31 @@
       character(len=1)     :: istr        !loop index placeholder
       integer              :: i
           
-      do i = 1,nveclen
-        write(istr,"(I1.1)")i
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
-        open(49+i,file=trim(fileloc)//filename)
-        write(49+i,*)'zone T = "ep = ',ep,'",'
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
-        open(59+i,file=trim(fileloc)//filename)
-        write(59+i,*)'zone T = "ep = ',ep,'",'
-      enddo
+      if(nveclen <= 9) then
+        do i = 1,nveclen
+          write(istr,"(I1.1)")i
+          filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
+          open(49+i,file=trim(fileloc)//filename)
+          write(49+i,*)'zone T = "ep = ',ep,'",'
+          filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+          open(59+i,file=trim(fileloc)//filename)
+          write(59+i,*)'zone T = "ep = ',ep,'",'
+        enddo
+      endif
 
       end subroutine init_output_files
       
 !==============================================================================      
 !  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
-      subroutine output_conv_stiff(nveclen,jactual,epsave)
+      subroutine output_conv_stiff(nveclen,epsave)
       
-      integer,                intent(in) :: nveclen,jactual
+      use control_variables, only : temporal_splitting,probname,jactual, &
+     &                              b1save,b1Psave,b1L2save  
+      use runge_kutta,       only : casename    
+      
+      integer,                intent(in) :: nveclen
       real(wp), dimension(:), intent(in) :: epsave
       
-      character(len=1)  :: istr        !loop index placeholder
       integer           :: i,j
       character(len=80) :: filename   !file name and location
       
@@ -106,6 +118,13 @@
           write(35,50)epsave(j),b1Psave(j,i)
         enddo
       enddo
+           
+      do i=1,3
+        write(35,*)'zone T = "Var',i,': ',i,'",'
+        do j=1,jactual
+          write(35,50)epsave(j),b1L2save(j,i)
+        enddo
+      enddo
 
       50 format( 10(e12.5,1x))
          
@@ -114,6 +133,9 @@
 !==============================================================================
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
       subroutine output_terminal_iteration(cost,mwt,ep,nveclen)
+      
+      use poly_fit_mod,      only : fit
+      use control_variables, only : isamp,dt_error_tol,b,error,errorP,errorL2
             
       real(wp), dimension(:),   intent(in) :: cost
 
@@ -121,9 +143,9 @@
       real(wp),                 intent(in) :: ep
       integer,                  intent(in) :: nveclen
       
-      real(wp), dimension(nveclen*2) :: a,siga1,sigb1,chi2
+      real(wp), dimension(nveclen*2+2) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
-      integer                        :: i,j,k
+      integer                        :: i,j
       integer                        :: jsamp
       real(wp), dimension(isamp)     :: sig
       
@@ -131,29 +153,37 @@
 
 
       !**GATHER OUTPUT VALUES
-      do k=1,size(error(1,:))
-        write(240,*)error(1,k)      
-      enddo
 
       do i = 1,nveclen
         do j=2,size(error(:,i))
           jsamp=j
           if (error(j,i)<=log10(dt_error_tol)) exit
         enddo
-
+ 
         call fit(cost,error(:,i),jsamp,sig,mwt,a(i),b(i),                  &
      &           siga1(i),sigb1(i),chi2(i),q)
         call fit(cost,errorP(:,i),jsamp,sig,mwt,a(i+nveclen),b(i+nveclen), &
      &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)   
+     enddo
+     
+     do i = 1,2
+        do j=2,size(errorL2(:,i))
+          jsamp=j
+          if (errorL2(j,i)<=log10(dt_error_tol)) exit
+        enddo
+        call fit(cost,errorL2(:,i),jsamp,sig,mwt,a(nveclen*2+i),b(nveclen*2+i),                  &
+     &           siga1(nveclen*2+i),sigb1(nveclen*2+i),chi2(nveclen*2+i),q)
       enddo
 
       !**OUTPUT TO TERMINAL**
       write(*,60,advance="no")ep
-        do i = 1,nveclen*2-1
-          write(*,60,advance="no")a(i),b(i)
-        enddo
-      write(*,60)a(nveclen*2),b(nveclen*2)
-
+! HACK
+!        do i = 1,nveclen*2+1
+!          write(*,60,advance="no")a(i),b(i)
+!        enddo
+!      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
+      write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+1)
+      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
    60 format( e12.5,1x,12(f8.3,1x))
    
       end subroutine output_terminal_iteration
@@ -161,6 +191,8 @@
 !==============================================================================
 !  OUTPUTS FINAL DATA BLOCK TO TERMINAL. ITERATION INFORMATION
       subroutine output_terminal_final(icount,jcount,stageE,stageI,maxiter)
+      
+      use runge_kutta, only : ns
       
       integer,                intent(in   ) :: icount,jcount
       real(wp), dimension(:), intent(inout) :: stageE,stageI,maxiter
@@ -184,17 +216,22 @@
 !==============================================================================
 !  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
       subroutine output_conv_error(cost)
+      
+      use control_variables, only : uvec,uexact,errvecT
+      
       real(wp),               intent(in) :: cost
       
       integer  :: i
       real(wp) :: tmp
   
-      do i = 1,size(uvec)
-        tmp=abs(uvec(i)-uexact(i))
-        if (tmp==0.0_wp)tmp=1.0e-15_wp
-        write(49+i,*)cost,log10(tmp)
-        write(59+i,*)cost,log10(errvecT(i))
-      enddo
+      if (size(uvec)<=9) then
+        do i = 1,size(uvec)
+          tmp=abs(uvec(i)-uexact(i))
+          if (tmp==0.0_wp)tmp=1.0e-15_wp
+          write(49+i,*)cost,log10(tmp)
+          write(59+i,*)cost,log10(errvecT(i))
+        enddo
+      endif
       
       end subroutine output_conv_error
 

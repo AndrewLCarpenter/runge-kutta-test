@@ -118,8 +118,8 @@
           write(35,50)epsave(j),b1Psave(j,i)
         enddo
       enddo
-      
-      do i=1,2
+           
+      do i=1,3
         write(35,*)'zone T = "Var',i,': ',i,'",'
         do j=1,jactual
           write(35,50)epsave(j),b1L2save(j,i)
@@ -183,7 +183,8 @@
 !        enddo
 !      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
       write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+1)
-      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
+      write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+2)
+      write(*,60)a(nveclen*2+2),b(nveclen*2+3)
    60 format( e12.5,1x,12(f8.3,1x))
    
       end subroutine output_terminal_iteration
