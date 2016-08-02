@@ -39,6 +39,7 @@
       use Brusselator_mod,   only: Brusselator
       use Burgers_Module,    only: Burgers
       use Boscarino31_Mod,   only: Boscarino31
+      use Broadwell_Mod,     only: Broadwell
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
@@ -72,6 +73,8 @@
        call Burgers(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
        call Boscarino31(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+      elseif (iprob==11) then
+       call Broadwell(    nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       else
        print*,'Invalid problem number!'
        stop
@@ -84,4 +87,5 @@
       end select
 
       end subroutine problemsub
+
       end module problemsub_mod
