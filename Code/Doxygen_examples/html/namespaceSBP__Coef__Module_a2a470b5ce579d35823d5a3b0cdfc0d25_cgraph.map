@@ -1,7 +1,8 @@
 <map id="G" name="G">
-<area shape="rect" id="node3" href="$namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="345,59,532,88"/>
+<area shape="rect" id="node3" href="$namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="345,5,532,35"/>
 <area shape="rect" id="node11" href="$namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="333,112,544,141"/>
-<area shape="rect" id="node13" href="$namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="345,5,532,35"/>
+<area shape="rect" id="node13" href="$namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="345,59,532,88"/>
+<area shape="rect" id="node17" href="$namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="333,165,544,195"/>
 <area shape="rect" id="node5" href="$namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="592,5,797,35"/>
 <area shape="rect" id="node7" href="$namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="597,59,792,88"/>
 <area shape="rect" id="node9" href="$namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="847,59,1052,88"/>

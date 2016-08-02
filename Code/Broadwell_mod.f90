@@ -20,7 +20,7 @@
       public  :: Broadwell
 
 !--------------------------------VARIABLES-------------------------------------         
-      integer,  parameter :: nx   =  32 
+      integer,  parameter :: nx   =  8 
       integer,  parameter :: neq  =   3 
 
       integer,  parameter :: vecl = nx * neq
@@ -102,8 +102,8 @@
         case('SET_INITIAL_CONDITIONS')
           
           !Update=true for Jac/RHS updates
-          update_RHS=.true.; update_Jac=.true. !reset every new epsilon/dt
-          
+          update_Jac=.true. !reset every new epsilon/dt
+
           !Allocate derivative operators
           if(.not. allocated(D1_per))call Define_CSR_Operators(nx,dx)   
           
@@ -151,7 +151,6 @@
               resE_vec(:)=dt*dudt_D1(:)
               resI_vec(:)=dt*dudt_Source(:)
           end select choose_RHS_type
-          update_RHS=.false. !no need to update RHS until next epsilon
           
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
@@ -170,18 +169,19 @@
      &                  Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p,    &
      &                  wrk_Jac,jwrk_Jac,iwrk_Jac,5*vecl,iw,ierr) 
               if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
-              call Broadwell_Add_Diag_Jac(nnz_Jac,dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)
+              
+              call Broadwell_Add_Diag_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)
 
             case('IMEX')
               nnz_Jac=vecl + 2*nx
               call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
               call Broadwell_Build_Source_Jac(ep,uvec,Source_p,jSource_p,iSource_p)
-              call Broadwell_Add_Diag_Jac(nnz_Jac,dt,akk,Source_p,jSource_p,iSource_p)
+              call Broadwell_Add_Diag_Jac(dt,akk,Source_p,jSource_p,iSource_p)
               
           end select choose_Jac_type
 
                         
-          update_Jac=.false.  !no need to update matrix that forms Jacobian until next epsilon/dt
+!          update_Jac=.false.  !no need to update matrix that forms Jacobian until next epsilon/dt
           
       end select Program_Step_Select     
 
@@ -207,17 +207,17 @@
       real(wp),                  intent(in   ) :: ep
       real(wp), dimension(vecl), intent(  out) :: u
 
-      integer                                  :: i
-      real(wp), dimension(81,vecl+1) :: ExactTot
-      real(wp) :: diff
+!      integer                                  :: i
+!      real(wp), dimension(81,vecl+1) :: ExactTot
+!      real(wp) :: diff
 
-      u(:)=0.0_wp
+      u(:)=0.0_wp*ep
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Broadwell_256.data')
-      rewind(39)
+!      open(unit=39,file='exact.Broadwell_256.data')
+!      rewind(39)
 ! HACK
-      ExactTot = 0.0_wp
+!      ExactTot = 0.0_wp
 ! HACK
 !     do i=1,81
 !       read(39,*)ExactTot(i,1:vecl)
@@ -285,16 +285,14 @@
       real(wp), dimension(nnz_D1_per), intent(  out) ::  a
       
       integer,  dimension(vecl+1)                 :: iDeriv_comb
-      integer,  dimension(nnz_D1_per)             :: jDeriv_comb
-      real(wp), dimension(nnz_D1_per)             ::  Deriv_comb
+      integer,  dimension(neq*nnz_D1_per)         :: jDeriv_comb
+      real(wp), dimension(neq*nnz_D1_per)         ::  Deriv_comb
 
       integer,  dimension(vecl)                   :: j_perm
 
       integer                                     :: i, nnz
 
 !------------------------------------------------------------------------------     
-
-! Set lower right diagonal
 ! |0|D|0|
 ! |0|0|D|
 ! |0|D|0|
@@ -304,7 +302,7 @@
         do i = 1,vecl+1
           iDeriv_comb(i) = 1 + 4*(i-1)
         enddo 
-
+        
         jDeriv_comb(      1:1*nnz) =  1*nx + jD1_per(1:nnz)
         jDeriv_comb(1*nnz+1:2*nnz) =  2*nx + jD1_per(1:nnz)
         jDeriv_comb(2*nnz+1:3*nnz) =  1*nx + jD1_per(1:nnz)
@@ -345,12 +343,13 @@
 !------------------------------------------------------------------------------     
 
       epI = 1.0_wp / ep
-
+      
+      ia(1:3)=1
+      do i = 4,vecl+1,3 
+        ia(i:i+2)=ia(i-3:i-1) + 3
+      enddo
+      
       do i = 1,nx
-        ia(1+(i-1)*neq) = (i-1)*neq + 1 
-        ia(2+(i-1)*neq) = (i-1)*neq + 1 
-        ia(3+(i-1)*neq) = (i-0)*neq + 1 
-
          ii = (i-1)*neq
 
          a(ii+1) = + epI * 2.0_wp*(u(ii+1)-u(ii+3))
@@ -366,32 +365,39 @@
 
 !==============================================================================
 
-      subroutine Broadwell_Add_Diag_Jac(nnz,dt,akk,a,ja,ia)
+      subroutine Broadwell_Add_Diag_Jac(dt,akk,a,ja,ia)
       
       use unary_mod,         only: aplsca
       use Jacobian_CSR_Mod,  only: iaJac, jaJac,  aJac
-     
-      integer,                   intent(in) :: nnz
 
-      real(wp),                  intent(in) :: dt,akk
-      real(wp), dimension(:),    intent(in) :: a
-      integer,  dimension(:),    intent(in) :: ja,ia
+      real(wp),               intent(in) :: dt,akk
+      real(wp), dimension(:), intent(in) :: a
+      integer,  dimension(:), intent(in) :: ja,ia
       
-      integer,  dimension(vecl)             :: iw
-      real(wp), dimension(size(a)+2*nx)     :: wrk
-      integer,  dimension(size(a)+2*nx)     :: jwrk
-      integer,  dimension(vecl+1)           :: iwrk      
+      integer,  dimension(vecl)          :: iw
+      real(wp), dimension(size(a)+nx*2)  :: wrk
+      integer,  dimension(size(a)+nx*2)  :: jwrk
+      integer,  dimension(vecl+1)        :: iwrk   
+      integer                            :: nnz
       
 !------------------------------------------------------------------------------     
-
+      nnz=size(a)
+      
       wrk(:nnz)=-akk*dt*a(:)   
       wrk(nnz+1:)=0.0_wp
       jwrk(:nnz)=ja(:)
       jwrk(nnz+1:)=0
       iwrk(:)=ia(:)
-
+  !    print*,'i',iwrk,'s',size(iwrk)
+  !    print*,'j',jwrk,'s',size(jwrk)
+  !    print*,'a',wrk,'s',size(wrk)
+  !    print*,'Going in --------------------------------------'
       call aplsca(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
- 
+  !    print*,'i',iwrk,'s',size(iwrk)
+  !    print*,'j',jwrk,'s',size(jwrk)
+  !    print*,'a',wrk,'s',size(wrk)
+  !    print*,'w',iw,size(iw)
+  !    stop
       iaJac=iwrk
       jaJac=jwrk
        aJac= wrk

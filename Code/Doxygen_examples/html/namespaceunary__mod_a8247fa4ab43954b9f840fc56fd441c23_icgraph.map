@@ -1,11 +1,14 @@
 <map id="G" name="G">
-<area shape="rect" id="node3" href="$namespaceBoscarino31__Mod.html#aba6ef998cf5ea9e4113dbccb62bb9fc3" title="Boscarino31_Mod::Bosc_dUdt" alt="" coords="185,75,383,105"/>
-<area shape="rect" id="node23" href="$namespaceunary__mod.html#a4d6e990ebe5d27f9b2c447d6ca9014e5" title="unary_mod::dmperm" alt="" coords="213,129,355,158"/>
-<area shape="rect" id="node5" href="$namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="433,75,639,105"/>
-<area shape="rect" id="node7" href="$namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="689,75,884,105"/>
-<area shape="rect" id="node9" href="$namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="949,75,1080,105"/>
-<area shape="rect" id="node15" href="$test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1593,89,1679,118"/>
-<area shape="rect" id="node18" href="$namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="933,22,1096,51"/>
-<area shape="rect" id="node11" href="$namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1144,25,1320,54"/>
-<area shape="rect" id="node13" href="$namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1369,50,1543,79"/>
+<area shape="rect" id="node3" href="$namespaceBoscarino31__Mod.html#aba6ef998cf5ea9e4113dbccb62bb9fc3" title="Boscarino31_Mod::Bosc_dUdt" alt="" coords="203,29,400,58"/>
+<area shape="rect" id="node23" href="$namespaceBrusselator__mod.html#a255cb631c1a7d91e665d7a521fb79d1d" title="Brusselator_mod::Bruss_dUdt" alt="" coords="203,82,400,111"/>
+<area shape="rect" id="node25" href="$namespaceBrusselator__mod.html#aec92a7632eb6287c9b18902c584ec3a3" title="Brusselator_mod::Build_Source_Jac" alt="" coords="185,135,417,165"/>
+<area shape="rect" id="node30" href="$namespaceunary__mod.html#a4d6e990ebe5d27f9b2c447d6ca9014e5" title="unary_mod::dmperm" alt="" coords="231,189,372,218"/>
+<area shape="rect" id="node5" href="$namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="468,42,673,71"/>
+<area shape="rect" id="node7" href="$namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="724,75,919,105"/>
+<area shape="rect" id="node9" href="$namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="984,75,1115,105"/>
+<area shape="rect" id="node15" href="$test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1628,89,1713,118"/>
+<area shape="rect" id="node18" href="$namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="968,22,1131,51"/>
+<area shape="rect" id="node11" href="$namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1179,25,1355,54"/>
+<area shape="rect" id="node13" href="$namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1404,50,1577,79"/>
+<area shape="rect" id="node27" href="$namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="473,109,668,138"/>
 </map>

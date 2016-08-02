@@ -96,18 +96,21 @@
 <a name="l00072"></a>00072        call <a class="code" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d">Burgers</a>(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
 <a name="l00073"></a>00073       elseif (iprob==10) <span class="keyword">then</span>
 <a name="l00074"></a>00074        call <a class="code" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5">Boscarino31</a>(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00075"></a>00075       <span class="keyword">endif</span>
-<a name="l00076"></a>00076       
-<a name="l00077"></a>00077       <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
-<a name="l00078"></a>00078         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)  
-<a name="l00079"></a>00079           <a class="code" href="namespacecontrol__variables.html#a9f7c2243d548ddee9248892603d7dcdc">resE</a>(:,L)=resE_vec(:)
-<a name="l00080"></a>00080           <a class="code" href="namespacecontrol__variables.html#a622a60898014b0384693ee589b049bcc">resI</a>(:,L)=resI_vec(:)
-<a name="l00081"></a>00081       <span class="keyword">end select</span>
-<a name="l00082"></a>00082 
-<a name="l00083"></a>00083 <span class="keyword">      end subroutine problemsub</span>
-<a name="l00084"></a>00084 <span class="keyword">      end module problemsub_mod</span>
+<a name="l00075"></a>00075       <span class="keyword">else</span>
+<a name="l00076"></a>00076        print*,<span class="stringliteral">&apos;Invalid problem number!&apos;</span>
+<a name="l00077"></a>00077        stop
+<a name="l00078"></a>00078       <span class="keyword">endif</span>
+<a name="l00079"></a>00079       
+<a name="l00080"></a>00080       <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
+<a name="l00081"></a>00081         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)  
+<a name="l00082"></a>00082           <a class="code" href="namespacecontrol__variables.html#a9f7c2243d548ddee9248892603d7dcdc">resE</a>(:,L)=resE_vec(:)
+<a name="l00083"></a>00083           <a class="code" href="namespacecontrol__variables.html#a622a60898014b0384693ee589b049bcc">resI</a>(:,L)=resI_vec(:)
+<a name="l00084"></a>00084       <span class="keyword">end select</span>
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086 <span class="keyword">      end subroutine problemsub</span>
+<a name="l00087"></a>00087 <span class="keyword">      end module problemsub_mod</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

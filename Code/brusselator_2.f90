@@ -131,13 +131,13 @@
      &                  wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_Jac,iw,ierr)
               if (ierr/=0) then; print*,'Build Jac ierr=',ierr;stop;endif
               
-              call Build_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac,nnz_Jac)   
+              call Build_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)   
                   
             case('IMEX')
               nnz_Jac=vecl*4
               call Allocate_Jac_CSR_Storage(vecl*2,nnz_Jac)
               call Build_Source_Jac(uvec,Source,jSource,iSource)
-              call Build_Jac(dt,akk,Source,jSource,iSource,nnz_Jac)
+              call Build_Jac(dt,akk,Source,jSource,iSource)
           end select choose_Jac_type
           
       end select Program_Step_select
@@ -283,11 +283,11 @@
       ! permute source's matrix    
       call dperm(vecl*2,Source,jSource,iSource,Source_p,jSource_p,iSource_p,  &
      &             j_perm,j_perm,1)
-
+     
       end subroutine Build_Source_Jac
 !==============================================================================
 ! SET JAC TO GLOBAL    
-      subroutine Build_Jac(dt,akk,a,ja,ia,nnz_Jac)
+      subroutine Build_Jac(dt,akk,a,ja,ia)
       
       use unary_mod,        only: aplsca
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac
@@ -295,20 +295,15 @@
       real(wp),               intent(in) :: dt,akk
       real(wp), dimension(:), intent(in) :: a
       integer,  dimension(:), intent(in) :: ja,ia
-      integer,                intent(in) :: nnz_Jac
       
       integer,  dimension(vecl*2)   :: iw    
-      real(wp), dimension(nnz_Jac)  :: wrk
-      integer,  dimension(nnz_Jac)  :: jwrk
+      real(wp), dimension(size(a))  :: wrk
+      integer,  dimension(size(a))  :: jwrk
       integer,  dimension(vecl*2+1) :: iwrk
-      integer                       :: nnz_a
       
-      nnz_a=size(a)
-       
-      wrk(:nnz_a)=-akk*dt*a(:)
-      wrk(nnz_a+1:)=0.0_wp
-      jwrk(:nnz_a)=ja(:)
-      jwrk(nnz_a+1:)=0
+      !Store in temporary variables to allow a,ja,ia to be intent(in)
+      wrk(:)=-akk*dt*a(:)
+      jwrk(:)=ja(:)
       iwrk(:)=ia(:)  
       
       call aplsca(vecl*2,wrk,jwrk,iwrk,1.0_wp,iw)      

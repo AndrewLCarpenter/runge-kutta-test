@@ -126,7 +126,7 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-!            do iDT = 1,2
+!            do iDT = 71,71
 ! HACK
             do iDT =1,isamp,1   
 

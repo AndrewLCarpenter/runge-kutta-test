@@ -5239,7 +5239,7 @@ end subroutine a_bl_pl_b_bl1
       do i = 1,nb
         eye(i,i) = 1.0_wp
       enddo
-!                                                                       
+!                                                                 
       call diapos (nrow,ja,ia,iw) 
       icount = 0 
 

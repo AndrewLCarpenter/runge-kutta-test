@@ -32,6 +32,7 @@ SRCS = precision_vars.f90\
        Oregonator.f90\
        brusselator_2.f90\
        Boscarino31_mod.f90\
+       Broadwell_mod.f90\
        problemsub.f90\
        Newton.f90\
        test_cases.f90
@@ -65,6 +66,7 @@ OBJS = precision_vars.o\
        Oregonator.o\
        brusselator_2.o\
        Boscarino31_mod.o\
+       Broadwell_mod.o\
        problemsub.o\
        Newton.o\
        test_cases.o

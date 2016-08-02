@@ -66,7 +66,7 @@
 <a name="l00042"></a>00042       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nveclen,nveclen) </span>:: xjacinv <span class="comment">!Jacobian</span>
 <a name="l00043"></a>00043 
 <a name="l00044"></a>00044 <span class="comment">!------------------------------------------------------------------------------</span>
-<a name="l00045"></a>00045       <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
+<a name="l00045"></a>00045       temporal_select: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
 <a name="l00046"></a>00046         <span class="keyword">case</span>(<span class="stringliteral">&apos;EXPLICIT&apos;</span>)
 <a name="l00047"></a>00047           <span class="keyword">do</span> k = 1,iter_max
 <a name="l00048"></a>00048             icount = icount + 1
@@ -75,7 +75,7 @@
 <a name="l00051"></a>00051             <span class="keyword">if</span>(<a class="code" href="namespaceNewton.html#aef423e4c07ae003b74792dc1b26cea6c">check_exit</a>(uveciter,k)) exit            
 <a name="l00052"></a>00052           <span class="keyword">enddo</span>   
 <a name="l00053"></a>00053         <span class="keyword">case</span> default <span class="comment">!IMEX or IMPLICIT</span>
-<a name="l00054"></a>00054           <span class="keyword">select</span> <span class="keyword">case</span>(Jac_case)
+<a name="l00054"></a>00054           Jac_select: <span class="keyword">select</span> <span class="keyword">case</span>(Jac_case)
 <a name="l00055"></a>00055             <span class="keyword">case</span>(<span class="stringliteral">&apos;SPARSE&apos;</span>)
 <a name="l00056"></a>00056               <span class="keyword">do</span> k = 1,iter_max
 <a name="l00057"></a>00057                 icount = icount + 1
@@ -121,8 +121,8 @@
 <a name="l00097"></a>00097                 <span class="keyword">enddo</span>
 <a name="l00098"></a>00098                 
 <a name="l00099"></a>00099               <span class="keyword">endif</span>                
-<a name="l00100"></a>00100           <span class="keyword">end select</span>    
-<a name="l00101"></a>00101       <span class="keyword">end select</span>
+<a name="l00100"></a>00100           <span class="keyword">end select</span> Jac_select 
+<a name="l00101"></a>00101       <span class="keyword">end select</span> temporal_select
 <a name="l00102"></a>00102 <span class="keyword">      end subroutine Newton_Iteration</span>
 <a name="l00103"></a>00103       
 <a name="l00104"></a>00104 <span class="comment">!==============================================================================</span>
@@ -138,7 +138,7 @@
 <a name="l00114"></a>00114       
 <a name="l00115"></a>00115       check_exit=.false.
 <a name="l00116"></a>00116       tmp = sum(abs(<a class="code" href="namespacecontrol__variables.html#af26d46d355bee6c749bf25537333f463">uvec</a>(:)-uveciter(:))) <span class="comment">!check accuracy of zeros         </span>
-<a name="l00117"></a>00117       <span class="keyword">if</span> (k&gt;=15) <span class="keyword">write</span>(*,*)<span class="stringliteral">&apos;tmp&apos;</span>,tmp,<span class="stringliteral">&apos;k&apos;</span>,k
+<a name="l00117"></a>00117       <span class="keyword">if</span> (k&gt;=7) <span class="keyword">write</span>(*,*)<span class="stringliteral">&apos;tmp&apos;</span>,tmp,<span class="stringliteral">&apos;k&apos;</span>,k
 <a name="l00118"></a>00118       <span class="keyword">if</span> (tmp/=tmp) <span class="keyword">then</span>
 <a name="l00119"></a>00119         print*,<span class="stringliteral">&apos;stopping NaN k=&apos;</span>,k
 <a name="l00120"></a>00120         stop
@@ -480,7 +480,7 @@
 <a name="l00456"></a>00456 <span class="comment">!==============================================================================      </span>
 <a name="l00457"></a>00457 <span class="keyword">      end module Newton</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

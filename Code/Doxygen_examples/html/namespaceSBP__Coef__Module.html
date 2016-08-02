@@ -28,6 +28,7 @@
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25">Define_CSR_Operators</a> (n, h)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7">D1_periodic</a> (n, nnz, ia, ja, a, h)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea">D2_periodic</a> (n, nnz, ia, ja, a, h)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9">D1_242</a> (n, nnz, ia, ja, a, h)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6">D2_242</a> (n, nnz, ia, ja, a, h)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b">CSR_Filler</a> (n, nnz, dmat, D1blk, D2blk, ia, ja, a)</td></tr>
@@ -40,14 +41,19 @@
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a1adae037837113781655b270e471ba68">D1</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a3f2cc5f7fad0e332d815a65f500fd6ca">D2</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#aeeedeeb8b7effc9487acec9db2fa96ba">D2_per</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a59352f918ff4deadfe38916683618337">iD1</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a925a2e3cb8ac90d224a58b2d5ca2abf4">iD2</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a88980715f10265d5c8d1a4ed267a60ab">jD1</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a83634f53cf0308ca3aff67b8f1ba2683">jD2</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#aee75987a58a3553015d1a40c74a484d8">iD1_per</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#af7ed9c575f092fd1b07b4084eb0515d2">iD2_per</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#adfc9ff82aadfb132a2e93f773e5c0042">jD2_per</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#ad3838223107366b3e9051bbded8066b9">nnz_D2</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a20212b75a6a7c053732d506470250153">nnz_D1_per</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#abe2d252abb85a2883d5e246bac78374d">nnz_D1</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceSBP__Coef__Module.html#a1eee16961d21d2917e8ccc7b19ccfb0b">nnz_D2_per</a></td></tr>
 </table>
 <hr/><h2>Function/Subroutine Documentation</h2>
 <a class="anchor" id="ab42d272ccc8a6a647de500a27b25b867"></a><!-- doxytag: member="SBP_Coef_Module::amux_local" ref="ab42d272ccc8a6a647de500a27b25b867" args="(n, x, y, a, ja, ia)" -->
@@ -99,16 +105,16 @@
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00400">400</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00464">464</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00333">test_error()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00397">test_error()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_ab42d272ccc8a6a647de500a27b25b867_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_ab42d272ccc8a6a647de500a27b25b867_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_ab42d272ccc8a6a647de500a27b25b867_icgraph_map" id="namespaceSBP__Coef__Module_ab42d272ccc8a6a647de500a27b25b867_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="263,75,457,105"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="507,49,693,78"/><area shape="rect" id="node30" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="507,102,693,131"/><area shape="rect" id="node7" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="743,75,1020,105"/><area shape="rect" id="node9" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="1071,49,1276,78"/><area shape="rect" id="node27" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="1089,102,1257,131"/><area shape="rect" id="node11" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1327,75,1521,105"/><area shape="rect" id="node13" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1587,75,1717,105"/><area shape="rect" id="node19" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="2231,89,2316,118"/><area shape="rect" id="node22" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1571,22,1733,51"/><area shape="rect" id="node15" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1781,25,1957,54"/><area shape="rect" id="node17" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="2007,50,2180,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="263,85,457,115"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="507,59,693,88"/><area shape="rect" id="node35" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="507,112,693,141"/><area shape="rect" id="node7" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="743,85,1020,115"/><area shape="rect" id="node9" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="1071,112,1276,141"/><area shape="rect" id="node27" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="1085,59,1261,88"/><area shape="rect" id="node29" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="1076,165,1271,195"/><area shape="rect" id="node32" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="1089,5,1257,35"/><area shape="rect" id="node11" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1327,112,1521,141"/><area shape="rect" id="node13" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1587,112,1717,141"/><area shape="rect" id="node19" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="2231,125,2316,155"/><area shape="rect" id="node22" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1571,59,1733,88"/><area shape="rect" id="node15" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1781,61,1957,91"/><area shape="rect" id="node17" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="2007,87,2180,116"/></map>
 </div>
 </p>
 
@@ -175,16 +181,16 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00257">257</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00321">321</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">D1_242()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00179">D2_242()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">D1_242()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00241">D2_242()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_aa4a8494f614c16427507535f3ff16a3b_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_aa4a8494f614c16427507535f3ff16a3b_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_aa4a8494f614c16427507535f3ff16a3b_icgraph_map" id="namespaceSBP__Coef__Module_aa4a8494f614c16427507535f3ff16a3b_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="259,49,445,78"/><area shape="rect" id="node28" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="259,102,445,131"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="495,75,772,105"/><area shape="rect" id="node7" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="823,49,1028,78"/><area shape="rect" id="node25" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="841,102,1009,131"/><area shape="rect" id="node9" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1079,75,1273,105"/><area shape="rect" id="node11" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1339,75,1469,105"/><area shape="rect" id="node17" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1983,89,2068,118"/><area shape="rect" id="node20" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1323,22,1485,51"/><area shape="rect" id="node13" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1533,25,1709,54"/><area shape="rect" id="node15" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1759,50,1932,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="259,59,445,88"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="259,112,445,141"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="495,85,772,115"/><area shape="rect" id="node7" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="823,112,1028,141"/><area shape="rect" id="node25" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="837,59,1013,88"/><area shape="rect" id="node27" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="828,165,1023,195"/><area shape="rect" id="node30" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="841,5,1009,35"/><area shape="rect" id="node9" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1079,112,1273,141"/><area shape="rect" id="node11" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1339,112,1469,141"/><area shape="rect" id="node17" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1983,125,2068,155"/><area shape="rect" id="node20" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1323,59,1485,88"/><area shape="rect" id="node13" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1533,61,1709,91"/><area shape="rect" id="node15" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1759,87,1932,116"/></map>
 </div>
 </p>
 
@@ -239,11 +245,11 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">108</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">170</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00257">CSR_Filler()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pinv</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pmat</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00333">test_error()</a>.</p>
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00321">CSR_Filler()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pinv</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pmat</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00397">test_error()</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -259,7 +265,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_ab6bbfe22a26777546d200e6ae6dfa9f9_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_ab6bbfe22a26777546d200e6ae6dfa9f9_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_ab6bbfe22a26777546d200e6ae6dfa9f9_icgraph_map" id="namespaceSBP__Coef__Module_ab6bbfe22a26777546d200e6ae6dfa9f9_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="241,75,519,105"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="569,49,775,78"/><area shape="rect" id="node23" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="588,102,756,131"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="825,75,1020,105"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1085,75,1216,105"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1729,89,1815,118"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1069,22,1232,51"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1280,25,1456,54"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1505,50,1679,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="241,85,519,115"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="569,112,775,141"/><area shape="rect" id="node23" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="584,59,760,88"/><area shape="rect" id="node25" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="575,165,769,195"/><area shape="rect" id="node28" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="588,5,756,35"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="825,112,1020,141"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1085,112,1216,141"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1729,125,1815,155"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1069,59,1232,88"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1280,61,1456,91"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1505,87,1679,116"/></map>
 </div>
 </p>
 
@@ -314,18 +320,18 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00048">48</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00059">59</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pinv</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pmat</a>.</p>
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pinv</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pmat</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_a59677ad098d07f9be61d5c5be73d64f7_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a59677ad098d07f9be61d5c5be73d64f7_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_a59677ad098d07f9be61d5c5be73d64f7_icgraph_map" id="namespaceSBP__Coef__Module_a59677ad098d07f9be61d5c5be73d64f7_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="265,75,543,105"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="593,49,799,78"/><area shape="rect" id="node23" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="612,102,780,131"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="849,75,1044,105"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1109,75,1240,105"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1753,89,1839,118"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1093,22,1256,51"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1304,25,1480,54"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1529,50,1703,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="265,85,543,115"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="593,112,799,141"/><area shape="rect" id="node23" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="608,59,784,88"/><area shape="rect" id="node25" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="599,165,793,195"/><area shape="rect" id="node28" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="612,5,780,35"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="849,112,1044,141"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1109,112,1240,141"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1753,125,1839,155"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1093,59,1256,88"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1304,61,1480,91"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1529,87,1703,116"/></map>
 </div>
 </p>
 
@@ -380,11 +386,11 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00179">179</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00241">241</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00257">CSR_Filler()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00333">test_error()</a>.</p>
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00321">CSR_Filler()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00397">test_error()</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -400,7 +406,71 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_a19d73fc016d9d911d44b5589d5eb77d6_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a19d73fc016d9d911d44b5589d5eb77d6_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_a19d73fc016d9d911d44b5589d5eb77d6_icgraph_map" id="namespaceSBP__Coef__Module_a19d73fc016d9d911d44b5589d5eb77d6_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="241,75,519,105"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="569,49,775,78"/><area shape="rect" id="node23" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="588,102,756,131"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="825,75,1020,105"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1085,75,1216,105"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1729,89,1815,118"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1069,22,1232,51"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1280,25,1456,54"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1505,50,1679,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="241,85,519,115"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="569,112,775,141"/><area shape="rect" id="node23" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="584,59,760,88"/><area shape="rect" id="node25" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="575,165,769,195"/><area shape="rect" id="node28" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="588,5,756,35"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="825,112,1020,141"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1085,112,1216,141"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1729,125,1815,155"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1069,59,1232,88"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1280,61,1456,91"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1505,87,1679,116"/></map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a568c69a1c6d1eb7230d6eaa8fc4e0cea"></a><!-- doxytag: member="SBP_Coef_Module::D2_periodic" ref="a568c69a1c6d1eb7230d6eaa8fc4e0cea" args="(n, nnz, ia, ja, a, h)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine SBP_Coef_Module::D2_periodic </td>
+          <td>(</td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>nnz</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(n+1),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ia</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(nnz),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ja</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),dimension(nnz),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),intent(in)&nbsp;</td>
+          <td class="paramname"> <em>h</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td><code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00118">118</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceSBP__Coef__Module_a568c69a1c6d1eb7230d6eaa8fc4e0cea_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a568c69a1c6d1eb7230d6eaa8fc4e0cea_icgraph_map" alt=""></div>
+<map name="namespaceSBP__Coef__Module_a568c69a1c6d1eb7230d6eaa8fc4e0cea_icgraph_map" id="namespaceSBP__Coef__Module_a568c69a1c6d1eb7230d6eaa8fc4e0cea_icgraph">
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="265,85,543,115"/><area shape="rect" id="node5" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="593,112,799,141"/><area shape="rect" id="node23" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="608,59,784,88"/><area shape="rect" id="node25" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="599,165,793,195"/><area shape="rect" id="node28" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="612,5,780,35"/><area shape="rect" id="node7" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="849,112,1044,141"/><area shape="rect" id="node9" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1109,112,1240,141"/><area shape="rect" id="node15" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1753,125,1839,155"/><area shape="rect" id="node18" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1093,59,1256,88"/><area shape="rect" id="node11" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1304,61,1480,91"/><area shape="rect" id="node13" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1529,87,1703,116"/></map>
 </div>
 </p>
 
@@ -431,18 +501,18 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">29</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">D1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00048">D1_periodic()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">D2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00179">D2_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">iD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">iD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">iD2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">jD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">jD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">jD2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00015">nnz_D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00015">nnz_D2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pinv</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">Pmat</a>.</p>
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">D1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00059">D1_periodic()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">D2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00241">D2_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">D2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00118">D2_periodic()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">iD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">iD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">iD2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">iD2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">jD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">jD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">jD2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">jD2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">nnz_D1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">nnz_D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">nnz_D2</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">nnz_D2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pinv</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Pmat</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00049">Boscarino31_Mod::Boscarino31()</a>, and <a class="el" href="Burgers__Mod_8f90_source.html#l00054">Burgers_Module::Burgers()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00051">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell_Mod::Broadwell()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>, and <a class="el" href="Burgers__Mod_8f90_source.html#l00055">Burgers_Module::Burgers()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_cgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_cgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_cgraph_map" id="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_cgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="345,59,532,88"/><area shape="rect" id="node11" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="333,112,544,141"/><area shape="rect" id="node13" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="345,5,532,35"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="592,5,797,35"/><area shape="rect" id="node7" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="597,59,792,88"/><area shape="rect" id="node9" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="847,59,1052,88"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="345,5,532,35"/><area shape="rect" id="node11" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="333,112,544,141"/><area shape="rect" id="node13" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="345,59,532,88"/><area shape="rect" id="node17" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="333,165,544,195"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="592,5,797,35"/><area shape="rect" id="node7" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="597,59,792,88"/><area shape="rect" id="node9" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="847,59,1052,88"/></map>
 </div>
 </p>
 
@@ -451,7 +521,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_icgraph_map" id="namespaceSBP__Coef__Module_a2a470b5ce579d35823d5a3b0cdfc0d25_icgraph">
-<area shape="rect" id="node3" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="335,49,540,78"/><area shape="rect" id="node21" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="353,102,521,131"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="591,75,785,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="851,75,981,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1495,89,1580,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="835,22,997,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1045,25,1221,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1271,50,1444,79"/></map>
+<area shape="rect" id="node3" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="335,112,540,141"/><area shape="rect" id="node21" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="349,59,525,88"/><area shape="rect" id="node23" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="340,165,535,195"/><area shape="rect" id="node26" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="353,5,521,35"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="591,112,785,141"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="851,112,981,141"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1495,125,1580,155"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="835,59,997,88"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1045,61,1221,91"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1271,87,1444,116"/></map>
 </div>
 </p>
 
@@ -500,11 +570,11 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00333">333</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00397">397</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00400">amux_local()</a>.</p>
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00464">amux_local()</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">D1_242()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00179">D2_242()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">D1_242()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00241">D2_242()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -520,7 +590,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceSBP__Coef__Module_a7ec1f25fff6547a14684db701fbd0d80_icgraph.png" border="0" usemap="#namespaceSBP__Coef__Module_a7ec1f25fff6547a14684db701fbd0d80_icgraph_map" alt=""></div>
 <map name="namespaceSBP__Coef__Module_a7ec1f25fff6547a14684db701fbd0d80_icgraph_map" id="namespaceSBP__Coef__Module_a7ec1f25fff6547a14684db701fbd0d80_icgraph">
-<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="251,49,437,78"/><area shape="rect" id="node28" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="251,102,437,131"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="487,75,764,105"/><area shape="rect" id="node7" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="815,49,1020,78"/><area shape="rect" id="node25" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="833,102,1001,131"/><area shape="rect" id="node9" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1071,75,1265,105"/><area shape="rect" id="node11" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1331,75,1461,105"/><area shape="rect" id="node17" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1975,89,2060,118"/><area shape="rect" id="node20" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1315,22,1477,51"/><area shape="rect" id="node13" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1525,25,1701,54"/><area shape="rect" id="node15" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1751,50,1924,79"/></map>
+<area shape="rect" id="node3" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="251,59,437,88"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="251,112,437,141"/><area shape="rect" id="node5" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="487,85,764,115"/><area shape="rect" id="node7" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="815,112,1020,141"/><area shape="rect" id="node25" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="829,59,1005,88"/><area shape="rect" id="node27" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="820,165,1015,195"/><area shape="rect" id="node30" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="833,5,1001,35"/><area shape="rect" id="node9" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="1071,112,1265,141"/><area shape="rect" id="node11" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="1331,112,1461,141"/><area shape="rect" id="node17" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1975,125,2060,155"/><area shape="rect" id="node20" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="1315,59,1477,88"/><area shape="rect" id="node13" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1525,61,1701,91"/><area shape="rect" id="node15" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1751,87,1924,116"/></map>
 </div>
 </p>
 
@@ -538,9 +608,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00054">Burgers_Module::Burgers()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00055">Burgers_Module::Burgers()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -555,9 +625,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00049">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00195">Boscarino31_Mod::Bosc_dUdt()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00051">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell_Mod::Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_Mod::Broadwell_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -572,9 +642,26 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aeeedeeb8b7effc9487acec9db2fa96ba"></a><!-- doxytag: member="SBP_Coef_Module::D2_per" ref="aeeedeeb8b7effc9487acec9db2fa96ba" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(wp),dimension(:),allocatable <a class="el" href="namespaceSBP__Coef__Module.html#aeeedeeb8b7effc9487acec9db2fa96ba">SBP_Coef_Module::D2_per</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Brusselator_mod::Bruss_dUdt()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -589,9 +676,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -606,9 +693,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00202">Boscarino31_Mod::Bosc_dUdt()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00195">Boscarino31_Mod::Bosc_dUdt()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_Mod::Broadwell_dUdt()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -623,9 +710,26 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="af7ed9c575f092fd1b07b4084eb0515d2"></a><!-- doxytag: member="SBP_Coef_Module::iD2_per" ref="af7ed9c575f092fd1b07b4084eb0515d2" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer,dimension(:),allocatable <a class="el" href="namespaceSBP__Coef__Module.html#af7ed9c575f092fd1b07b4084eb0515d2">SBP_Coef_Module::iD2_per</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">22</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Brusselator_mod::Bruss_dUdt()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -640,9 +744,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -657,9 +761,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00195">Boscarino31_Mod::Bosc_dUdt()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_Mod::Broadwell_dUdt()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -674,9 +778,43 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00014">14</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">21</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adfc9ff82aadfb132a2e93f773e5c0042"></a><!-- doxytag: member="SBP_Coef_Module::jD2_per" ref="adfc9ff82aadfb132a2e93f773e5c0042" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer,dimension(:),allocatable <a class="el" href="namespaceSBP__Coef__Module.html#adfc9ff82aadfb132a2e93f773e5c0042">SBP_Coef_Module::jD2_per</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">22</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Brusselator_mod::Bruss_dUdt()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abe2d252abb85a2883d5e246bac78374d"></a><!-- doxytag: member="SBP_Coef_Module::nnz_D1" ref="abe2d252abb85a2883d5e246bac78374d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer <a class="el" href="namespaceSBP__Coef__Module.html#abe2d252abb85a2883d5e246bac78374d">SBP_Coef_Module::nnz_D1</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">23</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -691,9 +829,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00015">15</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">23</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -708,9 +846,26 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00015">15</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">23</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00054">Burgers_Module::Burgers()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00055">Burgers_Module::Burgers()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1eee16961d21d2917e8ccc7b19ccfb0b"></a><!-- doxytag: member="SBP_Coef_Module::nnz_D2_per" ref="a1eee16961d21d2917e8ccc7b19ccfb0b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer <a class="el" href="namespaceSBP__Coef__Module.html#a1eee16961d21d2917e8ccc7b19ccfb0b">SBP_Coef_Module::nnz_D2_per</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">24</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Brusselator_mod::Bruss_dUdt()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -725,9 +880,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00215">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00154">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00048">D1_periodic()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00159">Burgers_Module::Burgers_dUdt()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00059">D1_periodic()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -742,9 +897,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">20</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00108">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00048">D1_periodic()</a>, <a class="el" href="control__variables_8f90_source.html#l00072">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">Define_CSR_Operators()</a>.</p>
+<p>Referenced by <a class="el" href="SBP__Coef__Module_8f90_source.html#l00170">D1_242()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00059">D1_periodic()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">Define_CSR_Operators()</a>.</p>
 
 </div>
 </div>
@@ -759,12 +914,12 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00007">7</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
+<p>Definition at line <a class="el" href="SBP__Coef__Module_8f90_source.html#l00013">13</a> of file <a class="el" href="SBP__Coef__Module_8f90_source.html">SBP_Coef_Module.f90</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -28,7 +28,6 @@
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935">Allocate_Jac_CSR_Storage</a> (nJac, nnz)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">logical&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceJacobian__CSR__Mod.html#ac99143b109acf90d98dc5e2099a388ad">allo_test</a> = .false.</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceJacobian__CSR__Mod.html#a94d69662ef031c9f945e105441d48c02">iaJac</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceJacobian__CSR__Mod.html#a5926dc41c54f00cbd2cc669cc175665b">jaJac</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, dimension(:), allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceJacobian__CSR__Mod.html#a503c966175f15e65a461a9fcd94aa0bf">jUJac</a></td></tr>
@@ -63,18 +62,18 @@
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">23</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">22</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00018">aJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">allo_test</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00018">aLUJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">iaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">iw</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">jaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">jLUJac</a>, and <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">jUJac</a>.</p>
+<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">aJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">aLUJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">iaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">iw</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">jaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">jLUJac</a>, and <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">jUJac</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00049">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00054">Burgers_Module::Burgers()</a>, and <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00051">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell_Mod::Broadwell()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00055">Burgers_Module::Burgers()</a>, and <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceJacobian__CSR__Mod_ab251b185ad5d74ee771ea99d2a7f3935_icgraph.png" border="0" usemap="#namespaceJacobian__CSR__Mod_ab251b185ad5d74ee771ea99d2a7f3935_icgraph_map" alt=""></div>
 <map name="namespaceJacobian__CSR__Mod_ab251b185ad5d74ee771ea99d2a7f3935_icgraph_map" id="namespaceJacobian__CSR__Mod_ab251b185ad5d74ee771ea99d2a7f3935_icgraph">
-<area shape="rect" id="node3" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="369,93,575,123"/><area shape="rect" id="node21" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="388,147,556,176"/><area shape="rect" id="node24" href="namespaceNewton.html#a87f5936737bd590d30d903cc00524ef8" title="Newton::Convert_to_CSR" alt="" coords="636,5,809,35"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="625,147,820,176"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="885,152,1016,181"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1529,156,1615,185"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="869,99,1032,128"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1080,104,1256,133"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1305,104,1479,133"/></map>
+<area shape="rect" id="node3" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5" title="Boscarino31_Mod::Boscarino31" alt="" coords="369,164,575,193"/><area shape="rect" id="node21" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="384,57,560,87"/><area shape="rect" id="node23" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="375,217,569,247"/><area shape="rect" id="node26" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d" title="Burgers_Module::Burgers" alt="" coords="388,111,556,140"/><area shape="rect" id="node29" href="namespaceNewton.html#a87f5936737bd590d30d903cc00524ef8" title="Newton::Convert_to_CSR" alt="" coords="636,5,809,35"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="625,163,820,192"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="885,161,1016,191"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1529,163,1615,192"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="869,108,1032,137"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1080,111,1256,140"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1305,111,1479,140"/></map>
 </div>
 </p>
 
@@ -92,26 +91,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00018">18</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00320">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ac99143b109acf90d98dc5e2099a388ad"></a><!-- doxytag: member="Jacobian_CSR_Mod::allo_test" ref="ac99143b109acf90d98dc5e2099a388ad" args="" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">logical <a class="el" href="namespaceJacobian__CSR__Mod.html#ac99143b109acf90d98dc5e2099a388ad">Jacobian_CSR_Mod::allo_test</a> = .false.</td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
-
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00310">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00243">Broadwell_Mod::Broadwell_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00290">Brusselator_mod::Build_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
@@ -126,9 +108,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00018">18</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
@@ -143,9 +125,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00320">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00310">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00243">Broadwell_Mod::Broadwell_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00290">Brusselator_mod::Build_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
@@ -160,9 +142,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -177,9 +159,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00320">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="Boscarino31__mod_8f90_source.html#l00310">Boscarino31_Mod::Bosc_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00243">Broadwell_Mod::Broadwell_Jac()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00220">Burgers_Module::Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00290">Brusselator_mod::Build_Jac()</a>, <a class="el" href="Newton_8f90_source.html#l00420">Newton::Convert_to_CSR()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
@@ -194,9 +176,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
@@ -211,14 +193,14 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">17</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">16</a> of file <a class="el" href="Jacobian__CSR__Mod_8f90_source.html">Jacobian_CSR_Mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00023">Allocate_Jac_CSR_Storage()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
+<p>Referenced by <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Allocate_Jac_CSR_Storage()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">control_variables::deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 25 Jul 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
