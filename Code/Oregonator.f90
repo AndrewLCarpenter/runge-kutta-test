@@ -9,9 +9,9 @@
       private
       public :: Oregonator
       contains
-      subroutine Oregonator(nveclen,ep,dt,tfinal,iDT,rese_vec,resi_vec,akk)
+      subroutine Oregonator(nveclen,neq,ep,dt,tfinal,iDT,rese_vec,resi_vec,akk)
       use precision_vars,    only: wp
-      use control_variables, only: temporal_splitting,probname,xjac, &
+      use control_variables, only: temporal_splitting,probname,xjac,var_names,&
      &                             tol,dt_error_tol,uvec,uexact,programstep
 !     Oregonator system
 !     
@@ -28,7 +28,7 @@
       !INIT vars
       real(wp),        intent(in   ) :: ep
       real(wp),        intent(inout) :: dt
-      integer,         intent(  out) :: nveclen
+      integer,         intent(  out) :: nveclen,neq
       real(wp),        intent(  out) :: tfinal
       integer,         intent(in   ) :: iDT
 
@@ -44,9 +44,13 @@
         !**Pre-initialization. Get problem name and vector length**
         case('INITIALIZE_PROBLEM_INFORMATION')
           nvecLen = vecl
+          neq = vecl
           probname='Oregonatr'         
           tol=1.0e-10_wp
           dt_error_tol=1.0e-13_wp
+          
+          allocate(var_names(neq))
+          var_names(:)=(/'Differential', 'Differential', 'Algebraic   '/)
           
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')

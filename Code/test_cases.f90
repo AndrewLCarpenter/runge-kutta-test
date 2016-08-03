@@ -70,7 +70,7 @@
       
       !problemsub variables
       real(wp)                              :: ep,dt,tfinal 
-      integer                               :: nveclen
+      integer                               :: nveclen,neq
 
       !data out variables
       real(wp), dimension(isamp)            :: cost         
@@ -105,9 +105,9 @@
               
           !**CALL FOR PROBNAME & NVECLEN**
           programStep='INITIALIZE_PROBLEM_INFORMATION'
-          call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1)
+          call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1)
         
-          call allocate_vars(nveclen,is) 
+          call allocate_vars(nveclen,neq,is) 
                                       
           !**INIT. FILE PATH FOR OUTPUTS**
           call create_file_paths
@@ -126,14 +126,14 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-            do iDT = 10,10
+!            do iDT = 10,10
 ! HACK
-!            do iDT =1,isamp,1   
+            do iDT =1,isamp,1   
 
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep='SET_INITIAL_CONDITIONS'
-              call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
+              call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
 
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
@@ -154,7 +154,7 @@
                 jcount = jcount + (ns-1)    !keep track of total RK stages  
 !--------------------------------RK LOOP---------------------------------------
                 programStep='BUILD_RHS'
-                call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),1) 
+                call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1) 
 
                 ustage(:,1) = uvec(:)
 
@@ -177,7 +177,7 @@
                  
                   ! Fill in resE and resI with the converged data
                   programStep='BUILD_RHS'
-                  call problemsub(iprob,nveclen,ep,dt,tfinal,iDT,tt,aI(1,1),L)
+                  call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),L)
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,ktime)
 
@@ -250,35 +250,37 @@
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))
-              errorL2(iDT,1)= log10(sqrt(dot_product(tmpvec(1:nveclen:2),tmpvec(1:nveclen:2))/(nveclen/2)))
-              errorL2(iDT,2)= log10(sqrt(dot_product(tmpvec(2:nveclen:2),tmpvec(2:nveclen:2))/(nveclen/2)))
+              do i = 1,neq
+                errorL2(iDT,i)= log10(sqrt(dot_product(tmpvec(i:nveclen:neq), &
+     &                                   tmpvec(i:nveclen:neq))/(nveclen/neq)))
+              enddo
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-           write(122,*)uvec(1:nveclen:2)
-           write(123,*)uvec(2:nveclen:2)
-           write(124,*)uvec(3:nveclen:3)
+!           write(122,*)uvec(1:nveclen:2)
+!           write(123,*)uvec(2:nveclen:2)
+!           write(124,*)uvec(3:nveclen:3)
 !           write(121,*)uexact
 !           write(125,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
 
-            call output_terminal_iteration(cost,0,ep,nveclen)
+            call output_terminal_iteration(cost,0,ep,nveclen,neq)
 
             epsave(jepsil) = log10(ep)
             do i = 1,nveclen
               b1save(jepsil,i) = -b(i)
               b1Psave(jepsil,i) = -b(i+nveclen)
             enddo
-            do i=1,3
-            b1L2save(jepsil,i) = -b(2*nveclen+i)
+            do i=1,neq
+              b1L2save(jepsil,i) = -b(2*nveclen+i)
             enddo
             
           enddo      
 !---------------------END STIFFNESS LOOP---------------------------------------
           !**OUTPUT CONVERGENCE VS STIFFNESS**
-          call output_conv_stiff(nveclen,epsave)
+          call output_conv_stiff(nveclen,neq,epsave)
           
           !**OUTPUT TO TERMINAL**
           call output_terminal_final(icount,jcount,stageE,stageI,maxiter)

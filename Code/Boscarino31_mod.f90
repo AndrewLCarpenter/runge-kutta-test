@@ -21,6 +21,7 @@
 
 !--------------------------------VARIABLES-------------------------------------         
       integer,  parameter :: vecl=256 !must be even  
+      integer,  parameter :: neq=2
       real(wp), parameter :: a=0.5_wp
       real(wp), parameter :: xL=-1.0_wp,xR=1.0_wp      
    
@@ -48,10 +49,11 @@
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
 
-      subroutine Boscarino31(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Boscarino31(nveclen,eq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
-      use control_variables, only: temporal_splitting,probname,Jac_case, &
-     &                             tol,dt_error_tol,uvec,uexact,programstep
+      use control_variables, only: temporal_splitting,probname,Jac_case,     &
+     &                             tol,dt_error_tol,uvec,uexact,programstep, &
+     &                             var_names
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
       use unary_mod,         only: aplb
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
@@ -60,7 +62,7 @@
       !INIT vars     
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
-      integer,  intent(  out) :: nveclen
+      integer,  intent(  out) :: nveclen,eq
       real(wp), intent(  out) :: tfinal
       integer,  intent(in   ) :: iDT
       
@@ -78,10 +80,15 @@
         !**Pre-initialization. Get problem name, vector length and grid**
         case('INITIALIZE_PROBLEM_INFORMATION')
           nveclen = vecl
+          eq = neq
           probname='Boscar_31'     
           Jac_case='SPARSE'
           tol=1.0e-12_wp  
           dt_error_tol=5.0e-14_wp
+          
+          allocate(var_names(neq))
+          var_names(:)=(/'Differential', 'Algebraic   '/)
+
           call grid()           
 
         !**Initialization of problem information**        

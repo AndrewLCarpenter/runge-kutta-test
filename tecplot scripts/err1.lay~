@@ -1,5 +1,6 @@
 #!MC 1410
-$!VarSet |LFDSFN1| = '"../Code/IMEX/vanderPol/ARK436[2]SA_1/vanderPol_ARK436[2]SA_1_1.dat"'
+$!VarSet |PATH1| = '|$PATHI|'
+$!VarSet |LFDSFN1| = '|PATH1| '
 $!VarSet |LFDSVL1| = '"V1" "V2"'
 $!SETSTYLEBASE FACTORY
 $!PLOTOPTIONS 
@@ -76,13 +77,21 @@ $!GLOBALLINEPLOT
   LEGEND
     {
     SHOW = YES
+    TEXTSHAPE
+      {
+      HEIGHT = 2.5
+      }
     BOX
       {
       BOXTYPE = FILLED
+      MARGIN = 0
+      LINETHICKNESS = 0.02
+      COLOR = WHITE
       }
+    ROWSPACING = 1.2
     XYPOS
       {
-      X = 87.864
+      X = 87.723
       Y = 87.823
       }
     }

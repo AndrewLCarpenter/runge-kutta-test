@@ -32,6 +32,7 @@
       public :: Brusselator
       
       integer,  parameter :: vecl=64     ! total uvec length == 2*vecl
+      integer,  parameter :: neq=2
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
       real(wp), dimension(vecl) :: x
@@ -44,10 +45,11 @@
       contains
       
 !==============================================================================      
-      subroutine Brusselator(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Brusselator(nveclen,eq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
-      use control_variables, only: temporal_splitting,probname,Jac_case, &
-     &                             tol,dt_error_tol,uvec,uexact,programstep
+      use control_variables, only: temporal_splitting,probname,Jac_case,     &
+     &                             tol,dt_error_tol,uvec,uexact,programstep, &
+     &                             var_names
       use SBP_Coef_Module,   only: Define_CSR_Operators,D2_per,nnz_D2_per
       use unary_mod,         only: aplb
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
@@ -56,7 +58,7 @@
       !INIT vars
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
-      integer,  intent(  out) :: nveclen
+      integer,  intent(  out) :: nveclen,eq
       real(wp), intent(  out) :: tfinal
       integer,  intent(in   ) :: iDT
 
@@ -79,11 +81,15 @@
       Program_Step_Select: select case(programstep)
         !**Pre-initialization. Get problem name and vector length**
         case('INITIALIZE_PROBLEM_INFORMATION')
-          nvecLen = 2*vecl
+          nvecLen = neq*vecl
+          eq = neq
           probname='Brusselat'     
           tol=9.9e-11_wp  
           dt_error_tol=1.0e-13_wp
           Jac_case='SPARSE'
+          
+          allocate(var_names(neq))
+          var_names(:)=(/'Differential', 'Algebraic   '/)
           
           call grid()
 

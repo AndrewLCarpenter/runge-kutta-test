@@ -26,7 +26,7 @@
       
       contains
       
-      subroutine problemsub(iprob,nveclen,ep,dt,tfinal,iDT,time,akk,L)
+      subroutine problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,time,akk,L)
 
       use control_variables, only: resE,resI,uvec
       use vanderPol_mod,     only: vanderPol
@@ -44,6 +44,7 @@
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
       integer,  intent(  out) :: nveclen
+      integer,  intent(  out) :: neq
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
       real(wp), intent(  out) :: tfinal
@@ -54,27 +55,27 @@
       real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
       if     (iprob==1)  then
-       call vanderPol(    nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call vanderPol(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==2)  then
-       call Pureschi(     nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Pureschi(     nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==3)  then
-       call Kaps(         nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Kaps(         nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==4)  then
-       call Kreiss(       nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Kreiss(       nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==5)  then 
-       call Lorenz(       nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Lorenz(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==6)  then 
-       call Rossler_Chaos(nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Rossler_Chaos(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==7)  then 
-       call Oregonator(   nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Oregonator(   nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==8)  then 
-       call Brusselator(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Brusselator(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==9)  then
-       call Burgers(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Burgers(      nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
-       call Boscarino31(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Boscarino31(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==11) then
-       call Broadwell(    nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Broadwell(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       else
        print*,'Invalid problem number!'
        stop

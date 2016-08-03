@@ -133,13 +133,13 @@
       real(wp),               intent(in   ) :: ep,dt,time,aI
       integer,                intent(in   ) :: iprob,L
 
-      integer  :: iDT,nveclen
+      integer  :: iDT,nveclen,neq
       real(wp) :: tfinal,dt_in
       
       dt_in=dt
       
       programStep='BUILD_RHS'
-      call problemsub(iprob,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
+      call problemsub(iprob,nveclen,neq,ep,dt_in,tfinal,iDT,time,aI,L)
       Build_Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
       end function Build_Rnewton
@@ -153,14 +153,13 @@
       real(wp), intent(in) :: ep,dt,time,aI
       integer,  intent(in) :: iprob,L
     
-      integer  :: nveclen
+      integer  :: nveclen,iDT,neq
       real(wp) :: tfinal,dt_in
-      integer  :: iDT
       
       dt_in=dt
   
       programStep='BUILD_JACOBIAN'
-      call problemsub(iprob,nveclen,ep,dt_in,tfinal,iDT,time,aI,L)
+      call problemsub(iprob,nveclen,neq,ep,dt_in,tfinal,iDT,time,aI,L)
       
       end subroutine Build_Jac
       

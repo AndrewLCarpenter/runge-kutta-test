@@ -68,7 +68,7 @@ $!FRAMENAME  = 'Frame 001'
 $!GLOBALTIME 
   SOLUTIONTIME = 0
 $!DELETELINEMAPS 
-$!ACTIVELINEMAPS  =  [1,3,5,7]
+$!ACTIVELINEMAPS  =  [1-4]
 $!GLOBALLINEPLOT 
   DATALABELS
     {
@@ -77,14 +77,22 @@ $!GLOBALLINEPLOT
   LEGEND
     {
     SHOW = YES
+    TEXTSHAPE
+      {
+      HEIGHT = 2.5
+      }
     BOX
       {
       BOXTYPE = FILLED
+      MARGIN = 0
+      LINETHICKNESS = 0.02
+      COLOR = WHITE
       }
+    ROWSPACING = 0.9
     XYPOS
       {
-      X = 66.82
-      Y = 86.587
+      X = 68.742
+      Y = 86.793
       }
     }
 $!LINEMAP  [1]
@@ -97,12 +105,14 @@ $!LINEMAP  [1]
     }
   LINES
     {
-    COLOR = RED
+    COLOR = BLACK
+    LINETHICKNESS = 0.4
     }
   SYMBOLS
     {
-    COLOR = RED
+    COLOR = BLACK
     FILLCOLOR = RED
+    SKIPPING = 8
     }
   BARCHARTS
     {
@@ -123,12 +133,19 @@ $!LINEMAP  [2]
     }
   LINES
     {
-    COLOR = GREEN
+    COLOR = RED
+    LINEPATTERN = DASHED
+    LINETHICKNESS = 0.4
     }
   SYMBOLS
     {
-    COLOR = GREEN
+    SYMBOLSHAPE
+      {
+      GEOMSHAPE = DEL
+      }
+    COLOR = RED
     FILLCOLOR = GREEN
+    SKIPPING = 8
     }
   BARCHARTS
     {
@@ -149,12 +166,18 @@ $!LINEMAP  [3]
     }
   LINES
     {
-    COLOR = BLUE
+    COLOR = GREEN
+    LINETHICKNESS = 0.4
     }
   SYMBOLS
     {
-    COLOR = BLUE
+    SYMBOLSHAPE
+      {
+      GEOMSHAPE = DIAMOND
+      }
+    COLOR = GREEN
     FILLCOLOR = BLUE
+    SKIPPING = 8
     }
   BARCHARTS
     {
@@ -175,102 +198,35 @@ $!LINEMAP  [4]
     }
   LINES
     {
-    COLOR = CUSTOM1
+    COLOR = BLUE
+    LINEPATTERN = DASHED
+    LINETHICKNESS = 0.4
     }
   SYMBOLS
+    {
+    SYMBOLSHAPE
+      {
+      GEOMSHAPE = CIRCLE
+      }
+    COLOR = BLUE
+    FILLCOLOR = CUSTOM1
+    SKIPPING = 8
+    }
+  BARCHARTS
     {
     COLOR = CUSTOM1
     FILLCOLOR = CUSTOM1
     }
-  BARCHARTS
-    {
-    COLOR = CUSTOM1
-    FILLCOLOR = CUSTOM1
-    }
   ERRORBARS
     {
     COLOR = CUSTOM1
-    }
-$!LINEMAP  [5]
-  NAME = '&ZN&'
-  ASSIGN
-    {
-    ZONE = 5
-    XAXISVAR = 1
-    YAXISVAR = 2
-    }
-  LINES
-    {
-    COLOR = CUSTOM3
-    }
-  SYMBOLS
-    {
-    COLOR = CUSTOM3
-    FILLCOLOR = CUSTOM3
-    }
-  BARCHARTS
-    {
-    COLOR = CUSTOM3
-    FILLCOLOR = CUSTOM3
-    }
-  ERRORBARS
-    {
-    COLOR = CUSTOM3
-    }
-$!LINEMAP  [6]
-  NAME = '&ZN&'
-  ASSIGN
-    {
-    ZONE = 6
-    XAXISVAR = 1
-    YAXISVAR = 2
-    }
-  LINES
-    {
-    COLOR = PURPLE
-    }
-  SYMBOLS
-    {
-    COLOR = PURPLE
-    FILLCOLOR = PURPLE
-    }
-  BARCHARTS
-    {
-    COLOR = PURPLE
-    FILLCOLOR = PURPLE
-    }
-  ERRORBARS
-    {
-    COLOR = PURPLE
-    }
-$!LINEMAP  [7]
-  NAME = '&ZN&'
-  ASSIGN
-    {
-    ZONE = 7
-    XAXISVAR = 1
-    YAXISVAR = 2
-    }
-  LINES
-    {
-    COLOR = RED
-    }
-  SYMBOLS
-    {
-    COLOR = RED
-    FILLCOLOR = RED
-    }
-  BARCHARTS
-    {
-    COLOR = RED
-    FILLCOLOR = RED
-    }
-  ERRORBARS
-    {
-    COLOR = RED
     }
 $!XYLINEAXIS 
   DEPXTOYRATIO = 1
+  GRIDAREA
+    {
+    DRAWBORDER = YES
+    }
 $!XYLINEAXIS 
   XDETAIL 1
     {
@@ -305,6 +261,8 @@ $!XYLINEAXIS
       TEXT = 'Convergence Rate'
       }
     }
+$!LINEPLOTLAYERS
+  SHOWSYMBOLS = YES
 $!FRAMECONTROL ACTIVATEBYNUMBER
   FRAME = 1
 $!SETSTYLEBASE CONFIG

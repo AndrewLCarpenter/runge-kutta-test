@@ -10,10 +10,10 @@
       private
       public :: Pureschi
       contains
-      subroutine Pureschi(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Pureschi(nveclen,neq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use precision_vars,    only: wp, pi
-      use control_variables, only: temporal_splitting,probname,xjac, &
+      use control_variables, only: temporal_splitting,probname,xjac,var_names,&
      &                             tol,dt_error_tol,uvec,uexact,programstep
 
       implicit none; save
@@ -23,7 +23,7 @@
       !INIT vars
       real(wp),                  intent(in   ) :: ep
       real(wp),                  intent(inout) :: dt
-      integer,                   intent(  out) :: nveclen
+      integer,                   intent(  out) :: nveclen,neq
       real(wp),                  intent(  out) :: tfinal
       integer,                   intent(in   ) :: iDT
 
@@ -42,9 +42,13 @@
         !**Pre-initialization. Get problem name and vector length**
         case('INITIALIZE_PROBLEM_INFORMATION')
           nvecLen = vecl
+          neq = vecl
           probname='Pureschi '   
           tol=1.0e-12_wp
           dt_error_tol=1.0e-13_wp
+          
+          allocate(var_names(neq))
+          var_names(:)=(/'Differential', 'Algebraic   '/)
         
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')

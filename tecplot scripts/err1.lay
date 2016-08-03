@@ -77,13 +77,21 @@ $!GLOBALLINEPLOT
   LEGEND
     {
     SHOW = YES
+    TEXTSHAPE
+      {
+      HEIGHT = 2.5
+      }
     BOX
       {
       BOXTYPE = FILLED
+      MARGIN = 0
+      LINETHICKNESS = 0.02
+      COLOR = WHITE
       }
+    ROWSPACING = 1.2
     XYPOS
       {
-      X = 87.864
+      X = 87.700
       Y = 87.823
       }
     }

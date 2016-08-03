@@ -26,6 +26,7 @@
       real(wp),               parameter :: sig1 = +1.0_wp
       
       integer,  parameter    :: vecl=128   
+      integer,  parameter    :: neq=1
       real(wp), dimension(vecl) :: x      
       real(wp), parameter :: xL=0.0_wp,xR=1.0_wp
 
@@ -52,10 +53,11 @@
 ! JACOBIAN_CSR_MOD.F90      *CONTAINS CSR JACOBIAN VARIABLES
 !******************************************************************************
 
-      subroutine Burgers(nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+      subroutine Burgers(nveclen,eq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
 
-      use control_variables, only: temporal_splitting,probname,Jac_case, &
-     &                             tol,dt_error_tol,uvec,uexact,programstep
+      use control_variables, only: temporal_splitting,probname,Jac_case,     &
+     &                             tol,dt_error_tol,uvec,uexact,programstep, &
+     &                             var_names
       use SBP_Coef_Module,   only: Define_CSR_Operators,nnz_D2,D1
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
 
@@ -63,7 +65,7 @@
       !INIT vars     
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
-      integer,  intent(  out) :: nveclen
+      integer,  intent(  out) :: nveclen,eq
       real(wp), intent(  out) :: tfinal
       real(wp), intent(in   ) :: time
       integer,  intent(in   ) :: iDT
@@ -81,10 +83,15 @@
         !**Pre-initialization. Get problem name, vector length and grid**
         case('INITIALIZE_PROBLEM_INFORMATION')
           nveclen = vecl
+          eq = neq
           probname='Burgers  '     
           tol=1.0e-12_wp  
           dt_error_tol=5.0e-14_wp
           jac_case='SPARSE'
+          
+          allocate(var_names(neq))
+          var_names(:)='Differential'
+          
           call grid()           
  
         !**Initialization of problem information**        

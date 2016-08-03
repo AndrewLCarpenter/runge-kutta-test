@@ -21,7 +21,7 @@
       public :: resE,resI,error,errorP,xjac,errorL2
       public :: b1save,b1Psave,b1L2save,ustage,predvec 
       public :: allocate_vars,deallocate_vars
-      public :: programstep
+      public :: programstep,var_names
 !--------------------------VARIABLES-------------------------------------------
 !      character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
       character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
@@ -40,23 +40,24 @@
       real(wp), dimension(:,:), allocatable :: resE,resI,error,errorP,xjac
       real(wp), dimension(:,:), allocatable :: b1save,b1Psave,ustage,predvec
       real(wp), dimension(:,:), allocatable :: errorL2,b1L2save
+      character(len=12), dimension(:), allocatable :: var_names
 !------------------------------------------------------------------------------
  
       contains
 
 !==============================================================================
 ! ALLOCATE GLOBAL VARIABLES
-      subroutine allocate_vars(nveclen,is)
+      subroutine allocate_vars(nveclen,neq,is)
       
-      integer, intent(in) :: nveclen,is
+      integer, intent(in) :: nveclen,neq,is
       
       !**ALLOCATE VARIABLES**
       !problemsub
       AllOCATE(uvec(nveclen),uexact(nveclen),resE(nveclen,is),resI(nveclen,is))
    
       !data outs
-      ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen),b(nveclen*2+2))
-      ALLOCATE(errorL2(isamp,2))
+      ALLOCATE(error(isamp,nveclen),errorP(isamp,nveclen),b(nveclen*2+neq))
+      ALLOCATE(errorL2(isamp,neq))
 
       !Newton_iteration
       ALLOCATE(usum(nveclen),xjac(nveclen,nveclen))       
@@ -64,10 +65,8 @@
       !internal
       ALLOCATE(ustage(nveclen,is),predvec(nveclen,is),uveco(nveclen))
       ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
-      ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,3))
-      
-      b1L2save(:,:)=0.0_wp
-       
+      ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,neq))
+
        end subroutine allocate_vars
      
 !==============================================================================
@@ -80,7 +79,7 @@
       
       !**DEALLOCATE VARIABLES**
       !problemsub
-      DEAllOCATE(uvec,uexact,resE,resI)
+      DEAllOCATE(uvec,uexact,resE,resI,var_names)
       
       !data out
       DEALLOCATE(error,errorP,b,errorL2)

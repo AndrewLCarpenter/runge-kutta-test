@@ -93,13 +93,13 @@
       
 !==============================================================================      
 !  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
-      subroutine output_conv_stiff(nveclen,epsave)
+      subroutine output_conv_stiff(nveclen,neq,epsave)
       
       use control_variables, only : temporal_splitting,probname,jactual, &
-     &                              b1save,b1Psave,b1L2save  
+     &                              b1save,b1Psave,b1L2save,var_names  
       use runge_kutta,       only : casename    
       
-      integer,                intent(in) :: nveclen
+      integer,                intent(in) :: nveclen,neq
       real(wp), dimension(:), intent(in) :: epsave
       
       integer           :: i,j
@@ -108,19 +108,19 @@
       filename=trim(probname)//'_'//trim(casename)//'_conv'//ext
       
       open(35,file=trim(fileloc)//filename)
-      do i=1,nveclen
-        write(35,*)'zone T = "Var ',i,': ',trim(temporal_splitting),'",'
-        do j=1,jactual
-          write(35,50)epsave(j),b1save(j,i)
-        enddo
-          write(35,*)'zone T = "Var ',i,': Predicted",'
-        do j=1,jactual
-          write(35,50)epsave(j),b1Psave(j,i)
-        enddo
-      enddo
+!      do i=1,nveclen
+!        write(35,*)'zone T = "Var ',i,': ',trim(temporal_splitting),'",'
+!        do j=1,jactual
+!          write(35,50)epsave(j),b1save(j,i)
+!        enddo
+!          write(35,*)'zone T = "Var ',i,': Predicted",'
+!        do j=1,jactual
+!          write(35,50)epsave(j),b1Psave(j,i)
+!        enddo
+!      enddo
            
-      do i=1,3
-        write(35,*)'zone T = "Var',i,': ',i,'",'
+      do i=1,neq
+        write(35,*)'zone T = "',trim(var_names(i)),' Variable - ',trim(temporal_splitting),'",'
         do j=1,jactual
           write(35,50)epsave(j),b1L2save(j,i)
         enddo
@@ -132,7 +132,7 @@
 
 !==============================================================================
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
-      subroutine output_terminal_iteration(cost,mwt,ep,nveclen)
+      subroutine output_terminal_iteration(cost,mwt,ep,nveclen,neq)
       
       use poly_fit_mod,      only : fit
       use control_variables, only : isamp,dt_error_tol,b,error,errorP,errorL2
@@ -141,9 +141,9 @@
 
       integer,                  intent(in) :: mwt
       real(wp),                 intent(in) :: ep
-      integer,                  intent(in) :: nveclen
+      integer,                  intent(in) :: nveclen,neq
       
-      real(wp), dimension(nveclen*2+2) :: a,siga1,sigb1,chi2
+      real(wp), dimension(nveclen*2+neq) :: a,siga1,sigb1,chi2
       real(wp)                       :: q
       integer                        :: i,j
       integer                        :: jsamp
@@ -166,7 +166,7 @@
      &           siga1(i+nveclen),sigb1(i+nveclen),chi2(i+nveclen),q)   
      enddo
      
-     do i = 1,2
+     do i = 1,neq
         do j=2,size(errorL2(:,i))
           jsamp=j
           if (errorL2(j,i)<=log10(dt_error_tol)) exit
@@ -182,9 +182,10 @@
 !          write(*,60,advance="no")a(i),b(i)
 !        enddo
 !      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
-      write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+1)
-      write(*,60,advance="no")a(nveclen*2+1),b(nveclen*2+2)
-      write(*,60)a(nveclen*2+2),b(nveclen*2+3)
+      do i = 1,neq-1
+        write(*,60,advance="no")a(nveclen*2+i),b(nveclen*2+i)
+      enddo
+      write(*,60)a(nveclen*2+neq),b(nveclen*2+neq)
    60 format( e12.5,1x,12(f8.3,1x))
    
       end subroutine output_terminal_iteration
