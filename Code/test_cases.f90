@@ -87,7 +87,7 @@
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
       do icase = cases,cases
-  
+      
         !**initilizations?**
         stageE(:) = 0.0_wp
         stageI(:) = 0.0_wp
@@ -126,15 +126,13 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-!            do iDT = 10,10
+!            do iDT = 1,1
 ! HACK
             do iDT =1,isamp,1   
-
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep='SET_INITIAL_CONDITIONS'
               call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
-
               dto = dt        !store time step
               t = 0.0_wp      !init. start time
 
@@ -226,7 +224,7 @@
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
 ! HACK exact solution for each dt
-!              write(120+iDT,*)uvec
+!              write(199+iDT,*)uvec
 !              print*,iDT
 ! HACK
 ! L2 norm and Linf norms          
@@ -241,7 +239,7 @@
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
-              call output_conv_error(cost(iDT))
+              call output_conv_error(cost(iDT),nveclen,neq)
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
 
@@ -262,7 +260,7 @@
 !           write(123,*)uvec(2:nveclen:2)
 !           write(124,*)uvec(3:nveclen:3)
 !           write(121,*)uexact
-!           write(125,*)uvec
+!           write(900,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
 

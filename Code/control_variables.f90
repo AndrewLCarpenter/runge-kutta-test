@@ -50,7 +50,7 @@
       subroutine allocate_vars(nveclen,neq,is)
       
       integer, intent(in) :: nveclen,neq,is
-      
+    
       !**ALLOCATE VARIABLES**
       !problemsub
       AllOCATE(uvec(nveclen),uexact(nveclen),resE(nveclen,is),resI(nveclen,is))
@@ -74,7 +74,7 @@
       subroutine deallocate_vars()
       
       use SBP_Coef_Module,  only: Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,D1_per,&
-     &                            iD1_per,jD1_per
+     &                            iD1_per,jD1_per,D2_per,jD2_per,iD2_per
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw
       
       !**DEALLOCATE VARIABLES**
@@ -93,7 +93,7 @@
       
       !D CSR
       if(allocated(D1)) deallocate(Pmat,Pinv,jD1,jD2,iD1,iD2,D1,D2,D1_per,&
-     &                              iD1_per,jD1_per) 
+     &                              iD1_per,jD1_per,D2_per,jD2_per,iD2_per) 
      
       !Jacobian CSR
       if(allocated(iaJac)) deallocate(iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw)                                 

@@ -31,7 +31,7 @@
       private
       public :: Brusselator
       
-      integer,  parameter :: vecl=64     ! total uvec length == 2*vecl
+      integer,  parameter :: vecl=32     ! total uvec length == 2*vecl
       integer,  parameter :: neq=2
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
@@ -101,8 +101,8 @@
            
           !Time information
           choose_dt: select case(temporal_splitting)
-            case('IMPLICIT');dt = 0.045_wp/10**((iDT-1)/20.0_wp) ! timestep   
-            case('IMEX')    ;dt = 0.00019_wp/10**((iDT-1)/20.0_wp) 
+            case('IMPLICIT');dt = 0.25_wp/10**((iDT-1)/28.0_wp) ! timestep   
+            case('IMEX')    ;dt = 0.0025_wp/10**((iDT-1)/40.0_wp)
           end select choose_dt
           tfinal = 10.0_wp                   ! final time
  
@@ -172,11 +172,13 @@
       real(wp), dimension(81,vecl*2+1)      :: ExactTot
       real(wp)                              :: diff
       real(wp), dimension(vecl*2)           :: exact_Bruss
+      character(len=2)                      :: vstr
 
       exact_Bruss(:)=0.0_wp
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Brusselator_64.data')
+      write(vstr,"(I2.1)")vecl
+      open(unit=39,file='exact.Brusselator_'//vstr//'.data')
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl*2)

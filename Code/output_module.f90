@@ -66,28 +66,26 @@
        
 !==============================================================================
 !  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
-      subroutine init_output_files(nveclen,ep)
+      subroutine init_output_files(neq,ep)
 
       use control_variables, only : probname
       use runge_kutta,       only : casename
      
-      integer,  intent(in) :: nveclen
+      integer,  intent(in) :: neq
       real(wp), intent(in) :: ep
       character(len=80)    :: filename   !file name and location
       character(len=1)     :: istr        !loop index placeholder
       integer              :: i
           
-      if(nveclen <= 9) then
-        do i = 1,nveclen
-          write(istr,"(I1.1)")i
-          filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
-          open(49+i,file=trim(fileloc)//filename)
-          write(49+i,*)'zone T = "ep = ',ep,'",'
-          filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
-          open(59+i,file=trim(fileloc)//filename)
-          write(59+i,*)'zone T = "ep = ',ep,'",'
-        enddo
-      endif
+      do i = 1,neq
+        write(istr,"(I1.1)")i
+        filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
+        open(49+i,file=trim(fileloc)//filename)
+        write(49+i,*)'zone T = "ep = ',ep,'",'
+        filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+        open(59+i,file=trim(fileloc)//filename)
+        write(59+i,*)'zone T = "ep = ',ep,'",'
+      enddo
 
       end subroutine init_output_files
       
@@ -171,6 +169,7 @@
           jsamp=j
           if (errorL2(j,i)<=log10(dt_error_tol)) exit
         enddo
+
         call fit(cost,errorL2(:,i),jsamp,sig,mwt,a(nveclen*2+i),b(nveclen*2+i),                  &
      &           siga1(nveclen*2+i),sigb1(nveclen*2+i),chi2(nveclen*2+i),q)
       enddo
@@ -217,23 +216,28 @@
 
 !==============================================================================
 !  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
-      subroutine output_conv_error(cost)
+      subroutine output_conv_error(cost,nveclen,neq)
       
       use control_variables, only : uvec,uexact,errvecT
       
-      real(wp),               intent(in) :: cost
+      real(wp),         intent(in) :: cost
+      integer,          intent(in) :: nveclen,neq
       
-      integer  :: i
-      real(wp) :: tmp
-  
-      if (size(uvec)<=9) then
-        do i = 1,size(uvec)
-          tmp=abs(uvec(i)-uexact(i))
-          if (tmp==0.0_wp)tmp=1.0e-15_wp
-          write(49+i,*)cost,log10(tmp)
-          write(59+i,*)cost,log10(errvecT(i))
-        enddo
-      endif
+      integer                      :: i
+      real(wp), dimension(nveclen) :: tmp
+     
+      tmp=abs(uvec(:)-uexact(:))
+      do i = 1,nveclen
+       if (tmp(i)==0.0_wp)tmp(i)=1.0e-15_wp  
+      enddo
+      
+      do i = 1,neq
+        write(49+i,*)cost,log10(sqrt(dot_product(tmp(i:nveclen:neq), &
+     &                                   tmp(i:nveclen:neq))/(nveclen/neq)))
+        write(59+i,*)cost,log10(sqrt(dot_product(errvecT(i:nveclen:neq), &
+     &                                errvecT(i:nveclen:neq))/(nveclen/neq)))
+      enddo
+
       
       end subroutine output_conv_error
 

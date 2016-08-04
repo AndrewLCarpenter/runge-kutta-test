@@ -99,7 +99,7 @@
           
           !Allocate derivative operators
           if(.not. allocated(D1_per))call Define_CSR_Operators(vecl/2,dx)   
-          
+
           !Time information
           tfinal = 0.2_wp  ! final time   
           choose_dt: select case(temporal_splitting)

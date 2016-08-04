@@ -45,8 +45,8 @@
           nvecLen = vecl
           neq = vecl
           probname='Kreiss   '   
-          tol=1.0e-10_wp
-          dt_error_tol=1.0e-9_wp
+          tol=5.0e-9_wp
+          dt_error_tol=1.0e-10_wp
           
           allocate(var_names(neq))
           var_names(:)=(/'Differential', 'Algebraic   '/)
@@ -59,7 +59,10 @@
           sin_t=sin(time)
           
           !Time information
-          dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep
+          choose_dt: select case(temporal_splitting)
+          case('IMEX');dt = 0.02_wp/10**((iDT-1)/30.0_wp) ! timestep
+          case('IMPLICIT'); dt = 1.0_wp/10**((iDT-1)/20.0_wp) ! timestep
+          end select choose_dt
           tfinal = 1.0_wp                    ! final time
 
           !**Exact Solution**
