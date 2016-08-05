@@ -32,12 +32,12 @@
 <a name="l00008"></a>00008 <span class="comment">!******************************************************************************</span>
 <a name="l00009"></a><a class="code" href="namespacePureschi__mod.html">00009</a>       <span class="keyword">module</span> Pureschi_mod
 <a name="l00010"></a>00010       <span class="keywordtype">private</span>
-<a name="l00011"></a>00011       <span class="keywordtype">public</span> :: <a class="code" href="namespacePureschi__mod.html#adafad2458c1389ee7e3d5f5a544229d7">Pureschi</a>
+<a name="l00011"></a>00011       <span class="keywordtype">public</span> :: <a class="code" href="namespacePureschi__mod.html#a674934cac7a575adee729ee8cbb66236">Pureschi</a>
 <a name="l00012"></a>00012       <span class="keyword">contains</span>
-<a name="l00013"></a><a class="code" href="namespacePureschi__mod.html#adafad2458c1389ee7e3d5f5a544229d7">00013</a>       <span class="keyword">subroutine </span><a class="code" href="namespacePureschi__mod.html#adafad2458c1389ee7e3d5f5a544229d7">Pureschi</a>(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+<a name="l00013"></a><a class="code" href="namespacePureschi__mod.html#a674934cac7a575adee729ee8cbb66236">00013</a>       <span class="keyword">subroutine </span><a class="code" href="namespacePureschi__mod.html#a674934cac7a575adee729ee8cbb66236">Pureschi</a>(nveclen,neq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 <a name="l00014"></a>00014 
 <a name="l00015"></a>00015       use <span class="keywordflow">precision_vars</span>,    only: wp, pi
-<a name="l00016"></a>00016       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,xjac, &amp;
+<a name="l00016"></a>00016       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,xjac,var_names,&amp;
 <a name="l00017"></a>00017      &amp;                             tol,dt_error_tol,uvec,uexact,programstep
 <a name="l00018"></a>00018 
 <a name="l00019"></a>00019       implicit none; <span class="keywordtype">save</span>
@@ -47,7 +47,7 @@
 <a name="l00023"></a>00023       <span class="comment">!INIT vars</span>
 <a name="l00024"></a>00024       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: ep
 <a name="l00025"></a>00025       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(inout)</span> :: dt
-<a name="l00026"></a>00026       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(  out)</span> :: nveclen
+<a name="l00026"></a>00026       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(  out)</span> :: nveclen,neq
 <a name="l00027"></a>00027       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(  out)</span> :: tfinal
 <a name="l00028"></a>00028       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(in   )</span> :: iDT
 <a name="l00029"></a>00029 
@@ -66,70 +66,74 @@
 <a name="l00042"></a>00042         <span class="comment">!**Pre-initialization. Get problem name and vector length**</span>
 <a name="l00043"></a>00043         <span class="keyword">case</span>(<span class="stringliteral">&apos;INITIALIZE_PROBLEM_INFORMATION&apos;</span>)
 <a name="l00044"></a>00044           nvecLen = vecl
-<a name="l00045"></a>00045           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Pureschi &apos;</span>   
-<a name="l00046"></a>00046           tol=1.0e-12_wp
-<a name="l00047"></a>00047           dt_error_tol=1.0e-13_wp
-<a name="l00048"></a>00048         
-<a name="l00049"></a>00049         <span class="comment">!**Initialization of problem information**        </span>
-<a name="l00050"></a>00050         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
-<a name="l00051"></a>00051       
-<a name="l00052"></a>00052           <span class="comment">!Time information</span>
-<a name="l00053"></a>00053           dt = 0.5_wp/10**((iDT-1)/20._wp) <span class="comment">! timestep</span>
-<a name="l00054"></a>00054           tfinal = 5.0_wp                  <span class="comment">! final time</span>
-<a name="l00055"></a>00055 
-<a name="l00056"></a>00056           <span class="comment">!**Exact Solution**</span>
-<a name="l00057"></a>00057           <span class="keyword">open</span>(unit=39,file=<span class="stringliteral">&apos;exact.pureschi.1.data&apos;</span>)
-<a name="l00058"></a>00058           rewind(39)
-<a name="l00059"></a>00059           <span class="keyword">do</span> i=1,81
-<a name="l00060"></a>00060             <span class="keyword">read</span>(39,*)ExactTot(i,1),ExactTot(i,2)
-<a name="l00061"></a>00061             ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp)) <span class="comment">!  used for 81 values of ep</span>
-<a name="l00062"></a>00062             <span class="keyword">enddo</span>
-<a name="l00063"></a>00063 
-<a name="l00064"></a>00064           <span class="keyword">do</span> i=1,81
-<a name="l00065"></a>00065             diff = abs(ExactTot(i,3) - ep)
-<a name="l00066"></a>00066             <span class="keyword">if</span>(diff.le.1.0e-10_wp)<span class="keyword">then</span>
-<a name="l00067"></a>00067               uexact(1) = ExactTot(i,1)
-<a name="l00068"></a>00068               uexact(2) = ExactTot(i,2)
-<a name="l00069"></a>00069               exit
-<a name="l00070"></a>00070             <span class="keyword">endif</span>
-<a name="l00071"></a>00071           <span class="keyword">enddo</span>
-<a name="l00072"></a>00072 
-<a name="l00073"></a>00073           <span class="comment">!**Equilibrium IC**</span>
-<a name="l00074"></a>00074           uvec(1) = <a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>/2.0_wp
-<a name="l00075"></a>00075           uvec(2) = sin(<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>/2.0_wp)
+<a name="l00045"></a>00045           neq = vecl
+<a name="l00046"></a>00046           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Pureschi &apos;</span>   
+<a name="l00047"></a>00047           tol=1.0e-12_wp
+<a name="l00048"></a>00048           dt_error_tol=1.0e-13_wp
+<a name="l00049"></a>00049           
+<a name="l00050"></a>00050           <span class="keyword">allocate</span>(<a class="code" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">var_names</a>(neq))
+<a name="l00051"></a>00051           <a class="code" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">var_names</a>(:)=(/<span class="stringliteral">&apos;Differential&apos;</span>, <span class="stringliteral">&apos;Algebraic   &apos;</span>/)
+<a name="l00052"></a>00052         
+<a name="l00053"></a>00053         <span class="comment">!**Initialization of problem information**        </span>
+<a name="l00054"></a>00054         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
+<a name="l00055"></a>00055       
+<a name="l00056"></a>00056           <span class="comment">!Time information</span>
+<a name="l00057"></a>00057           dt = 0.5_wp/10**((iDT-1)/20._wp) <span class="comment">! timestep</span>
+<a name="l00058"></a>00058           tfinal = 5.0_wp                  <span class="comment">! final time</span>
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060           <span class="comment">!**Exact Solution**</span>
+<a name="l00061"></a>00061           <span class="keyword">open</span>(unit=39,file=<span class="stringliteral">&apos;exact.pureschi.1.data&apos;</span>)
+<a name="l00062"></a>00062           rewind(39)
+<a name="l00063"></a>00063           <span class="keyword">do</span> i=1,81
+<a name="l00064"></a>00064             <span class="keyword">read</span>(39,*)ExactTot(i,1),ExactTot(i,2)
+<a name="l00065"></a>00065             ExactTot(i,3) = 1.0_wp/10**((i-1)/(10.0_wp)) <span class="comment">!  used for 81 values of ep</span>
+<a name="l00066"></a>00066             <span class="keyword">enddo</span>
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068           <span class="keyword">do</span> i=1,81
+<a name="l00069"></a>00069             diff = abs(ExactTot(i,3) - ep)
+<a name="l00070"></a>00070             <span class="keyword">if</span>(diff.le.1.0e-10_wp)<span class="keyword">then</span>
+<a name="l00071"></a>00071               uexact(1) = ExactTot(i,1)
+<a name="l00072"></a>00072               uexact(2) = ExactTot(i,2)
+<a name="l00073"></a>00073               exit
+<a name="l00074"></a>00074             <span class="keyword">endif</span>
+<a name="l00075"></a>00075           <span class="keyword">enddo</span>
 <a name="l00076"></a>00076 
-<a name="l00077"></a>00077         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)
-<a name="l00078"></a>00078           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
-<a name="l00079"></a>00079             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
-<a name="l00080"></a>00080               resE_vec(1) = dt*(-uvec(2))
-<a name="l00081"></a>00081               resE_vec(2) = dt*(+uvec(1))
-<a name="l00082"></a>00082               resI_vec(1) = 0.0_wp
-<a name="l00083"></a>00083               resI_vec(2) = dt*(sin(uvec(1)) - uvec(2))/ep
-<a name="l00084"></a>00084             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
-<a name="l00085"></a>00085               resE_vec(:) = 0.0_wp
-<a name="l00086"></a>00086               resI_vec(1) = dt*(-uvec(2))
-<a name="l00087"></a>00087               resI_vec(2) = dt*(+uvec(1) + (sin(uvec(1)) - uvec(2))/ep)
-<a name="l00088"></a>00088           <span class="keyword">end select</span> choose_RHS_type
-<a name="l00089"></a>00089 
-<a name="l00090"></a>00090         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
-<a name="l00091"></a>00091           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span>(Temporal_Splitting)
-<a name="l00092"></a>00092             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
-<a name="l00093"></a>00093               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(0.0_wp)
-<a name="l00094"></a>00094               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(0.0_wp)
-<a name="l00095"></a>00095               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(cos(uvec(1)) )/ep
-<a name="l00096"></a>00096               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
-<a name="l00097"></a>00097             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
-<a name="l00098"></a>00098               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
-<a name="l00099"></a>00099               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
-<a name="l00100"></a>00100               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(+1.0_wp + cos(uvec(1))/ep)
-<a name="l00101"></a>00101               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
-<a name="l00102"></a>00102           <span class="keyword">end select</span> choose_Jac_type
-<a name="l00103"></a>00103           
-<a name="l00104"></a>00104       <span class="keyword">end select</span> Program_Step_Select     
-<a name="l00105"></a>00105 <span class="keyword">      end subroutine Pureschi</span>
-<a name="l00106"></a>00106 <span class="keyword">      end module Pureschi_mod</span>
+<a name="l00077"></a>00077           <span class="comment">!**Equilibrium IC**</span>
+<a name="l00078"></a>00078           uvec(1) = <a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>/2.0_wp
+<a name="l00079"></a>00079           uvec(2) = sin(<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>/2.0_wp)
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)
+<a name="l00082"></a>00082           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
+<a name="l00083"></a>00083             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
+<a name="l00084"></a>00084               resE_vec(1) = dt*(-uvec(2))
+<a name="l00085"></a>00085               resE_vec(2) = dt*(+uvec(1))
+<a name="l00086"></a>00086               resI_vec(1) = 0.0_wp
+<a name="l00087"></a>00087               resI_vec(2) = dt*(sin(uvec(1)) - uvec(2))/ep
+<a name="l00088"></a>00088             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
+<a name="l00089"></a>00089               resE_vec(:) = 0.0_wp
+<a name="l00090"></a>00090               resI_vec(1) = dt*(-uvec(2))
+<a name="l00091"></a>00091               resI_vec(2) = dt*(+uvec(1) + (sin(uvec(1)) - uvec(2))/ep)
+<a name="l00092"></a>00092           <span class="keyword">end select</span> choose_RHS_type
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
+<a name="l00095"></a>00095           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span>(Temporal_Splitting)
+<a name="l00096"></a>00096             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
+<a name="l00097"></a>00097               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(0.0_wp)
+<a name="l00098"></a>00098               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+<a name="l00099"></a>00099               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(cos(uvec(1)) )/ep
+<a name="l00100"></a>00100               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
+<a name="l00101"></a>00101             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
+<a name="l00102"></a>00102               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(+0.0_wp)
+<a name="l00103"></a>00103               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
+<a name="l00104"></a>00104               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(+1.0_wp + cos(uvec(1))/ep)
+<a name="l00105"></a>00105               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
+<a name="l00106"></a>00106           <span class="keyword">end select</span> choose_Jac_type
+<a name="l00107"></a>00107           
+<a name="l00108"></a>00108       <span class="keyword">end select</span> Program_Step_Select     
+<a name="l00109"></a>00109 <span class="keyword">      end subroutine Pureschi</span>
+<a name="l00110"></a>00110 <span class="keyword">      end module Pureschi_mod</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

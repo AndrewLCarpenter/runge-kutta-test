@@ -366,7 +366,7 @@ c                \sum_{j=1}^{s-1} \sum_{k=0}^{order} ( BBh_{ijk}*r^(k)) * U^{n,j
           error1P(iDT) = alog10(errvecT(1))
           error2P(iDT) = alog10(errvecT(2))
   
-          write(50,*)cost(iDT),error1(iDT)
+          write(50,50)cost(iDT),error1(iDT)
           write(51,50)cost(iDT),error2(iDT)
           write(52,50)cost(iDT),error1P(iDT)
           write(53,50)cost(iDT),error2P(iDT)
@@ -3000,7 +3000,7 @@ c
       INTEGER mwt ,ndata
       REAL a,b,chi2,q,siga,sigb,sig(ndata),x(ndata),y(ndata)
       INTEGER i
-      REAL sigdat,ss,st2,sx,sxoss,sy,t,wt,gammq
+      REAL sigdat,ss,st2,sx,sxoss,sy,t,wt!,gammq
       sx=0.
       sy=0.
       st2=0. 

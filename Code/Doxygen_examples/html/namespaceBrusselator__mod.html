@@ -26,13 +26,14 @@
 <div class="contents">
 <h1>Brusselator_mod Module Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f">Brusselator</a> (nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617">Brusselator</a> (nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a88873c57a45f123664064496465fffbf">grid</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a255cb631c1a7d91e665d7a521fb79d1d">Bruss_dUdt</a> (vec, dudt_deriv2, dudt_source, eps)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aec92a7632eb6287c9b18902c584ec3a3">Build_Source_Jac</a> (vec, Source_p, jSource_p, iSource_p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a5162890a7558ad2a6dfcaabd0ff4a3ef">Build_Jac</a> (dt, akk, a, ja, ia, nnz_Jac)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a028dada9c4cbd8835c0ddb11670c6bb3">Build_Jac</a> (dt, akk, a, ja, ia)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">vecl</a> = 64</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">vecl</a> = 32</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a420f8d79cc50897bb5ac4b92cff1eaf4">neq</a> = 2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a12dedf90ba0b181f9d6223ad1c03e7c9">xL</a> = 0.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ab4743f9768880d4335f15ab6e27806bf">xR</a> = 1.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(<a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">vecl</a>)&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a71191a3f8ed5a526ed287783068f13d2">x</a></td></tr>
@@ -80,9 +81,9 @@
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00192">192</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00200">200</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>References <a class="el" href="matvec__module_8f90_source.html#l00039">matvec_module::amux()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00041">Deriv2_p</a>, <a class="el" href="unary__mod_8f90_source.html#l01626">unary_mod::dperm()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">SBP_Coef_Module::iD2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00042">iDeriv2_p</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">SBP_Coef_Module::jD2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00040">jDeriv2_p</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">SBP_Coef_Module::nnz_D2_per</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>.</p>
+<p>References <a class="el" href="matvec__module_8f90_source.html#l00039">matvec_module::amux()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00042">Deriv2_p</a>, <a class="el" href="unary__mod_8f90_source.html#l01626">unary_mod::dperm()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">SBP_Coef_Module::iD2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00043">iDeriv2_p</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00022">SBP_Coef_Module::jD2_per</a>, <a class="el" href="brusselator__2_8f90_source.html#l00041">jDeriv2_p</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">SBP_Coef_Module::nnz_D2_per</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -95,7 +96,7 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="ad830173db62e6e5629181139c7bef35f"></a><!-- doxytag: member="Brusselator_mod::Brusselator" ref="ad830173db62e6e5629181139c7bef35f" args="(nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
+<a class="anchor" id="ab79d0906955a0bb799e47451c5907617"></a><!-- doxytag: member="Brusselator_mod::Brusselator" ref="ab79d0906955a0bb799e47451c5907617" args="(nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -104,6 +105,12 @@ Here is the call graph for this function:</div>
           <td>(</td>
           <td class="paramtype">integer,intent(out)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(out)&nbsp;</td>
+          <td class="paramname"> <em>eq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -156,33 +163,33 @@ Here is the call graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00047">47</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00048">48</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage()</a>, <a class="el" href="unary__mod_8f90_source.html#l04036">unary_mod::aplb()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00290">Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00243">Build_Source_Jac()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">SBP_Coef_Module::Define_CSR_Operators()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00041">Deriv2_p</a>, <a class="el" href="brusselator__2_8f90_source.html#l00038">dx</a>, <a class="el" href="brusselator__2_8f90_source.html#l00161">exact_Bruss</a>, <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00042">iDeriv2_p</a>, <a class="el" href="control__variables_8f90_source.html#l00030">control_variables::Jac_case</a>, <a class="el" href="brusselator__2_8f90_source.html#l00040">jDeriv2_p</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">SBP_Coef_Module::nnz_D2_per</a>, <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="precision__vars_8f90_source.html#l00027">precision_vars::two</a>, <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00037">x</a>.</p>
+<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage()</a>, <a class="el" href="unary__mod_8f90_source.html#l04036">unary_mod::aplb()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00298">Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00251">Build_Source_Jac()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">SBP_Coef_Module::Define_CSR_Operators()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00042">Deriv2_p</a>, <a class="el" href="brusselator__2_8f90_source.html#l00039">dx</a>, <a class="el" href="brusselator__2_8f90_source.html#l00167">exact_Bruss</a>, <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00043">iDeriv2_p</a>, <a class="el" href="control__variables_8f90_source.html#l00030">control_variables::Jac_case</a>, <a class="el" href="brusselator__2_8f90_source.html#l00041">jDeriv2_p</a>, <a class="el" href="brusselator__2_8f90_source.html#l00035">neq</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00024">SBP_Coef_Module::nnz_D2_per</a>, <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="precision__vars_8f90_source.html#l00027">precision_vars::two</a>, <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00038">x</a>.</p>
 
 <p>Referenced by <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_cgraph.png" border="0" usemap="#namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_cgraph_map" alt=""></div>
-<map name="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_cgraph_map" id="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_cgraph">
-<area shape="rect" id="node3" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935" title="Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage" alt="" coords="249,5,561,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c" title="unary_mod::aplb" alt="" coords="347,59,464,88"/><area shape="rect" id="node7" href="namespaceBrusselator__mod.html#a5162890a7558ad2a6dfcaabd0ff4a3ef" title="Brusselator_mod::Build_Jac" alt="" coords="313,112,497,141"/><area shape="rect" id="node13" href="namespaceBrusselator__mod.html#aec92a7632eb6287c9b18902c584ec3a3" title="Brusselator_mod::Build_Source_Jac" alt="" coords="289,165,521,195"/><area shape="rect" id="node21" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="267,245,544,275"/><area shape="rect" id="node39" href="namespaceBrusselator__mod.html#a88873c57a45f123664064496465fffbf" title="Brusselator_mod::grid" alt="" coords="331,299,480,328"/><area shape="rect" id="node9" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="651,99,781,128"/><area shape="rect" id="node11" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="907,99,1037,128"/><area shape="rect" id="node15" href="namespaceunary__mod.html#a8247fa4ab43954b9f840fc56fd441c23" title="unary_mod::dperm" alt="" coords="651,152,781,181"/><area shape="rect" id="node17" href="namespaceunary__mod.html#a3911ae3b59ca413043b651034c4faa94" title="unary_mod::cperm" alt="" coords="907,205,1037,235"/><area shape="rect" id="node19" href="namespaceunary__mod.html#ac8cbdc4380307b940c0153271f95bf22" title="unary_mod::rperm" alt="" coords="909,152,1035,181"/><area shape="rect" id="node23" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="623,312,809,341"/><area shape="rect" id="node31" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="611,205,821,235"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="623,365,809,395"/><area shape="rect" id="node37" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="611,259,821,288"/><area shape="rect" id="node25" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="869,365,1075,395"/><area shape="rect" id="node27" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="875,312,1069,341"/><area shape="rect" id="node29" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="1124,312,1329,341"/></map>
+<div class="center"><img src="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_cgraph.png" border="0" usemap="#namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_cgraph_map" alt=""></div>
+<map name="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_cgraph_map" id="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_cgraph">
+<area shape="rect" id="node3" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935" title="Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage" alt="" coords="249,5,561,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c" title="unary_mod::aplb" alt="" coords="347,59,464,88"/><area shape="rect" id="node7" href="namespaceBrusselator__mod.html#a028dada9c4cbd8835c0ddb11670c6bb3" title="Brusselator_mod::Build_Jac" alt="" coords="313,112,497,141"/><area shape="rect" id="node13" href="namespaceBrusselator__mod.html#aec92a7632eb6287c9b18902c584ec3a3" title="Brusselator_mod::Build_Source_Jac" alt="" coords="289,165,521,195"/><area shape="rect" id="node21" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="267,245,544,275"/><area shape="rect" id="node39" href="namespaceBrusselator__mod.html#a88873c57a45f123664064496465fffbf" title="Brusselator_mod::grid" alt="" coords="331,299,480,328"/><area shape="rect" id="node9" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="651,99,781,128"/><area shape="rect" id="node11" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="907,99,1037,128"/><area shape="rect" id="node15" href="namespaceunary__mod.html#a8247fa4ab43954b9f840fc56fd441c23" title="unary_mod::dperm" alt="" coords="651,152,781,181"/><area shape="rect" id="node17" href="namespaceunary__mod.html#a3911ae3b59ca413043b651034c4faa94" title="unary_mod::cperm" alt="" coords="907,205,1037,235"/><area shape="rect" id="node19" href="namespaceunary__mod.html#ac8cbdc4380307b940c0153271f95bf22" title="unary_mod::rperm" alt="" coords="909,152,1035,181"/><area shape="rect" id="node23" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="623,312,809,341"/><area shape="rect" id="node31" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="611,205,821,235"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="623,365,809,395"/><area shape="rect" id="node37" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="611,259,821,288"/><area shape="rect" id="node25" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="869,365,1075,395"/><area shape="rect" id="node27" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="875,312,1069,341"/><area shape="rect" id="node29" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="1124,312,1329,341"/></map>
 </div>
 </p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_icgraph_map" alt=""></div>
-<map name="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_icgraph_map" id="namespaceBrusselator__mod_ad830173db62e6e5629181139c7bef35f_icgraph">
-<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="249,75,444,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="509,75,640,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1153,89,1239,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="493,22,656,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="704,25,880,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="929,50,1103,79"/></map>
+<div class="center"><img src="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_icgraph_map" alt=""></div>
+<map name="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_icgraph_map" id="namespaceBrusselator__mod_ab79d0906955a0bb799e47451c5907617_icgraph">
+<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="249,75,444,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="509,75,640,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1153,89,1239,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="493,22,656,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="704,25,880,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="929,50,1103,79"/></map>
 </div>
 </p>
 
 </div>
 </div>
-<a class="anchor" id="a5162890a7558ad2a6dfcaabd0ff4a3ef"></a><!-- doxytag: member="Brusselator_mod::Build_Jac" ref="a5162890a7558ad2a6dfcaabd0ff4a3ef" args="(dt, akk, a, ja, ia, nnz_Jac)" -->
+<a class="anchor" id="a028dada9c4cbd8835c0ddb11670c6bb3"></a><!-- doxytag: member="Brusselator_mod::Build_Jac" ref="a028dada9c4cbd8835c0ddb11670c6bb3" args="(dt, akk, a, ja, ia)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -214,13 +221,7 @@ Here is the caller graph for this function:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">integer,dimension(:),intent(in)&nbsp;</td>
-          <td class="paramname"> <em>ia</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">integer,intent(in)&nbsp;</td>
-          <td class="paramname"> <em>nnz_Jac</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>ia</em></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -231,17 +232,17 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00290">290</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00298">298</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
 <p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aJac</a>, <a class="el" href="unary__mod_8f90_source.html#l05083">unary_mod::aplsca()</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jaJac</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_cgraph.png" border="0" usemap="#namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_cgraph_map" alt=""></div>
-<map name="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_cgraph_map" id="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_cgraph">
+<div class="center"><img src="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_cgraph.png" border="0" usemap="#namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_cgraph_map" alt=""></div>
+<map name="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_cgraph_map" id="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_cgraph">
 <area shape="rect" id="node3" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="241,5,372,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="423,5,553,35"/></map>
 </div>
 </p>
@@ -249,9 +250,9 @@ Here is the call graph for this function:</div>
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_icgraph_map" alt=""></div>
-<map name="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_icgraph_map" id="namespaceBrusselator__mod_a5162890a7558ad2a6dfcaabd0ff4a3ef_icgraph">
-<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="240,75,435,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="484,75,679,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="744,75,875,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1388,89,1473,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="728,22,891,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="939,25,1115,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1164,50,1337,79"/></map>
+<div class="center"><img src="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_icgraph_map" alt=""></div>
+<map name="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_icgraph_map" id="namespaceBrusselator__mod_a028dada9c4cbd8835c0ddb11670c6bb3_icgraph">
+<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617" title="Brusselator_mod::Brusselator" alt="" coords="240,75,435,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="484,75,679,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="744,75,875,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1388,89,1473,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="728,22,891,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="939,25,1115,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1164,50,1337,79"/></map>
 </div>
 </p>
 
@@ -294,11 +295,11 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00243">243</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00251">251</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
 <p>References <a class="el" href="unary__mod_8f90_source.html#l01626">unary_mod::dperm()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
@@ -314,7 +315,7 @@ Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceBrusselator__mod_aec92a7632eb6287c9b18902c584ec3a3_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_aec92a7632eb6287c9b18902c584ec3a3_icgraph_map" alt=""></div>
 <map name="namespaceBrusselator__mod_aec92a7632eb6287c9b18902c584ec3a3_icgraph_map" id="namespaceBrusselator__mod_aec92a7632eb6287c9b18902c584ec3a3_icgraph">
-<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="288,75,483,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="532,75,727,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="792,75,923,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1436,89,1521,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="776,22,939,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="987,25,1163,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1212,50,1385,79"/></map>
+<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617" title="Brusselator_mod::Brusselator" alt="" coords="288,75,483,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="532,75,727,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="792,75,923,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1436,89,1521,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="776,22,939,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="987,25,1163,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1212,50,1385,79"/></map>
 </div>
 </p>
 
@@ -335,18 +336,18 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00149">149</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00155">155</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>References <a class="el" href="brusselator__2_8f90_source.html#l00038">dx</a>, <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>, <a class="el" href="brusselator__2_8f90_source.html#l00037">x</a>, <a class="el" href="brusselator__2_8f90_source.html#l00035">xL</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00035">xR</a>.</p>
+<p>References <a class="el" href="brusselator__2_8f90_source.html#l00039">dx</a>, <a class="el" href="brusselator__2_8f90_source.html#l00034">vecl</a>, <a class="el" href="brusselator__2_8f90_source.html#l00038">x</a>, <a class="el" href="brusselator__2_8f90_source.html#l00036">xL</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00036">xR</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceBrusselator__mod_a88873c57a45f123664064496465fffbf_icgraph.png" border="0" usemap="#namespaceBrusselator__mod_a88873c57a45f123664064496465fffbf_icgraph_map" alt=""></div>
 <map name="namespaceBrusselator__mod_a88873c57a45f123664064496465fffbf_icgraph_map" id="namespaceBrusselator__mod_a88873c57a45f123664064496465fffbf_icgraph">
-<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f" title="Brusselator_mod::Brusselator" alt="" coords="203,75,397,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="447,75,641,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="707,75,837,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1351,89,1436,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="691,22,853,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="901,25,1077,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1127,50,1300,79"/></map>
+<area shape="rect" id="node3" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617" title="Brusselator_mod::Brusselator" alt="" coords="203,75,397,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="447,75,641,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="707,75,837,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1351,89,1436,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="691,22,853,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="901,25,1077,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1127,50,1300,79"/></map>
 </div>
 </p>
 
@@ -364,9 +365,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00041">41</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00042">42</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00200">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 </div>
 </div>
@@ -381,9 +382,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00038">38</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00039">39</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>.</p>
 
 </div>
 </div>
@@ -398,9 +399,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00161">161</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00167">167</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 </div>
 </div>
@@ -415,9 +416,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00042">42</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00043">43</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00200">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 </div>
 </div>
@@ -432,9 +433,26 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00040">40</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00041">41</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00200">Bruss_dUdt()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a420f8d79cc50897bb5ac4b92cff1eaf4"></a><!-- doxytag: member="Brusselator_mod::neq" ref="a420f8d79cc50897bb5ac4b92cff1eaf4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer,parameter <a class="el" href="namespaceBrusselator__mod.html#a420f8d79cc50897bb5ac4b92cff1eaf4">Brusselator_mod::neq</a> = 2</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00035">35</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>.</p>
 
 </div>
 </div>
@@ -443,7 +461,7 @@ Here is the caller graph for this function:</div>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">integer,parameter <a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">Brusselator_mod::vecl</a> = 64</td>
+          <td class="memname">integer,parameter <a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">Brusselator_mod::vecl</a> = 32</td>
         </tr>
       </table>
 </div>
@@ -451,7 +469,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00034">34</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00192">Bruss_dUdt()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00290">Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00243">Build_Source_Jac()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00200">Bruss_dUdt()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00298">Build_Jac()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00251">Build_Source_Jac()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>.</p>
 
 </div>
 </div>
@@ -466,9 +484,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00037">37</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00038">38</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>.</p>
 
 </div>
 </div>
@@ -483,9 +501,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00035">35</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00036">36</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>.</p>
 
 </div>
 </div>
@@ -500,14 +518,14 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00035">35</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
+<p>Definition at line <a class="el" href="brusselator__2_8f90_source.html#l00036">36</a> of file <a class="el" href="brusselator__2_8f90_source.html">brusselator_2.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00149">grid()</a>.</p>
+<p>Referenced by <a class="el" href="brusselator__2_8f90_source.html#l00155">grid()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

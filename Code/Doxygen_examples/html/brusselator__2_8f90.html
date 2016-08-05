@@ -30,13 +30,14 @@
 <tr><td colspan="2"><h2>Modules</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">module &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html">Brusselator_mod</a></td></tr>
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f">Brusselator_mod::Brusselator</a> (nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617">Brusselator_mod::Brusselator</a> (nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a88873c57a45f123664064496465fffbf">Brusselator_mod::grid</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a255cb631c1a7d91e665d7a521fb79d1d">Brusselator_mod::Bruss_dUdt</a> (vec, dudt_deriv2, dudt_source, eps)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aec92a7632eb6287c9b18902c584ec3a3">Brusselator_mod::Build_Source_Jac</a> (vec, Source_p, jSource_p, iSource_p)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a5162890a7558ad2a6dfcaabd0ff4a3ef">Brusselator_mod::Build_Jac</a> (dt, akk, a, ja, ia, nnz_Jac)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a028dada9c4cbd8835c0ddb11670c6bb3">Brusselator_mod::Build_Jac</a> (dt, akk, a, ja, ia)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">Brusselator_mod::vecl</a> = 64</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aa4129ab910b5b45ce6a2d206b368f6ac">Brusselator_mod::vecl</a> = 32</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a420f8d79cc50897bb5ac4b92cff1eaf4">Brusselator_mod::neq</a> = 2</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a12dedf90ba0b181f9d6223ad1c03e7c9">Brusselator_mod::xL</a> = 0.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#ab4743f9768880d4335f15ab6e27806bf">Brusselator_mod::xR</a> = 1.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(vecl)&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#a71191a3f8ed5a526ed287783068f13d2">Brusselator_mod::x</a></td></tr>
@@ -47,7 +48,7 @@
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(vecl *2&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBrusselator__mod.html#aa44b4b76bbbcd67112622bff26198537">Brusselator_mod::exact_Bruss</a> )(eps)</td></tr>
 </table>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

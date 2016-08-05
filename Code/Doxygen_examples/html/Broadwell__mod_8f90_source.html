@@ -41,7 +41,7 @@
 <a name="l00017"></a>00017       implicit none; <span class="keywordtype">save</span> 
 <a name="l00018"></a>00018   
 <a name="l00019"></a>00019       <span class="keywordtype">private</span>
-<a name="l00020"></a>00020       <span class="keywordtype">public</span>  :: <a class="code" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069">Broadwell</a>
+<a name="l00020"></a>00020       <span class="keywordtype">public</span>  :: <a class="code" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">Broadwell</a>
 <a name="l00021"></a>00021 
 <a name="l00022"></a>00022 <span class="comment">!--------------------------------VARIABLES-------------------------------------         </span>
 <a name="l00023"></a><a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">00023</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">parameter</span> :: nx   =  32 
@@ -49,258 +49,382 @@
 <a name="l00025"></a>00025 
 <a name="l00026"></a><a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">00026</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">parameter</span> :: vecl = nx * neq
 <a name="l00027"></a>00027 
-<a name="l00028"></a><a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">00028</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: xL   = -10.0_wp
-<a name="l00029"></a><a class="code" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">00029</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: xR   = +10.0_wp      
-<a name="l00030"></a><a class="code" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">00030</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: a_u1 = + 0.3_wp
-<a name="l00031"></a><a class="code" href="namespaceBroadwell__Mod.html#a00c88973a02feacad9068d9a01448867">00031</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: a_u2 = + 0.1_wp
-<a name="l00032"></a>00032    
-<a name="l00033"></a><a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">00033</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)     </span>:: x      
-<a name="l00034"></a><a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">00034</a>       <span class="keywordtype">real(wp)                    </span>:: dx
-<a name="l00035"></a>00035 
-<a name="l00036"></a><a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">00036</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1) </span>:: iSource_p,iDeriv_comb_p,iwrk_Jac
-<a name="l00037"></a><a class="code" href="namespaceBroadwell__Mod.html#a62fb9b8712a7d9d6ba4a99ac1dfe076f">00037</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(4*vecl) </span>:: jDeriv_comb_p
-<a name="l00038"></a><a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">00038</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(5*vecl) </span>:: jwrk_Jac
-<a name="l00039"></a><a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">00039</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)   </span>:: jSource_p
-<a name="l00040"></a>00040 
-<a name="l00041"></a><a class="code" href="namespaceBroadwell__Mod.html#a4e04639bcc8248e232ad3ba53e7ef45b">00041</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(4*vecl) </span>::  Deriv_comb_p
-<a name="l00042"></a><a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">00042</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(5*vecl) </span>:: wrk_Jac
-<a name="l00043"></a>00043       
-<a name="l00044"></a><a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">00044</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)   </span>::  Source_p
-<a name="l00045"></a><a class="code" href="namespaceBroadwell__Mod.html#ad271b068871e137bf25ee1e1b063ee50">00045</a>       <span class="keywordtype">logical</span> :: update_RHS,update_Jac
-<a name="l00046"></a>00046 <span class="comment">!------------------------------------------------------------------------------      </span>
-<a name="l00047"></a>00047       <span class="keyword">contains</span>    
-<a name="l00048"></a>00048 <span class="comment">!==============================================================================</span>
-<a name="l00049"></a>00049 <span class="comment">!******************************************************************************</span>
-<a name="l00050"></a>00050 <span class="comment">! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian</span>
-<a name="l00051"></a>00051 <span class="comment">! of the Burgers problem </span>
-<a name="l00052"></a>00052 <span class="comment">!******************************************************************************</span>
-<a name="l00053"></a>00053 <span class="comment">! REQUIRED FILES:</span>
-<a name="l00054"></a>00054 <span class="comment">! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES</span>
-<a name="l00055"></a>00055 <span class="comment">! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES</span>
-<a name="l00056"></a>00056 <span class="comment">!******************************************************************************</span>
-<a name="l00057"></a>00057 
-<a name="l00058"></a><a class="code" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069">00058</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069">Broadwell</a>(nveclen,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,Jac_case, &amp;
-<a name="l00061"></a>00061      &amp;                             tol,dt_error_tol,uvec,uexact,programstep
-<a name="l00062"></a>00062       use <span class="keywordflow">SBP_Coef_Module</span>,   only: Define_CSR_Operators,D1_per
-<a name="l00063"></a>00063       use <span class="keywordflow">unary_mod</span>,         only: aplb
-<a name="l00064"></a>00064       use <span class="keywordflow">Jacobian_CSR_Mod</span>,  only: Allocate_Jac_CSR_Storage
-<a name="l00065"></a>00065 
-<a name="l00066"></a>00066 <span class="comment">!-----------------------VARIABLES----------------------------------------------</span>
-<a name="l00067"></a>00067       <span class="comment">!INIT vars     </span>
-<a name="l00068"></a>00068       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: ep
-<a name="l00069"></a>00069       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(inout)</span> :: dt
-<a name="l00070"></a>00070       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(  out)</span> :: nveclen
-<a name="l00071"></a>00071       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(  out)</span> :: tfinal
-<a name="l00072"></a>00072       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iDT
-<a name="l00073"></a>00073       
-<a name="l00074"></a>00074       <span class="comment">!RHS vars</span>
-<a name="l00075"></a>00075       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: resE_vec,resI_vec
-<a name="l00076"></a>00076       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)                </span>:: dudt_D1,dudt_Source
-<a name="l00077"></a>00077       
-<a name="l00078"></a>00078       <span class="comment">!Jacob vars</span>
-<a name="l00079"></a>00079       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span>  :: akk
-<a name="l00080"></a>00080       <span class="keywordtype">integer</span>                  :: nnz_Jac,ierr=0
-<a name="l00081"></a>00081       <span class="keywordtype">integer</span>, <span class="keywordtype">dimension(vecl) </span>:: iw
-<a name="l00082"></a>00082 <span class="comment">!------------------------------------------------------------------------------   </span>
-<a name="l00083"></a>00083       
-<a name="l00084"></a>00084       Program_Step_Select: <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
-<a name="l00085"></a>00085         <span class="comment">!**Pre-initialization. Get problem name, vector length and grid**</span>
-<a name="l00086"></a>00086         <span class="keyword">case</span>(<span class="stringliteral">&apos;INITIALIZE_PROBLEM_INFORMATION&apos;</span>)
-<a name="l00087"></a>00087           nveclen = <a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>
-<a name="l00088"></a>00088           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Broadwell&apos;</span>     
-<a name="l00089"></a>00089           <a class="code" href="namespacecontrol__variables.html#a291e2e72b0a3f05b05ea09624acb6878">Jac_case</a>=<span class="stringliteral">&apos;SPARSE&apos;</span>
-<a name="l00090"></a>00090           tol=1.0e-12_wp  
-<a name="l00091"></a>00091           dt_error_tol=5.0e-14_wp
-<a name="l00092"></a>00092           call <a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">grid</a>()           
-<a name="l00093"></a>00093 
-<a name="l00094"></a>00094         <span class="comment">!**Initialization of problem information**        </span>
-<a name="l00095"></a>00095         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
-<a name="l00096"></a>00096           
-<a name="l00097"></a>00097           <span class="comment">!Update=true for Jac/RHS updates</span>
-<a name="l00098"></a>00098           <a class="code" href="namespaceBroadwell__Mod.html#ad271b068871e137bf25ee1e1b063ee50">update_RHS</a>=.true.; <a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>=.true. <span class="comment">!reset every new epsilon/dt</span>
-<a name="l00099"></a>00099           
-<a name="l00100"></a>00100           <span class="comment">!Allocate derivative operators</span>
-<a name="l00101"></a>00101           <span class="keyword">if</span>(.not. <span class="keyword">allocated</span>(<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>))call <a class="code" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25">Define_CSR_Operators</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,<a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">dx</a>)   
-<a name="l00102"></a>00102           
-<a name="l00103"></a>00103           <span class="comment">!Time information</span>
-<a name="l00104"></a>00104           tfinal = 0.2_wp  <span class="comment">! final time   </span>
-<a name="l00105"></a>00105           choose_dt: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
-<a name="l00106"></a>00106             <span class="keyword">case</span>(<span class="stringliteral">&apos;EXPLICIT&apos;</span>); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) <span class="comment">! explicit timestep</span>
-<a name="l00107"></a>00107             <span class="keyword">case</span> default    ; dt = 0.2_wp/10**((iDT-1)/20.0_wp)             <span class="comment">! implicit timestep      </span>
-<a name="l00108"></a>00108           <span class="keyword">end select</span> choose_dt
+<a name="l00028"></a><a class="code" href="namespaceBroadwell__Mod.html#ace00bcd7151d3103aa20e1d607d47125">00028</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: Length =  20.0_wp
+<a name="l00029"></a><a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">00029</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: xL     = -10.0_wp
+<a name="l00030"></a><a class="code" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">00030</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: xR     = +10.0_wp      
+<a name="l00031"></a><a class="code" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">00031</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: a_u1   = + 0.3_wp
+<a name="l00032"></a><a class="code" href="namespaceBroadwell__Mod.html#a00c88973a02feacad9068d9a01448867">00032</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">parameter</span> :: a_u2   = + 0.1_wp
+<a name="l00033"></a>00033    
+<a name="l00034"></a><a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">00034</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)     </span>:: x      
+<a name="l00035"></a><a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">00035</a>       <span class="keywordtype">real(wp)                    </span>:: dx
+<a name="l00036"></a>00036 
+<a name="l00037"></a><a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">00037</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1) </span>:: iSource_p,iDeriv_comb_p,iwrk_Jac
+<a name="l00038"></a><a class="code" href="namespaceBroadwell__Mod.html#a62fb9b8712a7d9d6ba4a99ac1dfe076f">00038</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(4*vecl) </span>:: jDeriv_comb_p
+<a name="l00039"></a><a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">00039</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(5*vecl) </span>:: jwrk_Jac
+<a name="l00040"></a><a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">00040</a>       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)   </span>:: jSource_p
+<a name="l00041"></a>00041 
+<a name="l00042"></a><a class="code" href="namespaceBroadwell__Mod.html#a4e04639bcc8248e232ad3ba53e7ef45b">00042</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(4*vecl) </span>::  Deriv_comb_p
+<a name="l00043"></a><a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">00043</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(5*vecl) </span>:: wrk_Jac
+<a name="l00044"></a>00044       
+<a name="l00045"></a><a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">00045</a>       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)   </span>::  Source_p
+<a name="l00046"></a><a class="code" href="namespaceBroadwell__Mod.html#ad271b068871e137bf25ee1e1b063ee50">00046</a>       <span class="keywordtype">logical</span> :: update_RHS,update_Jac
+<a name="l00047"></a>00047 <span class="comment">!------------------------------------------------------------------------------      </span>
+<a name="l00048"></a>00048       <span class="keyword">contains</span>    
+<a name="l00049"></a>00049 <span class="comment">!==============================================================================</span>
+<a name="l00050"></a>00050 <span class="comment">!******************************************************************************</span>
+<a name="l00051"></a>00051 <span class="comment">! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian</span>
+<a name="l00052"></a>00052 <span class="comment">! of the Burgers problem </span>
+<a name="l00053"></a>00053 <span class="comment">!******************************************************************************</span>
+<a name="l00054"></a>00054 <span class="comment">! REQUIRED FILES:</span>
+<a name="l00055"></a>00055 <span class="comment">! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES</span>
+<a name="l00056"></a>00056 <span class="comment">! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES</span>
+<a name="l00057"></a>00057 <span class="comment">!******************************************************************************</span>
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">00059</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">Broadwell</a>(nveclen,eq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,Jac_case,     &amp;
+<a name="l00062"></a>00062      &amp;                             tol,dt_error_tol,uvec,uexact,programstep, &amp;
+<a name="l00063"></a>00063      &amp;                             var_names
+<a name="l00064"></a>00064       use <span class="keywordflow">SBP_Coef_Module</span>,   only: Define_CSR_Operators,D1_per
+<a name="l00065"></a>00065       use <span class="keywordflow">unary_mod</span>,         only: aplb
+<a name="l00066"></a>00066       use <span class="keywordflow">Jacobian_CSR_Mod</span>,  only: Allocate_Jac_CSR_Storage
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068 <span class="comment">!-----------------------VARIABLES----------------------------------------------</span>
+<a name="l00069"></a>00069       <span class="comment">!INIT vars     </span>
+<a name="l00070"></a>00070       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: ep
+<a name="l00071"></a>00071       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(inout)</span> :: dt
+<a name="l00072"></a>00072       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(  out)</span> :: nveclen,eq
+<a name="l00073"></a>00073       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(  out)</span> :: tfinal
+<a name="l00074"></a>00074       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iDT
+<a name="l00075"></a>00075       
+<a name="l00076"></a>00076       <span class="comment">!RHS vars</span>
+<a name="l00077"></a>00077       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: resE_vec,resI_vec
+<a name="l00078"></a>00078       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)                </span>:: dudt_D1,dudt_Source
+<a name="l00079"></a>00079       
+<a name="l00080"></a>00080       <span class="comment">!Jacob vars</span>
+<a name="l00081"></a>00081       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span>  :: akk
+<a name="l00082"></a>00082       <span class="keywordtype">integer</span>                  :: nnz_Jac,ierr=0
+<a name="l00083"></a>00083       <span class="keywordtype">integer</span>, <span class="keywordtype">dimension(vecl) </span>:: iw
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)             </span>:: r0,u0,m0,z0
+<a name="l00086"></a>00086       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)             </span>:: zE,z1,H
+<a name="l00087"></a>00087       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)             </span>:: dzEdr, dzEdm, dr0dx, dm0dx
+<a name="l00088"></a>00088       <span class="keywordtype">real(wp)                            </span>:: f
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090 <span class="comment">!------------------------------------------------------------------------------   </span>
+<a name="l00091"></a>00091       
+<a name="l00092"></a>00092       Program_Step_Select: <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
+<a name="l00093"></a>00093         <span class="comment">!**Pre-initialization. Get problem name, vector length and grid**</span>
+<a name="l00094"></a>00094         <span class="keyword">case</span>(<span class="stringliteral">&apos;INITIALIZE_PROBLEM_INFORMATION&apos;</span>)
+<a name="l00095"></a>00095           nveclen = <a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>
+<a name="l00096"></a>00096           eq = <a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>
+<a name="l00097"></a>00097           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Broadwell&apos;</span>     
+<a name="l00098"></a>00098           <a class="code" href="namespacecontrol__variables.html#a291e2e72b0a3f05b05ea09624acb6878">Jac_case</a>=<span class="stringliteral">&apos;SPARSE&apos;</span>
+<a name="l00099"></a>00099           tol=1.0e-12_wp  
+<a name="l00100"></a>00100           dt_error_tol=5.0e-14_wp
+<a name="l00101"></a>00101           
+<a name="l00102"></a>00102           <span class="keyword">allocate</span>(var_names(<a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>))
+<a name="l00103"></a>00103           var_names(:)=(/<span class="stringliteral">&apos;Differential&apos;</span>, <span class="stringliteral">&apos;Differential&apos;</span>, <span class="stringliteral">&apos;Algebraic   &apos;</span>/)
+<a name="l00104"></a>00104           
+<a name="l00105"></a>00105           call <a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">grid</a>()           
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107         <span class="comment">!**Initialization of problem information**        </span>
+<a name="l00108"></a>00108         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
 <a name="l00109"></a>00109           
-<a name="l00110"></a>00110           <span class="comment">! Set IC&apos;s</span>
-<a name="l00111"></a>00111           uvec(1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>:2)=sin(<a class="code" href="namespaceprecision__vars.html#aa062b339d028cb99bfdf249224f77661">two</a>*<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>*<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:))
-<a name="l00112"></a>00112           uvec(2:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>:2)=a*sin(<a class="code" href="namespaceprecision__vars.html#aa062b339d028cb99bfdf249224f77661">two</a>*<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>*<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:))+ep*(a**2-1)*<a class="code" href="namespaceprecision__vars.html#aa062b339d028cb99bfdf249224f77661">two</a>*<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>*cos(<a class="code" href="namespaceprecision__vars.html#aa062b339d028cb99bfdf249224f77661">two</a>*<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>*<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:))
-<a name="l00113"></a>00113          
-<a name="l00114"></a>00114           <span class="comment">!set exact solution at tfinal</span>
-<a name="l00115"></a>00115           call <a class="code" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8">exact_Broadwell</a>(uexact,ep) 
-<a name="l00116"></a>00116               
-<a name="l00117"></a>00117         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)
-<a name="l00118"></a>00118           call <a class="code" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1">Broadwell_dUdt</a>(uvec,dudt_D1,dudt_Source,ep)        
-<a name="l00119"></a>00119           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)       
-<a name="l00120"></a>00120             <span class="keyword">case</span>(<span class="stringliteral">&apos;EXPLICIT&apos;</span>)
-<a name="l00121"></a>00121               resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
-<a name="l00122"></a>00122               resI_vec(:)=0.0_wp                   
-<a name="l00123"></a>00123             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>)
-<a name="l00124"></a>00124               resE_vec(:)=0.0_wp
-<a name="l00125"></a>00125               resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
-<a name="l00126"></a>00126             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>)
-<a name="l00127"></a>00127               resE_vec(:)=dt*dudt_D1(:)
-<a name="l00128"></a>00128               resI_vec(:)=dt*dudt_Source(:)
-<a name="l00129"></a>00129           <span class="keyword">end select</span> choose_RHS_type
-<a name="l00130"></a>00130           <a class="code" href="namespaceBroadwell__Mod.html#ad271b068871e137bf25ee1e1b063ee50">update_RHS</a>=.false. <span class="comment">!no need to update RHS until next epsilon</span>
-<a name="l00131"></a>00131           
-<a name="l00132"></a>00132         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
-<a name="l00133"></a>00133           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
-<a name="l00134"></a>00134             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>)
-<a name="l00135"></a>00135               <span class="keyword">if</span> (<a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>) <span class="keyword">then</span>
-<a name="l00136"></a>00136                 nnz_Jac=5*<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
-<a name="l00137"></a>00137                 call <a class="code" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935">Allocate_Jac_CSR_Storage</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,nnz_Jac)
-<a name="l00138"></a>00138              
-<a name="l00139"></a>00139                 call <a class="code" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c">aplb</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,1,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>,    &amp;
-<a name="l00140"></a>00140      &amp;                    <a class="code" href="namespaceBroadwell__Mod.html#a4e04639bcc8248e232ad3ba53e7ef45b">Deriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a62fb9b8712a7d9d6ba4a99ac1dfe076f">jDeriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#afb14c9a85d1e73f89e7ac485557e8199">iDeriv_comb_p</a>,    &amp;
-<a name="l00141"></a>00141      &amp;                    <a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">wrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">jwrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">iwrk_Jac</a>,5*<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,iw,ierr) 
-<a name="l00142"></a>00142                 <span class="keyword">if</span> (ierr/=0) then; print*,<span class="stringliteral">&apos;Build Jac ierr=&apos;</span>,ierr; stop; <span class="keyword">endif</span> 
-<a name="l00143"></a>00143               <span class="keyword">endif</span>
-<a name="l00144"></a>00144               call <a class="code" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">Broadwell_Jac</a>(dt,akk,<a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">wrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">jwrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">iwrk_Jac</a>)       
-<a name="l00145"></a>00145                         
-<a name="l00146"></a>00146             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>)
-<a name="l00147"></a>00147               nnz_Jac=<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
-<a name="l00148"></a>00148               call <a class="code" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935">Allocate_Jac_CSR_Storage</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,nnz_Jac)
-<a name="l00149"></a>00149               call <a class="code" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">Broadwell_Jac</a>(dt,akk,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>)
-<a name="l00150"></a>00150               
-<a name="l00151"></a>00151           <span class="keyword">end select</span> choose_Jac_type
-<a name="l00152"></a>00152           <a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>=.false.  <span class="comment">!no need to update matrix that forms Jacobian until next epsilon/dt</span>
-<a name="l00153"></a>00153           
-<a name="l00154"></a>00154       <span class="keyword">end select</span> Program_Step_Select     
-<a name="l00155"></a>00155 <span class="keyword">      end subroutine Broadwell</span>
-<a name="l00156"></a>00156 <span class="comment">!==============================================================================</span>
-<a name="l00157"></a>00157 <span class="comment">!==============================================================================</span>
-<a name="l00158"></a>00158 <span class="comment">!==============================================================================</span>
-<a name="l00159"></a>00159 <span class="comment">! PRODUCES GRID</span>
-<a name="l00160"></a><a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">00160</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">grid</a>()
-<a name="l00161"></a>00161       <span class="keywordtype">integer</span> :: i
-<a name="l00162"></a>00162       
-<a name="l00163"></a>00163       <span class="keyword">do</span> i=1,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>/2
-<a name="l00164"></a>00164         <a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(i)= <a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">xL</a> + (<a class="code" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">xR</a>-<a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">xL</a>)*(i-1.0_wp)/(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)
-<a name="l00165"></a>00165       <span class="keyword">enddo</span>
-<a name="l00166"></a>00166       
-<a name="l00167"></a>00167       <a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">dx</a>=<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(2)-<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(1)
-<a name="l00168"></a>00168 
-<a name="l00169"></a>00169 <span class="keyword">      end subroutine grid</span>
-<a name="l00170"></a>00170 <span class="comment">!==============================================================================</span>
-<a name="l00171"></a>00171 <span class="comment">! RETURNS VECTOR WITH EXACT SOLUTION</span>
-<a name="l00172"></a><a class="code" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8">00172</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8">exact_Broadwell</a>(u,eps)
+<a name="l00110"></a>00110           <span class="comment">!Update=true for Jac/RHS updates</span>
+<a name="l00111"></a>00111           <a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>=.true. <span class="comment">!reset every new epsilon/dt</span>
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113           <span class="comment">!Allocate derivative operators</span>
+<a name="l00114"></a>00114           <span class="keyword">if</span>(.not. <span class="keyword">allocated</span>(<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>))call <a class="code" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25">Define_CSR_Operators</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,<a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">dx</a>)   
+<a name="l00115"></a>00115           
+<a name="l00116"></a>00116           <span class="comment">!Time information</span>
+<a name="l00117"></a>00117           tfinal = 0.2_wp  <span class="comment">! final time   </span>
+<a name="l00118"></a>00118           choose_dt: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
+<a name="l00119"></a>00119             <span class="keyword">case</span>(<span class="stringliteral">&apos;EXPLICIT&apos;</span>); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) <span class="comment">! explicit timestep</span>
+<a name="l00120"></a>00120             <span class="keyword">case</span> default    ; dt = 0.02_wp/10**((iDT-1)/20.0_wp)             <span class="comment">! implicit timestep      </span>
+<a name="l00121"></a>00121           <span class="keyword">end select</span> choose_dt
+<a name="l00122"></a>00122           
+<a name="l00123"></a>00123           f = 2.0_wp*<a class="code" href="namespaceprecision__vars.html#a5d3c9e506d81adeae20c38194ab26030">pi</a>/<a class="code" href="namespaceBroadwell__Mod.html#ace00bcd7151d3103aa20e1d607d47125">Length</a>
+<a name="l00124"></a>00124           <span class="comment">! Set IC&apos;s</span>
+<a name="l00125"></a>00125           r0(:) = (1.0_wp + <a class="code" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">a_u1</a> * sin(f*<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:)) )
+<a name="l00126"></a>00126           u0(:) = (0.5_wp + <a class="code" href="namespaceBroadwell__Mod.html#a00c88973a02feacad9068d9a01448867">a_u2</a> * sin(f*<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:)) )
+<a name="l00127"></a>00127           m0(:) = r0(:)*u0(:)
+<a name="l00128"></a>00128           zE(:) = 0.5_wp * (r0(:)*r0(:) + m0(:)*m0(:)) / r0(:)
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130           dzEdr = 0.5_wp * ( 1.0_wp - u0(:)*u0(:) )
+<a name="l00131"></a>00131           dzEdm = u0(:)
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133           dr0dx(:) = f * <a class="code" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">a_u1</a> * cos(f * <a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:)) 
+<a name="l00134"></a>00134           dm0dx(:) = r0(:) * f * <a class="code" href="namespaceBroadwell__Mod.html#a00c88973a02feacad9068d9a01448867">a_u2</a> * cos(f * <a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:)) &amp; 
+<a name="l00135"></a>00135                    + u0(:) * f * <a class="code" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">a_u1</a> * cos(f * <a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(:))
+<a name="l00136"></a>00136               H(:) = (1.0_wp - dzEdr(:) + dzEdm(:)*dzEdm(:))*dm0dx(:) + dzEdr(:)*dzEdm(:)*dr0dx(:)
+<a name="l00137"></a>00137              z1(:) = -H(:) / r0(:) 
+<a name="l00138"></a>00138              z0(:) = zE(:) + ep*z1(:)
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140           uvec(1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-2:<a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>) = r0(:)
+<a name="l00141"></a>00141           uvec(2:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-1:<a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>) = m0(:)
+<a name="l00142"></a>00142           uvec(3:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-0:<a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>) = z0(:)
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144           <span class="comment">!set exact solution at tfinal</span>
+<a name="l00145"></a>00145           call <a class="code" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9">exact_Broadwell</a>(uexact,ep) 
+<a name="l00146"></a>00146               
+<a name="l00147"></a>00147         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)
+<a name="l00148"></a>00148           call <a class="code" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703">Broadwell_dUdt</a>(uvec,dudt_D1,dudt_Source,ep)        
+<a name="l00149"></a>00149           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)       
+<a name="l00150"></a>00150             <span class="keyword">case</span>(<span class="stringliteral">&apos;EXPLICIT&apos;</span>)
+<a name="l00151"></a>00151               resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
+<a name="l00152"></a>00152               resI_vec(:)=0.0_wp                   
+<a name="l00153"></a>00153             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>)
+<a name="l00154"></a>00154               resE_vec(:)=0.0_wp
+<a name="l00155"></a>00155               resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
+<a name="l00156"></a>00156             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>)
+<a name="l00157"></a>00157               resE_vec(:)=dt*dudt_D1(:)
+<a name="l00158"></a>00158               resI_vec(:)=dt*dudt_Source(:)
+<a name="l00159"></a>00159           <span class="keyword">end select</span> choose_RHS_type
+<a name="l00160"></a>00160           
+<a name="l00161"></a>00161         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
+<a name="l00162"></a>00162           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
+<a name="l00163"></a>00163             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>)
+<a name="l00164"></a>00164               <span class="keyword">if</span> (<a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>) <span class="keyword">then</span>
+<a name="l00165"></a>00165                 nnz_Jac=5*<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a> + 2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
+<a name="l00166"></a>00166                 call <a class="code" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935">Allocate_Jac_CSR_Storage</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,nnz_Jac)
+<a name="l00167"></a>00167              
+<a name="l00168"></a>00168                 call <a class="code" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43">Broadwell_Build_Spatial_Jac</a>(<a class="code" href="namespaceBroadwell__Mod.html#a4e04639bcc8248e232ad3ba53e7ef45b">Deriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a62fb9b8712a7d9d6ba4a99ac1dfe076f">jDeriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#afb14c9a85d1e73f89e7ac485557e8199">iDeriv_comb_p</a>)
+<a name="l00169"></a>00169                 <a class="code" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a>=.false.  <span class="comment">!no need to update matrix that forms spacial Jacobian</span>
+<a name="l00170"></a>00170               <span class="keyword">endif</span>
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172               call <a class="code" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">Broadwell_Build_Source_Jac</a>(ep,uvec,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>)
 <a name="l00173"></a>00173 
-<a name="l00174"></a>00174       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: eps
-<a name="l00175"></a>00175       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: u
-<a name="l00176"></a>00176 
-<a name="l00177"></a>00177       <span class="keywordtype">integer</span>                                  :: i
-<a name="l00178"></a>00178       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(81,vecl+1) </span>:: ExactTot
-<a name="l00179"></a>00179       <span class="keywordtype">real(wp) </span>:: diff
+<a name="l00174"></a>00174               call <a class="code" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c">aplb</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,1,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>,    &amp;
+<a name="l00175"></a>00175      &amp;                  <a class="code" href="namespaceBroadwell__Mod.html#a4e04639bcc8248e232ad3ba53e7ef45b">Deriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a62fb9b8712a7d9d6ba4a99ac1dfe076f">jDeriv_comb_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#afb14c9a85d1e73f89e7ac485557e8199">iDeriv_comb_p</a>,    &amp;
+<a name="l00176"></a>00176      &amp;                  <a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">wrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">jwrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">iwrk_Jac</a>,5*<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,iw,ierr) 
+<a name="l00177"></a>00177               <span class="keyword">if</span> (ierr/=0) then; print*,<span class="stringliteral">&apos;Build Jac ierr=&apos;</span>,ierr; stop; <span class="keyword">endif</span> 
+<a name="l00178"></a>00178               
+<a name="l00179"></a>00179               call <a class="code" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">Broadwell_Add_Diag_Jac</a>(dt,akk,<a class="code" href="namespaceBroadwell__Mod.html#a23cd953f1d4fa11ff282d7ca089ed0fd">wrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#a263807e83bd23d9e62be9bfa62204bf7">jwrk_Jac</a>,<a class="code" href="namespaceBroadwell__Mod.html#afd7159749c621aa0fc1a67a35ccbd0a9">iwrk_Jac</a>)
 <a name="l00180"></a>00180 
-<a name="l00181"></a>00181       u(:)=0.0_wp
-<a name="l00182"></a>00182       
-<a name="l00183"></a>00183       <span class="comment">!**Exact Solution** </span>
-<a name="l00184"></a>00184       <span class="keyword">open</span>(unit=39,file=<span class="stringliteral">&apos;exact.Broadwell_256.data&apos;</span>)
-<a name="l00185"></a>00185       rewind(39)
-<a name="l00186"></a>00186       <span class="keyword">do</span> i=1,81
-<a name="l00187"></a>00187         <span class="keyword">read</span>(39,*)ExactTot(i,1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>)
-<a name="l00188"></a>00188         ExactTot(i,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1) = 1.0_wp/10**((i-1)/(10.0_wp))  <span class="comment">!  used for 81 values of ep</span>
-<a name="l00189"></a>00189       <span class="keyword">enddo</span>
-<a name="l00190"></a>00190       <span class="keyword">do</span> i=1,81
-<a name="l00191"></a>00191         diff = abs(ExactTot(i,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1) - eps)
-<a name="l00192"></a>00192         <span class="keyword">if</span>(diff &lt;= 1.0e-10_wp)<span class="keyword">then</span>
-<a name="l00193"></a>00193           u(:) = ExactTot(i,:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>)
-<a name="l00194"></a>00194           exit
-<a name="l00195"></a>00195         <span class="keyword">endif</span>
-<a name="l00196"></a>00196       <span class="keyword">enddo</span>
-<a name="l00197"></a>00197 
-<a name="l00198"></a>00198 <span class="keyword">      end subroutine exact_Broadwell</span>
-<a name="l00199"></a>00199 
-<a name="l00200"></a>00200 <span class="comment">!==============================================================================</span>
-<a name="l00201"></a>00201 <span class="comment">! DEFINES RHS </span>
-<a name="l00202"></a><a class="code" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1">00202</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1">Broadwell_dUdt</a>(u,dudt_D1,eps)
-<a name="l00203"></a>00203       
-<a name="l00204"></a>00204       use <span class="keywordflow">SBP_Coef_Module</span>, only: D1_per,jD1_per,iD1_per
-<a name="l00205"></a>00205       use <span class="keywordflow">matvec_module</span>,   only: amux
-<a name="l00206"></a>00206 
-<a name="l00207"></a>00207       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(in   )</span> :: u
-<a name="l00208"></a>00208       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: dudt_D1
-<a name="l00209"></a>00209       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: eps
-<a name="l00210"></a>00210            
-<a name="l00211"></a>00211       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(:)</span>, <span class="keywordtype">allocatable</span> :: t1
-<a name="l00212"></a>00212 
-<a name="l00213"></a>00213       <span class="keywordtype">real(wp)                            </span>:: epsI
-<a name="l00214"></a>00214 
-<a name="l00215"></a>00215       <span class="keyword">allocate</span>(t1(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)) ; t1(:) = 0.0_wp ;
-<a name="l00216"></a>00216 
-<a name="l00217"></a>00217       epsI  = 1.0_wp / eps
-<a name="l00218"></a>00218 <span class="comment">!------------------------------------------------------------------------------     </span>
-<a name="l00219"></a>00219       <span class="keyword">if</span> (<a class="code" href="namespaceBroadwell__Mod.html#ad271b068871e137bf25ee1e1b063ee50">update_RHS</a>) <span class="keyword">then</span>
-<a name="l00220"></a>00220         
-<a name="l00221"></a>00221          <span class="comment">! d (u2) / dx</span>
-<a name="l00222"></a>00222          call <a class="code" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea">amux</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,u(1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>),t1,<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#aee75987a58a3553015d1a40c74a484d8">iD1_per</a>)
-<a name="l00223"></a>00223          dudt_D1(     1:  <a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) = -t1
-<a name="l00224"></a>00224          dudt_D1(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:3*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) = -t1
-<a name="l00225"></a>00225 
-<a name="l00226"></a>00226          <span class="comment">! d (u3) / dx</span>
-<a name="l00227"></a>00227          call <a class="code" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea">amux</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,u(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:3*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>),t1,<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#aee75987a58a3553015d1a40c74a484d8">iD1_per</a>)
-<a name="l00228"></a>00228          dudt_D1(1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) = -t1
-<a name="l00229"></a>00229 
-<a name="l00230"></a>00230          dudt_D1(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:3*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) = dudt_D1(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:3*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) +        epsI * ( &amp;
-<a name="l00231"></a>00231                               +        u(0*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)*u(0*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)   &amp;
-<a name="l00232"></a>00232                               +        u(1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)*u(1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)   &amp;
-<a name="l00233"></a>00233                               - 2.0_wp*u(0*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)*u(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1:3*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>) )
+<a name="l00181"></a>00181             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>)
+<a name="l00182"></a>00182               nnz_Jac=<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a> + 2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
+<a name="l00183"></a>00183               call <a class="code" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935">Allocate_Jac_CSR_Storage</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,nnz_Jac)
+<a name="l00184"></a>00184               call <a class="code" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">Broadwell_Build_Source_Jac</a>(ep,uvec,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>)
+<a name="l00185"></a>00185               call <a class="code" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">Broadwell_Add_Diag_Jac</a>(dt,akk,<a class="code" href="namespaceBroadwell__Mod.html#a3d2b47dd8bee1eaa002164d3db5a251b">Source_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#a50afc63c6b61d81f068e3af645b1689f">jSource_p</a>,<a class="code" href="namespaceBroadwell__Mod.html#adfefa5f4d8e267caee8f9bed5c8ad9ef">iSource_p</a>)
+<a name="l00186"></a>00186               
+<a name="l00187"></a>00187           <span class="keyword">end select</span> choose_Jac_type
+<a name="l00188"></a>00188       <span class="keyword">end select</span> Program_Step_Select     
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190 <span class="keyword">      end subroutine Broadwell</span>
+<a name="l00191"></a>00191 <span class="comment">!==============================================================================</span>
+<a name="l00192"></a>00192 <span class="comment">!==============================================================================</span>
+<a name="l00193"></a>00193 <span class="comment">!==============================================================================</span>
+<a name="l00194"></a>00194 <span class="comment">! PRODUCES GRID</span>
+<a name="l00195"></a><a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">00195</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">grid</a>()
+<a name="l00196"></a>00196       <span class="keywordtype">integer</span> :: i
+<a name="l00197"></a>00197       
+<a name="l00198"></a>00198       <span class="keyword">do</span> i=1,<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
+<a name="l00199"></a>00199         <a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(i)= <a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">xL</a> + (<a class="code" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">xR</a>-<a class="code" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">xL</a>)*(i-1.0_wp)/(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>)
+<a name="l00200"></a>00200       <span class="keyword">enddo</span>
+<a name="l00201"></a>00201       
+<a name="l00202"></a>00202       <a class="code" href="namespaceBroadwell__Mod.html#a7853a2c51b45878dc2ed979648d2225d">dx</a>=<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(2)-<a class="code" href="namespaceBroadwell__Mod.html#a019206a884f781fd32a26e9ebcb4706f">x</a>(1)
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204 <span class="keyword">      end subroutine grid</span>
+<a name="l00205"></a>00205 <span class="comment">!==============================================================================</span>
+<a name="l00206"></a>00206 <span class="comment">! RETURNS VECTOR WITH EXACT SOLUTION</span>
+<a name="l00207"></a><a class="code" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9">00207</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9">exact_Broadwell</a>(u,ep)
+<a name="l00208"></a>00208 
+<a name="l00209"></a>00209       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: ep
+<a name="l00210"></a>00210       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: u
+<a name="l00211"></a>00211 
+<a name="l00212"></a>00212       <span class="keywordtype">integer</span>                                  :: i
+<a name="l00213"></a>00213       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(81,vecl+1)           </span>:: ExactTot
+<a name="l00214"></a>00214       <span class="keywordtype">real(wp) </span>:: diff
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216       u(:)=0.0_wp*ep
+<a name="l00217"></a>00217       
+<a name="l00218"></a>00218       <span class="comment">!**Exact Solution** </span>
+<a name="l00219"></a>00219       <span class="keyword">open</span>(unit=39,file=<span class="stringliteral">&apos;exact.Broadwell_32.data&apos;</span>)
+<a name="l00220"></a>00220       rewind(39)
+<a name="l00221"></a>00221       <span class="keyword">do</span> i=1,81
+<a name="l00222"></a>00222         <span class="keyword">read</span>(39,*)ExactTot(i,1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>)
+<a name="l00223"></a>00223         ExactTot(i,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1) = 1.0_wp/10**((i-1)/(10.0_wp))  <span class="comment">!  used for 81 values of ep</span>
+<a name="l00224"></a>00224       <span class="keyword">enddo</span>
+<a name="l00225"></a>00225       <span class="keyword">do</span> i=1,81
+<a name="l00226"></a>00226         diff = abs(ExactTot(i,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1) - ep)
+<a name="l00227"></a>00227         <span class="keyword">if</span>(diff &lt;= 1.0e-10_wp)<span class="keyword">then</span>
+<a name="l00228"></a>00228           u(:) = ExactTot(i,:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>)
+<a name="l00229"></a>00229           exit
+<a name="l00230"></a>00230         <span class="keyword">endif</span>
+<a name="l00231"></a>00231       <span class="keyword">enddo</span>
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233 <span class="keyword">      end subroutine exact_Broadwell</span>
 <a name="l00234"></a>00234 
-<a name="l00235"></a>00235       <span class="keyword">endif</span>
-<a name="l00236"></a>00236 
-<a name="l00237"></a>00237       <span class="keyword">deallocate</span>(t1)
-<a name="l00238"></a>00238       
-<a name="l00239"></a>00239 <span class="keyword">      end subroutine Broadwell_dUdt</span>
-<a name="l00240"></a>00240 
-<a name="l00241"></a>00241 <span class="comment">!==============================================================================</span>
-<a name="l00242"></a>00242 
-<a name="l00243"></a><a class="code" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">00243</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">Broadwell_Jac</a>(dt,akk,a,ja,ia)
-<a name="l00244"></a>00244       
-<a name="l00245"></a>00245       use <span class="keywordflow">unary_mod</span>,         only: aplsca
-<a name="l00246"></a>00246       use <span class="keywordflow">Jacobian_CSR_Mod</span>,  only: iaJac, jaJac,  aJac
-<a name="l00247"></a>00247      
-<a name="l00248"></a>00248       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in)</span> :: dt,akk
-<a name="l00249"></a>00249       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(:)</span>,    <span class="keywordtype">intent(in)</span> :: a
-<a name="l00250"></a>00250       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(:)</span>,    <span class="keywordtype">intent(in)</span> :: ja,ia
-<a name="l00251"></a>00251       
-<a name="l00252"></a>00252       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)             </span>:: iw
-<a name="l00253"></a>00253       <span class="keywordtype">real(wp)</span>, dimension(size(a)+vecl/2)   :: wrk
-<a name="l00254"></a>00254       <span class="keywordtype">integer</span>,  dimension(size(a)+vecl/2)   :: jwrk
-<a name="l00255"></a>00255       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1)           </span>:: iwrk      
-<a name="l00256"></a>00256       
-<a name="l00257"></a>00257       <span class="keywordtype">integer</span>                               :: nnz
-<a name="l00258"></a>00258 
-<a name="l00259"></a>00259       nnz = <span class="keyword">size</span>(a)
-<a name="l00260"></a>00260       
-<a name="l00261"></a>00261       wrk(:nnz)=-akk*dt*a(:)   
-<a name="l00262"></a>00262       wrk(nnz+1:)=0.0_wp
-<a name="l00263"></a>00263       jwrk(:nnz)=ja(:)
-<a name="l00264"></a>00264       jwrk(nnz+1:)=0
-<a name="l00265"></a>00265       iwrk(:)=ia(:)
+<a name="l00235"></a>00235 <span class="comment">!==============================================================================</span>
+<a name="l00236"></a>00236 <span class="comment">! DEFINES RHS </span>
+<a name="l00237"></a><a class="code" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703">00237</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703">Broadwell_dUdt</a>(u,dudt_D1,dudt_Source,ep)
+<a name="l00238"></a>00238 
+<a name="l00239"></a>00239 <span class="comment">!     u ordering:  flatted(  (neq,nx) ) </span>
+<a name="l00240"></a>00240 <span class="comment">!     dudt_D1:     flatted(  (neq,nx) ) </span>
+<a name="l00241"></a>00241       
+<a name="l00242"></a>00242       use <span class="keywordflow">SBP_Coef_Module</span>, only: D1_per,jD1_per,iD1_per
+<a name="l00243"></a>00243       use <span class="keywordflow">matvec_module</span>,   only: amux
+<a name="l00244"></a>00244 
+<a name="l00245"></a>00245       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(in   )</span> :: u
+<a name="l00246"></a>00246       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>, <span class="keywordtype">intent(  out)</span> :: dudt_D1,dudt_Source
+<a name="l00247"></a>00247       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: ep
+<a name="l00248"></a>00248            
+<a name="l00249"></a>00249       <span class="keywordtype">real(wp)                            </span>:: epI
+<a name="l00250"></a>00250       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)             </span>:: u1,u2,u3
+<a name="l00251"></a>00251       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nx)             </span>:: t1
+<a name="l00252"></a>00252 
+<a name="l00253"></a>00253       u1(:) = u(1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-2:3)
+<a name="l00254"></a>00254       u2(:) = u(2:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-1:3)
+<a name="l00255"></a>00255       u3(:) = u(3:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-0:3)
+<a name="l00256"></a>00256 
+<a name="l00257"></a>00257       dudt_D1(:)     = 0.0_wp
+<a name="l00258"></a>00258       dudt_Source(:) = 0.0_wp
+<a name="l00259"></a>00259 
+<a name="l00260"></a>00260       epI  = 1.0_wp / ep
+<a name="l00261"></a>00261 <span class="comment">!------------------------------------------------------------------------------     </span>
+<a name="l00262"></a>00262       <span class="comment">! d (u2) / dx</span>
+<a name="l00263"></a>00263       call <a class="code" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea">amux</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,u2,t1,<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#aee75987a58a3553015d1a40c74a484d8">iD1_per</a>)
+<a name="l00264"></a>00264       dudt_D1(1:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-2:3) = -t1(:)
+<a name="l00265"></a>00265       dudt_D1(3:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-0:3) = -t1(:)
 <a name="l00266"></a>00266 
-<a name="l00267"></a>00267       call <a class="code" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb">aplsca</a>(vecl,wrk,jwrk,iwrk,1.0_wp,iw)      
-<a name="l00268"></a>00268 
-<a name="l00269"></a>00269       <a class="code" href="namespaceJacobian__CSR__Mod.html#a94d69662ef031c9f945e105441d48c02">iaJac</a>=iwrk
-<a name="l00270"></a>00270       <a class="code" href="namespaceJacobian__CSR__Mod.html#a5926dc41c54f00cbd2cc669cc175665b">jaJac</a>=jwrk
-<a name="l00271"></a>00271       <a class="code" href="namespaceJacobian__CSR__Mod.html#a7f4fdf9a3cd9df4f89b43e74e69f16e5">aJac</a> = wrk
-<a name="l00272"></a>00272       
-<a name="l00273"></a>00273 <span class="keyword">      end subroutine Broadwell_Jac      </span>
+<a name="l00267"></a>00267       <span class="comment">! d (u3) / dx</span>
+<a name="l00268"></a>00268       call <a class="code" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea">amux</a>(<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>,u3,t1,<a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>,<a class="code" href="namespaceSBP__Coef__Module.html#aee75987a58a3553015d1a40c74a484d8">iD1_per</a>)
+<a name="l00269"></a>00269       dudt_D1(2:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-1:3) = -t1(:)
+<a name="l00270"></a>00270 
+<a name="l00271"></a>00271       dudt_source(3:<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>-0:3) = epI * ( u1(:)*u1(:) + u2(:)*u2(:) - 2.0_wp*u1(:)*u3(:))
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273 <span class="keyword">      end subroutine Broadwell_dUdt</span>
 <a name="l00274"></a>00274 
 <a name="l00275"></a>00275 <span class="comment">!==============================================================================</span>
 <a name="l00276"></a>00276 
-<a name="l00277"></a>00277 <span class="keyword">      end module Broadwell_mod</span>
+<a name="l00277"></a><a class="code" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43">00277</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43">Broadwell_Build_Spatial_Jac</a>(a,ja,ia)
+<a name="l00278"></a>00278 
+<a name="l00279"></a>00279       use <span class="keywordflow">unary_mod</span>,         only: dperm
+<a name="l00280"></a>00280       use <span class="keywordflow">SBP_Coef_Module</span>,   only: D1_per,jD1_per,nnz_D1_per
+<a name="l00281"></a>00281 
+<a name="l00282"></a>00282       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1)</span>,     <span class="keywordtype">intent(  out)</span> :: ia
+<a name="l00283"></a>00283       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(nnz_D1_per)</span>, <span class="keywordtype">intent(  out)</span> :: ja
+<a name="l00284"></a>00284       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(nnz_D1_per)</span>, <span class="keywordtype">intent(  out)</span> ::  a
+<a name="l00285"></a>00285       
+<a name="l00286"></a>00286       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1)                 </span>:: iDeriv_comb
+<a name="l00287"></a>00287       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(neq*nnz_D1_per)         </span>:: jDeriv_comb
+<a name="l00288"></a>00288       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(neq*nnz_D1_per)         </span>::  Deriv_comb
+<a name="l00289"></a>00289 
+<a name="l00290"></a>00290       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)                   </span>:: j_perm
+<a name="l00291"></a>00291 
+<a name="l00292"></a>00292       <span class="keywordtype">integer</span>                                     :: i, nnz
+<a name="l00293"></a>00293 
+<a name="l00294"></a>00294 <span class="comment">!------------------------------------------------------------------------------     </span>
+<a name="l00295"></a>00295 <span class="comment">! |0|D|0|</span>
+<a name="l00296"></a>00296 <span class="comment">! |0|0|D|</span>
+<a name="l00297"></a>00297 <span class="comment">! |0|D|0|</span>
+<a name="l00298"></a>00298 
+<a name="l00299"></a>00299         nnz = <a class="code" href="namespaceSBP__Coef__Module.html#a20212b75a6a7c053732d506470250153">nnz_D1_per</a>
+<a name="l00300"></a>00300 
+<a name="l00301"></a>00301         <span class="keyword">do</span> i = 1,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1
+<a name="l00302"></a>00302           iDeriv_comb(i) = 1 + 4*(i-1)
+<a name="l00303"></a>00303         <span class="keyword">enddo</span> 
+<a name="l00304"></a>00304         
+<a name="l00305"></a>00305         jDeriv_comb(      1:1*nnz) =  1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a> + <a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>(1:nnz)
+<a name="l00306"></a>00306         jDeriv_comb(1*nnz+1:2*nnz) =  2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a> + <a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>(1:nnz)
+<a name="l00307"></a>00307         jDeriv_comb(2*nnz+1:3*nnz) =  1*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a> + <a class="code" href="namespaceSBP__Coef__Module.html#a257ba3136887f7b61d2b30c476f7f5d9">jD1_per</a>(1:nnz)
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309          Deriv_comb(      1:1*nnz) =       +  <a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>(1:nnz)
+<a name="l00310"></a>00310          Deriv_comb(1*nnz+1:2*nnz) =       +  <a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>(1:nnz)
+<a name="l00311"></a>00311          Deriv_comb(2*nnz+1:3*nnz) =       +  <a class="code" href="namespaceSBP__Coef__Module.html#ad13cceaecd47b583a1073a31379c5574">D1_per</a>(1:nnz)
+<a name="l00312"></a>00312 
+<a name="l00313"></a>00313         j_perm(     1)=1
+<a name="l00314"></a>00314         j_perm(  <a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1)=2
+<a name="l00315"></a>00315         j_perm(2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1)=3
+<a name="l00316"></a>00316         <span class="keyword">do</span> i=2,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>
+<a name="l00317"></a>00317           <span class="keyword">if</span> (i==<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1 .or. i==2*<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>+1) cycle
+<a name="l00318"></a>00318           j_perm(i)=j_perm(i-1) + 3
+<a name="l00319"></a>00319         <span class="keyword">enddo</span>
+<a name="l00320"></a>00320 
+<a name="l00321"></a>00321       <span class="comment">! permute D1&apos;s matrix   </span>
+<a name="l00322"></a>00322         call <a class="code" href="namespaceunary__mod.html#a8247fa4ab43954b9f840fc56fd441c23">dperm</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,Deriv_comb,jDeriv_comb,iDeriv_comb,a, &amp;
+<a name="l00323"></a>00323      &amp;             ja,ia,j_perm,j_perm,1)
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325 <span class="keyword">      end subroutine Broadwell_Build_Spatial_Jac      </span>
+<a name="l00326"></a>00326 
+<a name="l00327"></a>00327 <span class="comment">!==============================================================================</span>
+<a name="l00328"></a>00328 
+<a name="l00329"></a><a class="code" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">00329</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">Broadwell_Build_Source_Jac</a>(ep,u,a,ja,ia)
+<a name="l00330"></a>00330 
+<a name="l00331"></a>00331       <span class="keywordtype">real(wp)</span>,                    <span class="keywordtype">intent(in   )</span> :: ep
+<a name="l00332"></a>00332       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>,   <span class="keywordtype">intent(in   )</span> :: u
+<a name="l00333"></a>00333       
+<a name="l00334"></a>00334       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1)</span>, <span class="keywordtype">intent(  out)</span> :: ia
+<a name="l00335"></a>00335       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)</span>,   <span class="keywordtype">intent(  out)</span> :: ja
+<a name="l00336"></a>00336       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(vecl)</span>,   <span class="keywordtype">intent(  out)</span> :: a
+<a name="l00337"></a>00337       
+<a name="l00338"></a>00338       <span class="keywordtype">integer</span>                                    :: i,ii
+<a name="l00339"></a>00339 
+<a name="l00340"></a>00340       <span class="keywordtype">real(wp)                                   </span>:: epI
+<a name="l00341"></a>00341 
+<a name="l00342"></a>00342 <span class="comment">!------------------------------------------------------------------------------     </span>
+<a name="l00343"></a>00343 
+<a name="l00344"></a>00344       epI = 1.0_wp / ep
+<a name="l00345"></a>00345       
+<a name="l00346"></a>00346       ia(1:3)=1
+<a name="l00347"></a>00347       <span class="keyword">do</span> i = 4,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>+1,3 
+<a name="l00348"></a>00348         ia(i:i+2)=ia(i-3:i-1) + 3
+<a name="l00349"></a>00349       <span class="keyword">enddo</span>
+<a name="l00350"></a>00350       
+<a name="l00351"></a>00351       <span class="keyword">do</span> i = 1,<a class="code" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a>
+<a name="l00352"></a>00352          ii = (i-1)*<a class="code" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a>
+<a name="l00353"></a>00353 
+<a name="l00354"></a>00354          a(ii+1) = + epI * 2.0_wp*(u(ii+1)-u(ii+3))
+<a name="l00355"></a>00355          a(ii+2) = + epI * 2.0_wp*(u(ii+2)        )
+<a name="l00356"></a>00356          a(ii+3) = - epI * 2.0_wp*(u(ii+1)        )
+<a name="l00357"></a>00357       <span class="keyword">enddo</span>
+<a name="l00358"></a>00358 
+<a name="l00359"></a>00359       <span class="keyword">do</span> i = 1,<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>
+<a name="l00360"></a>00360         ja(i) =  i
+<a name="l00361"></a>00361       <span class="keyword">enddo</span>
+<a name="l00362"></a>00362 
+<a name="l00363"></a>00363 <span class="keyword">      end subroutine Broadwell_Build_Source_Jac      </span>
+<a name="l00364"></a>00364 
+<a name="l00365"></a>00365 <span class="comment">!==============================================================================</span>
+<a name="l00366"></a>00366 
+<a name="l00367"></a><a class="code" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">00367</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">Broadwell_Add_Diag_Jac</a>(dt,akk,a,ja,ia)
+<a name="l00368"></a>00368       
+<a name="l00369"></a>00369       use <span class="keywordflow">unary_mod</span>,         only: aplsca
+<a name="l00370"></a>00370       use <span class="keywordflow">Jacobian_CSR_Mod</span>,  only: iaJac, jaJac,  aJac
+<a name="l00371"></a>00371 
+<a name="l00372"></a>00372       <span class="keywordtype">real(wp)</span>,               <span class="keywordtype">intent(in)</span> :: dt,akk
+<a name="l00373"></a>00373       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">dimension(:)</span>, <span class="keywordtype">intent(in)</span> :: a
+<a name="l00374"></a>00374       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(:)</span>, <span class="keywordtype">intent(in)</span> :: ja,ia
+<a name="l00375"></a>00375       
+<a name="l00376"></a>00376       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl)          </span>:: iw
+<a name="l00377"></a>00377       <span class="keywordtype">real(wp)</span>, dimension(size(a)+nx*2)  :: wrk
+<a name="l00378"></a>00378       <span class="keywordtype">integer</span>,  dimension(size(a)+nx*2)  :: jwrk
+<a name="l00379"></a>00379       <span class="keywordtype">integer</span>,  <span class="keywordtype">dimension(vecl+1)        </span>:: iwrk   
+<a name="l00380"></a>00380       <span class="keywordtype">integer</span>                            :: nnz
+<a name="l00381"></a>00381       
+<a name="l00382"></a>00382 <span class="comment">!------------------------------------------------------------------------------     </span>
+<a name="l00383"></a>00383       nnz=<span class="keyword">size</span>(a)
+<a name="l00384"></a>00384       
+<a name="l00385"></a>00385       wrk(:nnz)=-akk*dt*a(:)   
+<a name="l00386"></a>00386       wrk(nnz+1:)=0.0_wp
+<a name="l00387"></a>00387       jwrk(:nnz)=ja(:)
+<a name="l00388"></a>00388       jwrk(nnz+1:)=0
+<a name="l00389"></a>00389       iwrk(:)=ia(:)
+<a name="l00390"></a>00390 
+<a name="l00391"></a>00391       call <a class="code" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb">aplsca</a>(<a class="code" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a>,wrk,jwrk,iwrk,1.0_wp,iw)      
+<a name="l00392"></a>00392 
+<a name="l00393"></a>00393       <a class="code" href="namespaceJacobian__CSR__Mod.html#a94d69662ef031c9f945e105441d48c02">iaJac</a>=iwrk
+<a name="l00394"></a>00394       <a class="code" href="namespaceJacobian__CSR__Mod.html#a5926dc41c54f00cbd2cc669cc175665b">jaJac</a>=jwrk
+<a name="l00395"></a>00395        <a class="code" href="namespaceJacobian__CSR__Mod.html#a7f4fdf9a3cd9df4f89b43e74e69f16e5">aJac</a>= wrk
+<a name="l00396"></a>00396       
+<a name="l00397"></a>00397 <span class="keyword">      end subroutine Broadwell_Add_Diag_Jac      </span>
+<a name="l00398"></a>00398 
+<a name="l00399"></a>00399 <span class="comment">!==============================================================================</span>
+<a name="l00400"></a>00400 
+<a name="l00401"></a>00401 <span class="keyword">      end module Broadwell_Mod</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
