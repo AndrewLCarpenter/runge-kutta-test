@@ -32,12 +32,12 @@
 <a name="l00008"></a>00008 <span class="comment">!******************************************************************************</span>
 <a name="l00009"></a><a class="code" href="namespaceKreiss__mod.html">00009</a>       <span class="keyword">module</span> Kreiss_mod
 <a name="l00010"></a>00010       <span class="keywordtype">private</span>
-<a name="l00011"></a>00011       <span class="keywordtype">public</span> :: <a class="code" href="namespaceKreiss__mod.html#a433b9bfd5425378547fb5ec4d485b718">Kreiss</a>
+<a name="l00011"></a>00011       <span class="keywordtype">public</span> :: <a class="code" href="namespaceKreiss__mod.html#a5913fbeeafec0b96a7e257e2ff3426d4">Kreiss</a>
 <a name="l00012"></a>00012       <span class="keyword">contains</span>
-<a name="l00013"></a><a class="code" href="namespaceKreiss__mod.html#a433b9bfd5425378547fb5ec4d485b718">00013</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceKreiss__mod.html#a433b9bfd5425378547fb5ec4d485b718">Kreiss</a>(nveclen,ep,dt,tfinal,iDT,time,rese_vec,resi_vec,akk)
+<a name="l00013"></a><a class="code" href="namespaceKreiss__mod.html#a5913fbeeafec0b96a7e257e2ff3426d4">00013</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceKreiss__mod.html#a5913fbeeafec0b96a7e257e2ff3426d4">Kreiss</a>(nveclen,neq,ep,dt,tfinal,iDT,time,rese_vec,resi_vec,akk)
 <a name="l00014"></a>00014 
 <a name="l00015"></a>00015       use <span class="keywordflow">precision_vars</span>,    only: wp
-<a name="l00016"></a>00016       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,xjac, &amp;
+<a name="l00016"></a>00016       use <span class="keywordflow">control_variables</span>, only: temporal_splitting,probname,xjac,var_names,&amp;
 <a name="l00017"></a>00017      &amp;                             tol,dt_error_tol,uvec,uexact,programstep
 <a name="l00018"></a>00018 
 <a name="l00019"></a>00019       implicit none; <span class="keywordtype">save</span>
@@ -47,7 +47,7 @@
 <a name="l00023"></a>00023       <span class="comment">!INIT vars</span>
 <a name="l00024"></a>00024       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: ep
 <a name="l00025"></a>00025       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(inout)</span> :: dt
-<a name="l00026"></a>00026       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(  out)</span> :: nveclen
+<a name="l00026"></a>00026       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(  out)</span> :: nveclen,neq
 <a name="l00027"></a>00027       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(  out)</span> :: tfinal
 <a name="l00028"></a>00028       <span class="keywordtype">integer</span>,                   <span class="keywordtype">intent(in   )</span> :: iDT
 <a name="l00029"></a>00029       <span class="keywordtype">real(wp)</span>,                  <span class="keywordtype">intent(in   )</span> :: time
@@ -67,81 +67,88 @@
 <a name="l00043"></a>00043         <span class="comment">!**Pre-initialization. Get problem name and vector length**</span>
 <a name="l00044"></a>00044         <span class="keyword">case</span>(<span class="stringliteral">&apos;INITIALIZE_PROBLEM_INFORMATION&apos;</span>)
 <a name="l00045"></a>00045           nvecLen = vecl
-<a name="l00046"></a>00046           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Kreiss   &apos;</span>   
-<a name="l00047"></a>00047           tol=1.0e-10_wp
-<a name="l00048"></a>00048           dt_error_tol=1.0e-9_wp
-<a name="l00049"></a>00049         
-<a name="l00050"></a>00050         <span class="comment">!**Initialization of problem information**        </span>
-<a name="l00051"></a>00051         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
-<a name="l00052"></a>00052           <span class="comment">!Initialize temporary constants</span>
-<a name="l00053"></a>00053           epi =1.0_wp/ep
-<a name="l00054"></a>00054           cos_t=cos(time)
-<a name="l00055"></a>00055           sin_t=sin(time)
-<a name="l00056"></a>00056           
-<a name="l00057"></a>00057           <span class="comment">!Time information</span>
-<a name="l00058"></a>00058           dt = 0.25_wp/10**((iDT-1)/20.0_wp) <span class="comment">! timestep</span>
-<a name="l00059"></a>00059           tfinal = 1.0_wp                    <span class="comment">! final time</span>
-<a name="l00060"></a>00060 
-<a name="l00061"></a>00061           <span class="comment">!**Exact Solution**</span>
-<a name="l00062"></a>00062           lambda_p=0.5_wp*(-1.0_wp-epi) + 0.5_wp*sqrt((1.0_wp-epi)**2-4.0_wp)
-<a name="l00063"></a>00063           lambda_m=0.5_wp*(-1.0_wp-epi) - 0.5_wp*sqrt((1.0_wp-epi)**2-4.0_wp)
-<a name="l00064"></a>00064          
-<a name="l00065"></a>00065           E_mat(1,1)=cos(tfinal)
-<a name="l00066"></a>00066           E_mat(1,2)=-sin(tfinal)
-<a name="l00067"></a>00067           E_mat(2,1)=sin(tfinal)
-<a name="l00068"></a>00068           E_mat(2,2)=cos(tfinal)
-<a name="l00069"></a>00069           
-<a name="l00070"></a>00070           wrk_matrix(1,1)=ep
-<a name="l00071"></a>00071           wrk_matrix(1,2)=ep
-<a name="l00072"></a>00072           wrk_matrix(2,1)=1+lambda_p*ep
-<a name="l00073"></a>00073           wrk_matrix(2,2)=1+lambda_m*ep
-<a name="l00074"></a>00074           
-<a name="l00075"></a>00075           wrk_vec(1)=exp(lambda_p*tfinal)
-<a name="l00076"></a>00076           wrk_vec(2)=exp(lambda_m*tfinal)
-<a name="l00077"></a>00077           
-<a name="l00078"></a>00078           uexact=matmul(matmul(E_mat,wrk_matrix),wrk_vec)
-<a name="l00079"></a>00079           
-<a name="l00080"></a>00080           <span class="comment">!**IC**</span>
-<a name="l00081"></a>00081           uvec(1) = 2*ep
-<a name="l00082"></a>00082           uvec(2) = -1.0_wp*ep+1.0_wp
-<a name="l00083"></a>00083         
-<a name="l00084"></a>00084         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>) 
-<a name="l00085"></a>00085           <span class="comment">!Initialize temporary constants</span>
-<a name="l00086"></a>00086           cos_t=cos(time)
-<a name="l00087"></a>00087           sin_t=sin(time)
-<a name="l00088"></a>00088           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
-<a name="l00089"></a>00089             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
-<a name="l00090"></a>00090               rese_vec(1) = dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))
-<a name="l00091"></a>00091               rese_vec(2) = dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))
-<a name="l00092"></a>00092               resi_vec(1) = dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
-<a name="l00093"></a>00093               resi_vec(2) = dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
-<a name="l00094"></a>00094             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
-<a name="l00095"></a>00095               rese_vec(:) = 0.0_wp
-<a name="l00096"></a>00096               resi_vec(1) =  dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))+ &amp;
-<a name="l00097"></a>00097      &amp;                       dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
-<a name="l00098"></a>00098               resi_vec(2) =  dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))+ &amp;
-<a name="l00099"></a>00099      &amp;                       dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
-<a name="l00100"></a>00100           <span class="keyword">end select</span> choose_RHS_type
-<a name="l00101"></a>00101           
-<a name="l00102"></a>00102         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
-<a name="l00103"></a>00103           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
-<a name="l00104"></a>00104             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
-<a name="l00105"></a>00105               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(-cos_t*cos_t)/ep
-<a name="l00106"></a>00106               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-sin_t*cos_t)/ep
-<a name="l00107"></a>00107               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(-sin_t*cos_t)/ep
-<a name="l00108"></a>00108               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-sin_t*sin_t)/ep
-<a name="l00109"></a>00109             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
-<a name="l00110"></a>00110               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(-cos_t*cos_t-ep*sin_t*sin_t)/ep
-<a name="l00111"></a>00111               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*sin_t*cos_t)/ep
-<a name="l00112"></a>00112               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*cos_t*sin_t)/ep
-<a name="l00113"></a>00113               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-sin_t*sin_t-ep*cos_t*cos_t)/ep
-<a name="l00114"></a>00114           <span class="keyword">end select</span> choose_Jac_type
-<a name="l00115"></a>00115       
-<a name="l00116"></a>00116       <span class="keyword">end select</span> Program_Step_select      
-<a name="l00117"></a>00117 <span class="keyword">      end subroutine Kreiss</span>
-<a name="l00118"></a>00118 <span class="keyword">      end module Kreiss_mod</span>
+<a name="l00046"></a>00046           neq = vecl
+<a name="l00047"></a>00047           <a class="code" href="namespacecontrol__variables.html#ab4dc4a4fa46d7037bf7d9aaa1ab3e81c">probname</a>=<span class="stringliteral">&apos;Kreiss   &apos;</span>   
+<a name="l00048"></a>00048           tol=5.0e-9_wp
+<a name="l00049"></a>00049           dt_error_tol=1.0e-10_wp
+<a name="l00050"></a>00050           
+<a name="l00051"></a>00051           <span class="keyword">allocate</span>(<a class="code" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">var_names</a>(neq))
+<a name="l00052"></a>00052           <a class="code" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">var_names</a>(:)=(/<span class="stringliteral">&apos;Differential&apos;</span>, <span class="stringliteral">&apos;Algebraic   &apos;</span>/)
+<a name="l00053"></a>00053         
+<a name="l00054"></a>00054         <span class="comment">!**Initialization of problem information**        </span>
+<a name="l00055"></a>00055         <span class="keyword">case</span>(<span class="stringliteral">&apos;SET_INITIAL_CONDITIONS&apos;</span>)
+<a name="l00056"></a>00056           <span class="comment">!Initialize temporary constants</span>
+<a name="l00057"></a>00057           epi =1.0_wp/ep
+<a name="l00058"></a>00058           cos_t=cos(time)
+<a name="l00059"></a>00059           sin_t=sin(time)
+<a name="l00060"></a>00060           
+<a name="l00061"></a>00061           <span class="comment">!Time information</span>
+<a name="l00062"></a>00062           choose_dt: <span class="keyword">select</span> <span class="keyword">case</span>(temporal_splitting)
+<a name="l00063"></a>00063           <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>);dt = 0.02_wp/10**((iDT-1)/30.0_wp) <span class="comment">! timestep</span>
+<a name="l00064"></a>00064           <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>); dt = 1.0_wp/10**((iDT-1)/20.0_wp) <span class="comment">! timestep</span>
+<a name="l00065"></a>00065           <span class="keyword">end select</span> choose_dt
+<a name="l00066"></a>00066           tfinal = 1.0_wp                    <span class="comment">! final time</span>
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068           <span class="comment">!**Exact Solution**</span>
+<a name="l00069"></a>00069           lambda_p=0.5_wp*(-1.0_wp-epi) + 0.5_wp*sqrt((1.0_wp-epi)**2-4.0_wp)
+<a name="l00070"></a>00070           lambda_m=0.5_wp*(-1.0_wp-epi) - 0.5_wp*sqrt((1.0_wp-epi)**2-4.0_wp)
+<a name="l00071"></a>00071          
+<a name="l00072"></a>00072           E_mat(1,1)=cos(tfinal)
+<a name="l00073"></a>00073           E_mat(1,2)=-sin(tfinal)
+<a name="l00074"></a>00074           E_mat(2,1)=sin(tfinal)
+<a name="l00075"></a>00075           E_mat(2,2)=cos(tfinal)
+<a name="l00076"></a>00076           
+<a name="l00077"></a>00077           wrk_matrix(1,1)=ep
+<a name="l00078"></a>00078           wrk_matrix(1,2)=ep
+<a name="l00079"></a>00079           wrk_matrix(2,1)=1+lambda_p*ep
+<a name="l00080"></a>00080           wrk_matrix(2,2)=1+lambda_m*ep
+<a name="l00081"></a>00081           
+<a name="l00082"></a>00082           wrk_vec(1)=exp(lambda_p*tfinal)
+<a name="l00083"></a>00083           wrk_vec(2)=exp(lambda_m*tfinal)
+<a name="l00084"></a>00084           
+<a name="l00085"></a>00085           uexact=matmul(matmul(E_mat,wrk_matrix),wrk_vec)
+<a name="l00086"></a>00086           
+<a name="l00087"></a>00087           <span class="comment">!**IC**</span>
+<a name="l00088"></a>00088           uvec(1) = 2*ep
+<a name="l00089"></a>00089           uvec(2) = -1.0_wp*ep+1.0_wp
+<a name="l00090"></a>00090         
+<a name="l00091"></a>00091         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>) 
+<a name="l00092"></a>00092           <span class="comment">!Initialize temporary constants</span>
+<a name="l00093"></a>00093           cos_t=cos(time)
+<a name="l00094"></a>00094           sin_t=sin(time)
+<a name="l00095"></a>00095           choose_RHS_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
+<a name="l00096"></a>00096             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
+<a name="l00097"></a>00097               rese_vec(1) = dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))
+<a name="l00098"></a>00098               rese_vec(2) = dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))
+<a name="l00099"></a>00099               resi_vec(1) = dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
+<a name="l00100"></a>00100               resi_vec(2) = dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
+<a name="l00101"></a>00101             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
+<a name="l00102"></a>00102               rese_vec(:) = 0.0_wp
+<a name="l00103"></a>00103               resi_vec(1) =  dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))+ &amp;
+<a name="l00104"></a>00104      &amp;                       dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
+<a name="l00105"></a>00105               resi_vec(2) =  dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))+ &amp;
+<a name="l00106"></a>00106      &amp;                       dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
+<a name="l00107"></a>00107           <span class="keyword">end select</span> choose_RHS_type
+<a name="l00108"></a>00108           
+<a name="l00109"></a>00109         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_JACOBIAN&apos;</span>)
+<a name="l00110"></a>00110           choose_Jac_type: <span class="keyword">select</span> <span class="keyword">case</span> (Temporal_Splitting)
+<a name="l00111"></a>00111             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMEX&apos;</span>) <span class="comment">! For IMEX schemes</span>
+<a name="l00112"></a>00112               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(-cos_t*cos_t)/ep
+<a name="l00113"></a>00113               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-sin_t*cos_t)/ep
+<a name="l00114"></a>00114               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(-sin_t*cos_t)/ep
+<a name="l00115"></a>00115               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-sin_t*sin_t)/ep
+<a name="l00116"></a>00116             <span class="keyword">case</span>(<span class="stringliteral">&apos;IMPLICIT&apos;</span>) <span class="comment">! For fully implicit schemes</span>
+<a name="l00117"></a>00117               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,1) = 1.0_wp-akk*dt*(-cos_t*cos_t-ep*sin_t*sin_t)/ep
+<a name="l00118"></a>00118               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(1,2) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*sin_t*cos_t)/ep
+<a name="l00119"></a>00119               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,1) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*cos_t*sin_t)/ep
+<a name="l00120"></a>00120               <a class="code" href="namespacecontrol__variables.html#afae70ecf2800b85b5556f11ef27e1083">xjac</a>(2,2) = 1.0_wp-akk*dt*(-sin_t*sin_t-ep*cos_t*cos_t)/ep
+<a name="l00121"></a>00121           <span class="keyword">end select</span> choose_Jac_type
+<a name="l00122"></a>00122       
+<a name="l00123"></a>00123       <span class="keyword">end select</span> Program_Step_select      
+<a name="l00124"></a>00124 <span class="keyword">      end subroutine Kreiss</span>
+<a name="l00125"></a>00125 <span class="keyword">      end module Kreiss_mod</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

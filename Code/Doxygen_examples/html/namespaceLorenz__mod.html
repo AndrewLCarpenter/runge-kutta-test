@@ -26,10 +26,10 @@
 <div class="contents">
 <h1>Lorenz_mod Module Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLorenz__mod.html#ace3590bec970c7cd839e024285fde201">Lorenz</a> (nveclen, ep, dt, tfinal, iDT, rese_vec, resi_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceLorenz__mod.html#aab48d7e065d638529deff5920ca3a427">Lorenz</a> (nveclen, neq, ep, dt, tfinal, iDT, rese_vec, resi_vec, akk)</td></tr>
 </table>
 <hr/><h2>Function/Subroutine Documentation</h2>
-<a class="anchor" id="ace3590bec970c7cd839e024285fde201"></a><!-- doxytag: member="Lorenz_mod::Lorenz" ref="ace3590bec970c7cd839e024285fde201" args="(nveclen, ep, dt, tfinal, iDT, rese_vec, resi_vec, akk)" -->
+<a class="anchor" id="aab48d7e065d638529deff5920ca3a427"></a><!-- doxytag: member="Lorenz_mod::Lorenz" ref="aab48d7e065d638529deff5920ca3a427" args="(nveclen, neq, ep, dt, tfinal, iDT, rese_vec, resi_vec, akk)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -38,6 +38,12 @@
           <td>(</td>
           <td class="paramtype">integer,intent(out)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(out)&nbsp;</td>
+          <td class="paramname"> <em>neq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -92,23 +98,23 @@
 
 <p>Definition at line <a class="el" href="Lorenz_8f90_source.html#l00013">13</a> of file <a class="el" href="Lorenz_8f90_source.html">Lorenz.f90</a>.</p>
 
-<p>References <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::xjac</a>.</p>
+<p>References <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="control__variables_8f90_source.html#l00043">control_variables::var_names</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::xjac</a>.</p>
 
 <p>Referenced by <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceLorenz__mod_ace3590bec970c7cd839e024285fde201_icgraph.png" border="0" usemap="#namespaceLorenz__mod_ace3590bec970c7cd839e024285fde201_icgraph_map" alt=""></div>
-<map name="namespaceLorenz__mod_ace3590bec970c7cd839e024285fde201_icgraph_map" id="namespaceLorenz__mod_ace3590bec970c7cd839e024285fde201_icgraph">
-<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="196,75,391,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="456,75,587,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1100,89,1185,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="440,22,603,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="651,25,827,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="876,50,1049,79"/></map>
+<div class="center"><img src="namespaceLorenz__mod_aab48d7e065d638529deff5920ca3a427_icgraph.png" border="0" usemap="#namespaceLorenz__mod_aab48d7e065d638529deff5920ca3a427_icgraph_map" alt=""></div>
+<map name="namespaceLorenz__mod_aab48d7e065d638529deff5920ca3a427_icgraph_map" id="namespaceLorenz__mod_aab48d7e065d638529deff5920ca3a427_icgraph">
+<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="196,75,391,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="456,75,587,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1100,89,1185,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="440,22,603,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="651,25,827,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="876,50,1049,79"/></map>
 </div>
 </p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

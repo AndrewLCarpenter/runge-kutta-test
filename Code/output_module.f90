@@ -132,7 +132,7 @@
 !  OUTPUTS ITERATION INFORMATION TO TERMINAL      
       subroutine output_terminal_iteration(cost,mwt,ep,nveclen,neq)
       
-      use poly_fit_mod,      only : fit
+      use poly_fit_Mod,      only : fit
       use control_variables, only : isamp,dt_error_tol,b,error,errorP,errorL2
             
       real(wp), dimension(:),   intent(in) :: cost

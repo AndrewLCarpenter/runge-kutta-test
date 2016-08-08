@@ -30,15 +30,18 @@
 <tr><td colspan="2"><h2>Modules</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">module &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html">Broadwell_Mod</a></td></tr>
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069">Broadwell_Mod::Broadwell</a> (nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">Broadwell_Mod::Broadwell</a> (nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">Broadwell_Mod::grid</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8">Broadwell_Mod::exact_Broadwell</a> (u, eps)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1">Broadwell_Mod::Broadwell_dUdt</a> (u, dudt_D1, eps)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">Broadwell_Mod::Broadwell_Jac</a> (dt, akk, a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9">Broadwell_Mod::exact_Broadwell</a> (u, ep)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703">Broadwell_Mod::Broadwell_dUdt</a> (u, dudt_D1, dudt_Source, ep)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43">Broadwell_Mod::Broadwell_Build_Spatial_Jac</a> (a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">Broadwell_Mod::Broadwell_Build_Source_Jac</a> (ep, u, a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">Broadwell_Mod::Broadwell_Add_Diag_Jac</a> (dt, akk, a, ja, ia)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">Broadwell_Mod::nx</a> = 32</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">Broadwell_Mod::neq</a> = 3</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">Broadwell_Mod::vecl</a> = nx * neq</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ace00bcd7151d3103aa20e1d607d47125">Broadwell_Mod::Length</a> = 20.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">Broadwell_Mod::xL</a> = -10.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">Broadwell_Mod::xR</a> = +10.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">Broadwell_Mod::a_u1</a> = + 0.3_wp</td></tr>
@@ -58,7 +61,7 @@
 <tr><td class="memItemLeft" align="right" valign="top">logical&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">Broadwell_Mod::update_Jac</a></td></tr>
 </table>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

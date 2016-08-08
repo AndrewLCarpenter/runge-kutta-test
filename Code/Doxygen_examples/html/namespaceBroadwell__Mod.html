@@ -26,15 +26,18 @@
 <div class="contents">
 <h1>Broadwell_Mod Module Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069">Broadwell</a> (nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">Broadwell</a> (nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8">grid</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8">exact_Broadwell</a> (u, eps)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1">Broadwell_dUdt</a> (u, dudt_D1, eps)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d">Broadwell_Jac</a> (dt, akk, a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9">exact_Broadwell</a> (u, ep)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703">Broadwell_dUdt</a> (u, dudt_D1, dudt_Source, ep)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43">Broadwell_Build_Spatial_Jac</a> (a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3">Broadwell_Build_Source_Jac</a> (ep, u, a, ja, ia)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea">Broadwell_Add_Diag_Jac</a> (dt, akk, a, ja, ia)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a> = 32</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a> = 3</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">integer, parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#af1f487ccf1fabc9c22e9cd7f9d211924">vecl</a> = <a class="el" href="namespaceBroadwell__Mod.html#a34c57be9c77282eb5996427453a6e929">nx</a> * <a class="el" href="namespaceBroadwell__Mod.html#aab1aec26293b3c36201093f2cddd26b0">neq</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ace00bcd7151d3103aa20e1d607d47125">Length</a> = 20.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ae5a4e1a799a729a9bc010b8e427f6047">xL</a> = -10.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#adc87760a7ca35d723ca6d15fe12c3a8d">xR</a> = +10.0_wp</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#adc9a7f71bddd61ca964fb6a749ca38a4">a_u1</a> = + 0.3_wp</td></tr>
@@ -54,7 +57,7 @@
 <tr><td class="memItemLeft" align="right" valign="top">logical&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceBroadwell__Mod.html#ad7e158076badecf057c1d8c109c13730">update_Jac</a></td></tr>
 </table>
 <hr/><h2>Function/Subroutine Documentation</h2>
-<a class="anchor" id="abe06eb50d19f469c475430f9f02b2069"></a><!-- doxytag: member="Broadwell_Mod::Broadwell" ref="abe06eb50d19f469c475430f9f02b2069" args="(nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
+<a class="anchor" id="a5f4daaac125109c66525210bece53a41"></a><!-- doxytag: member="Broadwell_Mod::Broadwell" ref="a5f4daaac125109c66525210bece53a41" args="(nveclen, eq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -63,6 +66,12 @@
           <td>(</td>
           <td class="paramtype">integer,intent(out)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(out)&nbsp;</td>
+          <td class="paramname"> <em>eq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -115,84 +124,38 @@
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00058">58</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00059">59</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage()</a>, <a class="el" href="unary__mod_8f90_source.html#l04036">unary_mod::aplb()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_dUdt()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00243">Broadwell_Jac()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">SBP_Coef_Module::Define_CSR_Operators()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00041">Deriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00034">dx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00172">exact_Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00036">iDeriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00036">iSource_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00036">iwrk_Jac</a>, <a class="el" href="control__variables_8f90_source.html#l00030">control_variables::Jac_case</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00037">jDeriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00039">jSource_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00038">jwrk_Jac</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00044">Source_p</a>, <a class="el" href="precision__vars_8f90_source.html#l00027">precision_vars::two</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00045">update_Jac</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00045">update_RHS</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00042">wrk_Jac</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00033">x</a>.</p>
+<p>References <a class="el" href="Broadwell__mod_8f90_source.html#l00031">a_u1</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00032">a_u2</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00022">Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage()</a>, <a class="el" href="unary__mod_8f90_source.html#l04036">unary_mod::aplb()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00367">Broadwell_Add_Diag_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00329">Broadwell_Build_Source_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00277">Broadwell_Build_Spatial_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00237">Broadwell_dUdt()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00029">SBP_Coef_Module::Define_CSR_Operators()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00042">Deriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00035">dx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00207">exact_Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00037">iDeriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00037">iSource_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00037">iwrk_Jac</a>, <a class="el" href="control__variables_8f90_source.html#l00030">control_variables::Jac_case</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00038">jDeriv_comb_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00040">jSource_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00039">jwrk_Jac</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00028">Length</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00024">neq</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00045">Source_p</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00046">update_Jac</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00043">wrk_Jac</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00034">x</a>.</p>
 
-<p><div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_abe06eb50d19f469c475430f9f02b2069_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_abe06eb50d19f469c475430f9f02b2069_cgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_abe06eb50d19f469c475430f9f02b2069_cgraph_map" id="namespaceBroadwell__Mod_abe06eb50d19f469c475430f9f02b2069_cgraph">
-<area shape="rect" id="node3" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935" title="Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage" alt="" coords="231,5,543,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c" title="unary_mod::aplb" alt="" coords="328,59,445,88"/><area shape="rect" id="node7" href="namespaceBroadwell__Mod.html#a85fdddaf981ee96612834c55a03022b1" title="Broadwell_Mod::Broadwell_dUdt" alt="" coords="281,112,492,141"/><area shape="rect" id="node11" href="namespaceBroadwell__Mod.html#ac336181a366db7be1115eb2c9297348d" title="Broadwell_Mod::Broadwell_Jac" alt="" coords="285,165,488,195"/><area shape="rect" id="node17" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="248,219,525,248"/><area shape="rect" id="node35" href="namespaceBroadwell__Mod.html#a305f6492e91365fe99539a13143e5de8" title="Broadwell_Mod::exact_Broadwell" alt="" coords="280,272,493,301"/><area shape="rect" id="node37" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8" title="Broadwell_Mod::grid" alt="" coords="317,325,456,355"/><area shape="rect" id="node9" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea" title="matvec_module::amux" alt="" coords="620,85,775,115"/><area shape="rect" id="node13" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="632,139,763,168"/><area shape="rect" id="node15" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="888,139,1019,168"/><area shape="rect" id="node19" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="604,299,791,328"/><area shape="rect" id="node27" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="592,192,803,221"/><area shape="rect" id="node29" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="604,352,791,381"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="592,245,803,275"/><area shape="rect" id="node21" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="851,352,1056,381"/><area shape="rect" id="node23" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="856,299,1051,328"/><area shape="rect" id="node25" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="1105,299,1311,328"/></map>
-</div>
-</p>
-
-</div>
-</div>
-<a class="anchor" id="a85fdddaf981ee96612834c55a03022b1"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_dUdt" ref="a85fdddaf981ee96612834c55a03022b1" args="(u, dudt_D1, eps)" -->
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">subroutine Broadwell_Mod::Broadwell_dUdt </td>
-          <td>(</td>
-          <td class="paramtype">real(wp),dimension(vecl),intent(in)&nbsp;</td>
-          <td class="paramname"> <em>u</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">real(wp),dimension(vecl),intent(out)&nbsp;</td>
-          <td class="paramname"> <em>dudt_D1</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">real(wp),intent(in)&nbsp;</td>
-          <td class="paramname"> <em>eps</em></td><td>&nbsp;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td><td><code> [private]</code></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00202">202</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
-
-<p>References <a class="el" href="matvec__module_8f90_source.html#l00039">matvec_module::amux()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD1_per</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00045">update_RHS</a>.</p>
-
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_cgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_cgraph_map" id="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_cgraph">
-<area shape="rect" id="node3" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea" title="matvec_module::amux" alt="" coords="264,5,419,35"/></map>
+<div class="center"><img src="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_cgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_cgraph_map" id="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_cgraph">
+<area shape="rect" id="node3" href="namespaceJacobian__CSR__Mod.html#ab251b185ad5d74ee771ea99d2a7f3935" title="Jacobian_CSR_Mod::Allocate_Jac_CSR_Storage" alt="" coords="231,5,543,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#ad0d8a19e91684be702bb07ef7fe3a59c" title="unary_mod::aplb" alt="" coords="328,59,445,88"/><area shape="rect" id="node7" href="namespaceBroadwell__Mod.html#ab5854b6acfcd66dad9ad97501a94c9ea" title="Broadwell_Mod::Broadwell_Add_Diag_Jac" alt="" coords="253,112,520,141"/><area shape="rect" id="node13" href="namespaceBroadwell__Mod.html#ad243f6da1076012cc3876ea6d66cd9c3" title="Broadwell_Mod::Broadwell_Build_Source_Jac" alt="" coords="243,165,531,195"/><area shape="rect" id="node15" href="namespaceBroadwell__Mod.html#a0b0778573582e823dae1750ac4008d43" title="Broadwell_Mod::Broadwell_Build_Spatial_Jac" alt="" coords="244,219,529,248"/><area shape="rect" id="node23" href="namespaceBroadwell__Mod.html#a71e6d76ab8eab0d39c9661941c51e703" title="Broadwell_Mod::Broadwell_dUdt" alt="" coords="281,272,492,301"/><area shape="rect" id="node27" href="namespaceSBP__Coef__Module.html#a2a470b5ce579d35823d5a3b0cdfc0d25" title="SBP_Coef_Module::Define_CSR_Operators" alt="" coords="248,325,525,355"/><area shape="rect" id="node45" href="namespaceBroadwell__Mod.html#a0b2ed46d8fc6c397e90f3ad69424ebc9" title="Broadwell_Mod::exact_Broadwell" alt="" coords="280,379,493,408"/><area shape="rect" id="node47" href="namespaceBroadwell__Mod.html#a3c14aa4a4be918fe822aa5b6777c73f8" title="Broadwell_Mod::grid" alt="" coords="317,432,456,461"/><area shape="rect" id="node9" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="632,112,763,141"/><area shape="rect" id="node11" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="888,112,1019,141"/><area shape="rect" id="node17" href="namespaceunary__mod.html#a8247fa4ab43954b9f840fc56fd441c23" title="unary_mod::dperm" alt="" coords="632,205,763,235"/><area shape="rect" id="node19" href="namespaceunary__mod.html#a3911ae3b59ca413043b651034c4faa94" title="unary_mod::cperm" alt="" coords="888,245,1019,275"/><area shape="rect" id="node21" href="namespaceunary__mod.html#ac8cbdc4380307b940c0153271f95bf22" title="unary_mod::rperm" alt="" coords="891,192,1016,221"/><area shape="rect" id="node25" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea" title="matvec_module::amux" alt="" coords="620,259,775,288"/><area shape="rect" id="node29" href="namespaceSBP__Coef__Module.html#ab6bbfe22a26777546d200e6ae6dfa9f9" title="SBP_Coef_Module::D1_242" alt="" coords="604,419,791,448"/><area shape="rect" id="node37" href="namespaceSBP__Coef__Module.html#a59677ad098d07f9be61d5c5be73d64f7" title="SBP_Coef_Module::D1_periodic" alt="" coords="592,472,803,501"/><area shape="rect" id="node39" href="namespaceSBP__Coef__Module.html#a19d73fc016d9d911d44b5589d5eb77d6" title="SBP_Coef_Module::D2_242" alt="" coords="604,365,791,395"/><area shape="rect" id="node43" href="namespaceSBP__Coef__Module.html#a568c69a1c6d1eb7230d6eaa8fc4e0cea" title="SBP_Coef_Module::D2_periodic" alt="" coords="592,312,803,341"/><area shape="rect" id="node31" href="namespaceSBP__Coef__Module.html#aa4a8494f614c16427507535f3ff16a3b" title="SBP_Coef_Module::CSR_Filler" alt="" coords="851,419,1056,448"/><area shape="rect" id="node33" href="namespaceSBP__Coef__Module.html#a7ec1f25fff6547a14684db701fbd0d80" title="SBP_Coef_Module::test_error" alt="" coords="856,365,1051,395"/><area shape="rect" id="node35" href="namespaceSBP__Coef__Module.html#ab42d272ccc8a6a647de500a27b25b867" title="SBP_Coef_Module::amux_local" alt="" coords="1105,365,1311,395"/></map>
 </div>
 </p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_icgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_icgraph_map" id="namespaceBroadwell__Mod_a85fdddaf981ee96612834c55a03022b1_icgraph">
-<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="264,5,440,35"/></map>
+<div class="center"><img src="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_icgraph_map" id="namespaceBroadwell__Mod_a5f4daaac125109c66525210bece53a41_icgraph">
+<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="231,75,425,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="491,75,621,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1135,89,1220,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="475,22,637,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="685,25,861,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="911,50,1084,79"/></map>
 </div>
 </p>
 
 </div>
 </div>
-<a class="anchor" id="ac336181a366db7be1115eb2c9297348d"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_Jac" ref="ac336181a366db7be1115eb2c9297348d" args="(dt, akk, a, ja, ia)" -->
+<a class="anchor" id="ab5854b6acfcd66dad9ad97501a94c9ea"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_Add_Diag_Jac" ref="ab5854b6acfcd66dad9ad97501a94c9ea" args="(dt, akk, a, ja, ia)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">subroutine Broadwell_Mod::Broadwell_Jac </td>
+          <td class="memname">subroutine Broadwell_Mod::Broadwell_Add_Diag_Jac </td>
           <td>(</td>
           <td class="paramtype">real(wp),intent(in)&nbsp;</td>
           <td class="paramname"> <em>dt</em>, </td>
@@ -224,39 +187,219 @@ Here is the caller graph for this function:</div>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td><td></td>
+          <td></td><td></td><td><code> [private]</code></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00243">243</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00367">367</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aJac</a>, <a class="el" href="unary__mod_8f90_source.html#l05083">unary_mod::aplsca()</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iaJac</a>, and <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jaJac</a>.</p>
+<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aJac</a>, <a class="el" href="unary__mod_8f90_source.html#l05083">unary_mod::aplsca()</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iaJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jaJac</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_cgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_cgraph_map" id="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_cgraph">
-<area shape="rect" id="node3" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="260,5,391,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="441,5,572,35"/></map>
+<div class="center"><img src="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_cgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_cgraph_map" id="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_cgraph">
+<area shape="rect" id="node3" href="namespaceunary__mod.html#a74f52765deb59280ca3f1b308a7a3bfb" title="unary_mod::aplsca" alt="" coords="324,5,455,35"/><area shape="rect" id="node5" href="namespaceunary__mod.html#a26d9a8ea570451619e73d58120350141" title="unary_mod::diapos" alt="" coords="505,5,636,35"/></map>
 </div>
 </p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_icgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_icgraph_map" id="namespaceBroadwell__Mod_ac336181a366db7be1115eb2c9297348d_icgraph">
-<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="259,5,435,35"/></map>
+<div class="center"><img src="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_icgraph_map" id="namespaceBroadwell__Mod_ab5854b6acfcd66dad9ad97501a94c9ea_icgraph">
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="323,75,499,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="548,75,743,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="808,75,939,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1452,89,1537,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="792,22,955,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1003,25,1179,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1228,50,1401,79"/></map>
 </div>
 </p>
 
 </div>
 </div>
-<a class="anchor" id="a305f6492e91365fe99539a13143e5de8"></a><!-- doxytag: member="Broadwell_Mod::exact_Broadwell" ref="a305f6492e91365fe99539a13143e5de8" args="(u, eps)" -->
+<a class="anchor" id="ad243f6da1076012cc3876ea6d66cd9c3"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_Build_Source_Jac" ref="ad243f6da1076012cc3876ea6d66cd9c3" args="(ep, u, a, ja, ia)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine Broadwell_Mod::Broadwell_Build_Source_Jac </td>
+          <td>(</td>
+          <td class="paramtype">real(wp),intent(in)&nbsp;</td>
+          <td class="paramname"> <em>ep</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),dimension(vecl),intent(in)&nbsp;</td>
+          <td class="paramname"> <em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),dimension(vecl),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(vecl),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ja</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(vecl+1),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ia</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00329">329</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>References <a class="el" href="Broadwell__mod_8f90_source.html#l00024">neq</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceBroadwell__Mod_ad243f6da1076012cc3876ea6d66cd9c3_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_ad243f6da1076012cc3876ea6d66cd9c3_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_ad243f6da1076012cc3876ea6d66cd9c3_icgraph_map" id="namespaceBroadwell__Mod_ad243f6da1076012cc3876ea6d66cd9c3_icgraph">
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="341,75,517,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="567,75,761,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="827,75,957,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1471,89,1556,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="811,22,973,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1021,25,1197,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1247,50,1420,79"/></map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a0b0778573582e823dae1750ac4008d43"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_Build_Spatial_Jac" ref="a0b0778573582e823dae1750ac4008d43" args="(a, ja, ia)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine Broadwell_Mod::Broadwell_Build_Spatial_Jac </td>
+          <td>(</td>
+          <td class="paramtype">real(wp),dimension(nnz_d1_per),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(nnz_d1_per),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ja</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,dimension(vecl+1),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>ia</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00277">277</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>References <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="unary__mod_8f90_source.html#l01626">unary_mod::dperm()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00023">SBP_Coef_Module::nnz_D1_per</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_cgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_cgraph_map" id="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_cgraph">
+<area shape="rect" id="node3" href="namespaceunary__mod.html#a8247fa4ab43954b9f840fc56fd441c23" title="unary_mod::dperm" alt="" coords="341,32,472,61"/><area shape="rect" id="node5" href="namespaceunary__mod.html#a3911ae3b59ca413043b651034c4faa94" title="unary_mod::cperm" alt="" coords="520,5,651,35"/><area shape="rect" id="node7" href="namespaceunary__mod.html#ac8cbdc4380307b940c0153271f95bf22" title="unary_mod::rperm" alt="" coords="523,59,648,88"/></map>
+</div>
+</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_icgraph_map" id="namespaceBroadwell__Mod_a0b0778573582e823dae1750ac4008d43_icgraph">
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="341,75,517,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="567,75,761,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="827,75,957,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1471,89,1556,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="811,22,973,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="1021,25,1197,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1247,50,1420,79"/></map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a71e6d76ab8eab0d39c9661941c51e703"></a><!-- doxytag: member="Broadwell_Mod::Broadwell_dUdt" ref="a71e6d76ab8eab0d39c9661941c51e703" args="(u, dudt_D1, dudt_Source, ep)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine Broadwell_Mod::Broadwell_dUdt </td>
+          <td>(</td>
+          <td class="paramtype">real(wp),dimension(vecl),intent(in)&nbsp;</td>
+          <td class="paramname"> <em>u</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),dimension(vecl),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>dudt_D1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),dimension(vecl),intent(out)&nbsp;</td>
+          <td class="paramname"> <em>dudt_Source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(wp),intent(in)&nbsp;</td>
+          <td class="paramname"> <em>ep</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td><code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00237">237</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>References <a class="el" href="matvec__module_8f90_source.html#l00039">matvec_module::amux()</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD1_per</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_cgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_cgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_cgraph_map" id="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_cgraph">
+<area shape="rect" id="node3" href="namespacematvec__module.html#a1f3669ca263f13c00625724a4add11ea" title="matvec_module::amux" alt="" coords="264,5,419,35"/></map>
+</div>
+</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_icgraph_map" id="namespaceBroadwell__Mod_a71e6d76ab8eab0d39c9661941c51e703_icgraph">
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="264,75,440,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="489,75,684,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="749,75,880,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1393,89,1479,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="733,22,896,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="944,25,1120,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1169,50,1343,79"/></map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a0b2ed46d8fc6c397e90f3ad69424ebc9"></a><!-- doxytag: member="Broadwell_Mod::exact_Broadwell" ref="a0b2ed46d8fc6c397e90f3ad69424ebc9" args="(u, ep)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -270,7 +413,7 @@ Here is the caller graph for this function:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">real(wp),intent(in)&nbsp;</td>
-          <td class="paramname"> <em>eps</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>ep</em></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -281,18 +424,18 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00172">172</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00207">207</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
 <p>References <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespaceBroadwell__Mod_a305f6492e91365fe99539a13143e5de8_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a305f6492e91365fe99539a13143e5de8_icgraph_map" alt=""></div>
-<map name="namespaceBroadwell__Mod_a305f6492e91365fe99539a13143e5de8_icgraph_map" id="namespaceBroadwell__Mod_a305f6492e91365fe99539a13143e5de8_icgraph">
-<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="269,5,445,35"/></map>
+<div class="center"><img src="namespaceBroadwell__Mod_a0b2ed46d8fc6c397e90f3ad69424ebc9_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a0b2ed46d8fc6c397e90f3ad69424ebc9_icgraph_map" alt=""></div>
+<map name="namespaceBroadwell__Mod_a0b2ed46d8fc6c397e90f3ad69424ebc9_icgraph_map" id="namespaceBroadwell__Mod_a0b2ed46d8fc6c397e90f3ad69424ebc9_icgraph">
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="269,75,445,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="495,75,689,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="755,75,885,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1399,89,1484,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="739,22,901,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="949,25,1125,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1175,50,1348,79"/></map>
 </div>
 </p>
 
@@ -313,18 +456,18 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00160">160</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00195">195</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>References <a class="el" href="Broadwell__mod_8f90_source.html#l00034">dx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00026">vecl</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00033">x</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00028">xL</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00029">xR</a>.</p>
+<p>References <a class="el" href="Broadwell__mod_8f90_source.html#l00035">dx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00023">nx</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00034">x</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00029">xL</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00030">xR</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
 <div class="center"><img src="namespaceBroadwell__Mod_a3c14aa4a4be918fe822aa5b6777c73f8_icgraph.png" border="0" usemap="#namespaceBroadwell__Mod_a3c14aa4a4be918fe822aa5b6777c73f8_icgraph_map" alt=""></div>
 <map name="namespaceBroadwell__Mod_a3c14aa4a4be918fe822aa5b6777c73f8_icgraph_map" id="namespaceBroadwell__Mod_a3c14aa4a4be918fe822aa5b6777c73f8_icgraph">
-<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#abe06eb50d19f469c475430f9f02b2069" title="Broadwell_Mod::Broadwell" alt="" coords="195,5,371,35"/></map>
+<area shape="rect" id="node3" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41" title="Broadwell_Mod::Broadwell" alt="" coords="195,75,371,105"/><area shape="rect" id="node5" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="420,75,615,105"/><area shape="rect" id="node7" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="680,75,811,105"/><area shape="rect" id="node13" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1324,89,1409,118"/><area shape="rect" id="node16" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="664,22,827,51"/><area shape="rect" id="node9" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="875,25,1051,54"/><area shape="rect" id="node11" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="1100,50,1273,79"/></map>
 </div>
 </p>
 
@@ -342,7 +485,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00030">30</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00031">31</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -357,7 +502,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00031">31</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00032">32</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -372,9 +519,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00041">41</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00042">42</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -389,9 +536,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00034">34</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00035">35</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>.</p>
 
 </div>
 </div>
@@ -406,9 +553,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00036">36</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00037">37</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -423,9 +570,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00036">36</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00037">37</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -440,9 +587,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00036">36</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00037">37</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -457,9 +604,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00037">37</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00038">38</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -474,9 +621,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00039">39</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00040">40</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -491,9 +638,26 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00038">38</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00039">39</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ace00bcd7151d3103aa20e1d607d47125"></a><!-- doxytag: member="Broadwell_Mod::Length" ref="ace00bcd7151d3103aa20e1d607d47125" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(wp),parameter <a class="el" href="namespaceBroadwell__Mod.html#ace00bcd7151d3103aa20e1d607d47125">Broadwell_Mod::Length</a> = 20.0_wp</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00028">28</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -510,6 +674,8 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00024">24</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00329">Broadwell_Build_Source_Jac()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a34c57be9c77282eb5996427453a6e929"></a><!-- doxytag: member="Broadwell_Mod::nx" ref="a34c57be9c77282eb5996427453a6e929" args="" -->
@@ -525,7 +691,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00023">23</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_dUdt()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00329">Broadwell_Build_Source_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00277">Broadwell_Build_Spatial_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00237">Broadwell_dUdt()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>.</p>
 
 </div>
 </div>
@@ -540,9 +706,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00044">44</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00045">45</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -557,9 +723,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00045">45</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00046">46</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -574,9 +740,7 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00045">45</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
-
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00202">Broadwell_dUdt()</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00046">46</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
 </div>
 </div>
@@ -593,7 +757,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00026">26</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00172">exact_Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00367">Broadwell_Add_Diag_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00329">Broadwell_Build_Source_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00277">Broadwell_Build_Spatial_Jac()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00237">Broadwell_dUdt()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00207">exact_Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -608,9 +772,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00042">42</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00043">43</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>.</p>
 
 </div>
 </div>
@@ -625,9 +789,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00033">33</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00034">34</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell()</a>, and <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>.</p>
 
 </div>
 </div>
@@ -642,9 +806,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00028">28</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00029">29</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>.</p>
 
 </div>
 </div>
@@ -659,14 +823,14 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00029">29</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
+<p>Definition at line <a class="el" href="Broadwell__mod_8f90_source.html#l00030">30</a> of file <a class="el" href="Broadwell__mod_8f90_source.html">Broadwell_mod.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00160">grid()</a>.</p>
+<p>Referenced by <a class="el" href="Broadwell__mod_8f90_source.html#l00195">grid()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -2265,6 +2265,10 @@ DIAFILE_DIRS           =
 # the size of a graph can be further restricted by MAX_DOT_GRAPH_DEPTH.
 # Minimum value: 0, maximum value: 10000, default value: 50.
 # This tag requires that the tag HAVE_DOT is set to YES.
+# KEY WORDS:
+# RED NODE
+# EXPAND NODE
+# EXPAND GRAPH CAll GRAPH
 
 DOT_GRAPH_MAX_NODES    = 50
 

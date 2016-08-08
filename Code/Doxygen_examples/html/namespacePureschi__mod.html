@@ -26,10 +26,10 @@
 <div class="contents">
 <h1>Pureschi_mod Module Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePureschi__mod.html#adafad2458c1389ee7e3d5f5a544229d7">Pureschi</a> (nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacePureschi__mod.html#a674934cac7a575adee729ee8cbb66236">Pureschi</a> (nveclen, neq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)</td></tr>
 </table>
 <hr/><h2>Function/Subroutine Documentation</h2>
-<a class="anchor" id="adafad2458c1389ee7e3d5f5a544229d7"></a><!-- doxytag: member="Pureschi_mod::Pureschi" ref="adafad2458c1389ee7e3d5f5a544229d7" args="(nveclen, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
+<a class="anchor" id="a674934cac7a575adee729ee8cbb66236"></a><!-- doxytag: member="Pureschi_mod::Pureschi" ref="a674934cac7a575adee729ee8cbb66236" args="(nveclen, neq, ep, dt, tfinal, iDT, resE_vec, resI_vec, akk)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -38,6 +38,12 @@
           <td>(</td>
           <td class="paramtype">integer,intent(out)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(out)&nbsp;</td>
+          <td class="paramname"> <em>neq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -92,23 +98,23 @@
 
 <p>Definition at line <a class="el" href="Pureschi_8f90_source.html#l00013">13</a> of file <a class="el" href="Pureschi_8f90_source.html">Pureschi.f90</a>.</p>
 
-<p>References <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::xjac</a>.</p>
+<p>References <a class="el" href="precision__vars_8f90_source.html#l00049">precision_vars::pi</a>, <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>, <a class="el" href="control__variables_8f90_source.html#l00043">control_variables::var_names</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::xjac</a>.</p>
 
 <p>Referenced by <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespacePureschi__mod_adafad2458c1389ee7e3d5f5a544229d7_icgraph.png" border="0" usemap="#namespacePureschi__mod_adafad2458c1389ee7e3d5f5a544229d7_icgraph_map" alt=""></div>
-<map name="namespacePureschi__mod_adafad2458c1389ee7e3d5f5a544229d7_icgraph_map" id="namespacePureschi__mod_adafad2458c1389ee7e3d5f5a544229d7_icgraph">
-<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057" title="problemsub_mod::problemsub" alt="" coords="220,75,415,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="480,75,611,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1124,89,1209,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="464,22,627,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="675,25,851,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="900,50,1073,79"/></map>
+<div class="center"><img src="namespacePureschi__mod_a674934cac7a575adee729ee8cbb66236_icgraph.png" border="0" usemap="#namespacePureschi__mod_a674934cac7a575adee729ee8cbb66236_icgraph_map" alt=""></div>
+<map name="namespacePureschi__mod_a674934cac7a575adee729ee8cbb66236_icgraph_map" id="namespacePureschi__mod_a674934cac7a575adee729ee8cbb66236_icgraph">
+<area shape="rect" id="node3" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb" title="problemsub_mod::problemsub" alt="" coords="220,75,415,105"/><area shape="rect" id="node5" href="namespaceNewton.html#a52bc9902166475d40c85f9e38bc2762f" title="Newton::Build_Jac" alt="" coords="480,75,611,105"/><area shape="rect" id="node11" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="1124,89,1209,118"/><area shape="rect" id="node14" href="namespaceNewton.html#ad1d75574149095632fdf22abe98107da" title="Newton::Build_Rnewton" alt="" coords="464,22,627,51"/><area shape="rect" id="node7" href="namespaceNewton.html#aa2841efcdb8dfb34b1a57b88229f8e4c" title="Newton::newt_line_search" alt="" coords="675,25,851,54"/><area shape="rect" id="node9" href="namespaceNewton.html#ac0222c3dd5b4ca0f261e769a9f9e3693" title="Newton::Newton_Iteration" alt="" coords="900,50,1073,79"/></map>
 </div>
 </p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

@@ -120,7 +120,7 @@
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            call init_output_files(nveclen,ep)
+            call init_output_files(neq,ep)
 
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK

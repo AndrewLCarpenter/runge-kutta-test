@@ -26,7 +26,7 @@
 <div class="contents">
 <h1>control_variables Module Reference</h1><table border="0" cellpadding="0" cellspacing="0">
 <tr><td colspan="2"><h2>Functions/Subroutines</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#a78bc09bea8f6f302b104ee7ce7d1ad55">allocate_vars</a> (nveclen, is)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#a08bd6294bf88ad5bab4f6f8e4690d7bb">allocate_vars</a> (nveclen, neq, is)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#a9cf138262bc4c7548a3dbaf509edc947">deallocate_vars</a> ()</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">character(len=80), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#acddb29889ae54184c75bea993f2e153f">Temporal_Splitting</a></td></tr>
@@ -68,9 +68,11 @@ allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#ae2890b5634b50fd18559f0ac5b32d6f9">errorL2</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">real(wp), dimension(:,:), <br class="typebreak"/>
 allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#a8ba63cb8fa4f17663b09ad6e53635bf3">b1L2save</a></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">character(len=12), dimension(:), <br class="typebreak"/>
+allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">var_names</a></td></tr>
 </table>
 <hr/><h2>Function/Subroutine Documentation</h2>
-<a class="anchor" id="a78bc09bea8f6f302b104ee7ce7d1ad55"></a><!-- doxytag: member="control_variables::allocate_vars" ref="a78bc09bea8f6f302b104ee7ce7d1ad55" args="(nveclen, is)" -->
+<a class="anchor" id="a08bd6294bf88ad5bab4f6f8e4690d7bb"></a><!-- doxytag: member="control_variables::allocate_vars" ref="a08bd6294bf88ad5bab4f6f8e4690d7bb" args="(nveclen, neq, is)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -79,6 +81,12 @@ allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
           <td>(</td>
           <td class="paramtype">integer,intent(in)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>neq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -95,7 +103,7 @@ allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00049">49</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
+<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00050">50</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
 <p>References <a class="el" href="control__variables_8f90_source.html#l00038">b</a>, <a class="el" href="control__variables_8f90_source.html#l00042">b1L2save</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1Psave</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1save</a>, <a class="el" href="control__variables_8f90_source.html#l00040">error</a>, <a class="el" href="control__variables_8f90_source.html#l00042">errorL2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">errorP</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvec</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvecT</a>, <a class="el" href="control__variables_8f90_source.html#l00032">isamp</a>, <a class="el" href="control__variables_8f90_source.html#l00033">jmax</a>, <a class="el" href="control__variables_8f90_source.html#l00041">predvec</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resE</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resI</a>, <a class="el" href="control__variables_8f90_source.html#l00039">tmpvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uexact</a>, <a class="el" href="control__variables_8f90_source.html#l00041">ustage</a>, <a class="el" href="control__variables_8f90_source.html#l00038">usum</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uveco</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">xjac</a>.</p>
 
@@ -104,8 +112,8 @@ allocatable&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dynsection">
-<div class="center"><img src="namespacecontrol__variables_a78bc09bea8f6f302b104ee7ce7d1ad55_icgraph.png" border="0" usemap="#namespacecontrol__variables_a78bc09bea8f6f302b104ee7ce7d1ad55_icgraph_map" alt=""></div>
-<map name="namespacecontrol__variables_a78bc09bea8f6f302b104ee7ce7d1ad55_icgraph_map" id="namespacecontrol__variables_a78bc09bea8f6f302b104ee7ce7d1ad55_icgraph">
+<div class="center"><img src="namespacecontrol__variables_a08bd6294bf88ad5bab4f6f8e4690d7bb_icgraph.png" border="0" usemap="#namespacecontrol__variables_a08bd6294bf88ad5bab4f6f8e4690d7bb_icgraph_map" alt=""></div>
+<map name="namespacecontrol__variables_a08bd6294bf88ad5bab4f6f8e4690d7bb_icgraph_map" id="namespacecontrol__variables_a08bd6294bf88ad5bab4f6f8e4690d7bb_icgraph">
 <area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="260,5,345,35"/></map>
 </div>
 </p>
@@ -127,9 +135,9 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00073">73</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
+<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00074">74</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aLUJac</a>, <a class="el" href="control__variables_8f90_source.html#l00038">b</a>, <a class="el" href="control__variables_8f90_source.html#l00042">b1L2save</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1Psave</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1save</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">error</a>, <a class="el" href="control__variables_8f90_source.html#l00042">errorL2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">errorP</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvec</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvecT</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iaJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD2</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iw</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jaJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD2</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jLUJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jUJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::Pinv</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::Pmat</a>, <a class="el" href="control__variables_8f90_source.html#l00041">predvec</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resE</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resI</a>, <a class="el" href="control__variables_8f90_source.html#l00039">tmpvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uexact</a>, <a class="el" href="control__variables_8f90_source.html#l00041">ustage</a>, <a class="el" href="control__variables_8f90_source.html#l00038">usum</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uveco</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">xjac</a>.</p>
+<p>References <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00017">Jacobian_CSR_Mod::aLUJac</a>, <a class="el" href="control__variables_8f90_source.html#l00038">b</a>, <a class="el" href="control__variables_8f90_source.html#l00042">b1L2save</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1Psave</a>, <a class="el" href="control__variables_8f90_source.html#l00041">b1save</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D1_per</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::D2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">error</a>, <a class="el" href="control__variables_8f90_source.html#l00042">errorL2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">errorP</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvec</a>, <a class="el" href="control__variables_8f90_source.html#l00039">errvecT</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iaJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::iD2</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::iw</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jaJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD1</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00021">SBP_Coef_Module::jD2</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jLUJac</a>, <a class="el" href="Jacobian__CSR__Mod_8f90_source.html#l00016">Jacobian_CSR_Mod::jUJac</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::Pinv</a>, <a class="el" href="SBP__Coef__Module_8f90_source.html#l00020">SBP_Coef_Module::Pmat</a>, <a class="el" href="control__variables_8f90_source.html#l00041">predvec</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resE</a>, <a class="el" href="control__variables_8f90_source.html#l00040">resI</a>, <a class="el" href="control__variables_8f90_source.html#l00039">tmpvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uexact</a>, <a class="el" href="control__variables_8f90_source.html#l00041">ustage</a>, <a class="el" href="control__variables_8f90_source.html#l00038">usum</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uvec</a>, <a class="el" href="control__variables_8f90_source.html#l00038">uveco</a>, <a class="el" href="control__variables_8f90_source.html#l00043">var_names</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">xjac</a>.</p>
 
 <p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
 
@@ -158,7 +166,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00038">38</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00135">output_module::output_terminal_iteration()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00133">output_module::output_terminal_iteration()</a>.</p>
 
 </div>
 </div>
@@ -175,7 +183,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00042">42</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -192,7 +200,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00041">41</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -209,7 +217,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00041">41</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -226,7 +234,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00036">36</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00135">output_module::output_terminal_iteration()</a>.</p>
+<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00133">output_module::output_terminal_iteration()</a>.</p>
 
 </div>
 </div>
@@ -243,7 +251,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00040">40</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00135">output_module::output_terminal_iteration()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00133">output_module::output_terminal_iteration()</a>.</p>
 
 </div>
 </div>
@@ -260,7 +268,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00042">42</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00135">output_module::output_terminal_iteration()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00133">output_module::output_terminal_iteration()</a>.</p>
 
 </div>
 </div>
@@ -277,7 +285,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00040">40</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00135">output_module::output_terminal_iteration()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00133">output_module::output_terminal_iteration()</a>.</p>
 
 </div>
 </div>
@@ -294,7 +302,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00039">39</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -311,7 +319,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00039">39</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00218">output_module::output_conv_error()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00219">output_module::output_conv_error()</a>.</p>
 
 </div>
 </div>
@@ -328,7 +336,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00032">32</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
 
 </div>
 </div>
@@ -345,7 +353,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00030">30</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00051">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell_Mod::Broadwell()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00052">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell_Mod::Broadwell()</a>, and <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator_mod::Brusselator()</a>.</p>
 
 </div>
 </div>
@@ -362,7 +370,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00034">34</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00096">output_module::output_conv_stiff()</a>.</p>
+<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00094">output_module::output_conv_stiff()</a>.</p>
 
 </div>
 </div>
@@ -379,7 +387,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00033">33</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
 
 </div>
 </div>
@@ -396,7 +404,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00041">41</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00037">Stage_value_module::Stage_Value_Predictor1()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00037">Stage_value_module::Stage_Value_Predictor1()</a>.</p>
 
 </div>
 </div>
@@ -413,7 +421,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00029">29</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00051">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00058">Broadwell_Mod::Broadwell()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00047">Brusselator_mod::Brusselator()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00055">Burgers_Module::Burgers()</a>, <a class="el" href="output__module_8f90_source.html#l00069">output_module::init_output_files()</a>, <a class="el" href="Kaps_8f90_source.html#l00013">Kaps_mod::Kaps()</a>, <a class="el" href="Kreiss_8f90_source.html#l00013">Kreiss_mod::Kreiss()</a>, <a class="el" href="Lorenz_8f90_source.html#l00013">Lorenz_mod::Lorenz()</a>, <a class="el" href="Oregonator_8f90_source.html#l00012">Oregonator_mod::Oregonator()</a>, <a class="el" href="output__module_8f90_source.html#l00096">output_module::output_conv_stiff()</a>, <a class="el" href="output__module_8f90_source.html#l00056">output_module::output_names()</a>, <a class="el" href="Pureschi_8f90_source.html#l00013">Pureschi_mod::Pureschi()</a>, <a class="el" href="Rossler__Chaos_8f90_source.html#l00013">Rossler_mod::Rossler_Chaos()</a>, <a class="el" href="output__module_8f90_source.html#l00032">output_module::set_file_loc()</a>, and <a class="el" href="vanderPol_8f90_source.html#l00014">vanderPol_mod::vanderPol()</a>.</p>
+<p>Referenced by <a class="el" href="Boscarino31__mod_8f90_source.html#l00052">Boscarino31_Mod::Boscarino31()</a>, <a class="el" href="Broadwell__mod_8f90_source.html#l00059">Broadwell_Mod::Broadwell()</a>, <a class="el" href="brusselator__2_8f90_source.html#l00048">Brusselator_mod::Brusselator()</a>, <a class="el" href="Burgers__Mod_8f90_source.html#l00056">Burgers_Module::Burgers()</a>, <a class="el" href="output__module_8f90_source.html#l00069">output_module::init_output_files()</a>, <a class="el" href="Kaps_8f90_source.html#l00013">Kaps_mod::Kaps()</a>, <a class="el" href="Kreiss_8f90_source.html#l00013">Kreiss_mod::Kreiss()</a>, <a class="el" href="Lorenz_8f90_source.html#l00013">Lorenz_mod::Lorenz()</a>, <a class="el" href="Oregonator_8f90_source.html#l00012">Oregonator_mod::Oregonator()</a>, <a class="el" href="output__module_8f90_source.html#l00094">output_module::output_conv_stiff()</a>, <a class="el" href="output__module_8f90_source.html#l00056">output_module::output_names()</a>, <a class="el" href="Pureschi_8f90_source.html#l00013">Pureschi_mod::Pureschi()</a>, <a class="el" href="Rossler__Chaos_8f90_source.html#l00013">Rossler_mod::Rossler_Chaos()</a>, <a class="el" href="output__module_8f90_source.html#l00032">output_module::set_file_loc()</a>, and <a class="el" href="vanderPol_8f90_source.html#l00014">vanderPol_mod::vanderPol()</a>.</p>
 
 </div>
 </div>
@@ -445,7 +453,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00040">40</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 </div>
 </div>
@@ -462,7 +470,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00040">40</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00127">Newton::Build_Rnewton()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00127">Newton::Build_Rnewton()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="problemsub_8f90_source.html#l00029">problemsub_mod::problemsub()</a>.</p>
 
 </div>
 </div>
@@ -477,7 +485,7 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00026">26</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
+<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00027">27</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
 </div>
 </div>
@@ -494,7 +502,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00039">39</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, and <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>.</p>
 
 </div>
 </div>
@@ -528,7 +536,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00038">38</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00218">output_module::output_conv_error()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="output__module_8f90_source.html#l00219">output_module::output_conv_error()</a>.</p>
 
 </div>
 </div>
@@ -545,7 +553,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00041">41</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, <a class="el" href="Stage__Value__module_8f90_source.html#l00037">Stage_value_module::Stage_Value_Predictor1()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, <a class="el" href="Stage__Value__module_8f90_source.html#l00037">Stage_value_module::Stage_Value_Predictor1()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
 
 </div>
 </div>
@@ -562,7 +570,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00038">38</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00127">Newton::Build_Rnewton()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00127">Newton::Build_Rnewton()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>.</p>
 
 </div>
 </div>
@@ -579,7 +587,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00038">38</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00106">Newton::check_exit()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00169">Newton::LU_solver()</a>, <a class="el" href="Newton_8f90_source.html#l00197">Newton::newt_line_search()</a>, <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>, <a class="el" href="output__module_8f90_source.html#l00218">output_module::output_conv_error()</a>, <a class="el" href="Newton_8f90_source.html#l00261">Newton::QR_decomp()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00106">Newton::check_exit()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, <a class="el" href="Newton_8f90_source.html#l00168">Newton::LU_solver()</a>, <a class="el" href="Newton_8f90_source.html#l00196">Newton::newt_line_search()</a>, <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>, <a class="el" href="output__module_8f90_source.html#l00219">output_module::output_conv_error()</a>, <a class="el" href="Newton_8f90_source.html#l00260">Newton::QR_decomp()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
 
 </div>
 </div>
@@ -596,7 +604,24 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00038">38</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, and <a class="el" href="Stage__Value__module_8f90_source.html#l00094">Stage_value_module::Stage_Value_Predictor2()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a59e5eb16fd079dc96ea51aec52bb2f0d"></a><!-- doxytag: member="control_variables::var_names" ref="a59e5eb16fd079dc96ea51aec52bb2f0d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=12),dimension(:),allocatable <a class="el" href="namespacecontrol__variables.html#a59e5eb16fd079dc96ea51aec52bb2f0d">control_variables::var_names</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00043">43</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
+
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, <a class="el" href="Kaps_8f90_source.html#l00013">Kaps_mod::Kaps()</a>, <a class="el" href="Kreiss_8f90_source.html#l00013">Kreiss_mod::Kreiss()</a>, <a class="el" href="Lorenz_8f90_source.html#l00013">Lorenz_mod::Lorenz()</a>, <a class="el" href="Oregonator_8f90_source.html#l00012">Oregonator_mod::Oregonator()</a>, <a class="el" href="Pureschi_8f90_source.html#l00013">Pureschi_mod::Pureschi()</a>, <a class="el" href="Rossler__Chaos_8f90_source.html#l00013">Rossler_mod::Rossler_Chaos()</a>, and <a class="el" href="vanderPol_8f90_source.html#l00014">vanderPol_mod::vanderPol()</a>.</p>
 
 </div>
 </div>
@@ -613,12 +638,12 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="control__variables_8f90_source.html#l00040">40</a> of file <a class="el" href="control__variables_8f90_source.html">control_variables.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00049">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00073">deallocate_vars()</a>, <a class="el" href="Kaps_8f90_source.html#l00013">Kaps_mod::Kaps()</a>, <a class="el" href="Kreiss_8f90_source.html#l00013">Kreiss_mod::Kreiss()</a>, <a class="el" href="Lorenz_8f90_source.html#l00013">Lorenz_mod::Lorenz()</a>, <a class="el" href="Newton_8f90_source.html#l00197">Newton::newt_line_search()</a>, <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>, <a class="el" href="Oregonator_8f90_source.html#l00012">Oregonator_mod::Oregonator()</a>, <a class="el" href="Pureschi_8f90_source.html#l00013">Pureschi_mod::Pureschi()</a>, <a class="el" href="Rossler__Chaos_8f90_source.html#l00013">Rossler_mod::Rossler_Chaos()</a>, and <a class="el" href="vanderPol_8f90_source.html#l00014">vanderPol_mod::vanderPol()</a>.</p>
+<p>Referenced by <a class="el" href="control__variables_8f90_source.html#l00050">allocate_vars()</a>, <a class="el" href="control__variables_8f90_source.html#l00074">deallocate_vars()</a>, <a class="el" href="Kaps_8f90_source.html#l00013">Kaps_mod::Kaps()</a>, <a class="el" href="Kreiss_8f90_source.html#l00013">Kreiss_mod::Kreiss()</a>, <a class="el" href="Lorenz_8f90_source.html#l00013">Lorenz_mod::Lorenz()</a>, <a class="el" href="Newton_8f90_source.html#l00196">Newton::newt_line_search()</a>, <a class="el" href="Newton_8f90_source.html#l00025">Newton::Newton_Iteration()</a>, <a class="el" href="Oregonator_8f90_source.html#l00012">Oregonator_mod::Oregonator()</a>, <a class="el" href="Pureschi_8f90_source.html#l00013">Pureschi_mod::Pureschi()</a>, <a class="el" href="Rossler__Chaos_8f90_source.html#l00013">Rossler_mod::Rossler_Chaos()</a>, and <a class="el" href="vanderPol_8f90_source.html#l00014">vanderPol_mod::vanderPol()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

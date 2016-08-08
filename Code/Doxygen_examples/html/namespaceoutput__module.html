@@ -29,11 +29,11 @@
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a1bbe934919173628edb56ea325915dc3">set_file_loc</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#ad611ddb1c968215583b71c285a3cf74d">create_file_paths</a> ()</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#aad2f658ba385541bfca2b1f33290f74e">output_names</a> ()</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a950e79f4fb925a0470b24445f0646aca">init_output_files</a> (nveclen, ep)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a17a4ead78a1fe404ad874b55c273873a">output_conv_stiff</a> (nveclen, epsave)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a00e82ac997ed392a4f57522738112a54">output_terminal_iteration</a> (cost, mwt, ep, nveclen)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#ad1d46e4ed2c313571ecf5e0e0fd55af6">init_output_files</a> (neq, ep)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#adb97505c58a644a9e85587be925cfe71">output_conv_stiff</a> (nveclen, neq, epsave)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a5f6511e7dac801ea83b9a2a6ad3b1570">output_terminal_iteration</a> (cost, mwt, ep, nveclen, neq)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a2543c09fa9e919141f9bf06009027514">output_terminal_final</a> (icount, jcount, stageE, stageI, maxiter)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a60fbeae1699b358584056abe1d5e589d">output_conv_error</a> (cost)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">subroutine&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a577898266cdae887c079711341f42bfc">output_conv_error</a> (cost, nveclen, neq)</td></tr>
 <tr><td colspan="2"><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">character(len=80)&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a5f784625c432cf9041e1d4ced5ece9dd">fileloc</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">character(len=4), parameter&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceoutput__module.html#a6f73a6719525839d64a607b238a5b64b">ext</a></td></tr>
@@ -80,7 +80,7 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a950e79f4fb925a0470b24445f0646aca"></a><!-- doxytag: member="output_module::init_output_files" ref="a950e79f4fb925a0470b24445f0646aca" args="(nveclen, ep)" -->
+<a class="anchor" id="ad1d46e4ed2c313571ecf5e0e0fd55af6"></a><!-- doxytag: member="output_module::init_output_files" ref="ad1d46e4ed2c313571ecf5e0e0fd55af6" args="(neq, ep)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -88,7 +88,7 @@ Here is the caller graph for this function:</div>
           <td class="memname">subroutine output_module::init_output_files </td>
           <td>(</td>
           <td class="paramtype">integer,intent(in)&nbsp;</td>
-          <td class="paramname"> <em>nveclen</em>, </td>
+          <td class="paramname"> <em>neq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -109,9 +109,20 @@ Here is the caller graph for this function:</div>
 
 <p>References <a class="el" href="runge__kutta_8f90_source.html#l00020">runge_kutta::casename</a>, <a class="el" href="output__module_8f90_source.html#l00026">ext</a>, <a class="el" href="output__module_8f90_source.html#l00025">fileloc</a>, and <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>.</p>
 
+<p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_ad1d46e4ed2c313571ecf5e0e0fd55af6_icgraph.png" border="0" usemap="#namespaceoutput__module_ad1d46e4ed2c313571ecf5e0e0fd55af6_icgraph_map" alt=""></div>
+<map name="namespaceoutput__module_ad1d46e4ed2c313571ecf5e0e0fd55af6_icgraph_map" id="namespaceoutput__module_ad1d46e4ed2c313571ecf5e0e0fd55af6_icgraph">
+<area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="263,5,348,35"/></map>
+</div>
+</p>
+
 </div>
 </div>
-<a class="anchor" id="a60fbeae1699b358584056abe1d5e589d"></a><!-- doxytag: member="output_module::output_conv_error" ref="a60fbeae1699b358584056abe1d5e589d" args="(cost)" -->
+<a class="anchor" id="a577898266cdae887c079711341f42bfc"></a><!-- doxytag: member="output_module::output_conv_error" ref="a577898266cdae887c079711341f42bfc" args="(cost, nveclen, neq)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -119,21 +130,47 @@ Here is the caller graph for this function:</div>
           <td class="memname">subroutine output_module::output_conv_error </td>
           <td>(</td>
           <td class="paramtype">real(wp),intent(in)&nbsp;</td>
-          <td class="paramname"> <em>cost</em></td>
-          <td>&nbsp;)&nbsp;</td>
+          <td class="paramname"> <em>cost</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>neq</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00218">218</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
+<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00219">219</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
 <p>References <a class="el" href="control__variables_8f90_source.html#l00039">control_variables::errvecT</a>, <a class="el" href="control__variables_8f90_source.html#l00038">control_variables::uexact</a>, and <a class="el" href="control__variables_8f90_source.html#l00038">control_variables::uvec</a>.</p>
 
+<p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_a577898266cdae887c079711341f42bfc_icgraph.png" border="0" usemap="#namespaceoutput__module_a577898266cdae887c079711341f42bfc_icgraph_map" alt=""></div>
+<map name="namespaceoutput__module_a577898266cdae887c079711341f42bfc_icgraph_map" id="namespaceoutput__module_a577898266cdae887c079711341f42bfc_icgraph">
+<area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="273,5,359,35"/></map>
+</div>
+</p>
+
 </div>
 </div>
-<a class="anchor" id="a17a4ead78a1fe404ad874b55c273873a"></a><!-- doxytag: member="output_module::output_conv_stiff" ref="a17a4ead78a1fe404ad874b55c273873a" args="(nveclen, epsave)" -->
+<a class="anchor" id="adb97505c58a644a9e85587be925cfe71"></a><!-- doxytag: member="output_module::output_conv_stiff" ref="adb97505c58a644a9e85587be925cfe71" args="(nveclen, neq, epsave)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -142,6 +179,12 @@ Here is the caller graph for this function:</div>
           <td>(</td>
           <td class="paramtype">integer,intent(in)&nbsp;</td>
           <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>neq</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -158,9 +201,20 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00096">96</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
+<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00094">94</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
 <p>References <a class="el" href="runge__kutta_8f90_source.html#l00020">runge_kutta::casename</a>, <a class="el" href="output__module_8f90_source.html#l00026">ext</a>, <a class="el" href="output__module_8f90_source.html#l00025">fileloc</a>, <a class="el" href="control__variables_8f90_source.html#l00034">control_variables::jactual</a>, and <a class="el" href="control__variables_8f90_source.html#l00029">control_variables::probname</a>.</p>
+
+<p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_adb97505c58a644a9e85587be925cfe71_icgraph.png" border="0" usemap="#namespaceoutput__module_adb97505c58a644a9e85587be925cfe71_icgraph_map" alt=""></div>
+<map name="namespaceoutput__module_adb97505c58a644a9e85587be925cfe71_icgraph_map" id="namespaceoutput__module_adb97505c58a644a9e85587be925cfe71_icgraph">
+<area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="271,5,356,35"/></map>
+</div>
+</p>
 
 </div>
 </div>
@@ -239,13 +293,24 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00193">193</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
+<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00194">194</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
 <p>References <a class="el" href="runge__kutta_8f90_source.html#l00028">runge_kutta::ns</a>.</p>
 
+<p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_a2543c09fa9e919141f9bf06009027514_icgraph.png" border="0" usemap="#namespaceoutput__module_a2543c09fa9e919141f9bf06009027514_icgraph_map" alt=""></div>
+<map name="namespaceoutput__module_a2543c09fa9e919141f9bf06009027514_icgraph_map" id="namespaceoutput__module_a2543c09fa9e919141f9bf06009027514_icgraph">
+<area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="289,5,375,35"/></map>
+</div>
+</p>
+
 </div>
 </div>
-<a class="anchor" id="a00e82ac997ed392a4f57522738112a54"></a><!-- doxytag: member="output_module::output_terminal_iteration" ref="a00e82ac997ed392a4f57522738112a54" args="(cost, mwt, ep, nveclen)" -->
+<a class="anchor" id="a5f6511e7dac801ea83b9a2a6ad3b1570"></a><!-- doxytag: member="output_module::output_terminal_iteration" ref="a5f6511e7dac801ea83b9a2a6ad3b1570" args="(cost, mwt, ep, nveclen, neq)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -271,7 +336,13 @@ Here is the caller graph for this function:</div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">integer,intent(in)&nbsp;</td>
-          <td class="paramname"> <em>nveclen</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>nveclen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer,intent(in)&nbsp;</td>
+          <td class="paramname"> <em>neq</em></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -282,9 +353,29 @@ Here is the caller graph for this function:</div>
 </div>
 <div class="memdoc">
 
-<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00135">135</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
+<p>Definition at line <a class="el" href="output__module_8f90_source.html#l00133">133</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
-<p>References <a class="el" href="control__variables_8f90_source.html#l00038">control_variables::b</a>, <a class="el" href="control__variables_8f90_source.html#l00036">control_variables::dt_error_tol</a>, <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::error</a>, <a class="el" href="control__variables_8f90_source.html#l00042">control_variables::errorL2</a>, and <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::errorP</a>.</p>
+<p>References <a class="el" href="control__variables_8f90_source.html#l00038">control_variables::b</a>, <a class="el" href="control__variables_8f90_source.html#l00036">control_variables::dt_error_tol</a>, <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::error</a>, <a class="el" href="control__variables_8f90_source.html#l00042">control_variables::errorL2</a>, <a class="el" href="control__variables_8f90_source.html#l00040">control_variables::errorP</a>, and <a class="el" href="poly__fit__Mod_8f90_source.html#l00021">poly_fit_Mod::fit()</a>.</p>
+
+<p>Referenced by <a class="el" href="test__cases_8f90_source.html#l00044">test_cases()</a>.</p>
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_cgraph.png" border="0" usemap="#namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_cgraph_map" alt=""></div>
+<map name="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_cgraph_map" id="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_cgraph">
+<area shape="rect" id="node3" href="namespacepoly__fit__Mod.html#a318f7025e27dbc79c5781e2f4b258dc2" title="poly_fit_Mod::fit" alt="" coords="312,32,427,61"/><area shape="rect" id="node5" href="namespacepoly__fit__Mod.html#a3964f82a5cc74431ccbf7ca7f8893a44" title="poly_fit_Mod::gammq" alt="" coords="475,32,621,61"/><area shape="rect" id="node7" href="namespacepoly__fit__Mod.html#a6e4eb4c42d6c4dca462f76ddf611f5e2" title="poly_fit_Mod::gcf" alt="" coords="673,5,796,35"/><area shape="rect" id="node11" href="namespacepoly__fit__Mod.html#a1d60a69deaaba17e1ea34f3a9258b53b" title="poly_fit_Mod::gser" alt="" coords="671,59,799,88"/><area shape="rect" id="node9" href="namespacepoly__fit__Mod.html#a39ec755b028d6e80201e0a13ebe83883" title="poly_fit_Mod::gammln" alt="" coords="849,32,999,61"/></map>
+</div>
+</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dynsection">
+<div class="center"><img src="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_icgraph.png" border="0" usemap="#namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_icgraph_map" alt=""></div>
+<map name="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_icgraph_map" id="namespaceoutput__module_a5f6511e7dac801ea83b9a2a6ad3b1570_icgraph">
+<area shape="rect" id="node3" href="test__cases_8f90.html#abc2d84c4c286f8ddd69f01c3a4f3fbc7" title="test_cases" alt="" coords="313,5,399,35"/></map>
+</div>
+</p>
 
 </div>
 </div>
@@ -334,7 +425,7 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="output__module_8f90_source.html#l00026">26</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00069">init_output_files()</a>, and <a class="el" href="output__module_8f90_source.html#l00096">output_conv_stiff()</a>.</p>
+<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00069">init_output_files()</a>, and <a class="el" href="output__module_8f90_source.html#l00094">output_conv_stiff()</a>.</p>
 
 </div>
 </div>
@@ -351,12 +442,12 @@ Here is the caller graph for this function:</div>
 
 <p>Definition at line <a class="el" href="output__module_8f90_source.html#l00025">25</a> of file <a class="el" href="output__module_8f90_source.html">output_module.f90</a>.</p>
 
-<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00044">create_file_paths()</a>, <a class="el" href="output__module_8f90_source.html#l00069">init_output_files()</a>, <a class="el" href="output__module_8f90_source.html#l00096">output_conv_stiff()</a>, and <a class="el" href="output__module_8f90_source.html#l00032">set_file_loc()</a>.</p>
+<p>Referenced by <a class="el" href="output__module_8f90_source.html#l00044">create_file_paths()</a>, <a class="el" href="output__module_8f90_source.html#l00069">init_output_files()</a>, <a class="el" href="output__module_8f90_source.html#l00094">output_conv_stiff()</a>, and <a class="el" href="output__module_8f90_source.html#l00032">set_file_loc()</a>.</p>
 
 </div>
 </div>
 </div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>

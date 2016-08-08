@@ -36,12 +36,6 @@ ACTION: LOADADDON
 ACTION: PAGECONTROL: CREATE
 ACTION: OPENLAYOUT: /ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot scripts/err1.lay
 ACTION: PAGECONTROL: CREATE
-Err: Filename Error: Directory is invalid.
-FileName:
-...adwell/ARK548[2]SA_2/Broadwell_ARK548[2]SA_2_3.dat
-Err: Errors detected while reading layout file.
-Portions of the layout may be missing.
-ACTION: PAGECONTROL: CREATE
-Err: Failed to execute macro file
-/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot
-scripts/err.mcr
+ACTION: READDATASET: "/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/Code/IMEX/Broadwell/ARK548[2]SA_2/Broadwell_ARK548[2]SA_2_3.dat"
+ACTION: REDRAWALL
+ACTION: EXPORT

@@ -46,11 +46,11 @@
 <a name="l00022"></a>00022       implicit none;<span class="keywordtype">save</span>
 <a name="l00023"></a>00023       
 <a name="l00024"></a>00024       <span class="keywordtype">private</span>
-<a name="l00025"></a>00025       <span class="keywordtype">public</span> :: <a class="code" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057">problemsub</a>
+<a name="l00025"></a>00025       <span class="keywordtype">public</span> :: <a class="code" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb">problemsub</a>
 <a name="l00026"></a>00026       
 <a name="l00027"></a>00027       <span class="keyword">contains</span>
 <a name="l00028"></a>00028       
-<a name="l00029"></a><a class="code" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057">00029</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceproblemsub__mod.html#aa97c50c979947f803ea67b9c23bac057">problemsub</a>(iprob,nveclen,ep,dt,tfinal,iDT,time,akk,L)
+<a name="l00029"></a><a class="code" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb">00029</a>       <span class="keyword">subroutine </span><a class="code" href="namespaceproblemsub__mod.html#ae5a0e06489dbb748c161a8b47e6063fb">problemsub</a>(iprob,nveclen,neq,ep,dt,tfinal,iDT,time,akk,L)
 <a name="l00030"></a>00030 
 <a name="l00031"></a>00031       use <span class="keywordflow">control_variables</span>, only: resE,resI,uvec
 <a name="l00032"></a>00032       use <span class="keywordflow">vanderPol_mod</span>,     only: vanderPol
@@ -63,54 +63,59 @@
 <a name="l00039"></a>00039       use <span class="keywordflow">Brusselator_mod</span>,   only: Brusselator
 <a name="l00040"></a>00040       use <span class="keywordflow">Burgers_Module</span>,    only: Burgers
 <a name="l00041"></a>00041       use <span class="keywordflow">Boscarino31_Mod</span>,   only: Boscarino31
-<a name="l00042"></a>00042    
-<a name="l00043"></a>00043       <span class="comment">!PROBLEM PARAMETERS</span>
-<a name="l00044"></a>00044       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iprob
-<a name="l00045"></a>00045       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(  out)</span> :: nveclen
-<a name="l00046"></a>00046       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: ep
-<a name="l00047"></a>00047       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(inout)</span> :: dt
-<a name="l00048"></a>00048       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(  out)</span> :: tfinal
-<a name="l00049"></a>00049       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iDT
-<a name="l00050"></a>00050       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: time
-<a name="l00051"></a>00051       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: akk
-<a name="l00052"></a>00052       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: L
-<a name="l00053"></a>00053       <span class="keywordtype">real(wp)</span>, dimension(size(uvec)) :: resE_vec,resI_vec
-<a name="l00054"></a>00054 
-<a name="l00055"></a>00055       <span class="keyword">if</span>     (iprob==1)  <span class="keyword">then</span>
-<a name="l00056"></a>00056        call <a class="code" href="namespacevanderPol__mod.html#a2d765ef8024755d26ce89289df502280">vanderPol</a>(    nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00057"></a>00057       elseif (iprob==2)  <span class="keyword">then</span>
-<a name="l00058"></a>00058        call <a class="code" href="namespacePureschi__mod.html#adafad2458c1389ee7e3d5f5a544229d7">Pureschi</a>(     nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00059"></a>00059       elseif (iprob==3)  <span class="keyword">then</span>
-<a name="l00060"></a>00060        call <a class="code" href="namespaceKaps__mod.html#acf281c1cf874b054d2e617c4938c88de">Kaps</a>(         nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00061"></a>00061       elseif (iprob==4)  <span class="keyword">then</span>
-<a name="l00062"></a>00062        call <a class="code" href="namespaceKreiss__mod.html#a433b9bfd5425378547fb5ec4d485b718">Kreiss</a>(       nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
-<a name="l00063"></a>00063       elseif (iprob==5)  <span class="keyword">then</span> 
-<a name="l00064"></a>00064        call <a class="code" href="namespaceLorenz__mod.html#ace3590bec970c7cd839e024285fde201">Lorenz</a>(       nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00065"></a>00065       elseif (iprob==6)  <span class="keyword">then</span> 
-<a name="l00066"></a>00066        call <a class="code" href="namespaceRossler__mod.html#a9e870f7cf1be7f4a6b2aa3f22245a1d3">Rossler_Chaos</a>(nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00067"></a>00067       elseif (iprob==7)  <span class="keyword">then</span> 
-<a name="l00068"></a>00068        call <a class="code" href="namespaceOregonator__mod.html#a7722b84ba4d1f0af797e4d6f59b85762">Oregonator</a>(   nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00069"></a>00069       elseif (iprob==8)  <span class="keyword">then</span> 
-<a name="l00070"></a>00070        call <a class="code" href="namespaceBrusselator__mod.html#ad830173db62e6e5629181139c7bef35f">Brusselator</a>(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00071"></a>00071       elseif (iprob==9)  <span class="keyword">then</span>
-<a name="l00072"></a>00072        call <a class="code" href="namespaceBurgers__Module.html#a5cba412f3e39c8512e93efdc2446e25d">Burgers</a>(      nveclen,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
-<a name="l00073"></a>00073       elseif (iprob==10) <span class="keyword">then</span>
-<a name="l00074"></a>00074        call <a class="code" href="namespaceBoscarino31__Mod.html#acb356d5a1e816f2a446f7fe89d5efba5">Boscarino31</a>(  nveclen,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-<a name="l00075"></a>00075       <span class="keyword">else</span>
-<a name="l00076"></a>00076        print*,<span class="stringliteral">&apos;Invalid problem number!&apos;</span>
-<a name="l00077"></a>00077        stop
-<a name="l00078"></a>00078       <span class="keyword">endif</span>
-<a name="l00079"></a>00079       
-<a name="l00080"></a>00080       <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
-<a name="l00081"></a>00081         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)  
-<a name="l00082"></a>00082           <a class="code" href="namespacecontrol__variables.html#a9f7c2243d548ddee9248892603d7dcdc">resE</a>(:,L)=resE_vec(:)
-<a name="l00083"></a>00083           <a class="code" href="namespacecontrol__variables.html#a622a60898014b0384693ee589b049bcc">resI</a>(:,L)=resI_vec(:)
-<a name="l00084"></a>00084       <span class="keyword">end select</span>
-<a name="l00085"></a>00085 
-<a name="l00086"></a>00086 <span class="keyword">      end subroutine problemsub</span>
-<a name="l00087"></a>00087 <span class="keyword">      end module problemsub_mod</span>
+<a name="l00042"></a>00042       use <span class="keywordflow">Broadwell_Mod</span>,     only: Broadwell
+<a name="l00043"></a>00043    
+<a name="l00044"></a>00044       <span class="comment">!PROBLEM PARAMETERS</span>
+<a name="l00045"></a>00045       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iprob
+<a name="l00046"></a>00046       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(  out)</span> :: nveclen
+<a name="l00047"></a>00047       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(  out)</span> :: neq
+<a name="l00048"></a>00048       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: ep
+<a name="l00049"></a>00049       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(inout)</span> :: dt
+<a name="l00050"></a>00050       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(  out)</span> :: tfinal
+<a name="l00051"></a>00051       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: iDT
+<a name="l00052"></a>00052       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: time
+<a name="l00053"></a>00053       <span class="keywordtype">real(wp)</span>, <span class="keywordtype">intent(in   )</span> :: akk
+<a name="l00054"></a>00054       <span class="keywordtype">integer</span>,  <span class="keywordtype">intent(in   )</span> :: L
+<a name="l00055"></a>00055       <span class="keywordtype">real(wp)</span>, dimension(size(uvec)) :: resE_vec,resI_vec
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057       <span class="keyword">if</span>     (iprob==1)  <span class="keyword">then</span>
+<a name="l00058"></a>00058        call <a class="code" href="namespacevanderPol__mod.html#aeeea58fa6d82844415f410a3deffb8f4">vanderPol</a>(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00059"></a>00059       elseif (iprob==2)  <span class="keyword">then</span>
+<a name="l00060"></a>00060        call <a class="code" href="namespacePureschi__mod.html#a674934cac7a575adee729ee8cbb66236">Pureschi</a>(     nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00061"></a>00061       elseif (iprob==3)  <span class="keyword">then</span>
+<a name="l00062"></a>00062        call <a class="code" href="namespaceKaps__mod.html#a0b5fe1c360adb32befe5294e9efc2388">Kaps</a>(         nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00063"></a>00063       elseif (iprob==4)  <span class="keyword">then</span>
+<a name="l00064"></a>00064        call <a class="code" href="namespaceKreiss__mod.html#a5913fbeeafec0b96a7e257e2ff3426d4">Kreiss</a>(       nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+<a name="l00065"></a>00065       elseif (iprob==5)  <span class="keyword">then</span> 
+<a name="l00066"></a>00066        call <a class="code" href="namespaceLorenz__mod.html#aab48d7e065d638529deff5920ca3a427">Lorenz</a>(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00067"></a>00067       elseif (iprob==6)  <span class="keyword">then</span> 
+<a name="l00068"></a>00068        call <a class="code" href="namespaceRossler__mod.html#a91b71ed2300e5d80f35c0bd572ff71c7">Rossler_Chaos</a>(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00069"></a>00069       elseif (iprob==7)  <span class="keyword">then</span> 
+<a name="l00070"></a>00070        call <a class="code" href="namespaceOregonator__mod.html#ae46545601498bacba503057f1d09ef71">Oregonator</a>(   nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00071"></a>00071       elseif (iprob==8)  <span class="keyword">then</span> 
+<a name="l00072"></a>00072        call <a class="code" href="namespaceBrusselator__mod.html#ab79d0906955a0bb799e47451c5907617">Brusselator</a>(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00073"></a>00073       elseif (iprob==9)  <span class="keyword">then</span>
+<a name="l00074"></a>00074        call <a class="code" href="namespaceBurgers__Module.html#af630c7671c928ce31d7d507fffb1a19f">Burgers</a>(      nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+<a name="l00075"></a>00075       elseif (iprob==10) <span class="keyword">then</span>
+<a name="l00076"></a>00076        call <a class="code" href="namespaceBoscarino31__Mod.html#a7ef8c726058a1806a0e97a1074dabd0c">Boscarino31</a>(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00077"></a>00077       elseif (iprob==11) <span class="keyword">then</span>
+<a name="l00078"></a>00078        call <a class="code" href="namespaceBroadwell__Mod.html#a5f4daaac125109c66525210bece53a41">Broadwell</a>(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+<a name="l00079"></a>00079       <span class="keyword">else</span>
+<a name="l00080"></a>00080        print*,<span class="stringliteral">&apos;Invalid problem number!&apos;</span>
+<a name="l00081"></a>00081        stop
+<a name="l00082"></a>00082       <span class="keyword">endif</span>
+<a name="l00083"></a>00083       
+<a name="l00084"></a>00084       <span class="keyword">select</span> <span class="keyword">case</span>(programstep)
+<a name="l00085"></a>00085         <span class="keyword">case</span>(<span class="stringliteral">&apos;BUILD_RHS&apos;</span>)  
+<a name="l00086"></a>00086           <a class="code" href="namespacecontrol__variables.html#a9f7c2243d548ddee9248892603d7dcdc">resE</a>(:,L)=resE_vec(:)
+<a name="l00087"></a>00087           <a class="code" href="namespacecontrol__variables.html#a622a60898014b0384693ee589b049bcc">resI</a>(:,L)=resI_vec(:)
+<a name="l00088"></a>00088       <span class="keyword">end select</span>
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090 <span class="keyword">      end subroutine problemsub</span>
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092 <span class="keyword">      end module problemsub_mod</span>
 </pre></div></div>
-<hr size="1"/><address style="text-align: right;"><small>Generated on 2 Aug 2016 for Doxygen Fortran Example by&nbsp;
+<hr size="1"/><address style="text-align: right;"><small>Generated on 5 Aug 2016 for Doxygen Fortran Example by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
 </body>
