@@ -5,7 +5,7 @@ module unary_mod
   private 
   public  :: amubdg , aplbdg, amub, aplb, aplb1, csort, qsorti, qsortd, transp,  &
             & csrcsc, clncsr, csort_block, clean_CSR, aplsca, amudia, diamua,    &
-            & apldia, cperm, dperm, rperm,                                       &
+            & apldia, cperm, dperm, rperm,addblk,                                &
             & a_bl_mu_b_bl, a_sc_mu_b_bl, a_bl_mu_b_sc, a_bl_pl_b_bl1, a_bl_mu_x,&
             & a_bl_pl_b_bl_scal, a_bl_pl_b_bl_diag
 
@@ -3085,6 +3085,7 @@ contains
 !-----------------------------------------------------------------------
       logical values 
       integer i,j1,j2,ka,kb,kc,kamax,kbmax 
+
       values = (job  /=  0) 
       ierr = 0 
       nrowc = max(nrowa, nrowb+ipos-1) 
@@ -3102,7 +3103,7 @@ contains
             ka = ia(nrowa+1) 
          end if 
          if ((i >= ipos).and.((i-ipos) <= nrowb)) then 
-            kb = ib(i-ipos+1) 
+            kb    = ib(i-ipos+1) 
             kbmax = ib(i-ipos+2)-1 
          else 
             kb = ib(nrowb+1) 
@@ -3125,7 +3126,7 @@ contains
 !     if there are more elements to be added.                           
 !                                                                       
          if ((ka  <=  kamax .or. kb  <=  kbmax) .and.                   &
-     &        (j1  <=  ncolc .or. j2  <=  ncolc)) then                  
+     &       (j1  <=  ncolc .or. j2  <=  ncolc)) then                  
 !                                                                       
 !     three cases                                                       
 !                                                                       
@@ -3146,7 +3147,7 @@ contains
                kb = kb+1 
                kc = kc+1 
             endif 
-            if (kc  >  nzmx) goto 999 
+            if (kc  >  nzmx + ic(1) ) goto 999 
             goto 20 
          end if 
          ic(i+1) = kc 
@@ -3282,7 +3283,7 @@ contains
                kb = kb+1 
                kc = kc+1 
             endif 
-            if (kc  >  nzmx) goto 999 
+            if (kc  >  nzmx + ic(1) ) goto 999 
             goto 20 
          end if 
          ic(i+1) = kc 

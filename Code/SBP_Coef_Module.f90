@@ -27,10 +27,17 @@
       real(wp),  dimension(:), allocatable :: Eye
       integer,   dimension(:), allocatable :: iEye, jEye
 
+      integer                              :: n2D
+
+      integer                              :: nnz_D1_2D
       integer,   dimension(:), allocatable :: iDx_2D,jDx_2D
       real(wp),  dimension(:), allocatable ::  Dx_2D
 
-      integer                              :: n2D, nnz_D1_2D
+      integer                              :: nnz_D1_2D_per
+      integer,   dimension(:), allocatable :: iDx_2D_per,jDx_2D_per
+      real(wp),  dimension(:), allocatable ::  Dx_2D_per
+
+      logical                              :: Build_2D_Ops = .false.
 
       contains
 
@@ -66,18 +73,30 @@
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
       call D2_periodic(n,nnz_D2_per,iD2_per,jD2_per,D2_per,h)
 
-      allocate(iEye(n+1),jEye(n),Eye(n))
+      if(Build_2D_Ops) then
 
-      call Build_Eye(n,iEye,jEye,Eye)
+        allocate(iEye(n+1),jEye(n),Eye(n))
 
-      n2D = n*n
-      nnz_D1_2D = nnz_D1 * n
-      allocate(iDx_2D(n2D+1),jDx_2D(nnz_D1_2D),Dx_2D(nnz_D1_2D))
+        call Build_Eye(n,iEye,jEye,Eye)
 
-      !  Build the 2D tensor product derivative operator in the ``x'' direction
-      call Build_Tensor_Operators(n  ,n        ,Eye  ,jEye  ,iEye  ,   &
-                                 &n  ,nnz_D1   ,D1   ,jD1   ,iD1   ,   &
-                                 &n2D,nnz_D1_2D,Dx_2D,jDx_2D,iDx_2D,ierr)
+        n2D = n*n
+
+        nnz_D1_2D = nnz_D1 * n
+        allocate(iDx_2D(n2D+1),jDx_2D(nnz_D1_2D),Dx_2D(nnz_D1_2D))
+      
+        !  Build the 2D tensor product derivative operator in the ``x'' direction
+        call Build_Tensor_Operators(n  ,n        ,Eye  ,jEye  ,iEye  ,   &
+                                   &n  ,nnz_D1   ,D1   ,jD1   ,iD1   ,   &
+                                   &n2D,nnz_D1_2D,Dx_2D,jDx_2D,iDx_2D,ierr)
+
+        nnz_D1_2D_per = nnz_D1_per * n
+        allocate(iDx_2D_per(n2D+1),jDx_2D_per(nnz_D1_2D_per),Dx_2D_per(nnz_D1_2D_per))
+  
+        !  Build the periodic 2D tensor product derivative operator in the ``x'' direction
+        call Build_Tensor_Operators(n  ,n            ,Eye      ,jEye      ,iEye      ,   &
+                                   &n  ,nnz_D1_per   ,D1_per   ,jD1_per   ,iD1_per   ,   &
+                                   &n2D,nnz_D1_2D_per,Dx_2D_per,jDx_2D_per,iDx_2D_per,ierr)
+      endif
 
       
       end subroutine Define_CSR_Operators
@@ -522,8 +541,6 @@
 
       use unary_mod, only : addblk, csort
 
-      integer,  parameter              :: wp = 8
-
       integer,                        intent(in   ) :: nA, nnzA
       integer,  dimension(nA+1),      intent(in   ) :: iA
       integer,  dimension(nnzA),      intent(in   ) :: jA
@@ -536,16 +553,17 @@
 
       integer,                             intent(  out) :: nC, nnzC
       integer,  dimension(nA*nB+1),        intent(  out) :: iC
-      integer,  dimension(nnzA*nnzB+1),    intent(  out) :: jC
-      real(wp), dimension(nnzA*nnzB+1),    intent(  out) ::  C
+      integer,  dimension(nnzA*nnzB),      intent(  out) :: jC
+      real(wp), dimension(nnzA*nnzB),      intent(  out) ::  C
 
 !     integer,  dimension(:),         allocatable   :: iW
 !     integer,  dimension(:),         allocatable   :: jW
 !     real(wp), dimension(:),         allocatable   ::  W
 
       integer,  dimension(nA*nB+1)         :: iW
-      integer,  dimension(nnzA*nnzB+1)     :: jW
-      real(wp), dimension(nnzA*nnzB+1)     ::  W
+      integer,  dimension(nnzA*nnzB)       :: jW
+      real(wp), dimension(nnzA*nnzB)       ::  W
+
       integer,  parameter :: job = 1
       integer             :: nrowW, nrowb, nrowc
       integer             :: ncolW, ncolb, ncolc
@@ -554,9 +572,9 @@
 
       integer             :: i,j,k
 
+      integer,  dimension(:), allocatable  :: iwork
 
-      integer,  dimension(nA*nB+1,2*nnzA*nnzB+1)    :: iwork
-
+      allocate(iwork(max(nA*nB+1,2*nnzA*nnzB)))
 
         nC =   nA * nB
       nnzC = nnzA*nnzB
@@ -585,16 +603,21 @@
 
           ipos = (   i -1)*nB + 1
           jpos = (jA(k)-1)*nA + 1
-          write(*,*)'i,k,ipos,jpos',i,k,ipos,jpos
 
           call addblk(nrowW,ncolW,     W,jW,iW, ipos, jpos, job,  &
           &           nrowB,ncolB,A(k)*B,jB,iB,                   &
           &           nrowC,ncolC,     C,jC,iC, nnzC, ierr)
-
+          if(ierr /= 0) then
+            write(*,*)'ierr /= 0 in addblk; stopping'
+            stop
+          endif
+      
           call csort(nrowC,C,jC,iC,iwork,.true.)
 
         enddo
       enddo
+
+      deallocate(iwork) 
 
       end subroutine Build_Tensor_Operators
 
