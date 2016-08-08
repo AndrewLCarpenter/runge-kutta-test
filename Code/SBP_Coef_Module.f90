@@ -89,6 +89,8 @@
                                    &n  ,nnz_D1   ,D1   ,jD1   ,iD1   ,   &
                                    &n2D,nnz_D1_2D,Dx_2D,jDx_2D,iDx_2D,ierr)
 
+        call test_2D_error(1,n2D,iDx_2D,jDx_2D,Dx_2D)
+
         nnz_D1_2D_per = nnz_D1_per * n
         allocate(iDx_2D_per(n2D+1),jDx_2D_per(nnz_D1_2D_per),Dx_2D_per(nnz_D1_2D_per))
   
@@ -532,6 +534,80 @@
 
 
       end subroutine test_error
+
+! ======================================================================================
+
+      subroutine test_2D_error(order,n,ia,ja,a)
+
+      implicit none
+
+      integer,                   intent(in) :: order, n
+      integer,   dimension(:),   intent(in) :: ia
+      integer,   dimension(:),   intent(in) :: ja
+      real(wp),  dimension(:),   intent(in) ::  a
+      integer                               ::  i, ii, j, n_sqrt
+
+      real(wp),  allocatable, dimension(:)  :: err,  x0_vec ,  x1_vec ,   x2_vec,   x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d1x0_vec ,d1x1_vec , d1x2_vec, d1x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d1x0T_vec,d1x1T_vec,d1x2T_vec,d1x3T_vec
+      real(wp),  allocatable, dimension(:)  ::      d2x0_vec, d2x1_vec, d2x2_vec, d2x3_vec
+      real(wp),  allocatable, dimension(:)  ::     d2x0T_vec,d2x1T_vec,d2x2T_vec,d2x3T_vec
+
+      real(wp)                              :: tnorm, x
+
+      continue
+
+      allocate(  x0_vec(n),  x1_vec(n),  x2_vec(n),  x3_vec(n))
+      allocate(d1x0_vec(n) ,d1x1_vec(n) ,d1x2_vec(n) ,d1x3_vec(n) )
+      allocate(d1x0T_vec(n),d1x1T_vec(n),d1x2T_vec(n),d1x3T_vec(n))
+      allocate(d2x0_vec(n) ,d2x1_vec(n) ,d2x2_vec(n) ,d2x3_vec(n) )
+      allocate(d2x0T_vec(n),d2x1T_vec(n),d2x2T_vec(n),d2x3T_vec(n))
+      allocate(err(n))
+
+      n_sqrt = nint(sqrt(1.0_wp*n))
+
+      do j = 1,n_sqrt
+        do ii = 1,n_sqrt
+           i = (j-1)*n_sqrt + ii
+!          x = -1.0_wp + 2.0_wp*(ii-1)/(n_sqrt-1)
+!     NOTE: This domain size is specific to the Boscarino31 test case define on  (-1 -> 1-dx)
+           x = -1.0_wp + 2.0_wp*(ii-1)/(n_sqrt)
+          x0_vec(i) = 1.0_wp       ; d1x0_vec(i) = 0.0_wp     ; d2x0_vec(i) = 0.0_wp
+          x1_vec(i) = 1.0_wp*x     ; d1x1_vec(i) = 1.0_wp     ; d2x1_vec(i) = 0.0_wp
+          x2_vec(i) = 1.0_wp*x*x   ; d1x2_vec(i) = 2.0_wp*x   ; d2x2_vec(i) = 2.0_wp
+          x3_vec(i) = 1.0_wp*x*x*x ; d1x3_vec(i) = 3.0_wp*x*x ; d2x3_vec(i) = 6.0_wp*x
+        enddo
+      enddo
+
+      if(order == 1) then
+         call amux_local (n, x0_vec,d1x0T_vec, a,ja,ia)
+         call amux_local (n, x1_vec,d1x1T_vec, a,ja,ia)
+         call amux_local (n, x2_vec,d1x2T_vec, a,ja,ia)
+         call amux_local (n, x3_vec,d1x3T_vec, a,ja,ia)
+         err(:) = d1x0_vec(:) - d1x0T_vec(:) &
+                + d1x1_vec(:) - d1x1T_vec(:) &
+                + d1x2_vec(:) - d1x2T_vec(:) !&
+                !+ d1x3_vec(:) - d1x3T_vec(:)
+         tnorm = maxval(err)
+!         write(*,*)'error in tensor product first derivative',tnorm
+!         if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
+      elseif(order == 2) then
+         call amux_local (n, x0_vec,d2x0T_vec, a,ja,ia)
+         call amux_local (n, x1_vec,d2x1T_vec, a,ja,ia)
+         call amux_local (n, x2_vec,d2x2T_vec, a,ja,ia)
+         call amux_local (n, x3_vec,d2x3T_vec, a,ja,ia)
+
+         err(:) = d2x0_vec(:) - d2x0T_vec(:) &
+                + d2x1_vec(:) - d2x1T_vec(:) &
+                + d2x2_vec(:) - d2x2T_vec(:) !&
+                !+ d2x3_vec(:) - d2x3T_vec(:)
+         tnorm = maxval(err)
+!         write(*,*)'error in tensor product Second derivative',tnorm
+!         if(tnorm >= tol) write(*,*)'maxerr',maxval(err)
+      endif
+
+
+      end subroutine test_2D_error
 
 ! ==================================================================================
 
