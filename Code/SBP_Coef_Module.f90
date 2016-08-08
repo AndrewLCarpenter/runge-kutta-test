@@ -16,6 +16,7 @@
       public  :: Define_CSR_Operators,Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,nnz_D2
       public  :: nnz_D1_per,iD1_per,jD1_per,D1_per,nnz_D1
       public  :: nnz_D2_per,iD2_per,jD2_per,D2_per
+      public  :: iEye, jEye, Eye
       
       real(wp),  dimension(:), allocatable :: Pmat,Pinv,D1,D2,D1_per,D2_per
       integer,   dimension(:), allocatable :: iD1, iD2,jD1,jD2,iD1_per,jD1_per
@@ -23,9 +24,18 @@
       integer                              :: nnz_D2,nnz_D1_per,nnz_D1
       integer                              :: nnz_D2_per
       
+      real(wp),  dimension(:), allocatable :: Eye
+      integer,   dimension(:), allocatable :: iEye, jEye
+
+      integer,   dimension(:), allocatable :: iDx_2D,jDx_2D
+      real(wp),  dimension(:), allocatable ::  Dx_2D
+
+      integer                              :: n2D, nnz_D1_2D
 
       contains
+
 !==============================================================================
+
       subroutine Define_CSR_Operators(n,h)
       
       
@@ -33,9 +43,10 @@
       real(wp), intent(in) :: h
       integer,  parameter  :: order = 242
 
+      integer              :: ierr
+
 !     CSR storage for derivative matrices
 
-      
       allocate(iD1(n+1),iD2(n+1),Pmat(n),Pinv(n))
 
       if(order == 242) then
@@ -54,7 +65,51 @@
       call D2_242(n,nnz_D2,iD2,jD2,D2,h)
       call D1_periodic(n,nnz_D1_per,iD1_per,jD1_per,D1_per,h)
       call D2_periodic(n,nnz_D2_per,iD2_per,jD2_per,D2_per,h)
+
+      allocate(iEye(n+1),jEye(n),Eye(n))
+
+      call Build_Eye(n,iEye,jEye,Eye)
+
+      n2D = n*n
+      nnz_D1_2D = nnz_D1 * n
+      allocate(iDx_2D(n2D+1),jDx_2D(nnz_D1_2D),Dx_2D(nnz_D1_2D))
+
+      !  Build the 2D tensor product derivative operator in the ``x'' direction
+      call Build_Tensor_Operators(n  ,n        ,Eye  ,jEye  ,iEye  ,   &
+                                 &n  ,nnz_D1   ,D1   ,jD1   ,iD1   ,   &
+                                 &n2D,nnz_D1_2D,Dx_2D,jDx_2D,iDx_2D,ierr)
+
+      
       end subroutine Define_CSR_Operators
+
+!==============================================================================            
+
+      subroutine Build_Eye(n,ia,ja,a)
+
+      implicit none
+
+      integer,                    intent(in   ) :: n
+
+      integer,   dimension(n+1),  intent(  out) :: ia
+      integer,   dimension(n),    intent(  out) :: ja
+
+      real(wp),  dimension(n),    intent(  out) ::  a
+
+      integer                                   :: i,j,k
+
+      do i = 1,n+1
+        ia(i) = i
+      enddo
+      do i = 1,n
+        ja(i) = i
+         a(i) = 1.0_wp
+      enddo
+
+      end subroutine Build_Eye
+
+!==============================================================================            
+
+
 !==============================================================================         
       subroutine D1_periodic(n,nnz,ia,ja,a,h)
 
@@ -192,7 +247,7 @@
       allocate(D2blk(1:4,1:6))
       allocate(D1blkT(1:6,1:4))
 
-    !  h = 1.0_wp / (n - 1)
+      !  h = 1.0_wp / (n - 1)
 
       !  Diagonal matrix norm needed for 1st- and 2nd-order derivatives 
       Pmat(1:  4) = reshape((/17.0_wp/48.0_wp,59.0_wp/48.0_wp,43.0_wp/48.0_wp,49.0_wp/48.0_wp/),(/4/))
@@ -459,6 +514,90 @@
 
       end subroutine test_error
 
+! ==================================================================================
+
+      subroutine Build_Tensor_Operators(nA,nnzA,A,jA,iA,     &
+                                       &nB,nnzB,B,jB,iB,     &
+                                       &nC,nnzC,C,jC,iC, ierr)
+
+      use unary_mod, only : addblk, csort
+
+      integer,  parameter              :: wp = 8
+
+      integer,                        intent(in   ) :: nA, nnzA
+      integer,  dimension(nA+1),      intent(in   ) :: iA
+      integer,  dimension(nnzA),      intent(in   ) :: jA
+      real(wp), dimension(nnzA),      intent(in   ) ::  A
+
+      integer,                        intent(in   ) :: nB, nnzB
+      integer,  dimension(nB+1),      intent(in   ) :: iB
+      integer,  dimension(nnzB),      intent(in   ) :: jB
+      real(wp), dimension(nnzB),      intent(in   ) ::  B
+
+      integer,                             intent(  out) :: nC, nnzC
+      integer,  dimension(nA*nB+1),        intent(  out) :: iC
+      integer,  dimension(nnzA*nnzB+1),    intent(  out) :: jC
+      real(wp), dimension(nnzA*nnzB+1),    intent(  out) ::  C
+
+!     integer,  dimension(:),         allocatable   :: iW
+!     integer,  dimension(:),         allocatable   :: jW
+!     real(wp), dimension(:),         allocatable   ::  W
+
+      integer,  dimension(nA*nB+1)         :: iW
+      integer,  dimension(nnzA*nnzB+1)     :: jW
+      real(wp), dimension(nnzA*nnzB+1)     ::  W
+      integer,  parameter :: job = 1
+      integer             :: nrowW, nrowb, nrowc
+      integer             :: ncolW, ncolb, ncolc
+      integer             :: ipos, jpos
+      integer             :: ierr
+
+      integer             :: i,j,k
+
+
+      integer,  dimension(nA*nB+1,2*nnzA*nnzB+1)    :: iwork
+
+
+        nC =   nA * nB
+      nnzC = nnzA*nnzB
+
+      !  initialize the work array to be a diagonal matrix filled with zeroes
+      iC =  0      ; iW =  0      ;
+      jC =  0      ; jW =  0      ;
+       C =  0.0_wp ;  W =  0.0_wp ;
+
+      do i = 1,nC+1
+        iC(i) = 1
+      enddo
+      do j = 1,nC
+        jC(j) = 0
+         C(j) = 0.0_wp
+      enddo
+
+      nrowW = nC ; ncolW = nC
+      nrowB = nB ; ncolB = nB
+      nrowC = nC ; ncolC = nC
+
+      do i = 1,nA
+        do k = iA(i), iA(i+1) - 1
+
+          iW = iC ; jW = jC ; W =  C ;
+
+          ipos = (   i -1)*nB + 1
+          jpos = (jA(k)-1)*nA + 1
+          write(*,*)'i,k,ipos,jpos',i,k,ipos,jpos
+
+          call addblk(nrowW,ncolW,     W,jW,iW, ipos, jpos, job,  &
+          &           nrowB,ncolB,A(k)*B,jB,iB,                   &
+          &           nrowC,ncolC,     C,jC,iC, nnzC, ierr)
+
+          call csort(nrowC,C,jC,iC,iwork,.true.)
+
+        enddo
+      enddo
+
+      end subroutine Build_Tensor_Operators
+
 ! ======================================================================================
 
       subroutine amux_local (n, x, y, a,ja,ia)
@@ -504,5 +643,6 @@
 
       end subroutine amux_local
 
+! ======================================================================================
 
       end module SBP_Coef_Module
