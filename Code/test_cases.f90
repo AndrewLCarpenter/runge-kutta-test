@@ -126,7 +126,7 @@
 ! HACK
 !           do iDT = isamp,isamp,1         !  use this loop to set exact solution
             cost(:)=0.0_wp !turn this on when doing 1 iDT value
-!            do iDT = 1,1
+!            do iDT = 70,70
 ! HACK
             do iDT =1,isamp,1   
 
@@ -256,10 +256,6 @@
 !----------------------------END TIMESTEP LOOP---------------------------------
 !  HACK used to write exact solution
 !           write(*,*)'writing exact solution'
-!           write(122,*)uvec(1:nveclen:2)
-!           write(123,*)uvec(2:nveclen:2)
-!           write(124,*)uvec(3:nveclen:3)
-!           write(121,*)uexact
 !           write(900,*)uvec
 !  HACK used to write exact solution
 !----------------------------OUTPUTS-------------------------------------------
