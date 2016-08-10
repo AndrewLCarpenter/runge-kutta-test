@@ -91,6 +91,10 @@
 ! iSource_p     -> permuted ia matrix for Source terms             integer,   dimension(u-vector length + 1),                 not modified
 ! update_RHS    -> logical flag set to decide when to update RHS,  logical,                                                       set & modified
 ! update_Jac    -> logical flag set to decide when to update Jac,  logical,                                                       set & modified
+! grid          -> Subroutine to create grid
+! exact_Bosc    -> Subroutine to build exact solution
+! Bosc_dudt     -> Subroutine to build dudt (LHS)
+! Bosc_Jac      -> Subroutine to build Jacobian and store it
 !******************************************************************************
 ! INPUTS:
 ! ep   -> Stiffness epsilon value,                                   real(wp)
@@ -465,7 +469,7 @@
 ! akk -> Diagonal term from RK scheme, real(wp)
 ! m   ->  a matrix for input Jacobian, real(wp), dimension(dependant on temporal_splitting, see main routine)
 ! jm  -> ja matrix for input Jacobian, integer,  dimension(dependant on temporal_splitting, see main routine)
-! im  -> ia matrix for input Jacobian, intenger, dimension(u-vector length + 1)
+! im  -> ia matrix for input Jacobian, integer,  dimension(u-vector length + 1)
 !******************************************************************************
       subroutine Bosc_Jac(dt,akk,m,jm,im)
       

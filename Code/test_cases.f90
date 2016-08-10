@@ -26,6 +26,62 @@
 ! NEWTON.F90                *PERFORMS NEWTON ITERATION
 !------------------------------------------------------------------------------
 !
+!----------------------------GLOBAL VARIABLES/ROUTINES-------------------------
+! From precision_variables:
+!   wp  -> working precision
+! From output_module:
+!   create_file_paths         -> Creates file paths for output files if they do not exsist
+!   output_names              -> Outputs RK case, IMEX/IMPLICIT/EXPLICIT, and problem names to the terminal
+!   init_output_files         -> Create zones in output files for Tecplot/Tec360
+!   output_conv_stiff         -> Output data to convergence vs. stiffness files
+!   output_terminal_iteration -> Outputs data to terminal every epsilon iteration
+!   output_terminal_final     -> Outputs data to terminal at end of RK case/problem
+!   output_conv_error         -> Outputs data to files initilized earilier in the program
+! From Stage_value_module:
+!   Stage_Value_Predictor -> returns appropriate data for predicting stage value
+!   xnorm                 -> Function that takes a norm for stage value storage,  real(wp)
+! From control_variables:
+!   allocate_vars   -> Subroutine to allocate global variables
+!   deallocate_vars -> Subroutine to deallocate global variables at end of problem loop
+!   isamp       -> number of dt's,                               integer,                                              not modified
+!   jmax        -> number of epsilon values,                     integer,                                              not modified 
+!   uveco       -> newton iteration / usum storage (?),          real(wp), dimension(u-vector length),                     modified
+!   errvec      -> temporary error storage,                      real(wp), dimension(u-vector length),                     modified
+!   errvecT     -> error storage for each time step,             real(wp), dimension(u-vector length),                     modified
+!   tmpvec      -> (uvec-uexact),                                real(wp), dimension(u-vector length),                     modified
+!   resE        -> Explicit RHS vector,                          real(wp), dimension(u-vector length, num. stages),    not modified
+!   resI        -> Implicit RHS vector,                          real(wp), dimension(u-vector length, num. stages),    not modified
+!   error       -> solution error,                               real(wp), dimension(num. dt's, u-vector length),          modified
+!   errorP      -> solution error, predicted,                    real(wp), dimension(num. dt's, u-vector length),          modified
+!   b1save      -> convergence rate storage,                     real(wp), dimension(num. ep's, u-vector length),          modified
+!   b1Psave     -> convergence rate storage, predicted,          real(wp), dimension(num. ep's, u-vector length),          modified
+!   ustage      -> stage value predictor,                        real(wp), dimension(u-vector length, num. stages),        modified
+!   predvec     -> stage value predictor,                        real(wp), dimension(u-vector length, num. stages),        modified
+!   jactual     -> actual number of epsilon values,              integer,                                              not modified
+!   uvec        -> Array containing variables,                   real(wp), dimension(u-vector length),                     modified
+!   uexact      -> Array containing exact solution to variables, real(wp), dimension(u-vector length),                 not modified
+!   b           -> convergence rate,                             real(wp), dimension(2 * u-vector length + num. eq's), not modified          
+!   usum        -> Array containing summation from test_cases,   real(wp), dimension(u-vector length),                     modified
+!   programstep -> string used in program_step_select,           character(len=80),                                    not modified 
+!   errorL2     -> solution error, L2 norm,                      real(wp), dimension(num. dt's, num. eq's),                modified
+!   b1L2save    -> convergence rate storage, L2 norm ,           real(wp), dimension(num. ep's, num. eq's),                modified
+! From runge_kutta:
+!   aE  -> Explicit a  constants, real(wp), dimension(max. num. stages, max. num. stages), not modified
+!   aI  -> Implicit a  constants, real(wp), dimension(max. num. stages, max. num. stages), not modified
+!   bE  -> Explicit b  constants, real(wp), dimension(max. num. stages),                   not modified
+!   bI  -> Implicit b  constants, real(wp), dimension(max. num. stages),                   not modified
+!   bEH -> Explicit bH constants, real(wp), dimension(max. num. stages),                   not modified
+!   bIH -> Implicit bH constants, real(wp), dimension(max. num. stages),                   not modified
+!   cI  -> Implicit c  constants, real(wp), dimension(max. num. stages),                   not modified
+!   is  -> Maximum number stages, integer,                                                 not modified
+!   ns  -> Actualy number stages, integer,                                                 not modified 
+!   rungeadd -> Subroutine to set constants for particular RK schemes
+! From Newton:
+!   Newton_Iteration -> Subroutine to perform Newton iteration 
+! From problemsub_mod
+!   problemsub -> Subroutine to take in the problem number and call the appropriate problem
+!------------------------------------------------------------------------------
+!
 !--------------------------HOW TO USE------------------------------------------
 !**Adding test cases:
 !     Subroutine file can be added to the directory with form of vanderpol.f90,

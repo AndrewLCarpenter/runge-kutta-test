@@ -28,7 +28,23 @@
       contains
       
 !==============================================================================
-!  SETS FILE LOCATION VARIABLE
+!******************************************************************************
+! Set file location variable
+!******************************************************************************
+! REQUIRED FILES:
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type, character(len=80), not modified
+!   probname           -> string used to set output file names,               character(len=9),  not modified
+! From runge_kutta:
+!   casename           -> string holding name of RK case,                     character(len=25), not modified
+!
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files,            character(len=80), set
+!******************************************************************************
       subroutine set_file_loc()
       
       use control_variables, only : temporal_splitting,probname
@@ -40,7 +56,13 @@
       end subroutine set_file_loc           
       
 !==============================================================================
-!  CHECKS AND CREATES FILE PATHS FOR OUTPUTS
+!******************************************************************************
+! Creates file paths for output files if they do not exsist
+!******************************************************************************
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! set_file_loc -> Subroutine for setting fileloc
+!******************************************************************************
       subroutine create_file_paths()
       
       logical           :: dirExists   !check if directory exists
@@ -52,7 +74,20 @@
       end subroutine create_file_paths
       
 !==============================================================================  
-!  WRITES PROBLEM NAME AND CASE NAME TO THE TOP OF THE TERMIINAL OUTPUT
+!******************************************************************************
+! Outputs RK case, IMEX/IMPLICIT/EXPLICIT, and problem names to the terminal
+!******************************************************************************
+! REQUIRED FILES:
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type, character(len=80), not modified
+!   probname           -> string used to set output file names,               character(len=9),  not modified
+! From runge_kutta:
+!   casename           -> string holding name of RK case,                     character(len=25), not modified
+!******************************************************************************
       subroutine output_names()
 
       use control_variables, only : probname,temporal_splitting
@@ -65,7 +100,31 @@
       end subroutine output_names
        
 !==============================================================================
-!  INITIALIZE OUTPUT FILES FOR ERROR OUTPUTS
+!******************************************************************************
+! Create zones in output files for Tecplot/Tec360
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   probname -> string used to set output file names,              character(len=9),  not modified
+! From runge_kutta:
+!   casename -> string holding name of RK case,                    character(len=25), not modified
+!
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! ext     -> string used for file extension,                       character(len=4),  not modified
+!******************************************************************************
+! INPUTS:
+! neq  -> number of equations in problem, integer
+! ep   -> Stiffness epsilon value,        real(wp)
+!******************************************************************************
+
       subroutine init_output_files(neq,ep)
 
       use control_variables, only : probname
@@ -90,11 +149,41 @@
       end subroutine init_output_files
       
 !==============================================================================      
-!  OUTPUTS DATA TO CONVERGENCE VS. STIFFNESS FILE
+!******************************************************************************
+! Output data to convergence vs. stiffness files
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type, character(len=80),                               not modified
+!   probname           -> string used to set output file names,               character(len=9),                                not modified
+!   jactual            -> actual number of epsilon values,                    integer,                                         not modified
+!   b1save             -> convergence rate storage,                           real(wp), dimension(num. ep's, u-vector length), not modified
+!   b1Psave            -> convergence rate storage, predicted,                real(wp), dimension(num. ep's, u-vector length), not modified
+!   b1L2save           -> convergence rate storage, L2 norm ,                 real(wp), dimension(num. ep's, num. eq's),       not modified
+!   var_names          -> string array used to label output graphs,           character(len=12), dimension(num. eq's),         not modified
+! From runge_kutta:    
+!   casename           -> string holding name of RK case,                     character(len=25),                               not modified
+!
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! ext     -> string used for file extension,                       character(len=9),  not modified
+!******************************************************************************
+! INPUTS:
+! nveclen -> u-vector length,                 integer
+! neq     -> number of equations,             integer
+! epsave  -> array containing epsilon values, real(wp), dimension(num. ep's)
+!******************************************************************************
       subroutine output_conv_stiff(nveclen,neq,epsave)
       
       use control_variables, only : temporal_splitting,probname,jactual, &
-     &                              b1save,b1Psave,b1L2save,var_names  
+     &                              var_names,b1L2save!,b1save,b1Psave  
       use runge_kutta,       only : casename    
       
       integer,                intent(in) :: nveclen,neq
@@ -129,7 +218,34 @@
       end subroutine output_conv_stiff
 
 !==============================================================================
-!  OUTPUTS ITERATION INFORMATION TO TERMINAL      
+!******************************************************************************
+! Outputs data to terminal every epsilon iteration
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! POLY_FIT_MOD.F90          *CONTAINS SUBROUTINES TO OUTPUT DATA
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From poly_fit_Mod:
+!   fit          -> Subroutine to get convergence slopes
+! From control_variables:
+!   isamp        -> number of dt's,                            integer,                                              not modified
+!   dt_error_tol -> L2 error tolerance for convergence plots,  real(wp),                                             not modified
+!   error        -> solution error,                            real(wp), dimension(num. dt's, u-vector length),      not modified
+!   errorP       -> solution error, predicted,                 real(wp), dimension(num. dt's, u-vector length),      not modified
+!   b            -> convergence rate,                          real(wp), dimension(2 * u-vector length + num. eq's),     set          
+!   errorL2      -> solution error, L2 norm,                   real(wp), dimension(num. dt's, num. eq's),            not modified
+!******************************************************************************
+! INPUTS:
+! cost    -> cost of a particular dt value,             real(wp)
+! mwt     -> fit subroutine input,                      integer
+! ep      -> Stiffness epsilon value,                   real(wp)
+! nveclen -> total length of u-vector used for problem, integer
+! neq     -> number of equations in problem,            integer
+!******************************************************************************
       subroutine output_terminal_iteration(cost,mwt,ep,nveclen,neq)
       
       use poly_fit_Mod,      only : fit
@@ -190,7 +306,25 @@
       end subroutine output_terminal_iteration
 
 !==============================================================================
-!  OUTPUTS FINAL DATA BLOCK TO TERMINAL. ITERATION INFORMATION
+!******************************************************************************
+! Outputs data to terminal at end of RK case/problem
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp -> working precision
+! From runge_kutta:
+!   ns -> number of RK stage for this particular scheme, integer
+!******************************************************************************
+! INPUTS:
+! icount  -> counter used to determine average iterations, integer
+! jcount  -> total number of RK stages,                    integer
+! stageE  -> ?                                             real(wp), dimension(max stages)
+! stageI  -> ?                                             real(wp), dimension(max stages)
+! maxiter -> maximum number of newton iterations           real(wp), dimension(max stages)
+!******************************************************************************
       subroutine output_terminal_final(icount,jcount,stageE,stageI,maxiter)
       
       use runge_kutta, only : ns
@@ -215,7 +349,26 @@
       end subroutine output_terminal_final
 
 !==============================================================================
-!  OUTPUTS CONVERGENCE AND ERROR DATA TO FILES INITIALIZED EARILER
+!******************************************************************************
+! Outputs data to files initilized earilier in the program
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec    -> Array containing variables,                   real(wp), dimension(u-vector length), not modified
+!   uexact  -> Array containing exact solution to variables, real(wp), dimension(u-vector length), not modified
+!   errvecT -> error storage for each time step,             real(wp), dimension(u-vector length), not modified
+!******************************************************************************
+! INPUTS:
+! cost    -> cost of a particular dt value,             real(wp)
+! nveclen -> total length of u-vector used for problem, integer
+! neq     -> number of equations in problem,            integer
+!******************************************************************************
       subroutine output_conv_error(cost,nveclen,neq)
       
       use control_variables, only : uvec,uexact,errvecT

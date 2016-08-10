@@ -46,7 +46,37 @@
       contains
 
 !==============================================================================
-! ALLOCATE GLOBAL VARIABLES
+!******************************************************************************
+! Subroutine to allocate global variables
+!******************************************************************************
+! MODULE VARIABLES:
+! uvec     -> Array containing variables       
+! uexact   -> Array containing exact solution to variables              
+! resE     -> Explicit RHS vector
+! resI     -> Implicit RHS vector
+! error    -> solution error
+! errorP   -> solution error, predicted
+! b        -> convergence rate
+! errorL2  -> solution error, L2 norm
+! usum     -> Array containing summation from test_cases
+! xjac     -> matrix containing dense Jacobian
+! ustage   -> stage value predictor
+! predvec  -> stage value predictor
+! uveco    -> newton iteration / usum storage (?)
+! errvec   -> temporary error storage
+! errvecT  -> error storage for each time step
+! tmpvec   -> (uvec-uexact)
+! b1save   -> convergence rate storage
+! b1Psave  -> convergence rate storage, predicted
+! b1L2save -> convergence rate storage, L2 norm
+! isamp    -> number of dt's
+! jmax     -> number of epsilon values
+!******************************************************************************
+! INPUTS:
+! nveclen -> u-vector length,          integer
+! neq     -> number of equations,      integer
+! is      -> maximum number of stages, integer
+!******************************************************************************
       subroutine allocate_vars(nveclen,neq,is)
       
       integer, intent(in) :: nveclen,neq,is
@@ -67,10 +97,47 @@
       ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
       ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,neq))
 
-       end subroutine allocate_vars
+      end subroutine allocate_vars
      
 !==============================================================================
-! DEALLOCATE GLOBAL VARIABLES
+!******************************************************************************
+! Subroutine to deallocate global variables at end of problem loop
+!******************************************************************************
+! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES:
+! From SBP_Coef_Module:
+!   Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,D1_per,iD1_per,jD1_per,D2_per,jD2_per,iD2_per
+! From Jacobian_CSR_Mod:
+!   iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw
+! 
+! MODULE VARIABLES:
+! uvec     -> Array containing variables       
+! uexact   -> Array containing exact solution to variables              
+! resE     -> Explicit RHS vector
+! resI     -> Implicit RHS vector
+! error    -> solution error
+! errorP   -> solution error, predicted
+! b        -> convergence rate
+! errorL2  -> solution error, L2 norm
+! usum     -> Array containing summation from test_cases
+! xjac     -> matrix containing dense Jacobian
+! ustage   -> stage value predictor
+! predvec  -> stage value predictor
+! uveco    -> newton iteration / usum storage (?)
+! errvec   -> temporary error storage
+! errvecT  -> error storage for each time step
+! tmpvec   -> (uvec-uexact)
+! b1save   -> convergence rate storage
+! b1Psave  -> convergence rate storage, predicted
+! b1L2save -> convergence rate storage, L2 norm
+!******************************************************************************
+! INPUTS:
+! nveclen -> u-vector length,          integer
+! neq     -> number of equations,      integer
+! is      -> maximum number of stages, integer
+!******************************************************************************
       subroutine deallocate_vars()
       
       use SBP_Coef_Module,  only: Pmat,Pinv,iD1,jD1,D1,iD2,jD2,D2,D1_per,&

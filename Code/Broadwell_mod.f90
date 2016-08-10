@@ -99,6 +99,12 @@
 ! Source_p      -> permuted  a matrix for Source terms             real(wp),  dimension(u-vector length),                               not modified
 ! iSource_p     -> permuted ia matrix for Source terms             integer,   dimension(u-vector length + 1),                           not modified
 ! update_Jac    -> logical flag set to decide when to update Jac,  logical,                                                                 set & modified
+! grid          -> Subroutine to create grid
+! exact_Broadwell             ->Subroutine to build exact solution
+! Broadwell_dudt              -> Subroutine to build dudt (LHS)
+! Broadwell_Build_Spatial_Jac -> Subroutine to build spatial Jacobian
+! Broadwell_Build_Source_Jac  -> Subroutine to build source  Jacobian
+! Broadwell_Add_Diag_Jac      -> Subroutine to build Jacobian and store it
 !******************************************************************************
 ! INPUTS:
 ! ep   -> Stiffness epsilon value,                                   real(wp)
@@ -395,11 +401,14 @@
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
 ! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
 !******************************************************************************
 ! GLOBAL VARIABLES/ROUTINES:
 ! From precision_variables:
 !   wp  -> working precision
+! From unary_mod:
+!   dperm -> Subroutine to permute a matrix
 ! From SBP_Coef_Module:
 !    D1_per    -> First derivative  a matrix periodic operator, real(wp), dimension(4*num. points), not modified
 !   jD1_per    -> First derivative ja matrix periodic operator, integer,  dimension(4*num. points), not modified

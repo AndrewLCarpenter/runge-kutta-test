@@ -10,9 +10,32 @@
 ! KREISS.F90             *PROBLEM CONSTANTS FOR KREISS'
 ! ROSSLER_CHAOS.F90      *PROBLEM CONSTANTS FOR Rossler_Chaos
 ! OREGONATOR.F90         *PROBLEM CONSTANTS FOR OREGONATOR
-! BRUSSELATOR.F90        *PROBLEM CONSTANTS FOR BRUSSELATOR 
+! BRUSSELATOR_2.F90      *PROBLEM CONSTANTS FOR BRUSSELATOR 
 ! BURGERS_MOD.F90        *PROBLEM CONSTANTS AND ROUTINES FOR BURGERS
 ! BOSCARINO31_MOD.F90    *PROBLEM CONSTANTS AND ROUTINES FOR BOSCARINO-31
+! BROADWELL_MOD.F90      *PROBLEM CONSTANTS AND ROUTINES FOR BROADWELL
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   programstep -> string used in program_step_select, character(len=80), not modified 
+! From Problem modules:
+!   Use each problem's main subroutine to get problem constants, RHS and Jacobian
+!******************************************************************************
+! INPUTS:
+! iprob   -> defines problem number,                                    integer
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! iDT     -> Timestep counter from timestep loop to define dt,          integer
+! time    -> Current solution time,                                     real(wp)
+! akk     -> Diagonal term from RK scheme,                              real(wp)
+! L       -> stage number,                                              integer
+! INOUTS:
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! OUTPUTS:
+! nveclen -> total length of u-vector used for problem                  integer
+! neq     -> number of equations in problem                             integer
+! tfinal  -> final time for iterative solver                            real(wp)
 !******************************************************************************
       module problemsub_mod
       

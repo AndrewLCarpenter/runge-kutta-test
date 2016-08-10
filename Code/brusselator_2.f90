@@ -45,6 +45,69 @@
       contains
       
 !==============================================================================      
+!******************************************************************************
+! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
+! of the Brusselator problem 
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+!   two -> exact 2.0_wp,     real(wp)
+!   pi  -> mathematical Pi,  real(wp)
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type,         character(len=80),                       not modified
+!   probname           -> string used to set output file names,                       character(len=9),                            set
+!   Jac_case           -> string used in to determine CSR Jacobian or dense Jacobian, character(len=6),                            set
+!   tol                -> Newton iteration exit tolerance,                            real(wp),                                    set
+!   dt_error_tol       -> L2 error tolerance for convergence plots,                   real(wp),                                    set
+!   uvec               -> Array containing variables,                                 real(wp), dimension(u-vector length),        set & modified
+!   uexact             -> Array containing exact solution to variables,               real(wp), dimension(u-vector length),        set
+!   programstep        -> string used in program_step_select,                         character(len=80),                       not modified 
+!   var_names          -> string array used to label output graphs,                   character(len=12), dimension(num. eq's),     set
+! From SBP_Coef_Module:
+!   Define_CSR_Operators -> Subroutine to define CSR derivative operators needed
+!   D2_per               -> Second derivative operator, used to check if allocated,          not modified
+!   nnz_D2_per           -> Second derivative operator number of non zeros,         integer, not modified
+! From unary_mod:
+!   aplb -> Subroutine to add one CSR matrix to another
+! From Jacobian_CSR_Mod:
+!   Allocate_Jac_CSR_Storage -> Subroutine to create Jacobian and LU decomposition arrays for CSR problems
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl      -> total length of u-vector used for problem,      integer,                                                   not modified
+! neq       -> number of equations in problem,                 integer,                                                   not modified
+! x         -> stores x-grid points,                           real(wp),  dimension(u-vector length / num. eq's),         not modified
+! dx        -> separation between grid points,                 real(wp),                                                  not modified
+! jDeriv2_p -> permuted ja matrix for D1 operators             integer,   dimension(2 * 5 * u-vector length / num. eq's), not modified
+! Deriv2_p  -> permuted  a matrix for D1 operators             real(wp),  dimension(2 * 5 * u-vector length / num. eq's), not modified
+! iDeriv2_p -> permuted ia matrix for D1 operators             integer,   dimension(u-vector length + 1),                 not modified
+! grid              -> Subroutine to create grid
+! exact_Bruss       -> Function to build exact solution
+! Bruss_dudt        -> Subroutine to build dudt (LHS)
+! Build_Spatial_Jac -> Subroutine to build spatial Jacobian
+! Build_Source_Jac  -> Subroutine to build source  Jacobian
+! Build_Jac         -> Subroutine to build Jacobian and store it
+!******************************************************************************
+! INPUTS:
+! ep   -> Stiffness epsilon value,                                   real(wp)
+! iDT  -> Timestep counter from timestep loop to define dt,          integer
+! akk  -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! dt   -> timestep: created and then used later in the problem case, real(wp)
+! OUTPUTS:
+! nveclen  -> total length of u-vector used for problem              integer
+! eq       -> number of equations in problem                         integer
+! tfinal   -> final time for iterative solver                        real(wp)
+! resE_vec -> explicit residual for a particular stage               real(wp), dimension(u-vector length)
+! resI_vec -> implicit residual for a particular stage               real(wp), dimension(u-vector length)
+!******************************************************************************
       subroutine Brusselator(nveclen,eq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use control_variables, only: temporal_splitting,probname,Jac_case,     &
@@ -151,7 +214,16 @@
 !==============================================================================
 !==============================================================================
 !==============================================================================
-! PRODUCES GRID
+!******************************************************************************
+! Subroutine to initialize x-grid
+!******************************************************************************
+! MODULE VARIABLES/ROUTINES:
+! vecl -> total length of u-vector used for problem, integer,                                           not modified
+! x    -> stores x-grid points,                      real(wp),  dimension(u-vector length / num. eq's),     set
+! dx   -> separation between grid points,            real(wp),                                              set
+! xL   -> Left x-bound                               real(wp),                                          not modified
+! xR   -> Right x-bound                              real(wp),                                          not modified
+!******************************************************************************
       subroutine grid()
       integer :: i
       
@@ -163,7 +235,24 @@
 
       end subroutine grid
 !==============================================================================
-! RETURNS VECTOR WITH EXACT SOLUTION
+!******************************************************************************
+! Function to return exact solution vector
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp -> working precision
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl -> total length of u-vector used for problem, integer, not modified
+!******************************************************************************
+! INPUTS:
+! eps         -> Stiffness epsilon value, real(wp)
+! OUTPUTS:
+! exact_Bruss -> exact solution vector,   real(wp), dimension(u-vector length)
+!******************************************************************************
       function exact_Bruss(eps)
 
       real(wp),                  intent(in) :: eps
@@ -196,7 +285,43 @@
       end function exact_Bruss
 
 !==============================================================================
-! DEFINES RHS 
+!******************************************************************************
+! Subroutine to set RHS and store spacial part of Jacobian
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+! MATVEC_MODULE.F90         *PERFORMS SPARSE MATRIX*VECTOR OPERATIONS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From SBP_Coef_Module:
+!    D2_per    -> Second derivative  a matrix periodic operator,  real(wp), dimension(5*u-vector length/num. eq's), not modified
+!   jD2_per    -> Second derivative ja matrix periodic operator,  integer,  dimension(5*u-vector length/num. eq's), not modified
+!   iD2_per    -> Second derivative ia matrix periodic operator,  integer,  dimension(u-vector length + 1),         not modified
+!   nnz_D2_per -> Second derivative operator number of non zeros, integer,                                          not modified
+! From unary_mod:
+!   aplb  -> Subroutine to add one CSR matrix to another
+!   dperm -> Subroutine to permute a matrix
+!   csort -> subroutine to sort a CSR matrix
+! From matvec_module:
+!   amux -> multiplies a vector into a CSR matrix
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl      -> total length of u-vector used for problem,      integer,                                                   not modified
+! jDeriv2_p -> permuted ja matrix for D1 operators             integer,   dimension(2 * 5 * u-vector length / num. eq's), not modified
+! Deriv2_p  -> permuted  a matrix for D1 operators             real(wp),  dimension(2 * 5 * u-vector length / num. eq's), not modified
+! iDeriv2_p -> permuted ia matrix for D1 operators             integer,   dimension(u-vector length + 1),                 not modified
+!******************************************************************************
+! INPUTS:
+! vec -> variable vector,         real(wp), dimension(u-vector length)
+! eps -> Stiffness epsilon value, real(wp)
+! OUTPUTS:
+! dudt_deriv2 -> RHS vector involving just spacial derivatives, real(wp), dimension(u-vector length)
+! dudt_source -> RHS vector involving just source terms         real(wp), dimension(u-vector length)
+!******************************************************************************
       subroutine Bruss_dUdt(vec,dudt_deriv2,dudt_source,eps)
       
       use SBP_Coef_Module, only: D2_per,jD2_per,iD2_per,nnz_D2_per
@@ -247,7 +372,30 @@
 
       end subroutine Bruss_dUdt
 !==============================================================================
-!  CREATES SOURCE JACOBIAN
+!******************************************************************************
+! Subroutine to set source Jacobian
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From unary_mod:
+!   dperm -> Subroutine to permute a matrix
+!
+! MODULE VARIABLES/ROUTINES
+! vecl -> total length of u-vector used for problem, integer, not modified
+!******************************************************************************
+! INPUTS:
+! vec       -> variable vector,                                      real(wp), dimension(u-vector length)
+! ep        -> stiffness constant (epsilon),                         real(wp)
+! OUTPUTS:
+! iSource_p -> ia combined source matrix for output to main routine, integer,  dimension(u-vector length + 1)
+! jSource_p -> ja combined source matrix for output to main routine, integer,  dimension(u-vector length)
+!  Source_p ->  a combined source matrix for output to main routine, real(wp), dimension(u-vector length)
+!******************************************************************************
       subroutine Build_Source_Jac(vec,Source_p,jSource_p,iSource_p)
       
       use unary_mod, only: dperm
@@ -294,7 +442,34 @@
      
       end subroutine Build_Source_Jac
 !==============================================================================
-! SET JAC TO GLOBAL    
+!******************************************************************************
+! Subroutine to finish building Jacobian and set it to global variables
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From unary_mod:
+!   aplsca -> Subroutine to add diagonal constant to a CSR matrix
+! From Jacobian_CSR_Mod:
+!   iaJac -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1),                               set
+!   jaJac -> ja matrix for global storage of Jacobian, integer,  dimension(dependant on temporal_splitting, see main routine), set
+!    aJac ->  a matrix for global storage of Jacobian, real(wp), dimension(dependant on temporal_splitting, see main routine), set
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl  -> total length of u-vector used for problem, integer, not modified
+!******************************************************************************
+! INPUTS:
+! dt  -> timestep,                     real(wp)
+! akk -> Diagonal term from RK scheme, real(wp)
+! a   ->  a matrix for input Jacobian, real(wp), dimension(dependant on temporal_splitting, see main routine)
+! ja  -> ja matrix for input Jacobian, integer,  dimension(dependant on temporal_splitting, see main routine)
+! ia  -> ia matrix for input Jacobian, intenger, dimension(u-vector length + 1)
+!******************************************************************************    
       subroutine Build_Jac(dt,akk,a,ja,ia)
       
       use unary_mod,        only: aplsca

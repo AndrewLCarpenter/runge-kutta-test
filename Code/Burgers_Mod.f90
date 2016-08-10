@@ -49,10 +49,52 @@
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
-! BURGERS_MOD.F90           *CONTAINS ROUTINES TO BUILD BURGER
 ! JACOBIAN_CSR_MOD.F90      *CONTAINS CSR JACOBIAN VARIABLES
 !******************************************************************************
-
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type,         character(len=80),                       not modified
+!   probname           -> string used to set output file names,                       character(len=9),                            set
+!   Jac_case           -> string used in to determine CSR Jacobian or dense Jacobian, character(len=6),                            set
+!   tol                -> Newton iteration exit tolerance,                            real(wp),                                    set
+!   dt_error_tol       -> L2 error tolerance for convergence plots,                   real(wp),                                    set
+!   uvec               -> Array containing variables,                                 real(wp), dimension(u-vector length),        set & modified
+!   uexact             -> Array containing exact solution to variables,               real(wp), dimension(u-vector length),        set
+!   programstep        -> string used in program_step_select,                         character(len=80),                       not modified 
+!   var_names          -> string array used to label output graphs,                   character(len=12), dimension(num. eq's),     set
+! From SBP_Coef_Module:
+!   Define_CSR_Operators -> Subroutine to define CSR derivative operators needed
+!   D1                   -> First derivative operator, used to check if allocated, not modified
+!   nnz_D2               -> Number of non zeros in 2nd derivative operator,        not modified
+! From Jacobian_CSR_Mod:
+!   Allocate_Jac_CSR_Storage -> Subroutine to create Jacobian and LU decomposition arrays for CSR problems
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl           -> total length of u-vector used for problem,      integer,                                                   not modified
+! neq            -> number of equations in problem,                 integer,                                                   not modified
+! x              -> stores x-grid points,                           real(wp),  dimension(u-vector length / num. eq's),         not modified
+! dx             -> separation between grid points,                 real(wp),                                                  not modified
+! grid           -> Subroutine to create grid
+! exact_Burg     -> Subroutine to build exact solution
+! Burgers_dudt   -> Subroutine to build dudt (LHS)
+! Build_Jac      -> Subroutine to build Jacobian and store it
+!******************************************************************************
+! INPUTS:
+! ep   -> Stiffness epsilon value,                                   real(wp)
+! time -> Current solution time,                                     real(wp)
+! iDT  -> Timestep counter from timestep loop to define dt,          integer
+! akk  -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! dt   -> timestep: created and then used later in the problem case, real(wp)
+! OUTPUTS:
+! nveclen  -> total length of u-vector used for problem              integer
+! eq       -> number of equations in problem                         integer
+! tfinal   -> final time for iterative solver                        real(wp)
+! resE_vec -> explicit residual for a particular stage               real(wp), dimension(u-vector length)
+! resI_vec -> implicit residual for a particular stage               real(wp), dimension(u-vector length)
+!******************************************************************************
       subroutine Burgers(nveclen,eq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
 
       use control_variables, only: temporal_splitting,probname,Jac_case,     &
@@ -63,9 +105,9 @@
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
+      integer,  intent(  out) :: nveclen,eq
       real(wp), intent(in   ) :: ep
       real(wp), intent(inout) :: dt
-      integer,  intent(  out) :: nveclen,eq
       real(wp), intent(  out) :: tfinal
       real(wp), intent(in   ) :: time
       integer,  intent(in   ) :: iDT
@@ -137,7 +179,17 @@
 !==============================================================================
 !==============================================================================
 !==============================================================================
-! PRODUCES GRID
+!******************************************************************************
+! Subroutine to initialize x-grid
+!******************************************************************************
+! MODULE VARIABLES/ROUTINES:
+! vecl -> total length of u-vector used for problem, integer,                                           not modified
+! neq  -> number of equations in problem,            integer,                                           not modified
+! x    -> stores x-grid points,                      real(wp),  dimension(u-vector length / num. eq's),     set
+! dx   -> separation between grid points,            real(wp),                                              set
+! xL   -> Left x-bound                               real(wp),                                          not modified
+! xR   -> Right x-bound                              real(wp),                                          not modified
+!******************************************************************************
       subroutine grid()
       integer :: i
       
@@ -149,7 +201,29 @@
 
       end subroutine grid
 !==============================================================================
-! RETURNS VECTOR WITH EXACT SOLUTION
+!******************************************************************************
+! Subroutine to return 
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl           -> total length of u-vector used for problem,      integer,                                                   not modified
+! neq            -> number of equations in problem,                 integer,                                                   not modified
+! x              -> stores x-grid points,                           real(wp),  dimension(u-vector length / num. eq's),         not modified
+! NL_Burg_exactsolution -> Function to return solution at point     real(wp)
+!******************************************************************************
+! INPUTS:
+! eps  -> Stiffness epsilon value, real(wp)
+! time -> Current solution time,   real(wp)
+! OUTPUTS:
+! u    -> exact solution vector,   real(wp), dimension(u-vector length)
+!******************************************************************************
+
       subroutine exact_Burg(u,eps,time)
 
       real(wp),                  intent(in   ) :: eps,time
@@ -162,7 +236,48 @@
 
       end subroutine exact_Burg
 !==============================================================================
-! DEFINES RHS 
+!******************************************************************************
+! Subroutine to set RHS
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
+! MATVEC_MODULE.F90         *PERFORMS SPARSE MATRIX*VECTOR OPERATIONS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp       -> working precision
+!   third    -> exact 1/3, real(wp)
+!   half     -> exact 1/2, real(wp)
+!   twothird -> exact 2/3, real(wp)
+! From SBP_Coef_Module:
+!   Pinv -> Used for creating boundary conditions, real(wp), dimension(u-vector length),     not modified
+!    D1  -> First derivative  a matrix operator,   real(wp), dimension(4*u-vector length),   not modified
+!   jD1  -> First derivative ja matrix operator,   integer,  dimension(4*u-vector length),   not modified
+!   iD1  -> First derivative ia matrix operator,   integer,  dimension(u-vector length + 1), not modified
+!    D2  -> Second derivative  a matrix operator,  real(wp), dimension(4*u-vector length),   not modified
+!   jD2  -> Second derivative ja matrix operator,  integer,  dimension(4*u-vector length),   not modified
+!   iD2  -> Second derivative ia matrix operator,  integer,  dimension(u-vector length + 1), not modified
+! From matvec_module:
+!   amux -> multiplies a vector into a CSR matrix
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl   -> total length of u-vector used for problem, integer,                              not modified
+! sig0   -> BC parameter,                              real(wp),                             not modified
+! sig1   -> BC parameter,                              real(wp),                             not modified
+! d1vec0 -> BC derivate parameter,                     real(wp), dimension(4),               not modified
+! d1vec1 -> BC derivate parameter,                     real(wp), dimension(4),               not modified
+! NL_Burg_exactsolution -> Function to return solution at point  real(wp)
+!******************************************************************************
+! INPUTS:
+! u    -> variable vector,         real(wp), dimension(u-vector length)
+! time -> Current solution time,   real(wp)
+! eps  -> Stiffness epsilon value, real(wp)
+! dt   -> timestep,                real(wp)
+! OUTPUTS:
+! dudt  -> RHS vector,             real(wp), dimension(u-vector length)
+!******************************************************************************
+
       subroutine Burgers_dUdt(u,dudt,time,eps,dt)
       
       use SBP_Coef_Module, only: Pinv,D1,D2,jD1,jD2,iD1,iD2 
@@ -223,7 +338,55 @@
       end subroutine Burgers_dUdt
       
 !==============================================================================
-! CREATES JACOBIAN
+!******************************************************************************
+! Subroutine to finish building Jacobian and set it to global variables
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! SBP_COEF_MODULE.F90       *DEFINES CSR OPERATORS 
+! MATVEC_MODULE.F90         *PERFORMS SPARSE MATRIX*VECTOR OPERATIONS
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+!   third    -> exact 1/3, real(wp)
+! From SBP_Coef_Module:
+!   Pinv -> Used for creating boundary conditions, real(wp), dimension(u-vector length),     not modified
+!    D1  -> First derivative  a matrix operator,   real(wp), dimension(4*u-vector length),   not modified
+!   jD1  -> First derivative ja matrix operator,   integer,  dimension(4*u-vector length),   not modified
+!   iD1  -> First derivative ia matrix operator,   integer,  dimension(u-vector length + 1), not modified
+!    D2  -> Second derivative  a matrix operator,  real(wp), dimension(4*u-vector length),   not modified
+!   jD2  -> Second derivative ja matrix operator,  integer,  dimension(4*u-vector length),   not modified
+!   iD2  -> Second derivative ia matrix operator,  integer,  dimension(u-vector length + 1), not modified
+! From matvec_module:
+!   amux -> multiplies a vector into a CSR matrix
+! From unary_mod:
+!   aplb   -> Subroutine to add two CSR matricies
+!   aplsca -> Subroutine to add diagonal constant to a CSR matrix
+!   amudia -> Subroutine to add 
+! From Jacobian_CSR_Mod:
+!   iaJac -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1),                               set
+!   jaJac -> ja matrix for global storage of Jacobian, integer,  dimension(dependant on temporal_splitting, see main routine), set
+!    aJac ->  a matrix for global storage of Jacobian, real(wp), dimension(dependant on temporal_splitting, see main routine), set
+!
+! MODULE VARIABLES/ROUTINES:
+! vecl   -> total length of u-vector used for problem, integer, not modified
+! sig0   -> BC parameter,                              real(wp),                             not modified
+! sig1   -> BC parameter,                              real(wp),                             not modified
+! d1vec0 -> BC derivate parameter,                     real(wp), dimension(4),               not modified
+! d1vec1 -> BC derivate parameter,                     real(wp), dimension(4),               not modified
+! NL_Burg_exactsolution -> Function to return solution at point  real(wp)
+!******************************************************************************
+! INPUTS:
+! u    -> variable vector,         real(wp), dimension(u-vector length)
+! eps  -> Stiffness epsilon value, real(wp)
+! dt  -> timestep,                     real(wp)
+! akk -> Diagonal term from RK scheme, real(wp)
+! time -> Current solution time,   real(wp)
+!******************************************************************************
+
       subroutine Build_Jac(u,eps,dt,akk,time)
 
       use SBP_Coef_Module,  only: Pinv,D1,D2,jD1,jD2,iD1,iD2,nnz_D2       
@@ -359,7 +522,26 @@
 !!
 !!      end subroutine plot
 !==============================================================================
-! DEFINES EXACT SOLUTION FOR PARTICULAR x AND t VALUE
+!******************************************************************************
+! Function to return exact solution
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp -> working precision
+!
+! MODULE VARIABLES/ROUTINES:
+! exact_soluton -> String to determine which exact solution 
+!******************************************************************************
+! INPUTS:
+! xin -> x value of point,        real(wp)
+! tin -> current time,            real(wp)
+! eps -> Stiffness epsilon value, real(wp)
+! OUTPUTS:
+! NL_Burg_exactsolution -> Function to return solution at point  real(wp)
+!******************************************************************************
       function NL_Burg_exactsolution(xin,tin,eps)
 
       real(wp), intent(in) :: xin, tin, eps
@@ -386,7 +568,26 @@
 
       end function NL_Burg_exactsolution
 !==============================================================================
-! DEFINES EXACT DERIVATIVE FOR PARTICULAR x AND t VALUE
+!******************************************************************************
+! Function to return exact derivative
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp -> working precision
+!
+! MODULE VARIABLES/ROUTINES:
+! exact_soluton -> String to determine which exact solution 
+!******************************************************************************
+! INPUTS:
+! xin -> x value of point,        real(wp)
+! tin -> current time,            real(wp)
+! eps -> Stiffness epsilon value, real(wp)
+! OUTPUTS:
+! NL_Burg_exact_derivative -> Function to return derivative at point, real(wp)
+!******************************************************************************
       function NL_Burg_exact_derivative(xin,tin,eps)
 
        real(wp), intent(in) :: xin, tin, eps

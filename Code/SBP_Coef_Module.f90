@@ -107,8 +107,6 @@
 
       subroutine Build_Eye(n,ia,ja,a)
 
-      implicit none
-
       integer,                    intent(in   ) :: n
 
       integer,   dimension(n+1),  intent(  out) :: ia
@@ -127,9 +125,6 @@
       enddo
 
       end subroutine Build_Eye
-
-!==============================================================================            
-
 
 !==============================================================================         
       subroutine D1_periodic(n,nnz,ia,ja,a,h)
@@ -398,8 +393,6 @@
 
       !  Store the Derivative matrix in CSR format
 
-      implicit none
-
       real(wp),  parameter                     :: tol=1.0e-12_wp
 
       integer,                   intent(in   ) :: n,nnz
@@ -472,8 +465,6 @@
 
       subroutine test_error(order,n,ia,ja,a)
 
-      implicit none
-
       integer,                   intent(in) :: order, n
       integer,   dimension(:),   intent(in) :: ia
       integer,   dimension(:),   intent(in) :: ja
@@ -538,8 +529,6 @@
 ! ======================================================================================
 
       subroutine test_2D_error(order,n,ia,ja,a)
-
-      implicit none
 
       integer,                   intent(in) :: order, n
       integer,   dimension(:),   intent(in) :: ia
@@ -700,8 +689,6 @@
 ! ======================================================================================
 
       subroutine amux_local (n, x, y, a,ja,ia)
-
-        implicit none
 
         real(wp), dimension(:), intent(in   ) :: x,a
         real(wp), dimension(:), intent(  out) :: y

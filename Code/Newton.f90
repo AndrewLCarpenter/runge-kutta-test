@@ -20,8 +20,48 @@
       private      
       
       contains    
-!==============================================================================      
-!  PERFORMS NEWTON ITERATION
+!==============================================================================
+!******************************************************************************
+! Subroutine to perform Newton iteration 
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   temporal_splitting -> string used in choose_RHS_type and choose_Jac_type,         character(len=80),                       not modified
+!   Jac_case           -> string used in to determine CSR Jacobian or dense Jacobian, character(len=6),                        not modified
+!   uvec               -> Array containing variables,                                 real(wp), dimension(u-vector length),        modified
+!   usum               -> Array containing summation from test_cases,                 real(wp), dimension(u-vector length),    not modified
+!   xjac               -> matrix containing dense Jacobian,                           real(wp), dimension(u-vector length**2), not modified
+!
+! MODULE ROUTINES:
+! Build_Jac        -> Calls problemsub to build the problem's jacobian
+! LU_Solver        -> Performs LU decomposition and solving
+! newt_line_search -> Performs newton iteration with line search
+! Convert_to_CSR   -> converts dense matrix to CSR
+! QR_decomp        -> Performs QR decomposition and solving
+! Build_Rnewton    -> Calls problemsub to build RHS and RNewton
+! check_exit       -> checks whether newton iteration 
+! Mat_invert       -> inverts dense matrix up to rank 4
+! 
+!******************************************************************************
+! INPUTS:
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! nveclen -> total length of u-vector used for problem                  integer
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! icount  -> counter used to determine average iterations,              integer
+! OUTPUTS:
+! k       -> total number of newton iterations used for max iteration,  integer
+!******************************************************************************
       subroutine Newton_Iteration(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
       use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
@@ -102,7 +142,27 @@
       end subroutine Newton_Iteration
       
 !==============================================================================
-! EXITS NEWTON ITERATION
+!******************************************************************************
+! Function to check exit conditions for Newton iteration 
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   tol  -> Newton iteration exit tolerance, real(wp),                                 set
+!   uvec -> Array containing variables,      real(wp), dimension(u-vector length), not modified
+!
+!******************************************************************************
+! INPUTS:
+! uveciter -> u vector iteration value,                           real(wp), dimension(u-vector length)
+! k        -> newton iteration counter, used for error reporting, integer
+! OUTPUTS:
+! check_exit -> logical output function for if statement in newton iteration, logical
+!******************************************************************************
       function check_exit(uveciter,k)
       
       use control_variables, only: tol,uvec
@@ -123,7 +183,35 @@
       
       end function check_exit
 !==============================================================================
-!  CREATES RNEWTON FOR NEWTON ITERATION      
+!******************************************************************************
+! Function to create Rnewton from the RHS
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec         -> Array containing variables,                 real(wp), dimension(u-vector length),              not modified
+!   usum         -> Array containing summation from test_cases, real(wp), dimension(u-vector length),              not modified
+!   resI         -> Implicit RHS vector,                        real(wp), dimension(u-vector length, num. stages), not modified
+!   programstep  -> string used in program_step_select,         character(len=80),                                 not modified 
+! From problemsub_mod:
+!   problemsub   -> Subroutine to set problem information, determined by program step
+!******************************************************************************
+! INPUTS:
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+! OUTPUTS: 
+! Build_Rnewton -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
+!******************************************************************************    
       function Build_Rnewton(ep,dt,time,aI,iprob,L)
       
       use control_variables, only: uvec,usum,resI,programstep
@@ -144,7 +232,30 @@
 
       end function Build_Rnewton
 !==============================================================================
-!  CREATES JACOBIAN FOR NEWTON ITERATION      
+!******************************************************************************
+! Subroutine to get Jacobian for newton iteration
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! PROBLEMSUB.F90            *DEFINES WHICH PROBLEM IS RELATED TO USER INPUT
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   programstep  -> string used in program_step_select, character(len=80), not modified 
+! From problemsub_mod:
+!   problemsub   -> Subroutine to set problem information, determined by program step
+!******************************************************************************
+! INPUTS:
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+!******************************************************************************        
       subroutine Build_Jac(ep,dt,time,aI,iprob,L)
       
       use control_variables, only: programstep
@@ -164,7 +275,35 @@
       end subroutine Build_Jac
       
 !==============================================================================
-! PERFORMS LU DECOMPOSITION AND SOLVING
+!******************************************************************************
+! Subroutine to perform LU decomposition and solving
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! UNARY_MOD.F90             *PERFORMS SPARSE MATRIX OPERATIONS
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+! ILUT_MODULE.F90           *CONTAINS ROUTINES TO PERFORM LU DECOMPOSITION
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec   -> Array containing variables,               real(wp), dimension(u-vector length),                                      not modified
+! From Jacobian_CSR_Mod:
+!   iaJac  -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1),                                  not modified
+!   jaJac  -> ja matrix for global storage of Jacobian, integer,  dimension(dependant on temporal_splitting, see problem routine), not modified
+!    aJac  ->  a matrix for global storage of Jacobian, real(wp), dimension(dependant on temporal_splitting, see problem routine), not modified
+!    jUJac -> matrix for storage of LU Jacobian,        integer,  dimension(u-vector length),                                          set & modified
+!   jLUJac -> matrix for storage of LU Jacobian,        integer,  dimension(size of jaJac*4),                                          set & modified
+!   aLUJac -> matrix for storage of LU Jacobian,        real(wp), dimension(size of aJac*4),                                           set & modified
+! From ilut_module:
+!   lusol -> Performs LU solving
+!   ilutp -> Performs Preconditioning
+!
+!******************************************************************************
+! INPUTS:
+! Rnewton -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
+!******************************************************************************
       subroutine LU_solver(Rnewton)
       
       use control_variables, only: uvec      
@@ -192,7 +331,40 @@
       end subroutine LU_solver 
 
 !==============================================================================
-!  PERFORMS LINE SEARCH AND NEWTON ITERATION 
+!******************************************************************************
+! Subroutine to perform Newton iteration with line search
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec -> Array containing variables,       real(wp), dimension(u-vector length),        modified
+!   xjac -> matrix containing dense Jacobian, real(wp), dimension(u-vector length**2), not modified
+!
+! MODULE ROUTINES:
+! Build_Jac     -> Calls problemsub to build the problem's jacobian
+! Build_Rnewton -> Calls problemsub to build RHS and RNewton
+! check_exit    -> checks whether newton iteration 
+! Mat_invert    -> inverts dense matrix up to rank 4
+! 
+!******************************************************************************
+! INPUTS:
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! nveclen -> total length of u-vector used for problem                  integer
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! icount  -> counter used to determine average iterations,              integer
+! OUTPUTS:
+! k       -> total number of newton iterations used for max iteration,  integer
+!******************************************************************************
       subroutine newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
       use control_variables, only: uvec,xjac
@@ -256,11 +428,43 @@
       end subroutine newt_line_search
       
 !==============================================================================
-!  PEFORMS QR DECOMPOSITION USING QR MODULE       
+!******************************************************************************
+! Subroutine to perform QR decomposition and solving
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! QR_MODULE.F90             *CONTAINS QR ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec -> Array containing variables, real(wp), dimension(u-vector length), modified
+! From QR_Module:
+!   qrdcmp -> performs QR decomposition
+!   qrsolv -> performs QR solving 
+! MODULE ROUTINES:
+! Build_Rnewton -> Calls problemsub to build RHS and RNewton
+! 
+!******************************************************************************
+! INPUTS:
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! nveclen -> total length of u-vector used for problem                  integer
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! icount  -> counter used to determine average iterations,              integer
+! OUTPUTS:
+! k       -> total number of newton iterations used for max iteration,  integer
+!****************************************************************************** 
       subroutine QR_decomp(mat,nveclen,Rnewton)
       
       use control_variables, only: uvec
-      use QR_Module, only:qrdcmp,qrsolv
+      use QR_Module,         only: qrdcmp,qrsolv
       
       real(wp), dimension(:,:), intent(inout) :: mat
       integer,                  intent(in   ) :: nveclen
@@ -280,7 +484,22 @@
       end subroutine QR_decomp       
       
 !==============================================================================
-!  INVERTS MATRIX OF SIZE 2X2 TO 4X4
+!******************************************************************************
+! Function to invert a dense matrix of rank<=4
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! 
+!******************************************************************************
+! INPUTS:
+! mat -> input dense matrix, real(wp), dimension(:,:) 
+! OUTPUTS:
+! Mat_invert -> output inverted matrix, real(wp), dimension(:,:) (same as input)
+!****************************************************************************** 
       function Mat_invert(mat)
 
       real(wp), dimension(:,:), intent(in   ) :: mat
@@ -416,16 +635,37 @@
       return
       end function Mat_invert
 !==============================================================================
+!******************************************************************************
+! Subroutine to convert a dense matrix to CSR and store it as the global CSR
+! Jacobian
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From Jacobian_CSR_Mod:
+!   iaJac  -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1), set
+!   jaJac  -> ja matrix for global storage of Jacobian, integer,  dimension(u-vector length **2), set
+!    aJac  ->  a matrix for global storage of Jacobian, real(wp), dimension(u-vector length **2), set
+!   Allocate_Jac_CSR_Storage -> Subroutine to create Jacobian and LU decomposition arrays for CSR problems
+!******************************************************************************
+! INPUTS:
+! a        -> input dense matrix, real(wp), dimension(:,:) 
+!****************************************************************************** 
       subroutine Convert_to_CSR(a)
  
       use Jacobian_CSR_Mod, only: Allocate_Jac_CSR_Storage,iaJac,jaJac,aJac      
       
       real(wp), dimension(:,:), intent(in   ) :: a
-      integer                                 :: i,j,icnt,jcnt,nnz
+      integer                                 :: i,j,icnt,jcnt,nnz,dimen
       real(wp),    parameter              ::   toljac = 1.0e-13_wp     
-      nnz=size(a(:,1))
+      dimen=size(a(:,1))
+      nnz=size(a)
 
-      call Allocate_Jac_CSR_Storage(nnz,nnz)
+      call Allocate_Jac_CSR_Storage(dimen,nnz)
 
 !     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
 
@@ -437,9 +677,9 @@
       
       ! Store dense matrix into CSR format
       icnt = 0   
-      do i = 1,nnz
+      do i = 1,dimen
         jcnt = 0   
-        do j = 1,nnz
+        do j = 1,dimen
           if(abs(a(i,j)) >= tolJac) then
             icnt = icnt + 1 
             jcnt = jcnt + 1 
