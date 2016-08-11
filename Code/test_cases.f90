@@ -37,6 +37,9 @@
 !   output_terminal_iteration -> Outputs data to terminal every epsilon iteration
 !   output_terminal_final     -> Outputs data to terminal at end of RK case/problem
 !   output_conv_error         -> Outputs data to files initilized earilier in the program
+!   write_time_depen_sol      -> Outputs time dependant solution
+! output_iDT_sol,      &
+  !   &                              write_exact_sol
 ! From Stage_value_module:
 !   Stage_Value_Predictor -> returns appropriate data for predicting stage value
 !   xnorm                 -> Function that takes a norm for stage value storage,  real(wp)
@@ -96,6 +99,18 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
+!**Find exact solution
+!     To find the exact solution:
+!     1) set temporal_splitting (in control_variables) to "IMPLICIT"
+!     2) turn iDT_sol_flag=.true. and run desired problem and RK case.
+!     3) complile convergence_testing and move executable to IMPLICIT/probname/casename
+!     4) Take note of terminal output "Location = ##"
+!     5) set that number to exact_sol_iDT=##
+!     6) set exact_sol_flag=.true.
+!     6) compile this program and run problem & RK case again
+!     7) exact solution will be output to IMPLICIT/probname/casename, move/rename file to parent directory as appropriate
+!     NOTE: remember to turn all flags==.FALSE. as soon as they are no longer needed
+! 
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
@@ -103,7 +118,9 @@
       use output_module,      only: create_file_paths, output_names,          & 
      &                              init_output_files, output_conv_stiff,     &
      &                              output_terminal_iteration,                &
-     &                              output_terminal_final,output_conv_error
+     &                              output_terminal_final,output_conv_error,  &
+     &                              write_time_depen_sol,output_iDT_sol,      &
+     &                              write_exact_sol
       use Stage_value_module, only: Stage_Value_Predictor,xnorm
       use control_variables,  only: allocate_vars,deallocate_vars,isamp,jmax, &
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
@@ -131,6 +148,13 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
+      logical,  parameter                   :: time_sol_flag=.false. !True to output time solution
+      integer,  parameter                   :: time_sol_iDT=45      !which dt value to output (You only want one timestep in the file,
+                                                                    !                          system could be improved)
+      logical,  parameter                   :: iDT_sol_flag=.false.               
+      logical,  parameter                   :: exact_sol_flag=.false.
+      integer,  parameter                   :: exact_sol_iDT=67
+                                                     
       
 !      real(wp),dimension(40) :: tmpv
                           
@@ -170,8 +194,10 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
-                                 
+          do jepsil = 1,jactual,1    
+           
+            cost(:)=0.0_wp       
+                                    
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
@@ -180,8 +206,6 @@
 
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
-!           do iDT = isamp,isamp,1         !  use this loop to set exact solution
-            cost(:)=0.0_wp !turn this on when doing 1 iDT value
 !            do iDT = 70,70
 ! HACK
             do iDT =1,isamp,1   
@@ -263,35 +287,15 @@
   
                 errvecT(:) = errvecT(:) + errvec(:)
 
+                if (time_sol_flag .and. iDT==time_sol_iDT) then
+                  call write_time_depen_sol(t,ep,nveclen,neq)
+                endif
+                
                 t = t + dt                  !increment time
-! HACK - time depentent solution
-!                write(843,*)t,uvec(1:nveclen:2)
-!                write(844,*)t,uvec(2:nveclen+1:2)
-! HACK  
-!                print*,t,iDT,ep
                 if(t >= tfinal) exit        
-! HACK
-! L2 norm and Linf norms                
-!                print*,'u- errorL2',sqrt(dot_product(errvec(1:nveclen:2),errvec(1:nveclen:2))/(nveclen/2))
-!                print*,'u- errorLinf',maxval(errvec(1:nveclen:2))
-!                print*,'v- errorL2',sqrt(dot_product(errvec(2:nveclen:2),errvec(2:nveclen:2))/(nveclen/2))
-!                print*,'v- errorLinf',maxval(errvec(2:nveclen:2))
-! HACK
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
-! HACK exact solution for each dt
-!              write(199+iDT,*)uvec
-!              print*,iDT
-! HACK
-! L2 norm and Linf norms          
-!                tmpv=abs(uexact-uvec     )
-!                print*,'u- L2',sqrt(dot_product(tmpv(1:nveclen:2),&
-!     &                            tmpv(1:nveclen:2))/(nveclen/2))
-!                print*,'u- Linf',maxval(uexact(1:nveclen:2))
-!                print*,'v- L2',sqrt(dot_product(tmpv(2:nveclen:2),&
-!     &                            tmpv(2:nveclen:2))/(nveclen/2))
-!                print*,'v- Linf',maxval(uexact(2:nveclen:2))
-! HACK              
+              if (iDT_sol_flag .and. jepsil==jmax) call output_iDT_sol(iDT)           
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
@@ -310,10 +314,7 @@
               enddo
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
-!  HACK used to write exact solution
-!           write(*,*)'writing exact solution'
-!           write(900,*)uvec
-!  HACK used to write exact solution
+            if(exact_sol_flag) call write_exact_sol()
 !----------------------------OUTPUTS-------------------------------------------
 
             call output_terminal_iteration(cost,0,ep,nveclen,neq)

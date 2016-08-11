@@ -19,7 +19,8 @@
       
       public :: create_file_paths, output_names, init_output_files
       public :: output_conv_stiff,output_terminal_iteration
-      public :: output_terminal_final,output_conv_error
+      public :: output_terminal_final,output_conv_error,write_time_depen_sol
+      public :: output_iDT_sol,write_exact_sol
       
       private
       character(len=80)            :: fileloc   !file  location
@@ -292,11 +293,13 @@
 
       !**OUTPUT TO TERMINAL**
       write(*,60,advance="no")ep
-! HACK
+! HACK - Every variables's convergence suppressed
 !        do i = 1,nveclen*2+1
 !          write(*,60,advance="no")a(i),b(i)
 !        enddo
 !      write(*,60)a(nveclen*2+2),b(nveclen*2+2)
+! HACK
+      ! L2 norm convergences for each variable 
       do i = 1,neq-1
         write(*,60,advance="no")a(nveclen*2+i),b(nveclen*2+i)
       enddo
@@ -393,6 +396,117 @@
 
       
       end subroutine output_conv_error
-
+!==============================================================================
+!******************************************************************************
+! Outputs time dependant solution
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! RUNGE_KUTTA.F90           *CONTAINS RK CONSTANTS
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec    -> Array containing variables,                   real(wp), dimension(u-vector length), not modified
+!   probname           -> string used to set output file names,               character(len=9),  not modified
+! From runge_kutta:
+!   casename           -> string holding name of RK case,                     character(len=25), not modified
+!
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! ext     -> string used for file extension,                       character(len=9),  not modified
+!******************************************************************************
+! INPUTS:
+! time          -> current solution time,                     real(wp)
+!  ep           -> Stiffness epsilon value,                   real(wp)
+! nveclen       -> total length of u-vector used for problem, integer
+! neq           -> number of equations in problem,            integer
+!******************************************************************************
+      subroutine write_time_depen_sol(time,ep,nveclen,neq)
+      
+      use control_variables, only: uvec,probname
+      use runge_kutta,       only: casename
+      
+      real(wp), intent(in) :: time,ep
+      integer,  intent(in) :: nveclen,neq
+      integer              :: i
+      character(len=80)    :: filename   !file name
+      character(len=1)     :: istr
+      
+      do i = 1,neq  
+          
+        if (time<=1e-16_wp) then ! check if new epsilon
+          write(istr,"(I1.1)")i
+          filename=trim(probname)//'_'//trim(casename)//'_time_dependant_solution_'//istr//ext
+          open(849+i,file=trim(fileloc)//filename)   
+          write(849+i,*)'zone T = "ep = ',ep,'",'
+        endif
+         
+        write(849+i,*)time,uvec(i:nveclen:neq)
+      enddo
+      
+      end subroutine write_time_depen_sol  
+!==============================================================================
+!******************************************************************************
+! Outputs solution for each iDT value for use in finding exact solution
+!******************************************************************************
+! REQUIRED FILES:
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From control_variables:
+!   uvec    -> Array containing variables,                   real(wp), dimension(u-vector length), not modified
+! 
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! ext     -> string used for file extension,                       character(len=9),  not modified
+!******************************************************************************
+! INPUTS:
+! iDT     -> Timestep counter from timestep loop to define dt,          integer
+!******************************************************************************
+      subroutine output_iDT_sol(iDT)
+      
+      use control_variables, only: uvec
+      
+      integer,  intent(in) :: iDT
+      character(len=80)    :: filename   !file name
+      character(len=2)     :: istr
+      
+      write(istr,"(I2.1)")iDT
+      filename='iDT_solution_'//trim(istr)//ext
+      open(899+iDT,file=trim(fileloc)//filename)          
+      write(899+iDT,*)uvec
+      close(899+iDT)
+      
+      end subroutine output_iDT_sol 
+!==============================================================================
+!******************************************************************************
+! Outputs exact solution to a file in the appropriate directory
+!******************************************************************************
+! REQUIRED FILES:
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From control_variables:
+!   uvec    -> Array containing variables,                   real(wp), dimension(u-vector length), not modified
+!   probname           -> string used to set output file names,               character(len=9),  not modified
+!
+! MODULE VARIABLES/ROUTINES:
+! fileloc -> string used to hold the filename of the output files, character(len=80), not modified
+! ext     -> string used for file extension,                       character(len=9),  not modified
+!******************************************************************************
+      subroutine write_exact_sol()
+      
+      use control_variables, only: uvec,probname
+      
+      character(len=80)    :: filename   !file name
+      
+      filename='exact_'//trim(probname)//ext
+      open(95,file=trim(fileloc)//filename)          
+      write(95,*)uvec
+      
+      end subroutine write_exact_sol
 !==============================================================================
       end module output_module

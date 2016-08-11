@@ -144,6 +144,9 @@
      &                            iD1_per,jD1_per,D2_per,jD2_per,iD2_per
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw
       
+      logical :: open_logical
+      integer :: io_int,i
+      
       !**DEALLOCATE VARIABLES**
       !problemsub
       DEAllOCATE(uvec,uexact,resE,resI,var_names)
@@ -163,7 +166,14 @@
      &                              iD1_per,jD1_per,D2_per,jD2_per,iD2_per) 
      
       !Jacobian CSR
-      if(allocated(iaJac)) deallocate(iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw)                                 
+      if(allocated(iaJac)) deallocate(iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw)  
+      
+      !close all open files
+     ! do i=10,900
+       ! inquire(unit=i, opened=open_logical)!, iostat=io_int)
+       ! if (open_logical) print*,'io_int',io_int
+       ! printstop
+       ! enddo                               
       
       end subroutine deallocate_vars
       

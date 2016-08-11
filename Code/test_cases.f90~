@@ -26,6 +26,63 @@
 ! NEWTON.F90                *PERFORMS NEWTON ITERATION
 !------------------------------------------------------------------------------
 !
+!----------------------------GLOBAL VARIABLES/ROUTINES-------------------------
+! From precision_variables:
+!   wp  -> working precision
+! From output_module:
+!   create_file_paths         -> Creates file paths for output files if they do not exsist
+!   output_names              -> Outputs RK case, IMEX/IMPLICIT/EXPLICIT, and problem names to the terminal
+!   init_output_files         -> Create zones in output files for Tecplot/Tec360
+!   output_conv_stiff         -> Output data to convergence vs. stiffness files
+!   output_terminal_iteration -> Outputs data to terminal every epsilon iteration
+!   output_terminal_final     -> Outputs data to terminal at end of RK case/problem
+!   output_conv_error         -> Outputs data to files initilized earilier in the program
+!   write_time_depen_sol      -> Outputs time dependant solution
+! From Stage_value_module:
+!   Stage_Value_Predictor -> returns appropriate data for predicting stage value
+!   xnorm                 -> Function that takes a norm for stage value storage,  real(wp)
+! From control_variables:
+!   allocate_vars   -> Subroutine to allocate global variables
+!   deallocate_vars -> Subroutine to deallocate global variables at end of problem loop
+!   isamp       -> number of dt's,                               integer,                                              not modified
+!   jmax        -> number of epsilon values,                     integer,                                              not modified 
+!   uveco       -> newton iteration / usum storage (?),          real(wp), dimension(u-vector length),                     modified
+!   errvec      -> temporary error storage,                      real(wp), dimension(u-vector length),                     modified
+!   errvecT     -> error storage for each time step,             real(wp), dimension(u-vector length),                     modified
+!   tmpvec      -> (uvec-uexact),                                real(wp), dimension(u-vector length),                     modified
+!   resE        -> Explicit RHS vector,                          real(wp), dimension(u-vector length, num. stages),    not modified
+!   resI        -> Implicit RHS vector,                          real(wp), dimension(u-vector length, num. stages),    not modified
+!   error       -> solution error,                               real(wp), dimension(num. dt's, u-vector length),          modified
+!   errorP      -> solution error, predicted,                    real(wp), dimension(num. dt's, u-vector length),          modified
+!   b1save      -> convergence rate storage,                     real(wp), dimension(num. ep's, u-vector length),          modified
+!   b1Psave     -> convergence rate storage, predicted,          real(wp), dimension(num. ep's, u-vector length),          modified
+!   ustage      -> stage value predictor,                        real(wp), dimension(u-vector length, num. stages),        modified
+!   predvec     -> stage value predictor,                        real(wp), dimension(u-vector length, num. stages),        modified
+!   jactual     -> actual number of epsilon values,              integer,                                              not modified
+!   uvec        -> Array containing variables,                   real(wp), dimension(u-vector length),                     modified
+!   uexact      -> Array containing exact solution to variables, real(wp), dimension(u-vector length),                 not modified
+!   b           -> convergence rate,                             real(wp), dimension(2 * u-vector length + num. eq's), not modified          
+!   usum        -> Array containing summation from test_cases,   real(wp), dimension(u-vector length),                     modified
+!   programstep -> string used in program_step_select,           character(len=80),                                    not modified 
+!   errorL2     -> solution error, L2 norm,                      real(wp), dimension(num. dt's, num. eq's),                modified
+!   b1L2save    -> convergence rate storage, L2 norm ,           real(wp), dimension(num. ep's, num. eq's),                modified
+! From runge_kutta:
+!   aE  -> Explicit a  constants, real(wp), dimension(max. num. stages, max. num. stages), not modified
+!   aI  -> Implicit a  constants, real(wp), dimension(max. num. stages, max. num. stages), not modified
+!   bE  -> Explicit b  constants, real(wp), dimension(max. num. stages),                   not modified
+!   bI  -> Implicit b  constants, real(wp), dimension(max. num. stages),                   not modified
+!   bEH -> Explicit bH constants, real(wp), dimension(max. num. stages),                   not modified
+!   bIH -> Implicit bH constants, real(wp), dimension(max. num. stages),                   not modified
+!   cI  -> Implicit c  constants, real(wp), dimension(max. num. stages),                   not modified
+!   is  -> Maximum number stages, integer,                                                 not modified
+!   ns  -> Actualy number stages, integer,                                                 not modified 
+!   rungeadd -> Subroutine to set constants for particular RK schemes
+! From Newton:
+!   Newton_Iteration -> Subroutine to perform Newton iteration 
+! From problemsub_mod
+!   problemsub -> Subroutine to take in the problem number and call the appropriate problem
+!------------------------------------------------------------------------------
+!
 !--------------------------HOW TO USE------------------------------------------
 !**Adding test cases:
 !     Subroutine file can be added to the directory with form of vanderpol.f90,
@@ -40,6 +97,18 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
+!**Find exact solution
+!     To find the exact solution:
+!     1) set temporal_splitting (in control_variables) to "IMPLICIT"
+!     2) turn iDT_sol_flag=.true. and run desired problem and RK case.
+!     3) complile convergence_testing and move executable to IMPLICIT/probname/casename
+!     4) Take note of terminal output "Location = ##"
+!     5) set that number to exact_sol_iDT=##
+!     6) set exact_sol_flag=.true.
+!     6) compile this program and run problem & RK case again
+!     7) exact solution will be output to IMPLICIT/probname/casename, move/rename file to parent directory as appropriate
+!     NOTE: remember to turn all flags==.FALSE. as soon as they are no longer needed
+! 
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
@@ -47,7 +116,9 @@
       use output_module,      only: create_file_paths, output_names,          & 
      &                              init_output_files, output_conv_stiff,     &
      &                              output_terminal_iteration,                &
-     &                              output_terminal_final,output_conv_error
+     &                              output_terminal_final,output_conv_error,  &
+     &                              write_time_depen_sol,output_iDT_sol,      &
+     &                              write_exact_sol
       use Stage_value_module, only: Stage_Value_Predictor,xnorm
       use control_variables,  only: allocate_vars,deallocate_vars,isamp,jmax, &
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
@@ -75,6 +146,13 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
+      logical,  parameter                   :: time_sol_flag=.false. !True to output time solution
+      integer,  parameter                   :: time_sol_iDT=45      !which dt value to output (You only want one timestep in the file,
+                                                                    !                          system could be improved)
+      logical,  parameter                   :: iDT_sol_flag=.false.               
+      logical,  parameter                   :: exact_sol_flag=.false.
+      integer,  parameter                   :: exact_sol_iDT=67
+                                                     
       
 !      real(wp),dimension(40) :: tmpv
                           
@@ -86,8 +164,8 @@
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
-      do icase = 9,18
-  
+      do icase = cases,cases
+      
         !**initilizations?**
         stageE(:) = 0.0_wp
         stageI(:) = 0.0_wp
@@ -114,19 +192,19 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1     
-                                 
+          do jepsil = 1,jactual,1    
+           
+            cost(:)=0.0_wp       
+                                    
             itmp = 11 - jmax/jactual         !used for 81 values of ep
             ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
-            call init_output_files(nveclen,ep)
+            call init_output_files(neq,ep)
 
 !--------------------------TIMESTEP LOOP----------------------------------------
 ! HACK
-!           do iDT = isamp,isamp,1         !  use this loop to set exact solution
-            cost(:)=0.0_wp !turn this on when doing 1 iDT value
-!            do iDT = 1,1
+!            do iDT = 70,70
 ! HACK
             do iDT =1,isamp,1   
 
@@ -207,35 +285,15 @@
   
                 errvecT(:) = errvecT(:) + errvec(:)
 
+                if (time_sol_flag .and. iDT==time_sol_iDT) then
+                  call write_time_depen_sol(t,ep,nveclen,neq)
+                endif
+                
                 t = t + dt                  !increment time
-! HACK - time depentent solution
-!                write(843,*)t,uvec(1:nveclen:2)
-!                write(844,*)t,uvec(2:nveclen+1:2)
-! HACK  
-!                print*,t,iDT,ep
                 if(t >= tfinal) exit        
-! HACK
-! L2 norm and Linf norms                
-!                print*,'u- errorL2',sqrt(dot_product(errvec(1:nveclen:2),errvec(1:nveclen:2))/(nveclen/2))
-!                print*,'u- errorLinf',maxval(errvec(1:nveclen:2))
-!                print*,'v- errorL2',sqrt(dot_product(errvec(2:nveclen:2),errvec(2:nveclen:2))/(nveclen/2))
-!                print*,'v- errorLinf',maxval(errvec(2:nveclen:2))
-! HACK
               enddo                                                     
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
-! HACK exact solution for each dt
-!              write(199+iDT,*)uvec
-!              print*,iDT
-! HACK
-! L2 norm and Linf norms          
-!                tmpv=abs(uexact-uvec     )
-!                print*,'u- L2',sqrt(dot_product(tmpv(1:nveclen:2),&
-!     &                            tmpv(1:nveclen:2))/(nveclen/2))
-!                print*,'u- Linf',maxval(uexact(1:nveclen:2))
-!                print*,'v- L2',sqrt(dot_product(tmpv(2:nveclen:2),&
-!     &                            tmpv(2:nveclen:2))/(nveclen/2))
-!                print*,'v- Linf',maxval(uexact(2:nveclen:2))
-! HACK              
+              if (iDT_sol_flag .and. jepsil==jmax) call output_iDT_sol(iDT)           
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
@@ -254,14 +312,7 @@
               enddo
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
-!  HACK used to write exact solution
-!           write(*,*)'writing exact solution'
-!           write(122,*)uvec(1:nveclen:2)
-!           write(123,*)uvec(2:nveclen:2)
-!           write(124,*)uvec(3:nveclen:3)
-!           write(121,*)uexact
-!           write(900,*)uvec
-!  HACK used to write exact solution
+            if(exact_sol_flag) call write_exact_sol()
 !----------------------------OUTPUTS-------------------------------------------
 
             call output_terminal_iteration(cost,0,ep,nveclen,neq)
