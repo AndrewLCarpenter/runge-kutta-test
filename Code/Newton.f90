@@ -91,38 +91,38 @@
             if(check_exit(uveciter,k)) exit            
           enddo   
         case default !IMEX or IMPLICIT
-          Jac_select: select case(Jac_case)
-            case('SPARSE')
-              do k = 1,iter_max
-                icount = icount + 1
-                uveciter(:) = uvec(:) !store old uvec
+          line: if (Line_search) then
+            call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
+          else
+            Jac_select: select case(Jac_case)
+              case('SPARSE')
+                do k = 1,iter_max
+                  icount = icount + 1
+                  uveciter(:) = uvec(:) !store old uvec
 
-                Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
-                call Build_Jac(ep,dt,time,aI,iprob,L)
-              
-                call LU_solver(Rnewton)
+                  Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+                  call Build_Jac(ep,dt,time,aI,iprob,L)
                 
-                if(check_exit(uveciter,k)) exit
-                            
-              enddo  
-            case('DENSE')
-              if (Line_search) then
-                call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
-              else
+                  uvec(:)=uvec(:)-LU_solver(Rnewton)
+                  
+                  if(check_exit(uveciter,k)) exit
+                              
+                enddo  
+              case('DENSE')
                 do k = 1,iter_max
                   icount = icount + 1
                   uveciter(:) = uvec(:) !store old uvec   
-                              
+                                
                   Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
                   call Build_Jac(ep,dt,time,aI,iprob,L)
-                  
+                    
                   if (nveclen>4 .and. .not. QR) then !No explicit inverse
                     call Convert_to_CSR(xjac) !convert dense xjac to csr
-                    call LU_solver(Rnewton)
-                    
+                    uvec(:)=uvec(:)-LU_solver(Rnewton)
+                      
                   elseif (nveclen>4 .and. QR) then !QR factorization
                     call QR_decomp(xjac,nveclen,rnewton) 
-                     
+                       
                   elseif (nveclen<=4) then !Explicit inverse
                     xjacinv=Mat_invert(xjac)                  
                     do i = 1,nvecLen
@@ -131,13 +131,12 @@
                       enddo
                     enddo  
                   endif
-        
+          
                   if(check_exit(uveciter,k)) exit
-                  
+                    
                 enddo
-                
-              endif                
-          end select Jac_select 
+            end select Jac_select 
+          endif line
       end select temporal_select
       end subroutine Newton_Iteration
       
@@ -287,8 +286,6 @@
 ! GLOBAL VARIABLES/ROUTINES:
 ! From precision_variables:
 !   wp  -> working precision
-! From control_variables:
-!   uvec   -> Array containing variables,               real(wp), dimension(u-vector length),                                      not modified
 ! From Jacobian_CSR_Mod:
 !   iaJac  -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1),                                  not modified
 !   jaJac  -> ja matrix for global storage of Jacobian, integer,  dimension(dependant on temporal_splitting, see problem routine), not modified
@@ -304,15 +301,14 @@
 ! INPUTS:
 ! Rnewton -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
 !******************************************************************************
-      subroutine LU_solver(Rnewton)
-      
-      use control_variables, only: uvec      
+      function LU_solver(Rnewton)
+        
       use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac
       use ilut_module,       only: lusol,ilutp
       
-      real(wp), dimension(:)               :: Rnewton
+      real(wp), dimension(:), intent(in)          :: Rnewton
       integer                              :: nveclen,ierr=0
-      real(wp), dimension(size(Rnewton))   :: r_wrk
+      real(wp), dimension(size(Rnewton))  ::LU_solver
       real(wp), dimension(size(Rnewton))   :: w  
       integer,  dimension(2*size(Rnewton)) :: jw,iperm
       nveclen=size(Rnewton)   
@@ -320,15 +316,14 @@
       call ilutp(nveclen,aJac,jaJac,iaJac,nveclen,1e-13_wp,0.1_wp,nveclen, &
      &           aLUJac,jLUJac,jUJac,size(alujac),w,jw,iperm,ierr)
 
-      call lusol(nveclen,Rnewton,r_wrk,aLUJac,jLUJac,jUJac)
-      uvec(:)=uvec(:)-r_wrk(:)        
+      call lusol(nveclen,Rnewton,LU_solver,aLUJac,jLUJac,jUJac)     
 
       if (ierr/=0) then 
         print*,'Error in LU_solver!'
         print*,'ierr=',ierr
         stop
       endif
-      end subroutine LU_solver 
+      end function LU_solver 
 
 !==============================================================================
 !******************************************************************************
@@ -367,7 +362,7 @@
 !******************************************************************************
       subroutine newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
-      use control_variables, only: uvec,xjac
+      use control_variables, only: uvec,xjac,Jac_case
       
       integer,  intent(in   ) :: iprob,L
       real(wp), intent(in   ) :: ep,dt
@@ -392,10 +387,15 @@
 
         call Build_Jac(ep,dt,time,aI,iprob,L)
 
+        select case(Jac_case)
+        case('DENSE')
         xjacinv=Mat_invert(xjac)
 
         dxi = MatMul(xjacinv,Rnewton(:))
-
+        case('SPARSE')
+        dxi = LU_solver(Rnewton)
+        end select
+        
         al = 1.0_wp
         do j = 1,10    !   under-relax the value of the parameter alpha
         
@@ -419,7 +419,7 @@
         uvec(:) = uvec(:) - al*dxi
 
         rnorm = rnormt
-       if (k >= 140) print*,'L',L,'k',k,'tmp',rnorm,'j',j
+        if (k >= 140) print*,'L',L,'k',k,'tmp',rnorm!,'j',j
         if(rnorm <= 1.0e-9_wp) then
           ierr = 0
           return

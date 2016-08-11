@@ -38,8 +38,8 @@
 !   output_terminal_final     -> Outputs data to terminal at end of RK case/problem
 !   output_conv_error         -> Outputs data to files initilized earilier in the program
 !   write_time_depen_sol      -> Outputs time dependant solution
-! output_iDT_sol,      &
-  !   &                              write_exact_sol
+!   output_iDT_sol            -> Outputs solution for each iDT value for use in finding exact solution
+!   write_exact_sol           -> Outputs exact solution to a file in the appropriate directory
 ! From Stage_value_module:
 !   Stage_Value_Predictor -> returns appropriate data for predicting stage value
 !   xnorm                 -> Function that takes a norm for stage value storage,  real(wp)
@@ -205,9 +205,6 @@
             call init_output_files(neq,ep)
 
 !--------------------------TIMESTEP LOOP----------------------------------------
-! HACK
-!            do iDT = 70,70
-! HACK
             do iDT =1,isamp,1   
 
               !**INITIALIZE PROBLEM INFORMATION**

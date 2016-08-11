@@ -35,6 +35,9 @@
       integer,  parameter :: neq=2
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
+      real(wp), parameter :: aa=3.0_wp,bb=1.0_wp
+      real(wp)            :: aa_ep,bb_ep
+      
       real(wp), dimension(vecl) :: x
       real(wp)                  :: dx
       
@@ -124,6 +127,7 @@
       integer,  intent(  out) :: nveclen,eq
       real(wp), intent(  out) :: tfinal
       integer,  intent(in   ) :: iDT
+      real(wp)                :: dt_max
 
       !RHS vars
       real(wp), dimension(vecl*2), intent(  out) :: resE_vec,resI_vec
@@ -159,20 +163,25 @@
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')
           
+          !**Set constants
+          aa_ep=aa/ep
+          bb_ep=bb/ep
+          
           !Allocate derivative operators
           if(.not. allocated(D2_per))call Define_CSR_Operators(vecl,dx) 
            
           !Time information
+          dt_max=0.5_wp*dx**2
           choose_dt: select case(temporal_splitting)
             case('IMPLICIT');dt = 0.25_wp/10**((iDT-1)/28.0_wp) ! timestep   
-            case('IMEX')    ;dt = 0.0025_wp/10**((iDT-1)/40.0_wp)
+            case('IMEX')    ;dt = 0.75_wp*dt_max/10**((iDT-1)/40.0_wp)
           end select choose_dt
           tfinal = 10.0_wp                   ! final time
  
           !**IC**
-          uvec(1:2*vecl:2) = 1.0_wp+sin(two*pi*x(:))
-          uvec(2:2*vecl:2) = 3.0_wp
-      
+          uvec(1:2*vecl:2) = 1.0_wp+ep*      sin(two*pi*x(:))
+          uvec(2:2*vecl:2) = bb/aa -ep*bb/aa*sin(two*pi*x(:))
+                
           !**Exact Solution**
           uexact=exact_Bruss(ep)
           
@@ -342,9 +351,9 @@
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
 
 ! ---------------------- Dx part of dudt --------------------------------------
-      Deriv2(:nnz_D2_per)    = eps*D2_per(:)
-      Deriv2(nnz_D2_per+1:)  = eps*D2_per(:)
-      iDeriv2(:vecl)         = iD2_per(:)
+      Deriv2(:nnz_D2_per)    = D2_per(:)
+      Deriv2(nnz_D2_per+1:)  = D2_per(:)
+      iDeriv2(:vecl)         = iD2_per(:vecl)
       iDeriv2(vecl+1:)       = iD2_per(:)+iD2_per(vecl+1)-1
       jDeriv2(:nnz_D2_per)   = jD2_per(:)
       jDeriv2(nnz_D2_per+1:) = jD2_per(:)+vecl
@@ -367,8 +376,8 @@
       call amux(vecl*2,vec,dudt_Deriv2,Deriv2_p,jDeriv2_p,iDeriv2_p)   
 
 !----------------------  Source part of dudt  ---------------------------------      
-      dudt_Source(1:2*vecl:2)=1.0_wp-4.0_wp*u(:)+u(:)*u(:)*v(:)
-      dudt_Source(2:2*vecl:2)=       3.0_wp*u(:)-u(:)*u(:)*v(:)
+      dudt_Source(1:2*vecl:2)=1.0_wp-(1.0_wp+bb_ep)*u(:)+aa_ep*u(:)*u(:)*v(:)
+      dudt_Source(2:2*vecl:2)=                bb_ep*u(:)-aa_ep*u(:)*u(:)*v(:)
 
       end subroutine Bruss_dUdt
 !==============================================================================
@@ -417,10 +426,10 @@
       u=vec(1:vecl*2:2); v=vec(2:vecl*2:2)
      
 ! Set Source Jacobian
-      Source(1:vecl*2:2)=-4.0_wp+2.0_wp*u(:)*v(:)
-      Source(2:vecl*2:2)=2.0_wp*u(:)
-      Source(vecl*2+1:vecl*4:2)=3.0_wp-2.0_wp*u(:)*v(:)
-      Source(vecl*2+2:vecl*4:2)=-u(:)*u(:)
+      Source(1:vecl*2:2)=-(1.0_wp+bb_ep)+2.0_wp*aa_ep*u(:)*v(:)
+      Source(2:vecl*2:2)=aa_ep*u(:)*u(:)
+      Source(vecl*2+1:vecl*4:2)=bb_ep-2.0_wp*aa_ep*u(:)*v(:)
+      Source(vecl*2+2:vecl*4:2)=-aa_ep*u(:)*u(:)
       iSource(:) = (/ (i, i=1, vecl*4+1,2) /)
       do i=1,vecl
         jSource(2*i-1)        = i
