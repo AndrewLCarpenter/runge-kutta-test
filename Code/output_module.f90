@@ -372,16 +372,23 @@
 ! nveclen -> total length of u-vector used for problem, integer
 ! neq     -> number of equations in problem,            integer
 !******************************************************************************
-      subroutine output_conv_error(cost,nveclen,neq)
+      subroutine output_conv_error(cost,nveclen,neq,iprob)
       
-      use control_variables, only : uvec,uexact,errvecT
+      use control_variables, only : uvec,uexact,errvecT,programstep
+      use problemsub_mod,    only : problemsub
       
       real(wp),         intent(in) :: cost
-      integer,          intent(in) :: nveclen,neq
+      integer,          intent(in) :: nveclen,neq,iprob
       
-      integer                      :: i
+      integer                      :: i,iDT,L,vecl,num_eq
       real(wp), dimension(nveclen) :: tmp
+      real(wp)                    :: ep,dt,time,akk,tfinal
+      vecl=nveclen
+      num_eq=neq
      
+      programstep='ROTATE_VARS'
+      call problemsub(iprob,vecl,num_eq,ep,dt,tfinal,iDT,time,akk,L)
+
       tmp=abs(uvec(:)-uexact(:))
       do i = 1,nveclen
        if (tmp(i)==0.0_wp)tmp(i)=1.0e-15_wp  

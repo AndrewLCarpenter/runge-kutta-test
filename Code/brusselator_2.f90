@@ -31,7 +31,7 @@
       private
       public :: Brusselator
       
-      integer,  parameter :: vecl=32     ! total uvec length == 2*vecl
+      integer,  parameter :: vecl=16     ! total uvec length == 2*vecl
       integer,  parameter :: neq=2
       real(wp), parameter :: xL=0.0_wp, xR=1.0_wp
       
