@@ -296,7 +296,7 @@
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
-              call output_conv_error(cost(iDT),nveclen,neq)
+              call output_conv_error(cost(iDT),nveclen,neq,iprob)
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
 
