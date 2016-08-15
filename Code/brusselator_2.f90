@@ -93,7 +93,7 @@
 ! iDeriv2_p -> permuted ia matrix for D1 operators             integer,   dimension(u-vector length + 1),                 not modified
 ! grid              -> Subroutine to create grid
 ! exact_Bruss       -> Function to build exact solution
-! Bruss_dudt        -> Subroutine to build dudt (LHS)
+! Bruss_dUdt        -> Subroutine to build dudt (LHS)
 ! Build_Spatial_Jac -> Subroutine to build spatial Jacobian
 ! Build_Source_Jac  -> Subroutine to build source  Jacobian
 ! Build_Jac         -> Subroutine to build Jacobian and store it
@@ -186,7 +186,7 @@
           uexact=exact_Bruss(ep)
           
         case('BUILD_RHS')
-          call Bruss_dudt(uvec,dudt_Dx,dudt_Source,ep)
+          call Bruss_dUdt(uvec,dudt_Dx,dudt_Source)
           choose_RHS_type: select case (Temporal_Splitting)
             case('IMPLICIT')
               resE_vec(:)=0.0_wp
@@ -331,7 +331,7 @@
 ! dudt_deriv2 -> RHS vector involving just spacial derivatives, real(wp), dimension(u-vector length)
 ! dudt_source -> RHS vector involving just source terms         real(wp), dimension(u-vector length)
 !******************************************************************************
-      subroutine Bruss_dUdt(vec,dudt_deriv2,dudt_source,eps)
+      subroutine Bruss_dUdt(vec,dudt_deriv2,dudt_source)
       
       use SBP_Coef_Module, only: D2_per,jD2_per,iD2_per,nnz_D2_per
       use unary_mod,       only: dperm
@@ -339,7 +339,6 @@
 
       real(wp), dimension(:),      intent(in   ) :: vec
       real(wp), dimension(vecl*2), intent(  out) :: dudt_deriv2,dudt_source
-      real(wp),                    intent(in   ) :: eps
      
       real(wp), dimension(vecl)                  :: u,v
       integer,  dimension(vecl*2)                :: j_perm
@@ -377,7 +376,7 @@
 
 !----------------------  Source part of dudt  ---------------------------------      
       dudt_Source(1:2*vecl:2)=1.0_wp-(1.0_wp+bb_ep)*u(:)+aa_ep*u(:)*u(:)*v(:)
-      dudt_Source(2:2*vecl:2)=                bb_ep*u(:)-aa_ep*u(:)*u(:)*v(:)
+      dudt_Source(2:2*vecl:2)=              +bb_ep *u(:)-aa_ep*u(:)*u(:)*v(:)
 
       end subroutine Bruss_dUdt
 !==============================================================================

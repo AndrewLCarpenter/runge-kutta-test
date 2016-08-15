@@ -114,7 +114,7 @@
 
       real(wp),  dimension(n),    intent(  out) ::  a
 
-      integer                                   :: i,j,k
+      integer                                   :: i
 
       do i = 1,n+1
         ia(i) = i

@@ -53,7 +53,7 @@
 
         allocate(iw(nJac))
         
-        jLUJac(:)=0.0_wp ; aLUJac(:)=0.0_wp; aJac=0.0_wp
+        jLUJac(:)=0 ; aLUJac(:)=0.0_wp; aJac=0.0_wp
         
       endif
 

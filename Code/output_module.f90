@@ -391,7 +391,7 @@
 
       tmp=abs(uvec(:)-uexact(:))
       do i = 1,nveclen
-       if (tmp(i)==0.0_wp)tmp(i)=1.0e-15_wp  
+       if (tmp(i) <= 0.0_wp)tmp(i)=1.0e-15_wp  
       enddo
       
       do i = 1,neq

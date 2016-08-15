@@ -86,11 +86,11 @@
               resI_vec(:)=0.0_wp
               resE_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
               resE_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              resE_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
+              resE_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
             case('IMEX') ! For IMEX schemes
               rese_vec(1)=0.0_wp
               rese_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              rese_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))     
+              rese_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))     
               resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
               resi_vec(2)=0.0_wp
               resi_vec(3)=0.0_wp            
@@ -98,7 +98,7 @@
               rese_vec(:)=0.0_wp
               resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
               resi_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              resi_vec(3)=dt*(uvec(1)*uvec(2)-beta*uvec(3))
+              resi_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
           end select choose_RHS_type
           
         case('BUILD_JACOBIAN')          

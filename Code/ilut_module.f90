@@ -11,6 +11,9 @@
       public ::   ilu0_csr, lusol_csr, msrcsr
       public ::   lusol_M_rhs
 
+!--------------------------------VARIABLES-------------------------------------         
+      real(wp), parameter :: tolerance =  1.0e-17_wp
+
       contains
 
 !=============================================================================80
@@ -182,7 +185,7 @@
          do k=j1,j2 
             tnorm = tnorm+abs(a(k)) 
          enddo
-         if (tnorm  ==  0.0_wp) goto 999 
+         if (abs(tnorm)  <=  tolerance) goto 999 
          tnorm = tnorm/real(j2-j1+1) 
                                                                         
 !        unpack L-part and U-part of row of A in arrays w                  
@@ -518,7 +521,7 @@
          do 501 k=j1,j2 
             tnorm = tnorm+abs(a(k)) 
   501    continue 
-         if (tnorm  ==  0.0_wp) goto 999 
+         if (abs(tnorm)  <=  tolerance) goto 999 
          tnorm = tnorm/(j2-j1+1) 
 !                                                                       
 !     unpack L-part and U-part of row of A in arrays  w  --             
@@ -740,7 +743,7 @@
 !                                                                       
 !     store inverse of diagonal element of u                            
 !                                                                       
-        if (w(ii)  ==  0.0) w(ii) = (1.0D-4 + droptol)*tnorm 
+        if (abs(w(ii))  <=  tolerance) w(ii) = (1.0D-4 + droptol)*tnorm 
         alu(ii) = 1.0_wp/ w(ii) 
 !                                                                       
 !     update pointer to beginning of next row of U.                     
@@ -904,7 +907,7 @@
          do 501 k=j1,j2 
             tnorm = tnorm + abs(a(k)) 
   501    continue 
-         if (tnorm  ==  0.0) goto 997 
+         if (abs(tnorm)  <=  tolerance) goto 997 
          tnorm = tnorm / real(j2-j1+1) 
 !                                                                       
 !     unpack L-part and U-part of row of A in arrays w                  
@@ -1093,7 +1096,7 @@
 !                                                                       
 !     store inverse of diagonal element of u                            
 !                                                                       
-         if (w(ii)  ==  0.0) w(ii) = (0.0001 + tol)*tnorm 
+         if (abs(w(ii))  <=  tolerance) w(ii) = (0.0001 + tol)*tnorm 
 !                                                                       
          alu(ii) = 1.0_wp/ w(ii) 
 !                                                                       
@@ -1243,7 +1246,7 @@
          do 501 k=j1,j2 
             tnorm = tnorm+abs(a(k)) 
   501    continue 
-         if (tnorm  ==  0.0) goto 997 
+         if (abs(tnorm)  <=  tolerance) goto 997 
          tnorm = tnorm/(j2-j1+1) 
 !                                                                       
 !     unpack L-part and U-part of row of A in arrays  w  --             
@@ -1453,7 +1456,7 @@
 !                                                                       
 !     store inverse of diagonal element of u                            
 !                                                                       
-        if (w(ii)  ==  0.0_wp) w(ii) = (1.0e-4_wp + droptol)*tnorm 
+        if (abs(w(ii))  <=  tolerance) w(ii) = (1.0e-4_wp + droptol)*tnorm 
 !                                                                       
         alu(ii) = 1.0_wp/ w(ii) 
 !                                                                       
@@ -1603,7 +1606,7 @@
          do 170  j = j1, j2 
             k = ja(j) 
             t = a(j) 
-            if (t  ==  0.0) goto 170 
+            if (abs(t)  <=  tolerance) goto 170 
             if (k  <  ii) then 
                lenl = lenl+1 
                jw(lenl) = k 
@@ -1761,7 +1764,7 @@
             endif 
   302    continue 
                                                                         
-         if (w(ii)  ==  0.0) goto 999 
+         if (abs(w(ii))  <=  tolerance) goto 999 
 !                                                                       
          alu(ii) = 1.0_wp/ w(ii) 
 !                                                                       
@@ -1783,11 +1786,6 @@
 !     insufficient storage in L.                                        
 !                                                                       
   996 ierr = -2 
-      return 
-!                                                                       
-!     insufficient storage in U.                                        
-!                                                                       
-  997 ierr = -3 
       return 
 !                                                                       
 !     illegal lfil entered.                                             
@@ -1927,14 +1925,15 @@
 !                                                                       
 !     invert  and store diagonal element.                               
 !                                                                       
-           if (alu(ii)  ==  0.0_wp) goto 600 
+           if (abs(alu(ii))  <=  tolerance) goto 600 
            alu(ii) = 1.0_wp/alu(ii) 
 !                                                                       
 !     reset pointer iw to zero                                          
 !                                                                       
            iw(ii) = 0 
-           do 201 i = js, jf 
-  201         iw(jlu(i)) = 0 
+           do i = js, jf 
+              iw(jlu(i)) = 0 
+           enddo
   500      continue 
            ierr = 0 
            return 
@@ -2023,8 +2022,9 @@
           ju0 = n+2 
           jlu(1) = ju0 
 ! initialize work vector to zero's                                      
-        do 31 i=1, n 
-   31         iw(i) = 0 
+        do i=1, n 
+          iw(i) = 0 
+        enddo
 !                                                                       
 !-------------- MAIN LOOP ----------------------------------            
 !                                                                       
@@ -2070,12 +2070,13 @@
   150      continue 
 !----------------------- invert and store diagonal element.             
            alu(ii) = alu(ii)-s 
-           if (alu(ii)  ==  0.0_wp) goto 600 
+           if (abs(alu(ii))  <=  tolerance) goto 600 
            alu(ii) = 1.0_wp/alu(ii) 
 !----------------------- reset pointer iw to zero                       
            iw(ii) = 0 
-           do 201 i = js, jf 
-  201         iw(jlu(i)) = 0 
+           do i = js, jf 
+              iw(jlu(i)) = 0 
+           enddo
   500      continue 
            ierr = 0 
            return 
@@ -2237,7 +2238,7 @@
       end subroutine ilu0_csr
 
 !=============================================================================80
-!! HACK HACK
+!
 !       subroutine pgmres(n, im, rhs, sol, vv, eps, maxits, iout,        &
 !     &  aa, ja, ia, alu, jlu, ju, ierr)
 !
@@ -2363,7 +2364,7 @@
 !   20  ro = dnrm2(n, vv, 1) 
 !       if (iout  >  0 .and. its  ==  0)                                &
 !     &      write(iout, 199) its, ro                                    
-!       if (ro  ==  0.0_wp) goto 999 
+!       if (abs(ro)  <=  tolerance) goto 999 
 !       t = 1.0_wp/ ro 
 !       do 210 j=1, n 
 !          vv(j,1) = vv(j,1)*t 
@@ -2387,7 +2388,7 @@
 !   55  continue 
 !       t = dnrm2(n, vv(1,i1), 1) 
 !       hh(i1,i) = t 
-!       if ( t  ==  0.0_wp) goto 58 
+!       if (abs(t)  <=  tolerance) goto 58 
 !       t = 1.0_wp/t 
 !       do 57  k=1,n 
 !          vv(k,i1) = vv(k,i1)*t 
@@ -2409,7 +2410,7 @@
 !     if gamma is zero then any small value will do...                  
 !     will affect only residual estimate                                
 !                                                                       
-!       if (gam  ==  0.0_wp) gam = epslon(1.0_wp)
+!       if (abs(gam)  <=  tolerance) gam = epslon(1.0_wp)
 !                                                                       
 !     get  next plane rotation                                          
 !                                                                       
@@ -2764,8 +2765,10 @@
 !=============================================================================80
 
         subroutine lutsol(n, y, x, alu, jlu, ju) 
+
+        integer, intent(in ) :: n
+        integer jlu(*), ju(*) 
         real(wp) x(n), y(n), alu(*) 
-        integer n, jlu(*), ju(*) 
 !-----------------------------------------------------------------------
 !                                                                       
 ! This routine solves the system  Transp(LU) x = y,                     
@@ -2817,11 +2820,12 @@
 
 !=============================================================================80
 
-!-----------------------------------------------------------------------
         subroutine qsplit(a,ind,n,ncut) 
 
-        real(wp) a(n) 
-        integer ind(n), n, ncut 
+        integer,                intent(in  ) :: n, ncut
+        integer,  dimension(n)  :: ind
+        real(wp), dimension(n)  :: a(n) 
+
         integer mid,j
 !-----------------------------------------------------------------------
 !     does a quick-sort split of a real array.                          
