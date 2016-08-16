@@ -1,10 +1,10 @@
 #!MC 1410
-$!VarSet |MFBD| = '/ump/fldmd/home/bmurray3'
+$!VarSet |MFBD| = '/ump/fldmd/home/mhcarpen'
 $!VarSet |PATH1| = '|$PATHI|'
 
 $!PAGE NAME = 'Untitled'
 $!PAGECONTROL CREATE
-$!OPENLAYOUT  "/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot scripts/err1.lay"
+$!OPENLAYOUT  "/ump/fldmd/home/mhcarpen/runge-kutta-test/tecplot scripts/err1.lay"
 $!READDATASET  ' |PATH1| '
   READDATAOPTION = NEW
   RESETSTYLE = NO

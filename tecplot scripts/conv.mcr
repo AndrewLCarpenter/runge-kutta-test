@@ -1,14 +1,14 @@
 #!MC 1410
-$!VarSet |MFBD| = '/ump/fldmd/home/bmurray3/.local/share/Trash/files/runge-kutta-test.2/IMEX'
+$!VarSet |MFBD| = '/ump/fldmd/home/mhcarpen/runge-kutta-test/TMP'
 $!VarSet |PATH1| = '|$PATHI|'
 $!VarSet |PATH2| = '|$PATHE|'
 $!PAGE NAME = 'Untitled'
 $!PAGECONTROL CREATE
 
 $!IF |$VARS| == 2
-$!OPENLAYOUT "/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot scripts/conv2.lay"
+$!OPENLAYOUT "/ump/fldmd/home/mhcarpen/runge-kutta-test/tecplot scripts/conv2.lay"
 $!ELSEIF |$VARS| == 3
-$!OPENLAYOUT "/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot scripts/conv3.lay"
+$!OPENLAYOUT "/ump/fldmd/home/mhcarpen/runge-kutta-test/tecplot scripts/conv3.lay"
 $!ENDIF
 
 $!READDATASET  ' |PATH1| |PATH2| '
