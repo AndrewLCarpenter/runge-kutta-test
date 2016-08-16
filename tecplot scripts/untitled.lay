@@ -1,5 +1,5 @@
 #!MC 1410
-$!VarSet |PATH1| = '/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/Code/IMEX/Kaps/ARK436[2]SA_4/Kaps_ARK436[2]SA_4_2.dat'
+$!VarSet |PATH1| = '/ump/fldmd/home/mhcarpen/runge-kutta-test/Code/IMEX/Kaps/ARK436[2]SA_4/Kaps_ARK436[2]SA_4_2.dat'
 $!VarSet |LFDSFN1| = '|PATH1| '
 $!VarSet |LFDSVL1| = '"V1" "V2"'
 $!SETSTYLEBASE FACTORY

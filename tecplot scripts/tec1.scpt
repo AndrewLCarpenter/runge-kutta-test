@@ -1,5 +1,5 @@
  #! /bin/sh
-PATHTOP='/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/Code/'
+PATHTOP='/ump/fldmd/home/mhcarpen/runge-kutta-test/Code/'
 
 PATHIMEX=$PATHTOP'IMEX/'
 PATHIMPLICIT=$PATHTOP'IMPLICIT/'
