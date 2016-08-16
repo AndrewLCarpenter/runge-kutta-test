@@ -149,7 +149,7 @@
       real(wp), dimension(nx)             :: r0,u0,m0,z0
       real(wp), dimension(nx)             :: zE,z1,H
       real(wp), dimension(nx)             :: dzEdr, dzEdm, dr0dx, dm0dx
-      real(wp)                            :: f
+      real(wp)                            :: f, dt_max
 
 !------------------------------------------------------------------------------   
       
@@ -178,10 +178,12 @@
           if(.not. allocated(D1_per))call Define_CSR_Operators(nx,dx)   
           
           !Time information
-          tfinal = 0.2_wp  ! final time   
+          dt_max=1.0_wp*dx
+          !Time information
+          tfinal = 1.0_wp  ! final time   
           choose_dt: select case(temporal_splitting)
-            case('EXPLICIT'); dt = 0.000025_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
-            case default    ; dt = 0.2_wp/10**((iDT-1)/20.0_wp)             ! implicit timestep      
+            case('EXPLICIT'); dt = 0.0000025_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
+            case default    ; dt = 1.0_wp/10**((iDT-1)/20.0_wp)             ! implicit timestep      
           end select choose_dt
           
           f = 2.0_wp*pi/Length

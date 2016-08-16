@@ -144,6 +144,7 @@
       !problemsub variables
       real(wp)                              :: ep,dt,tfinal 
       integer                               :: nveclen,neq
+      integer                               :: iDT_Low, iDT_High
 
       !data out variables
       real(wp), dimension(isamp)            :: cost         
@@ -153,7 +154,7 @@
                                                                     !                          system could be improved)
       logical,  parameter                   :: iDT_sol_flag=.false.               
       logical,  parameter                   :: exact_sol_flag=.false.
-!     integer,  parameter                   :: exact_sol_iDT=67
+      integer,  parameter                   :: exact_sol_iDT =70
                                                      
       
 !      real(wp),dimension(40) :: tmpv
@@ -205,7 +206,11 @@
             call init_output_files(neq,ep)
 
 !--------------------------TIMESTEP LOOP----------------------------------------
-            do iDT =1,isamp,1   
+            iDT_Low = 1 ; iDT_High = isamp ; 
+
+            if(exact_sol_flag) then ; iDT_Low  = exact_sol_iDT ; iDT_High = exact_sol_iDT ; endif
+
+            do iDT =iDT_Low,iDT_High,1   
 
               !**INITIALIZE PROBLEM INFORMATION**
               programStep='SET_INITIAL_CONDITIONS'
