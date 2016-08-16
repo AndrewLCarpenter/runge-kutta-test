@@ -5613,7 +5613,7 @@ end subroutine a_bl_pl_b_bl1
 
       INTEGER     :: iu(21), il(21)
       INTEGER     :: m, i, j, k, l, ij, it, itt, indx
-      REAL        :: r
+      REAL(wp)    :: r
       REAL(wp)    :: t
 
 ! LOCAL PARAMETERS -
@@ -5817,8 +5817,8 @@ end subroutine a_bl_pl_b_bl1
 
       INTEGER     :: iu(21), il(21)
       INTEGER     :: m, i, j, k, l, ij, it, itt, indx
-      REAL        :: r
 
+      REAL(wp)    :: r
       integer     :: t
 
 ! LOCAL PARAMETERS -

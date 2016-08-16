@@ -14,6 +14,7 @@
       public    ::  qrdcmp, qrsolv
       private
       
+      real(wp), parameter   :: tolerance = 1.0e-17_wp
       contains
 
 !==============================================================================
@@ -42,7 +43,7 @@
         do i=k,n
           scl=max(scl,abs(a(i,k)))
         enddo
-        if(scl.eq.0.)then
+        if(abs(scl) <= tolerance)then
           sing=.true.
           c(k)=0.0_wp
           d(k)=0.0_wp
@@ -71,7 +72,7 @@
         endif
       enddo
       d(n)=a(n,n)
-      if(d(n).eq.0.0_wp)sing=.true.
+      if(abs(d(n)) <= tolerance)sing=.true.
       
       END subroutine qrdcmp
 
@@ -123,7 +124,7 @@
 !     on  output.
 
       INTEGER                                    :: i,j
-      REAL                                       :: wrk
+      REAL(wp)                                   :: wrk
 
       b(n)=b(n)/d(n)
       do i=n-1,1,-1

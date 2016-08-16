@@ -82,22 +82,17 @@
 
 !=============================================================================80
 
-      subroutine amux_M_rhs(n, m, nnz, x, y, a, ja, ia) 
+      subroutine amux_M_rhs(n, m, x, y, a, ja, ia) 
 
       implicit none
       
-      integer,                     intent(in)    :: n, m, nnz
-!     integer,     dimension(nnz), intent(in   ) :: ja
-!     integer,     dimension(n+1), intent(in   ) :: ia
+      integer,                     intent(in)    :: n, m
       integer,     dimension(:  ), intent(in   ) :: ja
       integer,     dimension(:  ), intent(in   ) :: ia
 
-!     real(wp), dimension(nnz), intent(in   ) :: a 
-!     real(wp), dimension(m,n), intent(in   ) :: x
       real(wp), dimension(:  ), intent(in   ) :: a 
       real(wp), dimension(:,:), intent(in   ) :: x
 
-!     real(wp), dimension(m,n), intent(  out) :: y
       real(wp), dimension(:,:), intent(  out) :: y
 
 
@@ -291,12 +286,13 @@
 
       implicit none
       
+      integer,                  intent(in)    :: n, m
+
       real(wp), dimension(  *), intent(in   ) :: al
       real(wp), dimension(m,n), intent(in   ) :: y
 
       real(wp), dimension(m,n), intent(  out) :: x
 
-      integer,                     intent(in)    :: n, m
       integer,     dimension(  *), intent(in   ) :: jal
       integer,     dimension(n+1), intent(in   ) :: ial
 
@@ -432,12 +428,13 @@
 
       implicit none
       
+      integer,                  intent(in)    :: n, m
+
       real(wp), dimension(  *), intent(in   ) :: au
       real(wp), dimension(m,n), intent(in   ) :: y
 
       real(wp), dimension(m,n), intent(  out) :: x
 
-      integer,                     intent(in)    :: n, m
       integer,     dimension(  *), intent(in   ) :: jau
       integer,     dimension(n+1), intent(in   ) :: iau
 
@@ -481,6 +478,7 @@
       end subroutine usol_M_rhs
 
 !=============================================================================80
+
       subroutine udsol (n,x,y,au,jau)
 
       integer n, jau(*)

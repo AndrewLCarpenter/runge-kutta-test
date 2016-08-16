@@ -305,12 +305,14 @@
         
       use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac,aLUJac,jLUJac,jUJac
       use ilut_module,       only: lusol,ilutp
+      use matvec_module,     only: amux
       
       real(wp), dimension(:), intent(in)          :: Rnewton
       integer                              :: nveclen,ierr=0
-      real(wp), dimension(size(Rnewton))  ::LU_solver
+      real(wp), dimension(size(Rnewton))   :: LU_solver
       real(wp), dimension(size(Rnewton))   :: w  
       integer,  dimension(2*size(Rnewton)) :: jw,iperm
+
       nveclen=size(Rnewton)   
 
       call ilutp(nveclen,aJac,jaJac,iaJac,nveclen,1e-13_wp,0.1_wp,nveclen, &

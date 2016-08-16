@@ -153,7 +153,7 @@
                                                                     !                          system could be improved)
       logical,  parameter                   :: iDT_sol_flag=.false.               
       logical,  parameter                   :: exact_sol_flag=.false.
-      integer,  parameter                   :: exact_sol_iDT=67
+!     integer,  parameter                   :: exact_sol_iDT=67
                                                      
       
 !      real(wp),dimension(40) :: tmpv
@@ -235,7 +235,7 @@
 
                 !  ESDIRK Loop
                 do L = 2,ns                        
-                tt=t+Ci(L)*dt
+                  tt=t+Ci(L)*dt
 
                   usum(:) = uveco(:)
                   do LL = 1,L-1 
@@ -244,10 +244,10 @@
               
                   if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
                   if(ipred/=2) uvec(:) = predvec(:,L)  
-!---------------BEG NEWTON ITERATION ------------------------------------------
+!-----------------BEG NEWTON ITERATION ------------------------------------------
                   call Newton_Iteration(iprob,L,ep,dt,nveclen,&
      &                                      tt,aI(L,L),icount,k)
-!---------------END NEWTON ITERATION-------------------------------------------
+!-----------------END NEWTON ITERATION-------------------------------------------
                   ustage(:,L) = uvec(:)     !  Save the solution at each stage
                  
                   ! Fill in resE and resI with the converged data
@@ -296,12 +296,12 @@
      
               cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
               
-              call output_conv_error(cost(iDT),nveclen,neq)
+              call output_conv_error(cost(iDT),nveclen,neq,iprob)
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
 
               do i = 1,nvecLen
-                if(tmpvec(i) == 0.0_wp)tmpvec(i)=1.0e-15_wp
+                if(tmpvec(i) <= 0.0_wp)tmpvec(i)=1.0e-15_wp
               enddo
               error(iDT,:)  = log10(tmpvec(:))
               errorP(iDT,:) = log10(errvecT(:))

@@ -28,8 +28,8 @@
       real(wp), parameter :: Length =  20.0_wp
       real(wp), parameter :: xL     = -10.0_wp
       real(wp), parameter :: xR     = +10.0_wp      
-      real(wp), parameter :: a_u1   = + 0.3_wp
-      real(wp), parameter :: a_u2   = + 0.1_wp
+      real(wp), parameter :: a_u1   = + 0.3_wp  ! Original
+      real(wp), parameter :: a_u2   = + 0.1_wp  ! Original
    
       real(wp), dimension(nx)     :: x      
       real(wp)                    :: dx
@@ -37,10 +37,10 @@
       integer,  dimension(vecl+1) :: iSource_p,iDeriv_comb_p,iwrk_Jac
       integer,  dimension(4*vecl) :: jDeriv_comb_p
       integer,  dimension(5*vecl) :: jwrk_Jac
-      integer,  dimension(vecl)   :: jSource_p
+      integer,  dimension(  vecl) :: jSource_p
 
       real(wp), dimension(4*vecl) ::  Deriv_comb_p
-      real(wp), dimension(5*vecl) :: wrk_Jac
+      real(wp), dimension(5*vecl) ::  wrk_Jac
       
       real(wp), dimension(vecl)   ::  Source_p
       logical :: update_Jac
@@ -89,12 +89,12 @@
 ! a_u2          -> problem parameter                               real(wp),                                                            not modified
 ! x             -> stores x-grid points,                           real(wp),  dimension(num. points),                                   not modified
 ! dx            -> separation between grid points,                 real(wp),                                                            not modified
-! jDeriv_comb_p -> permuted ja matrix for D1 operators             integer,   dimension(num. eq. * 4 * num. points),                    not modified
-! Deriv_comb_p  -> permuted  a matrix for D1 operators             real(wp),  dimension(num. eq. * 4 * num. points),                    not modified
 ! iDeriv_comb_p -> permuted ia matrix for D1 operators             integer,   dimension(u-vector length) + 1),                          not modified
-! jwrk_Jac      -> combined ja matrix for Source + D1              integer,   dimension(num. eq's * 4 * num. points + u-vector length),     set
-! wrk_Jac       -> combined  a matrix for Source + D1              real(wp),  dimension(num. eq's * 4 * num. points + u-vector length),     set
+! jDeriv_comb_p -> permuted ja matrix for D1 operators             integer,   dimension(num. eq. * 4 * num. points),                    not modified
+!  Deriv_comb_p -> permuted  a matrix for D1 operators             real(wp),  dimension(num. eq. * 4 * num. points),                    not modified
 ! iwrk_Jac      -> combined ia matrix for Source + D1              integer,   dimension(u-vector length + 1),                               set
+! jwrk_Jac      -> combined ja matrix for Source + D1              integer,   dimension(num. eq's * 4 * num. points + u-vector length),     set
+!  wrk_Jac      -> combined  a matrix for Source + D1              real(wp),  dimension(num. eq's * 4 * num. points + u-vector length),     set
 ! jSource_p     -> permuted ja matrix for Source terms             integer,   dimension(u-vector length),                               not modified
 ! Source_p      -> permuted  a matrix for Source terms             real(wp),  dimension(u-vector length),                               not modified
 ! iSource_p     -> permuted ia matrix for Source terms             integer,   dimension(u-vector length + 1),                           not modified
@@ -127,6 +127,7 @@
       use SBP_Coef_Module,   only: Define_CSR_Operators,D1_per
       use unary_mod,         only: aplb
       use Jacobian_CSR_Mod,  only: Allocate_Jac_CSR_Storage
+      use matvec_module,     only: amux
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -146,7 +147,7 @@
       integer, dimension(vecl) :: iw
 
       real(wp), dimension(nx)             :: r0,u0,m0,z0
-      real(wp), dimension(nx)             :: zE,z1,H,z1_test
+      real(wp), dimension(nx)             :: zE,z1,H
       real(wp), dimension(nx)             :: dzEdr, dzEdm, dr0dx, dm0dx
       real(wp)                            :: f
 
@@ -187,6 +188,8 @@
           ! Set IC's
           r0(:) = (1.0_wp + a_u1 * sin(f*x(:)) )
           u0(:) = (0.5_wp + a_u2 * sin(f*x(:)) )
+!         r0(:) = (1.0_wp + a_u1 * sin(f*x(:)) * sin(f*x(:)) )
+!         u0(:) = (0.5_wp + a_u2 * sin(f*x(:)) * sin(f*x(:)) )
           m0(:) = r0(:)*u0(:)
           zE(:) = 0.5_wp * (r0(:)*r0(:) + m0(:)*m0(:)) / r0(:)
 
@@ -196,16 +199,18 @@
           dr0dx(:) = f * a_u1 * cos(f * x(:)) 
           dm0dx(:) = r0(:) * f * a_u2 * cos(f * x(:)) & 
                    + u0(:) * f * a_u1 * cos(f * x(:))
+!         dr0dx(:) = 2.0_wp * f * a_u1 * sin(f * x(:)) * cos(f * x(:)) 
+!         dm0dx(:) = 2.0_wp * r0(:) * f * a_u2 * sin(f * x(:)) * cos(f * x(:)) & 
+!                  + 2.0_wp * u0(:) * f * a_u1 * sin(f * x(:)) * cos(f * x(:))
               H(:) = (1.0_wp - dzEdr(:) + dzEdm(:)*dzEdm(:))*dm0dx(:) + dzEdr(:)*dzEdm(:)*dr0dx(:)
              z1(:) = -H(:) / r0(:) /2.0_wp !Boscarino's paper is missing 1/2 multiplier on z1
              z0(:) = zE(:) + ep*z1(:)
-           
+
              !z1(:)=-1.0_wp/2.0_wp*(dm0dx(:)/2.0_wp*(1+u0(:)**2)+u0(:)*(dzEdr(:)*dr0dx(:)+dzEdm(:)*dm0dx(:)))/r0(:)
           uvec(1:vecl-2:neq) = r0(:)
           uvec(2:vecl-1:neq) = m0(:)
           uvec(3:vecl-0:neq) = z0(:)
 !------------------------------------------------
-        
           
         !  print*,'test',z1_test(:)-z1(:)/2.0_wp
 
@@ -241,9 +246,9 @@
 
               call Broadwell_Build_Source_Jac(ep,uvec,Source_p,jSource_p,iSource_p)
 
-              call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,    &
-     &                  Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p,    &
-     &                  wrk_Jac,jwrk_Jac,iwrk_Jac,5*vecl,iw,ierr) 
+              call aplb(vecl,vecl,1,Source_p,jSource_p,iSource_p,   &
+                      & Deriv_comb_p,jDeriv_comb_p,iDeriv_comb_p,   &
+                      & wrk_Jac,jwrk_Jac,iwrk_Jac,5*vecl,iw,ierr) 
               if (ierr/=0) then; print*,'Build Jac ierr=',ierr; stop; endif 
               
               call Broadwell_Add_Diag_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)
@@ -428,8 +433,8 @@
       use SBP_Coef_Module,   only: D1_per,jD1_per,nnz_D1_per
 
       integer,  dimension(vecl+1),     intent(  out) :: ia
-      integer,  dimension(nnz_D1_per), intent(  out) :: ja
-      real(wp), dimension(nnz_D1_per), intent(  out) ::  a
+      integer,  dimension(neq*nnz_D1_per), intent(  out) :: ja
+      real(wp), dimension(neq*nnz_D1_per), intent(  out) ::  a
       
       integer,  dimension(vecl+1)                 :: iDeriv_comb
       integer,  dimension(neq*nnz_D1_per)         :: jDeriv_comb
@@ -454,9 +459,9 @@
         jDeriv_comb(1*nnz+1:2*nnz) =  2*nx + jD1_per(1:nnz)
         jDeriv_comb(2*nnz+1:3*nnz) =  1*nx + jD1_per(1:nnz)
 
-         Deriv_comb(      1:1*nnz) =       +  D1_per(1:nnz)
-         Deriv_comb(1*nnz+1:2*nnz) =       +  D1_per(1:nnz)
-         Deriv_comb(2*nnz+1:3*nnz) =       +  D1_per(1:nnz)
+         Deriv_comb(      1:1*nnz) =       -  D1_per(1:nnz)
+         Deriv_comb(1*nnz+1:2*nnz) =       -  D1_per(1:nnz)
+         Deriv_comb(2*nnz+1:3*nnz) =       -  D1_per(1:nnz)
 
         j_perm(     1)=1
         j_perm(  nx+1)=2
@@ -512,9 +517,10 @@
       epI = 1.0_wp / ep
       
       ia(1:3)=1
-      do i = 4,vecl+1,3 
+      do i = 4,vecl-1,3 
         ia(i:i+2)=ia(i-3:i-1) + 3
       enddo
+      ia(size(ia)) = vecl + 1
       
       do i = 1,nx
          ii = (i-1)*neq
@@ -569,10 +575,10 @@
       integer,  dimension(:), intent(in) :: ja,ia
       
       integer,  dimension(vecl)          :: iw
-      real(wp), dimension(size(a)+nx*2)  :: wrk
-      integer,  dimension(size(a)+nx*2)  :: jwrk
       integer,  dimension(vecl+1)        :: iwrk   
-      integer                            :: nnz
+      integer,  dimension(size(a)+nx*2)  :: jwrk
+      real(wp), dimension(size(a)+nx*2)  ::  wrk
+      integer                            ::  nnz
       
 !------------------------------------------------------------------------------     
       nnz=size(a)

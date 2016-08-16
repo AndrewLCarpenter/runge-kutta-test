@@ -144,9 +144,6 @@
      &                            iD1_per,jD1_per,D2_per,jD2_per,iD2_per
       use Jacobian_CSR_Mod, only: iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw
       
-      logical :: open_logical
-      integer :: io_int,i
-      
       !**DEALLOCATE VARIABLES**
       !problemsub
       DEAllOCATE(uvec,uexact,resE,resI,var_names)

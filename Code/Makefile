@@ -1,13 +1,13 @@
 .SUFFIXES: .o .c .f90 .F90 .mod
 
 CC = gcc
-FC = ifort
-#FC = gfortran
+#FC = ifort
+ FC = gfortran
 
 #FCFLAGS = -Wuninitialized -Wunused -pedantic -Wall -Wsurprising -fbacktrace -fbounds-check -W -O3 $(INCLUDESDIR)
 # FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
-FCFLAGS = -check uninit -warn all -no-wrap-margin -WB -O3 $(INCLUDESDIR)
-#FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+#FCFLAGS = -check uninit -warn all -no-wrap-margin -WB -O3 $(INCLUDESDIR)
+ FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\
@@ -17,7 +17,6 @@ SRCS = precision_vars.f90\
        control_variables.f90\
        poly_fit_Mod.f90\
        runge_kutta.f90\
-       output_module.f90\
        Stage_Value_module.f90\
        QR_Module.f90\
        matvec_module.f90\
@@ -34,6 +33,7 @@ SRCS = precision_vars.f90\
        Boscarino31_mod.f90\
        Broadwell_mod.f90\
        problemsub.f90\
+       output_module.f90\
        Newton.f90\
        test_cases.f90
 
@@ -51,7 +51,6 @@ OBJS = precision_vars.o\
        control_variables.o\
        poly_fit_Mod.o\
        runge_kutta.o\
-       output_module.o\
        Stage_Value_module.o\
        QR_Module.o\
        matvec_module.o\
@@ -68,6 +67,7 @@ OBJS = precision_vars.o\
        Boscarino31_mod.o\
        Broadwell_mod.o\
        problemsub.o\
+       output_module.o\
        Newton.o\
        test_cases.o
 

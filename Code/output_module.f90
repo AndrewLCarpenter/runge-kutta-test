@@ -391,7 +391,7 @@
 
       tmp=abs(uvec(:)-uexact(:))
       do i = 1,nveclen
-       if (tmp(i)==0.0_wp)tmp(i)=1.0e-15_wp  
+       if (tmp(i) <= 0.0_wp)tmp(i)=1.0e-15_wp  
       enddo
       
       do i = 1,neq
@@ -455,6 +455,7 @@
       enddo
       
       end subroutine write_time_depen_sol  
+
 !==============================================================================
 !******************************************************************************
 ! Outputs solution for each iDT value for use in finding exact solution
@@ -473,6 +474,7 @@
 ! INPUTS:
 ! iDT     -> Timestep counter from timestep loop to define dt,          integer
 !******************************************************************************
+
       subroutine output_iDT_sol(iDT)
       
       use control_variables, only: uvec
