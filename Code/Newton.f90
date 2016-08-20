@@ -44,7 +44,7 @@
 ! newt_line_search -> Performs newton iteration with line search
 ! Convert_to_CSR   -> converts dense matrix to CSR
 ! QR_decomp        -> Performs QR decomposition and solving
-! Build_Rnewton    -> Calls problemsub to build RHS and RNewton
+! Nonlinear_Residual    -> Calls problemsub to build RHS and RNewton
 ! check_exit       -> checks whether newton iteration 
 ! Mat_invert       -> inverts dense matrix up to rank 4
 ! 
@@ -100,7 +100,7 @@
                   icount = icount + 1
                   uveciter(:) = uvec(:) !store old uvec
 
-                  Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+                  Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                 
                   uvec(:)=uvec(:)-LU_solver(Rnewton)
@@ -113,7 +113,7 @@
                   icount = icount + 1
                   uveciter(:) = uvec(:) !store old uvec   
                                 
-                  Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+                  Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                     
                   if (nveclen>4 .and. .not. QR) then !No explicit inverse
@@ -209,14 +209,14 @@
 ! iprob   -> defines problem number,                                    integer
 ! L       -> stage number,                                              integer
 ! OUTPUTS: 
-! Build_Rnewton -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
+! Nonlinear_Residual -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
 !******************************************************************************    
-      function Build_Rnewton(ep,dt,time,aI,iprob,L)
+      function Nonlinear_Residual(ep,dt,time,aI,iprob,L)
       
       use control_variables, only: uvec,usum,resI,programstep
       use problemsub_mod,    only: problemsub
             
-      real(wp), dimension(size(uvec))       :: Build_Rnewton
+      real(wp), dimension(size(uvec))       :: Nonlinear_Residual
       real(wp),               intent(in   ) :: ep,dt,time,aI
       integer,                intent(in   ) :: iprob,L
 
@@ -227,9 +227,9 @@
       
       programStep='BUILD_RHS'
       call problemsub(iprob,nveclen,neq,ep,dt_in,tfinal,iDT,time,aI,L)
-      Build_Rnewton(:) = uvec(:)-aI*resI(:,L)-usum(:)
+      Nonlinear_Residual(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
-      end function Build_Rnewton
+      end function Nonlinear_Residual
 !==============================================================================
 !******************************************************************************
 ! Subroutine to get Jacobian for newton iteration
@@ -344,7 +344,7 @@
 !
 ! MODULE ROUTINES:
 ! Build_Jac     -> Calls problemsub to build the problem's jacobian
-! Build_Rnewton -> Calls problemsub to build RHS and RNewton
+! Nonlinear_Residual -> Calls problemsub to build RHS and RNewton
 ! check_exit    -> checks whether newton iteration 
 ! Mat_invert    -> inverts dense matrix up to rank 4
 ! 
@@ -379,11 +379,15 @@
 
       real(wp) :: al,rnorm,rnormt
       real(wp), dimension(nveclen) :: dxi
+
+!     real(wp) :: delta_k, delta_km1
+!     real(wp) ::   eta_k,   eta_km1
+
       
       do k = 1,150
         icount = icount + 1
    
-        Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+        Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
     
         rnorm = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 
@@ -405,7 +409,7 @@
                           !stored so that calculations are done correctly
           uvec(:) = uvec(:) - al*dxi
              
-          Rnewton=Build_Rnewton(ep,dt,time,aI,iprob,L)
+          Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
     
           rnormt = sqrt(dot_product(Rnewton(:),Rnewton(:)))
 
@@ -428,6 +432,164 @@
         endif
       enddo      
       end subroutine newt_line_search
+
+!==============================================================================
+
+      subroutine Inexact_Newton_Dogleg(iprob,L,ep,dt,nveclen,time,aI,icount,k)
+      
+      use control_variables, only: uvec,xjac,Jac_case
+      use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac
+      use matvec_module,     only: amux
+      
+      integer,  intent(in   ) :: iprob,L
+      real(wp), intent(in   ) :: ep,dt
+      integer,  intent(in   ) :: nveclen
+      real(wp), intent(in   ) :: time,aI
+      integer,  intent(inout) :: icount,k
+      
+      real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobianxjac,
+
+      real(wp), dimension(nveclen) :: ustor
+      real(wp), dimension(nveclen) :: S_k, S_InNewt, S_Cauchy, SteepD_k
+      real(wp), dimension(nveclen) :: J_SteepD_k, J_S_Cauchy, J_S_k
+ 
+      real(wp), dimension(nveclen) :: R_NonLin_k,        R_NonLin_predct_k
+      real(wp), dimension(nveclen) :: R_Cauchy_predct_k, R_InNewt_predct_k
+
+      real(wp)                     :: S_Cauchy_L2_k,        S_InNewt_L2
+      real(wp)                     :: R_NonLin_L2_k,        R_NonLin_L2_km1
+      real(wp)                     :: R_NonLin_predct_L2_k, R_NonLin_predct_L2_km1
+      real(wp)                     :: R_Cauchy_predct_L2_k
+      real(wp)                     :: SteepD_L2_k, J_SteepD_L2_k
+
+      real(wp)                     :: delta_k
+      real(wp)                     ::   eta_k
+      real(wp)                     :: gamma_k
+      real(wp)                     :: ratio
+
+      integer                      :: ierr
+      
+      R_NonLin_L2_k          = -10000000.0_wp ; R_NonLin_L2_km1        = -10000000.0_wp ;
+      R_NonLin_predct_L2_k   = -10000000.0_wp ; R_NonLin_predct_L2_km1 = -10000000.0_wp ;
+
+      S_Cauchy               = -10000000.0_wp ; J_S_Cauchy             = -10000000.0_wp ;
+      S_InNewt               = -10000000.0_wp ; S_k                    = -10000000.0_wp ;
+      SteepD_k               = -10000000.0_wp ; J_SteepD_k             = -10000000.0_wp ;
+
+      !     F(x_k)  &  ||F(x_k)||
+      R_NonLin_k = Nonlinear_Residual(ep,dt,time,aI,iprob,L)
+      R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:)))
+
+      k = 0 
+      call NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
+                                      R_NonLin_predct_L2_k, S_InNewt_L2, Delta_k)
+
+      call NL_Optimization_Eta_k  (k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
+                                      R_NonLin_predct_L2_k,             Eta_k)
+
+      do k = 1,100
+
+        ustor(:)=uvec(:)  ! uvec is global and needs to be temp
+
+      !     {\partial F}{\partial (x_k)}
+        call Build_Jac(ep,dt,time,aI,iprob,L)
+
+         
+      !  First build Cauchy point: it does not require matrix inverse
+        select case(Jac_case)
+          case('DENSE')
+              SteepD_k = MatMul(Transpose(xjac),R_NonLin_k)
+            J_SteepD_k = MatMul(xjac,SteepD_k)
+          case('SPARSE')
+            call atmux(nveclen,R_NonLin_k,  SteepD_k,aJac,jaJac,iaJac)
+            call amux (nveclen,SteepD_k   ,J_SteepD_k,aJac,jaJac,iaJac)
+        end select
+
+          SteepD_L2_k = sqrt(dot_product(  SteepD_k,  SteepD_k))
+        J_SteepD_L2_k = sqrt(dot_product(J_SteepD_k,J_SteepD_k))
+
+        ratio = SteepD_L2_k**2/J_SteepD_L2_k**2 
+        S_Cauchy(:)      = ratio * SteepD_k(:)
+        S_Cauchy_L2_k    = sqrt(dot_product(S_Cauchy,S_Cauchy))
+
+        if ( S_Cauchy_L2_k >= Delta_k) then
+            ratio = Delta_k / S_Cauchy_L2_k
+           S_k(:) = ratio * S_Cauchy(:)
+        else
+          select case(Jac_case)
+            case('DENSE')
+              J_S_Cauchy = MatMul(xjac,S_Cauchy)
+            case('SPARSE')
+              call amux(nveclen,S_Cauchy,J_S_Cauchy,aJac,jaJac,iaJac)
+          end select
+          R_Cauchy_predct_k(:) = R_NonLin_k(:) + J_S_Cauchy(:)
+          R_Cauchy_predct_L2_k = sqrt(dot_product(R_Cauchy_predct_k, &
+                                                  R_Cauchy_predct_k))
+
+          if(R_Cauchy_predct_L2_k <= Eta_k * R_NonLin_L2_k ) then
+             S_k(:) = S_Cauchy(:)
+          else
+            select case(Jac_case)
+              case('DENSE')
+                xjacinv=Mat_invert(xjac) ; S_InNewt = MatMul(xjacinv,R_NonLin_k)
+              case('SPARSE')
+                S_InNewt = LU_solver(R_NonLin_k)
+            end select
+
+            S_InNewt_L2 = sqrt(dot_product(S_InNewt,S_InNewt))
+
+            if(S_InNewt_L2 <= Delta_k) then
+              S_k(:) = S_InNewt(:)
+            else
+              
+              call amux(nveclen,S_InNewt,R_InNewt_predct_k,aJac,jaJac,iaJac)
+
+              call NL_Optimization_gamma(S_Cauchy, R_Cauchy_predct_k, &
+                                         S_InNewt, R_InNewt_predct_k, &
+                                         delta_k, gamma_k) 
+
+              S_k(:) = (1.0_wp - gamma_k) * S_Cauchy(:)  &
+                     + (         gamma_k) * S_InNewt(:)
+            endif
+
+          endif
+            
+        endif
+
+        call amux(nveclen,S_k,J_S_k,aJac,jaJac,iaJac)
+        R_NonLin_predct_k      = R_NonLin_k + J_S_k
+        R_NonLin_predct_L2_k   = sqrt(dot_product(R_NonLin_predct_k, &
+                                                  R_NonLin_predct_k))
+
+
+        R_NonLin_predct_L2_km1 = R_NonLin_predct_L2_k
+        R_NonLin_L2_km1        = R_NonLin_L2_k
+
+        uvec(:) = ustor(:) + S_k(:)
+
+        !     F(x_k)  
+        R_NonLin_k = Nonlinear_Residual(ep,dt,time,aI,iprob,L)
+        !   ||F(x_k)||
+        R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:)))
+
+
+        call NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
+                                        R_NonLin_predct_L2_k, S_InNewt_L2,&
+                                        Delta_k)
+
+        call NL_Optimization_Eta_k  (k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
+                                        R_NonLin_predct_L2_k,         Eta_k)
+
+        print*,'L',L,'k',k,'tmp',R_NonLin_L2_k!,'j',j
+        if(R_NonLin_L2_k <= 1.0e-10_wp) then
+          ierr = 0
+          icount = icount + k
+          return
+        endif
+      enddo      
+      icount = icount + k - 1
+
+      end subroutine Inexact_Newton_Dogleg
       
 !==============================================================================
 !******************************************************************************
@@ -447,7 +609,7 @@
 !   qrdcmp -> performs QR decomposition
 !   qrsolv -> performs QR solving 
 ! MODULE ROUTINES:
-! Build_Rnewton -> Calls problemsub to build RHS and RNewton
+! Nonlinear_Residual -> Calls problemsub to build RHS and RNewton
 ! 
 !******************************************************************************
 ! INPUTS:
@@ -695,4 +857,181 @@
 
       end subroutine Convert_to_CSR
 !==============================================================================      
+!============================================================================
+
+      subroutine NL_Optimization_Delta_k(k, F_NonLin_L2_kp1, F_NonLin_L2_k,   &
+                                            F_NonLin_L2_pred_kp1, S_InNewt_L2, Delta_k)
+
+!============================================================================
+
+!   Uses the current and previous nonlinear residuals and the current predicted residual
+!
+!   Inexact Newton Dogleg Methods
+!   R. PAWLOWSKI, J. SIMONIS, H. WALKER, AND J. SHADID
+!
+!   Worcester Polytechnic Institute:     DigitalCommons@WPI
+!   SIAM J. Numer. Anal, Vol. 46, No. 4, pp. 2112-2132,   (2008)
+!
+!
+!   Integer:
+!      k                                                    :  Nonlinear iteration
+
+!   Real:
+!      F_NonLin_L2_kp1      =  || F(x_k  ) ||                    :  Nonlinear residual at iteration k
+!      F_NonLin_L2_k        =  || F(x_km1) ||                    :  Nonlinear residual at iteration km1
+!      F_NonLin_L2_pred_kp1 =  || F(x_km1) + F'(x_km1) S_km1 ||  :  Predicted nonlinear residual at k
+!      S_InNewt_L2          =  || S_Inexact_Newton ||            :  Update provided by GMRES iteration
+!      Delta_k                                                   :  
+!
+
+      integer,  intent(in)    :: k
+      real(wp), intent(in)    :: F_NonLin_L2_kp1, F_NonLin_L2_k
+      real(wp), intent(in)    :: F_NonLin_L2_pred_kp1, S_InNewt_L2
+      real(wp), intent(inout) :: Delta_k
+  
+      real(wp)                :: act_red_k, pred_red_k
+      real(wp), parameter     ::   rho_s   = 0.10_wp   ,   rho_e   = 0.75_wp
+      real(wp), parameter     ::  beta_s   = 0.25_wp   ,  beta_e   = 4.00_wp
+      real(wp), parameter     :: delta_min = 1.0e-06_wp, delta_max = 1.0e+10_wp
+      real(wp), parameter     ::     eps   = 1.0e-10_wp
+
+      continue
+
+      if(k == 0) then
+
+        if( S_InNewt_L2 < Delta_min) then
+          Delta_k = 2.0_wp * Delta_min
+        else
+          Delta_k = S_InNewt_L2
+        endif
+
+      else
+
+         act_red_k = F_NonLin_L2_k - F_NonLin_L2_kp1
+        pred_red_k = F_NonLin_L2_k - F_NonLin_L2_pred_kp1
+  
+        if(act_red_k / pred_red_k < rho_s) then
+           if(S_InNewt_L2 < Delta_k) then
+              Delta_k = max(S_InNewt_L2,Delta_min)
+           else
+              Delta_k = max(beta_s*Delta_k,Delta_min)
+           endif
+        else
+           if( (act_red_k / pred_red_k > rho_e) .and. (S_InNewt_L2 - Delta_k <= eps) ) then
+             Delta_k = min(beta_e*Delta_k, Delta_max)
+           else
+             Delta_k = Delta_k
+           endif
+  
+        endif
+      endif
+
+      end subroutine NL_Optimization_Delta_k
+
+!============================================================================
+
+      subroutine NL_Optimization_Eta_k(k, F_norm_k, F_norm_km1, &
+                                       F_norm_pred_km1, Eta_k)
+
+!============================================================================
+!       Algorithm IN. Inexact newton method 
+!           Let x0 be given.
+!           For k = 0, 1, . . . (until convergence) do:
+!           Choose η_k ∈ [0, 1) and s^IN_k such that
+!           ||F(x_k) + F'(x_k) s^IN_k|| ≤ \eta_k || F(x_k) || .
+!           Set x_{k+1} = x_k + s^IN_k.
+
+!   Adjust the forcing term \eta_k region  
+!
+!   Uses the current and previous nonlinear residuals and the current predicted residual
+!
+!   Inexact Newton Dogleg Methods
+!   R. PAWLOWSKI, J. SIMONIS, H. WALKER, AND J. SHADID
+!
+!   Worcester Polytechnic Institute:     DigitalCommons@WPI
+!   SIAM J. Numer. Anal, Vol. 46, No. 4, pp. 2112-2132,   (2008)
+!
+!
+!   Integer:
+!      k                                                    :  Nonlinear iteration
+
+!   Real:
+!      F_norm_k        =  || F(x_k  ) ||                    :  Nonlinear residual at iteration k
+!      F_norm_km1      =  || F(x_km1) ||                    :  Nonlinear residual at iteration km1
+!      F_norm_pred_k   =  || F(x_km1) + F'(x_km1) S_km1 ||  :  Predicted nonlinear residual at k
+!      Eta_k                                                :  Trust region radius
+!
+!============================================================================
+
+      implicit none
+
+      integer,  intent(in)    :: k
+      real(wp), intent(in)    :: F_norm_k,F_norm_km1,F_norm_pred_km1
+      real(wp), intent(inout) :: Eta_k
+  
+      real(wp)                :: Eta_k_tmp, expo
+      real(wp), parameter     :: Eta_max = 0.9_wp, Eta_0 = 0.01_wp
+
+      real(wp), save          :: Eta_km1
+  
+      continue
+
+      if(k == 1) then
+        Eta_k = Eta_0
+      else
+        Eta_k_tmp = min(Eta_max, abs( F_norm_k - F_norm_pred_km1 ) / F_norm_km1)
+        expo = (1.0_wp+sqrt(5.0_wp))/2.0_wp
+        if( Eta_km1**expo  > 0.1_wp ) then
+          Eta_k = max(Eta_k_tmp, Eta_km1**expo)
+        else
+          Eta_k = Eta_k_tmp
+        endif
+      endif
+      Eta_km1 = Eta_k
+
+      end subroutine NL_Optimization_Eta_k
+
+!============================================================================
+
+      subroutine NL_Optimization_gamma(S_Cauchy, R_Cauchy_predct, &
+                                       S_InNewt, R_InNewt_predct, &
+                                       delta_k, gamma_k) 
+
+      implicit none
+
+      real(wp), dimension(:), intent(in   )    :: S_Cauchy, R_Cauchy_predct
+      real(wp), dimension(:), intent(in   )    :: S_InNewt, R_InNewt_predct
+      real(wp),               intent(in   )    :: delta_k
+      real(wp),               intent(  out)    :: gamma_k
+
+      real(wp), dimension(size(S_Cauchy))      :: wrk
+
+      real(wp)                                 :: gam_min, gam_P
+      real(wp)                                 :: T1, T2, T3, T4
+
+  
+      continue
+
+      wrk(:) = R_Cauchy_predct(:) - R_InNewt_predct(:)
+
+      gam_min = dot_product(R_Cauchy_predct,wrk) /  &
+              & dot_product(            wrk,wrk) 
+
+      wrk(:) = S_Cauchy(:) - S_InNewt(:)
+
+      T1 = dot_product(S_Cauchy, wrk     )
+      T2 = dot_product(S_Cauchy, S_Cauchy)
+      T3 = dot_product(    wrk , wrk     )
+      T4 = delta_k**2
+
+      if (T4 >= T2) then
+        gam_P = (T1 + sqrt( T1 * T1 + (T4 - T2) * T3 )) / T3
+      else
+        write(*,*)'somethings wrong in NL_Optimization_gama' ; stop ;
+      endif
+
+      gamma_k = min(gam_min, gam_P)
+
+      end subroutine NL_Optimization_gamma
+
       end module Newton
