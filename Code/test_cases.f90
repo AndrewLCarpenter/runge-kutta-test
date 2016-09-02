@@ -162,12 +162,13 @@
 !-----------------------------USER INPUT---------------------------------------
       write(*,*)'what is ipred?' !input predictor number
       read(*,*)ipred
-      write(*,*)'what is case?'  !input range of runge kutta cases
-      read(*,*)cases
+!     write(*,*)'what is case?'  !input range of runge kutta cases
+!     read(*,*)cases
       write(*,*)'which problem?' !input problem number
       read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
-      do icase = cases,cases
+!     do icase = cases,cases
+      do icase = 7,18
       
         !**initilizations?**
         stageE(:) = 0.0_wp

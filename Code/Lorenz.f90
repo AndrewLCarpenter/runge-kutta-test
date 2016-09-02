@@ -17,10 +17,10 @@
 
       implicit none; save
 !-----------------------VARIABLES----------------------------------------------
-      integer, parameter     :: vecl=3
-      real(wp), parameter    :: sigma=5.0_wp
-      real(wp), parameter    :: beta=1.0_wp/3.0_wp
-      real(wp), parameter    :: rho=2.0_wp
+      integer,  parameter    :: vecl  = 3
+      real(wp), parameter    :: sigma0= 10.0_wp
+      real(wp), parameter    :: beta0 = 8.0_wp/3.0_wp
+      real(wp), parameter    :: rho0  = 28.0_wp
                  
       !INIT vars
       real(wp),        intent(in   ) :: ep
@@ -31,6 +31,8 @@
 
       real(wp), dimension(81,vecl+1) :: ExactTot
       real(wp)                       :: diff
+      real(wp)                       :: x0,y0,z0,x1,y1,z1
+      real(wp)                       :: sigma,beta,rho
       integer                        :: i
 
       !RHS vars
@@ -38,15 +40,19 @@
       
       !Jacob vars
       real(wp), intent(in   ) :: akk
-!------------------------------------------------------------------------------
+
+      sigma =  sigma0/ ep
+      beta  =  beta0
+      rho   =  rho0
       
+!------------------------------------------------------------------------------
       Program_Step_Select: select case(programstep)
         !**Pre-initialization. Get problem name and vector length**
         case('INITIALIZE_PROBLEM_INFORMATION')
           nvecLen = vecl
           neq = vecl
           probname='Lorenz   '         
-          tol=1.0e-14_wp
+          tol=1.0e-12_wp
           dt_error_tol=1.0e-11_wp
           
           allocate(var_names(neq))
@@ -76,28 +82,39 @@
           enddo
 
           !**IC**
-          uvec(1) = 0.0_wp
-          uvec(2) = 1.0_wp
-          uvec(3) = 0.0_wp
+!         uvec(1) = 0.0_wp
+!         uvec(2) = 1.0_wp
+!         uvec(3) = 0.0_wp
+
+          z0 = rho - 1.0_wp
+          x0 = sqrt(beta*z0)
+          y0 = x0
+          z1 =  0.0_wp
+          x1 = +1.0_wp
+          y1 = x1
+
+          uvec(1) = x0 + ep * x1
+          uvec(2) = y0 + ep * y1
+          uvec(3) = z0 + ep * z1
         
         case('BUILD_RHS')
           choose_RHS_type: select case (Temporal_Splitting)
             case('EXPLICIT') ! For fully explicit schemes
               resI_vec(:)=0.0_wp
-              resE_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
+              resE_vec(1)=dt*sigma*(uvec(2)-uvec(1))
               resE_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
               resE_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
             case('IMEX') ! For IMEX schemes
               rese_vec(1)=0.0_wp
               rese_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
               rese_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))     
-              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
+              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))
               resi_vec(2)=0.0_wp
               resi_vec(3)=0.0_wp            
             case('IMPLICIT') ! For fully implicit schemes
               rese_vec(:)=0.0_wp
-              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))/ep
-              resi_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
+              resi_vec(1)=dt*(sigma*(uvec(2)-uvec(1)))
+              resi_vec(2)=dt*( (rho - uvec(3))*uvec(1) - uvec(2) )
               resi_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
           end select choose_RHS_type
           
@@ -116,9 +133,9 @@
               xjac(3,2) = 0.0_wp
               xjac(3,3) = 1.0_wp
             case('IMEX') ! For IMEX schemes
-              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.0_wp-akk*dt*(+sigma)/ep
-              xjac(1,3) = 0.0_wp-akk*dt*(0.0_wp)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)
+              xjac(1,2) = 0.0_wp-akk*dt*(+sigma)
+              xjac(1,3) = 0.0_wp-akk*dt*(0.0_wp)
 
               xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
               xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)
@@ -128,9 +145,9 @@
               xjac(3,2) = 0.0_wp-akk*dt*(0.0_wp)
               xjac(3,3) = 1.0_wp-akk*dt*(0.0_wp)
             case('IMPLICIT') ! For fully implicit schemes
-              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)/ep
-              xjac(1,2) = 0.0_wp-akk*dt*(+sigma)/ep
-              xjac(1,3) = 0.0_wp-akk*dt*(0)/ep
+              xjac(1,1) = 1.0_wp-akk*dt*(-sigma)
+              xjac(1,2) = 0.0_wp-akk*dt*(+sigma)
+              xjac(1,3) = 0.0_wp-akk*dt*(0)
 
               xjac(2,1) = 0.0_wp-akk*dt*(rho-uvec(3))
               xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)

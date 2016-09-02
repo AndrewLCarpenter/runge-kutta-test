@@ -93,6 +93,7 @@
         case default !IMEX or IMPLICIT
           line: if (Line_search) then
             call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
+!           call Inexact_Newton_Dogleg(iprob,L,ep,dt,nveclen,time,aI,icount,k)
           else
             Jac_select: select case(Jac_case)
               case('SPARSE')
@@ -439,7 +440,7 @@
       
       use control_variables, only: uvec,xjac,Jac_case
       use Jacobian_CSR_Mod,  only: iaJac,jaJac,aJac
-      use matvec_module,     only: amux
+      use matvec_module,     only: amux, atmux
       
       integer,  intent(in   ) :: iprob,L
       real(wp), intent(in   ) :: ep,dt
@@ -457,6 +458,7 @@
       real(wp), dimension(nveclen) :: R_Cauchy_predct_k, R_InNewt_predct_k
 
       real(wp)                     :: S_Cauchy_L2_k,        S_InNewt_L2
+      real(wp)                     :: S_L2_k
       real(wp)                     :: R_NonLin_L2_k,        R_NonLin_L2_km1
       real(wp)                     :: R_NonLin_predct_L2_k, R_NonLin_predct_L2_km1
       real(wp)                     :: R_Cauchy_predct_L2_k
@@ -465,29 +467,29 @@
       real(wp)                     :: delta_k
       real(wp)                     ::   eta_k
       real(wp)                     :: gamma_k
-      real(wp)                     :: ratio
+      real(wp)                     :: ratio, small
+      real(wp), parameter          :: T1 = -10000000.0_wp
 
       integer                      :: ierr
       
-      R_NonLin_L2_k          = -10000000.0_wp ; R_NonLin_L2_km1        = -10000000.0_wp ;
-      R_NonLin_predct_L2_k   = -10000000.0_wp ; R_NonLin_predct_L2_km1 = -10000000.0_wp ;
+      R_NonLin_L2_k          = T1 ; R_NonLin_L2_km1        = T1 ;
+      R_NonLin_predct_L2_k   = T1 ; R_NonLin_predct_L2_km1 = T1 ;
 
-      S_Cauchy               = -10000000.0_wp ; J_S_Cauchy             = -10000000.0_wp ;
-      S_InNewt               = -10000000.0_wp ; S_k                    = -10000000.0_wp ;
-      SteepD_k               = -10000000.0_wp ; J_SteepD_k             = -10000000.0_wp ;
+      S_Cauchy               = T1 ; J_S_Cauchy             = T1 ;
+      S_InNewt               = T1 ; S_k                    = T1 ;
+      SteepD_k               = T1 ; J_SteepD_k             = T1 ;
+      gamma_k = 1.0_wp            ;  small = 1.0e-40_wp
+      eta_k   = 0.01_wp           ;  Delta_k = 0.1 ;
 
       !     F(x_k)  &  ||F(x_k)||
       R_NonLin_k = Nonlinear_Residual(ep,dt,time,aI,iprob,L)
-      R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:)))
+      R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:))+small)
 
-      k = 0 
-      call NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
-                                      R_NonLin_predct_L2_k, S_InNewt_L2, Delta_k)
+      do k = 1,25
 
-      call NL_Optimization_Eta_k  (k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
-                                      R_NonLin_predct_L2_k,             Eta_k)
-
-      do k = 1,100
+      write(*,*)'k,R_NonLin_L2_k',k,R_NonLin_L2_k
+      write(*,*)'k,Delta_k',k,Delta_k
+      write(*,*)'k,Eta_k',k,Eta_k
 
         ustor(:)=uvec(:)  ! uvec is global and needs to be temp
 
@@ -498,23 +500,29 @@
       !  First build Cauchy point: it does not require matrix inverse
         select case(Jac_case)
           case('DENSE')
-              SteepD_k = MatMul(Transpose(xjac),R_NonLin_k)
-            J_SteepD_k = MatMul(xjac,SteepD_k)
+              SteepD_k = + MatMul(Transpose(xjac),R_NonLin_k)
+            J_SteepD_k = + MatMul(xjac,SteepD_k)
           case('SPARSE')
-            call atmux(nveclen,R_NonLin_k,  SteepD_k,aJac,jaJac,iaJac)
-            call amux (nveclen,SteepD_k   ,J_SteepD_k,aJac,jaJac,iaJac)
+            call atmux(nveclen,R_NonLin_k,SteepD_k,aJac,jaJac,iaJac)
+            call amux (nveclen,SteepD_k,J_SteepD_k,aJac,jaJac,iaJac)
         end select
 
-          SteepD_L2_k = sqrt(dot_product(  SteepD_k,  SteepD_k))
-        J_SteepD_L2_k = sqrt(dot_product(J_SteepD_k,J_SteepD_k))
+          SteepD_L2_k = sqrt(dot_product(  SteepD_k,  SteepD_k)+small)
+        J_SteepD_L2_k = sqrt(dot_product(J_SteepD_k,J_SteepD_k)+small)
 
         ratio = SteepD_L2_k**2/J_SteepD_L2_k**2 
-        S_Cauchy(:)      = ratio * SteepD_k(:)
-        S_Cauchy_L2_k    = sqrt(dot_product(S_Cauchy,S_Cauchy))
+        S_Cauchy(:)      = + ratio * SteepD_k(:)
+        S_Cauchy_L2_k    = sqrt(dot_product(S_Cauchy,S_Cauchy)+small)
 
-        if ( S_Cauchy_L2_k >= Delta_k) then
+        if (k<=2) then
+           delta_k = S_Cauchy_L2_k
+           S_k(:)  = S_Cauchy(:)
+!          write(*,*)'norm S_k: first step',l,k,sqrt(dot_product(S_k,S_k))
+        elseif ( S_Cauchy_L2_k >= Delta_k) then
             ratio = Delta_k / S_Cauchy_L2_k
            S_k(:) = ratio * S_Cauchy(:)
+!          write(*,*)'Cauchy path violates trust delta_k: S_Cauchy_L2_k', S_Cauchy_L2_k
+           write(*,*)'norm S_k: reduced Cauchy',l,k,sqrt(dot_product(S_k,S_k))
         else
           select case(Jac_case)
             case('DENSE')
@@ -524,10 +532,12 @@
           end select
           R_Cauchy_predct_k(:) = R_NonLin_k(:) + J_S_Cauchy(:)
           R_Cauchy_predct_L2_k = sqrt(dot_product(R_Cauchy_predct_k, &
-                                                  R_Cauchy_predct_k))
+                                                  R_Cauchy_predct_k)+small)
 
           if(R_Cauchy_predct_L2_k <= Eta_k * R_NonLin_L2_k ) then
              S_k(:) = S_Cauchy(:)
+!            write(*,*)'Cauchy path satisfies reduction tolerance'
+             write(*,*)'norm S_k: Cauchy reduction',l,k,sqrt(dot_product(S_k,S_k))
           else
             select case(Jac_case)
               case('DENSE')
@@ -536,10 +546,11 @@
                 S_InNewt = LU_solver(R_NonLin_k)
             end select
 
-            S_InNewt_L2 = sqrt(dot_product(S_InNewt,S_InNewt))
+            S_InNewt_L2 = sqrt(dot_product(S_InNewt,S_InNewt)+small)
 
             if(S_InNewt_L2 <= Delta_k) then
               S_k(:) = S_InNewt(:)
+              write(*,*)'norm S_k: newton',l,k,sqrt(dot_product(S_k,S_k))
             else
               
               call amux(nveclen,S_InNewt,R_InNewt_predct_k,aJac,jaJac,iaJac)
@@ -547,45 +558,46 @@
               call NL_Optimization_gamma(S_Cauchy, R_Cauchy_predct_k, &
                                          S_InNewt, R_InNewt_predct_k, &
                                          delta_k, gamma_k) 
-
               S_k(:) = (1.0_wp - gamma_k) * S_Cauchy(:)  &
-                     + (         gamma_k) * S_InNewt(:)
+                      + (         gamma_k) * S_InNewt(:)
+              write(*,*)'norm S_k: dogleg',l,k,sqrt(dot_product(S_k,S_k))
             endif
-
           endif
             
         endif
 
+        S_L2_k = sqrt(dot_product(S_k,S_k))
+
         call amux(nveclen,S_k,J_S_k,aJac,jaJac,iaJac)
         R_NonLin_predct_k      = R_NonLin_k + J_S_k
         R_NonLin_predct_L2_k   = sqrt(dot_product(R_NonLin_predct_k, &
-                                                  R_NonLin_predct_k))
+                                                  R_NonLin_predct_k)+small)
 
 
         R_NonLin_predct_L2_km1 = R_NonLin_predct_L2_k
         R_NonLin_L2_km1        = R_NonLin_L2_k
 
-        uvec(:) = ustor(:) + S_k(:)
+        uvec(:) = ustor(:) - S_k(:)
 
         !     F(x_k)  
         R_NonLin_k = Nonlinear_Residual(ep,dt,time,aI,iprob,L)
         !   ||F(x_k)||
-        R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:)))
+        R_NonLin_L2_k  = sqrt(dot_product(R_NonLin_k(:),R_NonLin_k(:))+small)
 
 
         call NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
-                                        R_NonLin_predct_L2_k, S_InNewt_L2,&
+                                        R_NonLin_predct_L2_k, S_L2_k,     &
                                         Delta_k)
 
         call NL_Optimization_Eta_k  (k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
                                         R_NonLin_predct_L2_k,         Eta_k)
-
-        print*,'L',L,'k',k,'tmp',R_NonLin_L2_k!,'j',j
+        print*,'L',L,'k',k,'tmp',R_NonLin_L2_k,'||Uvec||',sqrt(dot_product(uvec(:),uvec(:)))
         if(R_NonLin_L2_k <= 1.0e-10_wp) then
           ierr = 0
           icount = icount + k
           return
         endif
+
       enddo      
       icount = icount + k - 1
 
@@ -856,11 +868,12 @@
       enddo
 
       end subroutine Convert_to_CSR
-!==============================================================================      
-!============================================================================
 
-      subroutine NL_Optimization_Delta_k(k, F_NonLin_L2_kp1, F_NonLin_L2_k,   &
-                                            F_NonLin_L2_pred_kp1, S_InNewt_L2, Delta_k)
+!==============================================================================      
+
+      subroutine NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
+                                            R_NonLin_predct_L2_k, S_InNewt_L2,&
+                                            Delta_k)
 
 !============================================================================
 
@@ -877,22 +890,22 @@
 !      k                                                    :  Nonlinear iteration
 
 !   Real:
-!      F_NonLin_L2_kp1      =  || F(x_k  ) ||                    :  Nonlinear residual at iteration k
-!      F_NonLin_L2_k        =  || F(x_km1) ||                    :  Nonlinear residual at iteration km1
-!      F_NonLin_L2_pred_kp1 =  || F(x_km1) + F'(x_km1) S_km1 ||  :  Predicted nonlinear residual at k
+!      R_NonLin_L2_k        =  || F(x_k  ) ||                    :  Nonlinear residual at iteration k
+!      R_NonLin_L2_km1      =  || F(x_km1) ||                    :  Nonlinear residual at iteration km1
+!      R_NonLin_Predct_L2_k =  || F(x_km1) + F'(x_km1) S_km1 ||  :  Predicted nonlinear residual at k
 !      S_InNewt_L2          =  || S_Inexact_Newton ||            :  Update provided by GMRES iteration
 !      Delta_k                                                   :  
 !
 
       integer,  intent(in)    :: k
-      real(wp), intent(in)    :: F_NonLin_L2_kp1, F_NonLin_L2_k
-      real(wp), intent(in)    :: F_NonLin_L2_pred_kp1, S_InNewt_L2
+      real(wp), intent(in)    :: R_NonLin_L2_k, R_NonLin_L2_km1
+      real(wp), intent(in)    :: R_NonLin_Predct_L2_k, S_InNewt_L2
       real(wp), intent(inout) :: Delta_k
   
       real(wp)                :: act_red_k, pred_red_k
       real(wp), parameter     ::   rho_s   = 0.10_wp   ,   rho_e   = 0.75_wp
       real(wp), parameter     ::  beta_s   = 0.25_wp   ,  beta_e   = 4.00_wp
-      real(wp), parameter     :: delta_min = 1.0e-06_wp, delta_max = 1.0e+10_wp
+      real(wp), parameter     :: delta_min = 1.0e-03_wp, delta_max = 1.0e+08_wp
       real(wp), parameter     ::     eps   = 1.0e-10_wp
 
       continue
@@ -907,11 +920,11 @@
 
       else
 
-         act_red_k = F_NonLin_L2_k - F_NonLin_L2_kp1
-        pred_red_k = F_NonLin_L2_k - F_NonLin_L2_pred_kp1
+         act_red_k = R_NonLin_L2_km1 - R_NonLin_L2_k
+        pred_red_k = R_NonLin_L2_km1 - R_NonLin_Predct_L2_k
   
         if(act_red_k / pred_red_k < rho_s) then
-           if(S_InNewt_L2 < Delta_k) then
+           if(S_InNewt_L2 <= Delta_k) then
               Delta_k = max(S_InNewt_L2,Delta_min)
            else
               Delta_k = max(beta_s*Delta_k,Delta_min)
@@ -976,17 +989,14 @@
   
       continue
 
-      if(k == 1) then
-        Eta_k = Eta_0
+      Eta_k_tmp = min(Eta_max, abs( F_norm_k - F_norm_pred_km1 ) / F_norm_km1)
+      expo = (1.0_wp+sqrt(5.0_wp))/2.0_wp
+      if( Eta_km1**expo  > 0.1_wp ) then
+        Eta_k = max(Eta_k_tmp, Eta_km1**expo)
       else
-        Eta_k_tmp = min(Eta_max, abs( F_norm_k - F_norm_pred_km1 ) / F_norm_km1)
-        expo = (1.0_wp+sqrt(5.0_wp))/2.0_wp
-        if( Eta_km1**expo  > 0.1_wp ) then
-          Eta_k = max(Eta_k_tmp, Eta_km1**expo)
-        else
-          Eta_k = Eta_k_tmp
-        endif
+        Eta_k = Eta_k_tmp
       endif
+
       Eta_km1 = Eta_k
 
       end subroutine NL_Optimization_Eta_k
@@ -1027,7 +1037,7 @@
       if (T4 >= T2) then
         gam_P = (T1 + sqrt( T1 * T1 + (T4 - T2) * T3 )) / T3
       else
-        write(*,*)'somethings wrong in NL_Optimization_gama' ; stop ;
+        write(*,*)'somethings wrong in NL_Optimization_gamma' ; stop ;
       endif
 
       gamma_k = min(gam_min, gam_P)
