@@ -3120,7 +3120,7 @@
 !     THIRD-ORDER
 !     ===============================================
  
-      casename='ESDIRK3(2)4L[2]SA'
+      casename='ESDIRK324L[2]SA'
       ns=4
 
       bI(1) = 1471266399579.0_wp/7840856788654.0_wp
@@ -3158,7 +3158,7 @@
  
       elseif(icase.eq.102) then
 
-      casename='ESDIRK3(2)5L[2]SA (page 85, TM-2016-219173)'
+      casename='ESDIRK325L[2]SA' !(page 85, TM-2016-219173)'
       ns=5
  
       bI(1) = 1150014452202.0_wp/6551090391107.0_wp
@@ -3196,7 +3196,7 @@
 !     ===============================================
 !     FOURTH-ORDER
 !     ===============================================
-      casename='SDIRK4 - Hairer & Wanner(1996)'
+      casename='SDIRK4' ! - Hairer & Wanner(1996)'
       ns=5
 
       bI(1) = 25.0_wp/24.0_wp
@@ -3232,7 +3232,7 @@
  
       elseif(icase.eq.104) then
 
-      casename='ESDIRK4(3)6L[2]SA_1 (page 90, TM-2016-219173)'
+      casename='ESDIRK436L[2]SA_1'  !(page 90, TM-2016-219173)'
       ns=6
  
       bI(1) = -140404485182.0_wp/9007427031765.0_wp
@@ -3277,7 +3277,7 @@
  
       elseif(icase.eq.105) then
 
-      casename='ESDIRK4(3)6L[2]SA_2 (2017 paper)'
+      casename='ESDIRK436L[2]SA_2' ! (2017 paper)
       ns=6
  
       bI(1) = -12917657251.0_wp/5222094901039.0_wp
@@ -3322,7 +3322,7 @@
  
       elseif(icase.eq.106) then
 
-      casename='ESDIRK4(3)7L[2]SA (page 100, TM-2016-219173)'
+      casename='ESDIRK437L[2]SA'  !(page 100, TM-2016-219173)
       ns=7
  
       bI(1) = -5649241495537.0_wp/14093099002237.0_wp
@@ -3379,7 +3379,7 @@
 ! ===============================================
 ! FIFTH-ORDER
 ! ===============================================
-      casename='ESDIRK5(4)7L[2]SA_1 (2017 paper)'
+      casename='ESDIRK547L[2]SA_1' !(2017 paper)
       ns=7
  
       bI(1) = -1319096626979.0_wp/17356965168099.0_wp
@@ -3434,7 +3434,7 @@
  
       elseif(icase.eq.108) then
 
-      casename='ESDIRK5(4)7L[2]SA_2 (2017 paper)'
+      casename='ESDIRK547L[2]SA_2' ! (2017 paper)
       ns=7
  
       bI(1) = -188593204321.0_wp/4778616380481.0_wp
@@ -3489,7 +3489,7 @@
  
       elseif(icase.eq.109) then
 
-      casename='ESDIRK5(4)8L[2]SA (2017 paper)'
+      casename='ESDIRK548L[2]SA'  ! (2017 paper)
       ns=8
 !
       bI(1) = 2162042939093.0_wp/22873479087181.0_wp
@@ -3555,7 +3555,7 @@
 
       elseif(icase.eq.201) then
 
-      casename='ESDIRK4(3)6L[2]SA_ARK'
+      casename='ESDIRK436L[2]SA_ARK'
       ns=6
  
       bI(1) = 82889.0_wp/524892.0_wp
@@ -3600,7 +3600,7 @@
  
       elseif(icase.eq.202) then
 
-      casename='ESDIRK4(3)6L[2]SA_3'
+      casename='ESDIRK436L[2]SA_3'
       ns=6
  
       bI(1) = -27737620336.0_wp/11183067741183.0_wp
@@ -3645,7 +3645,7 @@
  
       elseif(icase.eq.203) then
 
-      casename='ESDIRK5(4)7L[2]SA_3'
+      casename='ESDIRK547L[2]SA_3'
       ns=7
  
       bI(1) = -901527176531.0_wp/5442448871114.0_wp
