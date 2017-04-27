@@ -100,7 +100,7 @@
 ! iSource_p     -> permuted ia matrix for Source terms             integer,   dimension(u-vector length + 1),                           not modified
 ! update_Jac    -> logical flag set to decide when to update Jac,  logical,                                                                 set & modified
 ! grid          -> Subroutine to create grid
-! exact_Broadwell             ->Subroutine to build exact solution
+! exact_Broadwell             -> Subroutine to build exact solution
 ! Broadwell_dudt              -> Subroutine to build dudt (LHS)
 ! Broadwell_Build_Spatial_Jac -> Subroutine to build spatial Jacobian
 ! Broadwell_Build_Source_Jac  -> Subroutine to build source  Jacobian

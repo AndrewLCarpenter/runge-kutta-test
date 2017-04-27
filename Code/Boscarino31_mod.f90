@@ -169,7 +169,7 @@
           end select choose_dt
           
           ! Set IC's
-          uvec(1:vecl:2)=sin(two*pi*x(:))
+          uvec(1:vecl:2)=  sin(two*pi*x(:))
           uvec(2:vecl:2)=a*sin(two*pi*x(:))+ep*(a**2-1)*two*pi*cos(two*pi*x(:))
          
           !set exact solution at tfinal
