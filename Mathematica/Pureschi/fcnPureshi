@@ -1,0 +1,2 @@
+      eqn(1) = -y
+      eqn(2) = x + (-y + Sin(x))/ep

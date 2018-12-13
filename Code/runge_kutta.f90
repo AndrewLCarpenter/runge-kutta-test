@@ -2261,10 +2261,8 @@
       bD(6,4) = 132807060383020.0_wp/5446874804559.0_wp
  
 
-      elseif(icase.eq.7)   then
-!
-! ARK4(3)6[2]SA_1 
-!
+      elseif(icase.eq.7) then     !    The scheme you're using is: ARK4(3)6[2]SA_1 
+ 
       casename='ARK436[2]SA_1 '
       ns=6
 
@@ -2323,10 +2321,8 @@
       ae(6,4) = 3354512671639.0_wp/8306763924573.0_wp
       ae(6,5) = 4040.0_wp/17871.0_wp
       
-      elseif(icase.eq.8) then
-!
-! ARK4(3)6[2]SA_2 
-!
+      elseif(icase.eq.8) then             ! ARK4(3)6[2]SA_2 
+
       casename='ARK436[2]SA_2'
       ns=6 
 
@@ -2385,11 +2381,8 @@
       ae(6,4) = -5048620687834.0_wp/92339425473437.0_wp
       ae(6,5) = 8896345872551.0_wp/7243516620705.0_wp
 
-      elseif(icase.eq.9) then
+      elseif(icase.eq.9) then  ! ARK4(3)6[2]SA_3 
 
-!
-! ARK4(3)6[2]SA_3 
-!
       casename='ARK436[2]SA_3'
       ns=6
 
@@ -2448,11 +2441,8 @@
       ae(6,4) = 5250600446074.0_wp/8183108169889.0_wp
       ae(6,5) = -1823295857039.0_wp/8251525768023.0_wp
 
-      elseif(icase.eq.10) then
-
-!
-! ARK4(3)6[2]SA_4 
-!
+      elseif(icase.eq.10) then    ! ARK4(3)6[2]SA_4 
+ 
       casename='ARK436[2]SA_4'
       ns=6
 
@@ -2511,11 +2501,8 @@
       ae(6,4) = -4166316519687.0_wp/12342528959153.0_wp
       ae(6,5) = 4458662801326.0_wp/5256029283095.0_wp
 
-      elseif(icase.eq.11) then
-
-!
-! ARK4(3)6[1]SA_1 
-!
+      elseif(icase.eq.11) then  ! ARK4(3)6[1]SA_1 
+ 
       casename='ARK436[1]SA_1'
       ns=6
 
@@ -2574,11 +2561,8 @@
       ae(6,4) = -445365011627.0_wp/9408792710459.0_wp
       ae(6,5) = 14493695364115.0_wp/11586640971269.0_wp
 
-      elseif(icase.eq.12) then
-
-!
-! ARK4(3)6[1]SA_2 
-!
+      elseif(icase.eq.12) then  ! ARK4(3)6[1]SA_2 
+ 
       casename='ARK436[1]SA_2'
       ns=6
 
@@ -2637,11 +2621,8 @@
       ae(6,4) = 1626706275962.0_wp/7726705360761.0_wp
       ae(6,5) = 26836827770789.0_wp/18137309065654.0_wp
 
-      elseif(icase.eq.13) then
-
-!
-! ARK4(3)6[1]SA_3 
-!
+      elseif(icase.eq.13) then  ! ARK4(3)6[1]SA_3 
+ 
       casename='ARK436[1]SA_3'
       ns=6 
      
@@ -2700,11 +2681,8 @@
       ae(6,4) = 7899108610982.0_wp/8226900766593.0_wp
       ae(6,5) = 15124372802359.0_wp/12042948172666.0_wp
 
-      elseif(icase.eq.14) then
+      elseif(icase.eq.14) then  ! Lirk4 
 
-!
-! Lirk4
-!
       casename='Lirk4'
       ns=6
 
@@ -2757,11 +2735,8 @@
       ae(6,4) = 25.0_wp/2.0_wp
       ae(6,5) = -85.0_wp/6.0_wp
 
-      elseif(icase.eq.15) then
-
-!
-! ARK4(3)7[2]SA_1 - C2E and C2I
-!
+      elseif(icase.eq.15) then  ! ARK4(3)7[2]SA_1 - C2E and C2I
+ 
       casename='ARK437[2]SA_1-C2EC2I'
       ns=7
 
@@ -2836,11 +2811,8 @@
       ae(7,5) = -13330509492149.0_wp/9695768672337.0_wp
       ae(7,6) = 11565764226357.0_wp/8513123442827.0_wp
 
-      elseif(icase.eq.16) then
-
-!
-! ARK5(3)7[2]SA_1
-!
+      elseif(icase.eq.16) then  ! ARK5(3)7[2]SA_1
+ 
       casename='ARK537[2]SA_1'
       ns=7
 
@@ -2922,10 +2894,8 @@
       ae(7,6) = 97078764070659.0_wp/21124881142075.0_wp
       ae(7,7) = 0.0_wp/1.0_wp
 
-      elseif(icase.eq.17) then
-!
-! ARK5(4)8[2]SA_1
-!
+      elseif(icase.eq.17) then  ! ARK5(4)8[2]SA_1
+ 
       casename='ARK548[2]SA_1'
       ns=8
  
@@ -3018,10 +2988,8 @@
       ae(8,6) = -69563011059811.0_wp/9646580694205.0_wp
       ae(8,7) = 7356628210526.0_wp/4942186776405.0_wp
 
-      elseif(icase.eq.18) then
-!
-! ARK5(4)8[2]SA_2
-!
+      elseif(icase.eq.18) then  ! ARK5(4)8[2]SA_2
+ 
       casename='ARK548[2]SA_2'
       ns=8
 
@@ -3114,7 +3082,7 @@
       ae(8,6) = 572599549169.0_wp/6265429158920.0_wp
       ae(8,7) = -457874356192.0_wp/11306498036315.0_wp
 
-      elseif(icase.eq.101) then
+      elseif(icase.eq.101) then !  The scheme you are using is 'ESDIRK3(2)4L[2]SA'
 
 !     ===============================================
 !     THIRD-ORDER
@@ -3156,9 +3124,9 @@
       aI(4,3) = 11266239266428.0_wp/11593286722821.0_wp
       aI(4,4) = 1767732205903.0_wp/4055673282236.0_wp
  
-      elseif(icase.eq.102) then
+      elseif(icase.eq.102) then !  The scheme you are using is 'ESDIRK325L[2]SA' (page 85, TM-2016-219173)
 
-      casename='ESDIRK325L[2]SA' !(page 85, TM-2016-219173)'
+      casename='ESDIRK325L[2]SA' 
       ns=5
  
       be(1) = 1150014452202.0_wp/6551090391107.0_wp
@@ -3195,7 +3163,7 @@
       aI(5,4) = 5827.0_wp/7560.0_wp
       aI(5,5) = 9.0_wp/40.0_wp
 
-      elseif(icase.eq.103) then
+      elseif(icase.eq.103) then ! - Hairer & Wanner(1996) 
 !     ===============================================
 !     FOURTH-ORDER
 !     ===============================================
@@ -3246,9 +3214,9 @@
       aI(6,5) = -85.0_wp/12.0_wp
       aI(6,6) = 1.0_wp/4.0_wp
  
-      elseif(icase.eq.104) then
+      elseif(icase.eq.104) then     !(page 90, TM-2016-219173)'
 
-      casename='ESDIRK436L[2]SA_1'  !(page 90, TM-2016-219173)'
+      casename='ESDIRK436L[2]SA_1' 
       ns=6
  
       be(1) = -140404485182.0_wp/9007427031765.0_wp
@@ -3291,9 +3259,9 @@
       aI(6,5) = -990969975725.0_wp/9154032505244.0_wp
       aI(6,6) = 1.0_wp/4.0_wp
  
-      elseif(icase.eq.105) then
+      elseif(icase.eq.105) then   !  'ESDIRK436L[2]SA_2' (2018 paper)
 
-      casename='ESDIRK436L[2]SA_2' ! (2017 paper)
+      casename='ESDIRK436L[2]SA_2' 
       ns=6
  
       be(1) = -12917657251.0_wp/5222094901039.0_wp
@@ -3336,9 +3304,9 @@
       aI(6,5) = -2420307481369.0_wp/24731958684496.0_wp
       aI(6,6) = 31.0_wp/125.0_wp
  
-      elseif(icase.eq.106) then
+      elseif(icase.eq.106) then     !  'ESDIRK4(3)7L[2]SA'  (page 100, TM-2016-219173)
 
-      casename='ESDIRK437L[2]SA'  !(page 100, TM-2016-219173)
+      casename='ESDIRK437L[2]SA' 
       ns=7
  
       be(1) = -5649241495537.0_wp/14093099002237.0_wp
@@ -3391,11 +3359,11 @@
       aI(7,6) = -3696041814078.0_wp/6641566663007.0_wp
       aI(7,7) = 1.0_wp/8.0_wp
  
-      elseif(icase.eq.107) then
+      elseif(icase.eq.107) then  ! ESDIRK5(4)7L[2]SA_1 !(2018 paper)
 ! ===============================================
 ! FIFTH-ORDER
 ! ===============================================
-      casename='ESDIRK547L[2]SA_1' !(2017 paper)
+      casename='ESDIRK547L[2]SA_1' 
       ns=7
  
       be(1) = -1319096626979.0_wp/17356965168099.0_wp
@@ -3448,9 +3416,9 @@
       aI(7,6) = -308199069217.0_wp/5897303561678.0_wp
       aI(7,7) = 23.0_wp/125.0_wp
  
-      elseif(icase.eq.108) then
+      elseif(icase.eq.108) then   ! 'ESDIRK5(4)7L[2]SA_2' (2018 paper)
 
-      casename='ESDIRK547L[2]SA_2' ! (2017 paper)
+      casename='ESDIRK547L[2]SA_2'
       ns=7
  
       be(1) = -188593204321.0_wp/4778616380481.0_wp
@@ -3503,9 +3471,9 @@
       aI(7,6) = -1307970675534.0_wp/8059683598661.0_wp
       aI(7,7) = 23.0_wp/125.0_wp
  
-      elseif(icase.eq.109) then
+      elseif(icase.eq.109) then  ! 'ESDIRK5(4)8L[2]SA'  (2018 paper)
 
-      casename='ESDIRK548L[2]SA'  ! (2017 paper)
+      casename='ESDIRK548L[2]SA'  
       ns=8
 !
       be(1) = 2162042939093.0_wp/22873479087181.0_wp

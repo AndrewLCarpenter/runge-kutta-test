@@ -46,21 +46,27 @@
           dt_error_tol=1.0e-11_wp
               
           allocate(var_names(neq))
-          var_names(:)=(/'Algebraic   ', 'Differential'/)    
+!         var_names(:)=(/'Algebraic   ', 'Differential'/)    
+          var_names(:)=(/'Differential', 'Algebraic   '/)    
           
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')
        
         !Time information
-        dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep
+        dt = 0.5_wp
+        if(iDT /= 1) dt = 0.5_wp/10**((iDT-1)/20.0_wp) ! timestep
         tfinal = 1.0_wp                   ! final time
 
         !*Exact Solution**        
         tmp = exp(-tfinal)
-        uexact(1) = tmp*tmp
-        uexact(2) = tmp
+!       uexact(1) = tmp*tmp
+!       uexact(2) = tmp
+        uexact(1) = tmp
+        uexact(2) = tmp*tmp
 
         !**Equilibrium IC**
+!       uvec(1) = 1.0_wp
+!       uvec(2) = 1.0_wp
         uvec(1) = 1.0_wp
         uvec(2) = 1.0_wp
 
@@ -68,29 +74,43 @@
           epI = 1.0_wp / ep  !**Initialize 1/epsilon
           choose_RHS_type: select case (Temporal_Splitting)
             case('IMEX') ! For IMEX schemes
-              resE_vec(1) = dt*(-2.0_wp*uvec(1))
-              resE_vec(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
-              resi_vec(1) = dt*(-epI*uvec(1) + epI*uvec(2)*uvec(2))
-              resi_vec(2) = 0.0_wp
+!             resE_vec(1) = dt*(-2.0_wp*uvec(1))
+!             resE_vec(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+!             resi_vec(1) = dt*(-epI*uvec(1) + epI*uvec(2)*uvec(2))
+!             resi_vec(2) = 0.0_wp
+              resE_vec(1) = dt*(uvec(2) - uvec(1) - uvec(1)*uvec(1) )
+              resE_vec(2) = dt*(-2.0_wp*uvec(2))
+              resi_vec(1) = 0.0_wp
+              resi_vec(2) = dt*(-epI*uvec(2) + epI*uvec(1)*uvec(1))
             case('IMPLICIT') ! For fully implicit schemes
               resE_vec(:) = 0.0_wp
-              resi_vec(1) = dt*(-(epI+2.0_wp)*uvec(1) + epI*uvec(2)*uvec(2))
-              resi_vec(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+!             resi_vec(1) = dt*(-(epI+2.0_wp)*uvec(1) + epI*uvec(2)*uvec(2))
+!             resi_vec(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
+              resi_vec(1) = dt*(uvec(2) - uvec(1) - uvec(1)*uvec(1) )
+              resi_vec(2) = dt*(-(epI+2.0_wp)*uvec(2) + epI*uvec(1)*uvec(1))
           end select choose_RHS_type
         
         case('BUILD_JACOBIAN')
           epI = 1.0_wp / ep  !**Initialize 1/epsilon
           choose_Jac_type: select case (Temporal_Splitting)
             case('IMEX') ! For IMEX schemes
-              xjac(1,1) = 1.0_wp-akk*dt*(-epI)
-              xjac(1,2) = 0.0_wp-akk*dt*( epI)*2.0_wp*uvec(2)
-              xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
-              xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)            
+!             xjac(1,1) = 1.0_wp-akk*dt*(-epI)
+!             xjac(1,2) = 0.0_wp-akk*dt*( epI)*2.0_wp*uvec(2)
+!             xjac(2,1) = 0.0_wp-akk*dt*(0.0_wp)
+!             xjac(2,2) = 1.0_wp-akk*dt*(0.0_wp)            
+              xjac(1,1) = 1.0_wp-akk*dt*(0.0_wp)            
+              xjac(1,2) = 0.0_wp-akk*dt*(0.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*( epI)*2.0_wp*uvec(1)
+              xjac(2,2) = 1.0_wp-akk*dt*(-epI)
             case('IMPLICIT') ! For fully implicit schemes
-              xjac(1,1) = 1.0_wp-akk*dt*(-(epI+2.0_wp))
-              xjac(1,2) = 0.0_wp-akk*dt*(+epI*2.0_wp*uvec(2))
-              xjac(2,1) = 0.0_wp-akk*dt*(1.0_wp)
-              xjac(2,2) = 1.0_wp-akk*dt*(-(1.0_wp+2.0_wp*uvec(2)))
+!             xjac(1,1) = 1.0_wp-akk*dt*(-(epI+2.0_wp))
+!             xjac(1,2) = 0.0_wp-akk*dt*(+epI*2.0_wp*uvec(2))
+!             xjac(2,1) = 0.0_wp-akk*dt*(1.0_wp)
+!             xjac(2,2) = 1.0_wp-akk*dt*(-(1.0_wp+2.0_wp*uvec(2)))
+              xjac(1,1) = 1.0_wp-akk*dt*(-(1.0_wp+2.0_wp*uvec(1)))
+              xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
+              xjac(2,1) = 0.0_wp-akk*dt*(+epI*2.0_wp*uvec(1))
+              xjac(2,2) = 1.0_wp-akk*dt*(-(epI+2.0_wp))
           end select choose_Jac_type
           
       end select Program_Step_Select

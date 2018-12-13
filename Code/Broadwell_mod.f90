@@ -204,8 +204,12 @@
 !         dr0dx(:) = 2.0_wp * f * a_u1 * sin(f * x(:)) * cos(f * x(:)) 
 !         dm0dx(:) = 2.0_wp * r0(:) * f * a_u2 * sin(f * x(:)) * cos(f * x(:)) & 
 !                  + 2.0_wp * u0(:) * f * a_u1 * sin(f * x(:)) * cos(f * x(:))
-              H(:) = (1.0_wp - dzEdr(:) + dzEdm(:)*dzEdm(:))*dm0dx(:) + dzEdr(:)*dzEdm(:)*dr0dx(:)
-             z1(:) = -H(:) / r0(:) /2.0_wp !Boscarino's paper is missing 1/2 multiplier on z1
+!   Boscarino's paper 
+!             H(:) = (1.0_wp - dzEdr(:) + dzEdm(:)*dzEdm(:))*dm0dx(:) + dzEdr(:)*dzEdm(:)*dr0dx(:)
+!            z1(:) = -H(:) / r0(:) 
+!   Our Derivation
+              H(:) = (1.0_wp - dzEdr(:) - dzEdm(:)*dzEdm(:))*dm0dx(:) - dzEdr(:)*dzEdm(:)*dr0dx(:)
+             z1(:) = -H(:) / r0(:) /2.0_wp 
              z0(:) = zE(:) + ep*z1(:)
 
              !z1(:)=-1.0_wp/2.0_wp*(dm0dx(:)/2.0_wp*(1+u0(:)**2)+u0(:)*(dzEdr(:)*dr0dx(:)+dzEdm(:)*dm0dx(:)))/r0(:)

@@ -1,0 +1,3 @@
+      eqn(1) = -y - z
+      eqn(2) = x + aa*y
+      eqn(3) = bb + (-cc + x)*z

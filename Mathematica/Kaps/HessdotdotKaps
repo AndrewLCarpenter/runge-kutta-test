@@ -1,0 +1,2 @@
+      hessdotdot(1) = (2*du(2)**2)/ep
+      hessdotdot(2) = -2*du(2)**2

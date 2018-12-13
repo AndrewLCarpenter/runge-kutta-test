@@ -7,7 +7,8 @@ CC = gcc
 #FCFLAGS = -Wuninitialized -Wunused -pedantic -Wall -Wsurprising -fbacktrace -fbounds-check -W -O1 $(INCLUDESDIR)
 #FCFLAGS = -Wuninitialized -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
 #FCFLAGS = -check uninit -warn all -no-wrap-margin -WB -O3 $(INCLUDESDIR)
- FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+#FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
+ FCFLAGS = -Wuninitialized -Wsurprising -O3 $(INCLUDESDIR)
 CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\

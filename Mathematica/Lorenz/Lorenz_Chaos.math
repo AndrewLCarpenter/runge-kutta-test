@@ -1,0 +1,103 @@
+eqn1 = sig*(y - x)/ep ;
+eqn2 = x*(rho - z) - y ;
+eqn3 = x*y - beta z ;
+
+eqns = Table["eqn"<>ToString[i], {i, 1, 3}]
+f = ToExpression[eqns] ;
+vars = {x,y,z} ;
+
+Jac = Table[0,{i,1,3},{j,1,3}] ;
+For[i=1,i<=3,i++,
+   For[j=1,j<=3,j++,
+      Jac[[i,j]] = D[ToExpression[eqns[[i]]],vars[[j]]]
+      ] ;
+   ] ;
+
+JacI = Inverse[Jac] ;
+
+du = {d1,d2,d3} ;
+Hes = Table[0,{i,1,3},{j,1,3},{k,1,3}] ;
+For[i=1,i<=3,i++,
+   For[j=1,j<=3,j++,
+      For[k=1,k<=3,k++,
+      Hes[[i,j,k]] = D[ToExpression[eqns[[i]]],vars[[j]],vars[[k]]]
+         ] ;
+      ] ;
+   ] ;
+
+wrk = Table[0,{i,1,3}] ;
+For[i=1,i<=3,i++,
+   wrk[[i]] = 0 ;
+   For[j=1,j<=3,j++,
+      For[k=1,k<=3,k++,
+           wrk[[i]] = wrk[[i]] + Hes[[i,j,k]]*du[[j]]*du[[k]]
+         ] ;
+      ] ;
+   ] ;
+
+
+res = {r1,r2,r3} ;
+eqnNon = res + Jac.du + 1/2 Hes.du.du ;
+
+z0 = rho - 1 ;
+x0 = Sqrt[beta] Sqrt[z0] ;
+y0 = x0 ;
+y1 = x1 ;
+ff = FullSimplify[ep * f/.{x->x0+ep x1+ep^2 x2,y->y0+ep y1+ep^2 y2,z->z0+ep z1+ep^2 z2}]
+
+str1 = OpenWrite["fcnLorenz", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str1,
+           SequenceForm[ Format["      ", OutputForm],
+                         eqn[i],
+                         Format[" = ", OutputForm],
+                         ToExpression[eqns[[i]]]
+                       ] ] ]
+Close[str1]
+
+            (* Create Jacobian Matrix in Fortran form *)
+
+str2 = OpenWrite["jacLorenz", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+      Write[str2,
+            SequenceForm[Format["      ", OutputForm],
+                         JAC[i, j],
+                         Format[" = ", OutputForm],
+                         D[ToExpression[eqns[[i]]], vars[[j]] ]
+                        ] ] ] ]
+Close[str2]
+
+            (* Create Hessian Matrix in Fortran form *)
+
+str3 = OpenWrite["hesLorenz", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+       For[ k = 1, k<= Length[vars], k++,
+          Write[str3,
+                SequenceForm[Format["      ", OutputForm],
+                             HES[i, j, k],
+                             Format[" = ", OutputForm],
+                             D[ToExpression[eqns[[i]]], vars[[j]], vars[[k]] ]
+                            ] ] ] ] ]
+
+Close[str3]
+
+(*
+str4 = OpenWrite["HessdotdotLorenz", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str4,
+           SequenceForm[ Format["      ", OutputForm],
+                         hessdotdot[i],
+                         Format[" = ", OutputForm],
+                         wrk[[i]]
+                       ] ] ]
+Close[str4]
+*)
+
+
+

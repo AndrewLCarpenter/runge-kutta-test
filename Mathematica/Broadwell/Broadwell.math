@@ -1,0 +1,144 @@
+Nx = 10 ;
+NN = 3*Nx ;
+
+X = Array[x,{Nx}] ;
+Y = Array[y,{Nx}] ;
+Z = Array[z,{Nx}] ;
+
+aa = -1/(12 dx) ;
+bb = +8/(12 dx) ;
+D1mat = Table[Switch[i-j,-2,-aa,-1,-bb,0,0,+1,bb,2,aa,_,0],{j,1,Nx},{i,1,Nx}] ;
+D1mat[[1,Nx-1]] = -aa ;
+D1mat[[1,Nx-0]] = -bb ;
+D1mat[[2,Nx-0]] = -aa ;
+D1mat[[Nx-1,1]] = +aa ;
+D1mat[[Nx-0,1]] = +bb ;
+D1mat[[Nx-0,2]] = +aa ;
+
+rr = Array[r,{Nx}] ;
+mm = Array[m,{Nx}] ;
+zz = Array[z,{Nx}] ;
+drr = D1mat.rr ;
+dmm = D1mat.mm ;
+dzz = D1mat.zz ;
+
+Source = Table[0,{i,1,Nx}] ;
+For[i=1,i<=Nx,i++,Source[[i]] = (rr[[i]]^2 + mm[[i]]^2 - 2 rr[[i]] zz[[i]])/ep ] ;
+
+eqn1 = -dmm ;
+eqn2 = -dzz ;
+eqn3 = -dmm + Source ;
+
+vars = {} ;
+For[i=1,i<=Nx,i++,
+   vars = Append[vars,rr[[i]]];
+   vars = Append[vars,mm[[i]]];
+   vars = Append[vars,zz[[i]]];
+   ] ;
+eqns = {} ;
+For[i=1,i<=Nx,i++,
+   eqns = Append[eqns,eqn1[[i]]];
+   eqns = Append[eqns,eqn2[[i]]];
+   eqns = Append[eqns,eqn3[[i]]];
+   ] ;
+
+Jac = Table[0,{i,1,NN},{j,1,NN}] ;
+For[i=1,i<=NN,i++,
+   For[j=1,j<=NN,j++,
+      Jac[[i,j]] = D[eqns[[i]],vars[[j]]]
+      ] ;
+   ] ;
+Jac1 = Jac/.{ep->1,dx->39};
+For[i=1,i<=Nx,i++, 
+Jac1 = Jac1/.{r[i]->387};
+Jac1 = Jac1/.{m[i]->-73};
+Jac1 = Jac1/.{z[i]->+37}]
+
+
+Hes = Table[0,{i,1,NN},{j,1,NN},{k,1,NN}] ;
+For[i=1,i<=NN,i++,
+   For[j=1,j<=NN,j++,
+      For[k=1,k<=NN,k++,
+      Hes[[i,j,k]] = D[eqns[[i]],vars[[j]],vars[[k]]]
+         ] ;
+      ] ;
+   ] ;
+
+Hes1 = Hes/.{ep->1,dx->39};
+For[i=1,i<=Nx,i++, 
+Hes1 = Hes1/.{r[i]->387};
+Hes1 = Hes1/.{m[i]->-73};
+Hes1 = Hes1/.{z[i]->+37}]
+
+dU = Array[du,{NN}] ;
+wrk = Table[0,{i,1,NN}] ;
+For[i=1,i<=NN,i++,
+   wrk[[i]] = 0 ;
+   For[j=1,j<=NN,j++,
+      For[k=1,k<=NN,k++,
+           wrk[[i]] = wrk[[i]] + Hes[[i,j,k]]*dU[[j]]*dU[[k]]
+         ] ;
+      ] ;
+   ] ;
+wrk = FullSimplify[wrk] ;
+
+
+res = Array[rs,{NN}] ;
+eqnNon = res + Jac.dU + 1/2 Hes.dU.dU ;
+
+str1 = OpenWrite["fcnBroadwell", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str1,
+           SequenceForm[ Format["      ", OutputForm],
+                         eqn[i],
+                         Format[" = ", OutputForm],
+                         eqns[[i]]
+                       ] ] ]
+Close[str1]
+
+            (* Create Jacobian Matrix in Fortran form *)
+
+str2 = OpenWrite["jacBroadwell", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+      If[Jac1[[i,j]]!=0,
+      Write[str2,
+            SequenceForm[Format["      ", OutputForm],
+                         JAC[i, j],
+                         Format[" = ", OutputForm],
+                         D[eqns[[i]],vars[[j]]]
+                        ] ] ] ] ]
+Close[str2]
+
+            (* Create Hessian Matrix in Fortran form *)
+
+str3 = OpenWrite["hesBroadwell", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+       For[ k = 1, k<= Length[vars], k++,
+          If[Hes1[[i,j,k]]!=0,
+          Write[str3,
+                SequenceForm[Format["      ", OutputForm],
+                             HES[i, j, k],
+                             Format[" = ", OutputForm],
+                             D[eqns[[i]], vars[[j]], vars[[k]] ]
+                            ] ] ] ] ]]
+
+Close[str3]
+
+str4 = OpenWrite["HessdotdotBroadwell", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str4,
+           SequenceForm[ Format["      ", OutputForm],
+                         hessdotdot[i],
+                         Format[" = ", OutputForm],
+                         wrk[[i]]
+                       ] ] ]
+Close[str4]
+
+
+

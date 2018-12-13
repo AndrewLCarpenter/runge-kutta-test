@@ -1,0 +1,764 @@
+(* 5-stage, 4th-order, 2N Williamson-type RK scheme with
+  9 free-parameters BB1-BB5, AA2-AA5 *)
+
+(*
+(* ================================================================ *)
+tt5  = 144; 		(* 542p47, 542Im *)
+tt5  = 120; 		(* 542p65 *)
+tt5  = 10^10/40869614;  (* 542Re *)
+(* ================================================================ *)
+*)
+
+tt5  = 176 + 1/2;  (* Minimum A5 *)
+tt5  = 180;
+tt5  = 200;
+tt5  = 220;
+
+
+tt5  = 144;
+tth4 = 30;
+
+minA = -1.6; maxA = +0.5;
+minB = -0.5; maxB = +1.6;
+
+A5max = 0.100;
+
+NA3 = 0.005;
+NA4 = 0.1;
+
+(* ================================================================ *)
+(* ================================================================ *)
+(* ================================================================ *)
+(* ================================================================ *)
+(* ================================================================ *)
+
+
+iteractual = 0;
+Print["<=======================================================>" ];
+Print["<======= The 5th-order Tall Tree = b.a.a.a.c  ==========>" ];
+Print["You have set the fifth-order tall tree to 1/", N[tt5]];
+Print["<=======================================================>" ];
+
+Do[
+
+a = {{  0 ,  0 ,  0 ,  0 , 0},
+     { a21,  0 ,  0 ,  0 , 0},
+     { a31, a32,  0 ,  0 , 0},
+     { a41, a42, a43,  0 , 0},
+     { a51, a52, a53, a54, 0}};
+
+b = { b1, b2, b3, b4, b5};
+bh= {bh1,bh2,bh3,bh4,bh5};
+c = { 0 , c2, c3, c4, c5};
+e = { 1 ,  1,  1,  1,  1};
+
+(* ================================================================== *)
+
+Clear[bb1]; Clear[bb2]; Clear[bb3]; Clear[bb4]; Clear[bb5];
+            Clear[aa2]; Clear[aa3]; Clear[aa4]; Clear[aa5];
+
+bb2 = RandomReal[{minB,maxB}];
+bb3 = RandomReal[{minB,maxB}]; aa3 = RandomReal[{minA,maxA}];
+bb4 = RandomReal[{minB,maxB}]; aa4 = RandomReal[{minA,maxA}];
+bb5 = RandomReal[{minB,maxB}]; aa5 = RandomReal[{minA,maxA}];
+
+(* ================================================================== *)
+
+aa2  = -(1 - 2*bb2 + 2*bb2^2 - 2*bb3 - 2*aa3*bb3 + 2*bb2*bb3 + 
+   4*aa3*bb2*bb3 + 2*bb3^2 + 4*aa3*bb3^2 + 2*aa3^2*bb3^2 - 2*bb4 - 
+   2*aa4*bb4 - 2*aa3*aa4*bb4 + 2*bb2*bb4 + 2*aa4*bb2*bb4 + 
+   4*aa3*aa4*bb2*bb4 + 2*bb3*bb4 + 2*aa3*bb3*bb4 + 4*aa4*bb3*bb4 + 
+   8*aa3*aa4*bb3*bb4 + 4*aa3^2*aa4*bb3*bb4 + 2*bb4^2 + 4*aa4*bb4^2 + 
+   4*aa3*aa4*bb4^2 + 2*aa4^2*bb4^2 + 4*aa3*aa4^2*bb4^2 + 
+   2*aa3^2*aa4^2*bb4^2 - 2*bb5 - 2*aa5*bb5 - 2*aa4*aa5*bb5 - 
+   2*aa3*aa4*aa5*bb5 + 2*bb2*bb5 + 2*aa5*bb2*bb5 + 2*aa4*aa5*bb2*bb5 + 
+   4*aa3*aa4*aa5*bb2*bb5 + 2*bb3*bb5 + 2*aa3*bb3*bb5 + 2*aa5*bb3*bb5 + 
+   2*aa3*aa5*bb3*bb5 + 4*aa4*aa5*bb3*bb5 + 8*aa3*aa4*aa5*bb3*bb5 + 
+   4*aa3^2*aa4*aa5*bb3*bb5 + 2*bb4*bb5 + 2*aa4*bb4*bb5 + 2*aa3*aa4*bb4*bb5 + 
+   4*aa5*bb4*bb5 + 8*aa4*aa5*bb4*bb5 + 8*aa3*aa4*aa5*bb4*bb5 + 
+   4*aa4^2*aa5*bb4*bb5 + 8*aa3*aa4^2*aa5*bb4*bb5 + 
+   4*aa3^2*aa4^2*aa5*bb4*bb5 + 2*bb5^2 + 4*aa5*bb5^2 + 4*aa4*aa5*bb5^2 + 
+   4*aa3*aa4*aa5*bb5^2 + 2*aa5^2*bb5^2 + 4*aa4*aa5^2*bb5^2 + 
+   4*aa3*aa4*aa5^2*bb5^2 + 2*aa4^2*aa5^2*bb5^2 + 4*aa3*aa4^2*aa5^2*bb5^2 + 
+   2*aa3^2*aa4^2*aa5^2*bb5^2)/(2*(bb2^2 + 2*aa3*bb2*bb3 + aa3*bb3^2 + 
+   aa3^2*bb3^2 + 2*aa3*aa4*bb2*bb4 + 2*aa3*aa4*bb3*bb4 + 
+   2*aa3^2*aa4*bb3*bb4 + aa3*aa4*bb4^2 + aa3*aa4^2*bb4^2 + 
+   aa3^2*aa4^2*bb4^2 + 2*aa3*aa4*aa5*bb2*bb5 + 2*aa3*aa4*aa5*bb3*bb5 + 
+   2*aa3^2*aa4*aa5*bb3*bb5 + 2*aa3*aa4*aa5*bb4*bb5 + 
+   2*aa3*aa4^2*aa5*bb4*bb5 + 2*aa3^2*aa4^2*aa5*bb4*bb5 + aa3*aa4*aa5*bb5^2 + 
+   aa3*aa4*aa5^2*bb5^2 + aa3*aa4^2*aa5^2*bb5^2 + aa3^2*aa4^2*aa5^2*bb5^2));
+
+bb1  = (bb2 + aa3*bb3 - 2*bb2*bb3 + 2*bb2*bb3^2 + aa3*aa4*bb4 - 2*bb2*bb4 - 
+  2*aa4*bb2*bb4 - 2*aa3*bb3*bb4 + 2*bb2*bb3*bb4 + 4*aa4*bb2*bb3*bb4 + 
+  2*bb2*bb4^2 + 4*aa4*bb2*bb4^2 + 2*aa4^2*bb2*bb4^2 + 2*aa3*bb3*bb4^2 + 
+  aa3*aa4*aa5*bb5 - 2*bb2*bb5 - 2*aa5*bb2*bb5 - 2*aa4*aa5*bb2*bb5 - 
+  2*aa3*bb3*bb5 - 2*aa3*aa5*bb3*bb5 + 2*bb2*bb3*bb5 + 2*aa5*bb2*bb3*bb5 + 
+  4*aa4*aa5*bb2*bb3*bb5 - 2*aa3*aa4*bb4*bb5 + 2*bb2*bb4*bb5 + 
+  2*aa4*bb2*bb4*bb5 + 4*aa5*bb2*bb4*bb5 + 8*aa4*aa5*bb2*bb4*bb5 + 
+  4*aa4^2*aa5*bb2*bb4*bb5 + 2*aa3*bb3*bb4*bb5 + 4*aa3*aa5*bb3*bb4*bb5 + 
+  2*bb2*bb5^2 + 4*aa5*bb2*bb5^2 + 4*aa4*aa5*bb2*bb5^2 + 2*aa5^2*bb2*bb5^2 + 
+  4*aa4*aa5^2*bb2*bb5^2 + 2*aa4^2*aa5^2*bb2*bb5^2 + 2*aa3*bb3*bb5^2 + 
+  4*aa3*aa5*bb3*bb5^2 + 2*aa3*aa5^2*bb3*bb5^2 + 2*aa3*aa4*bb4*bb5^2)/
+ (2*(bb2^2 + 2*aa3*bb2*bb3 + aa3*bb3^2 + aa3^2*bb3^2 + 2*aa3*aa4*bb2*bb4 + 
+   2*aa3*aa4*bb3*bb4 + 2*aa3^2*aa4*bb3*bb4 + aa3*aa4*bb4^2 + 
+   aa3*aa4^2*bb4^2 + aa3^2*aa4^2*bb4^2 + 2*aa3*aa4*aa5*bb2*bb5 + 
+   2*aa3*aa4*aa5*bb3*bb5 + 2*aa3^2*aa4*aa5*bb3*bb5 + 2*aa3*aa4*aa5*bb4*bb5 + 
+   2*aa3*aa4^2*aa5*bb4*bb5 + 2*aa3^2*aa4^2*aa5*bb4*bb5 + aa3*aa4*aa5*bb5^2 + 
+   aa3*aa4*aa5^2*bb5^2 + aa3*aa4^2*aa5^2*bb5^2 + aa3^2*aa4^2*aa5^2*bb5^2));
+
+(* ================================================================== *)
+
+c1  = 0;
+c2  = bb1;
+c3  = bb1 + bb2 + aa2*bb2;
+c4  = bb1 + bb2 + aa2*bb2 + bb3 + aa3*bb3 + aa2*aa3*bb3;
+c5  = bb1 + bb2 + aa2*bb2 + bb3 + aa3*bb3 + aa2*aa3*bb3 + bb4 + aa4*bb4 + aa3*aa4*bb4 + aa2*aa3*aa4*bb4;
+
+minC = N[Min[c],4];
+maxC = N[Max[c],4];
+
+If[ minC > -0.1 && maxC < 1.25,
+
+(* ================================================================== *)
+
+t11=-1+bb1+bb2+aa2*bb2+bb3+aa3*bb3+aa2*aa3*bb3+bb4+aa4*bb4+aa3*aa4*bb4+
+aa2*aa3*aa4*bb4+bb5+aa5*bb5+aa4*aa5*bb5+aa3*aa4*aa5*bb5+aa2*aa3*aa4*aa5*bb5;
+
+t21=(-1+2*bb1*bb2+2*bb1*bb3+2*aa3*bb1*bb3+2*bb2*bb3+2*aa2*bb2*bb3+2*bb1*bb4+2*aa4*bb1*bb4+
+2*aa3*aa4*bb1*bb4+2*bb2*bb4+2*aa2*bb2*bb4+2*aa4*bb2*bb4+2*aa2*aa4*bb2*bb4+2*bb3*bb4+
+2*aa3*bb3*bb4+2*aa2*aa3*bb3*bb4+2*bb1*bb5+2*aa5*bb1*bb5+2*aa4*aa5*bb1*bb5+
+2*aa3*aa4*aa5*bb1*bb5+2*bb2*bb5+2*aa2*bb2*bb5+2*aa5*bb2*bb5+2*aa2*aa5*bb2*bb5+
+2*aa4*aa5*bb2*bb5+2*aa2*aa4*aa5*bb2*bb5+2*bb3*bb5+2*aa3*bb3*bb5+2*aa2*aa3*bb3*bb5+
+2*aa5*bb3*bb5+2*aa3*aa5*bb3*bb5+2*aa2*aa3*aa5*bb3*bb5+2*bb4*bb5+2*aa4*bb4*bb5+
+2*aa3*aa4*bb4*bb5+2*aa2*aa3*aa4*bb4*bb5)/2;
+
+t31=(-1+3*bb1^2*bb2+3*bb1^2*bb3+3*aa3*bb1^2*bb3+6*bb1*bb2*bb3+6*aa2*bb1*bb2*bb3+3*bb2^2*bb3+
+6*aa2*bb2^2*bb3+3*aa2^2*bb2^2*bb3+3*bb1^2*bb4+3*aa4*bb1^2*bb4+3*aa3*aa4*bb1^2*bb4+6*bb1*bb2*bb4+
+6*aa2*bb1*bb2*bb4+6*aa4*bb1*bb2*bb4+6*aa2*aa4*bb1*bb2*bb4+3*bb2^2*bb4+6*aa2*bb2^2*bb4+
+3*aa2^2*bb2^2*bb4+3*aa4*bb2^2*bb4+6*aa2*aa4*bb2^2*bb4+3*aa2^2*aa4*bb2^2*bb4+
+6*bb1*bb3*bb4+6*aa3*bb1*bb3*bb4+6*aa2*aa3*bb1*bb3*bb4+6*bb2*bb3*bb4+
+6*aa2*bb2*bb3*bb4+6*aa3*bb2*bb3*bb4+12*aa2*aa3*bb2*bb3*bb4+6*aa2^2*aa3*bb2*bb3*bb4+
+3*bb3^2*bb4+6*aa3*bb3^2*bb4+6*aa2*aa3*bb3^2*bb4+3*aa3^2*bb3^2*bb4+6*aa2*aa3^2*bb3^2*bb4+
+3*aa2^2*aa3^2*bb3^2*bb4+3*bb1^2*bb5+3*aa5*bb1^2*bb5+3*aa4*aa5*bb1^2*bb5+3*aa3*aa4*aa5*bb1^2*bb5+
+6*bb1*bb2*bb5+6*aa2*bb1*bb2*bb5+6*aa5*bb1*bb2*bb5+6*aa2*aa5*bb1*bb2*bb5+
+6*aa4*aa5*bb1*bb2*bb5+6*aa2*aa4*aa5*bb1*bb2*bb5+3*bb2^2*bb5+6*aa2*bb2^2*bb5+3*aa2^2*bb2^2*bb5+
+3*aa5*bb2^2*bb5+6*aa2*aa5*bb2^2*bb5+3*aa2^2*aa5*bb2^2*bb5+3*aa4*aa5*bb2^2*bb5+
+6*aa2*aa4*aa5*bb2^2*bb5+3*aa2^2*aa4*aa5*bb2^2*bb5+6*bb1*bb3*bb5+6*aa3*bb1*bb3*bb5+
+6*aa2*aa3*bb1*bb3*bb5+6*aa5*bb1*bb3*bb5+6*aa3*aa5*bb1*bb3*bb5+6*aa2*aa3*aa5*bb1*bb3*bb5+
+6*bb2*bb3*bb5+6*aa2*bb2*bb3*bb5+6*aa3*bb2*bb3*bb5+12*aa2*aa3*bb2*bb3*bb5+
+6*aa2^2*aa3*bb2*bb3*bb5+6*aa5*bb2*bb3*bb5+6*aa2*aa5*bb2*bb3*bb5+6*aa3*aa5*bb2*bb3*bb5+
+12*aa2*aa3*aa5*bb2*bb3*bb5+6*aa2^2*aa3*aa5*bb2*bb3*bb5+3*bb3^2*bb5+6*aa3*bb3^2*bb5+
+6*aa2*aa3*bb3^2*bb5+3*aa3^2*bb3^2*bb5+6*aa2*aa3^2*bb3^2*bb5+3*aa2^2*aa3^2*bb3^2*bb5+
+3*aa5*bb3^2*bb5+6*aa3*aa5*bb3^2*bb5+6*aa2*aa3*aa5*bb3^2*bb5+3*aa3^2*aa5*bb3^2*bb5+
+6*aa2*aa3^2*aa5*bb3^2*bb5+3*aa2^2*aa3^2*aa5*bb3^2*bb5+6*bb1*bb4*bb5+6*aa4*bb1*bb4*bb5+
+6*aa3*aa4*bb1*bb4*bb5+6*aa2*aa3*aa4*bb1*bb4*bb5+6*bb2*bb4*bb5+6*aa2*bb2*bb4*bb5+
+6*aa4*bb2*bb4*bb5+6*aa2*aa4*bb2*bb4*bb5+6*aa3*aa4*bb2*bb4*bb5+12*aa2*aa3*aa4*bb2*bb4*bb5+
+6*aa2^2*aa3*aa4*bb2*bb4*bb5+6*bb3*bb4*bb5+6*aa3*bb3*bb4*bb5+6*aa2*aa3*bb3*bb4*bb5+
+6*aa4*bb3*bb4*bb5+12*aa3*aa4*bb3*bb4*bb5+12*aa2*aa3*aa4*bb3*bb4*bb5+6*aa3^2*aa4*bb3*bb4*
+bb5+12*aa2*aa3^2*aa4*bb3*bb4*bb5+6*aa2^2*aa3^2*aa4*bb3*bb4*bb5+3*bb4^2*bb5+
+6*aa4*bb4^2*bb5+6*aa3*aa4*bb4^2*bb5+6*aa2*aa3*aa4*bb4^2*bb5+3*aa4^2*bb4^2*bb5+
+6*aa3*aa4^2*bb4^2*bb5+6*aa2*aa3*aa4^2*bb4^2*bb5+3*aa3^2*aa4^2*bb4^2*bb5+6*aa2*aa3^2*aa4^2*bb4^2*bb5+
+3*aa2^2*aa3^2*aa4^2*bb4^2*bb5)/6;
+
+t32=(-1+6*bb1*bb2*bb3+6*bb1*bb2*bb4+6*aa4*bb1*bb2*bb4+6*bb1*bb3*bb4+
+6*aa3*bb1*bb3*bb4+6*bb2*bb3*bb4+6*aa2*bb2*bb3*bb4+6*bb1*bb2*bb5+
+6*aa5*bb1*bb2*bb5+6*aa4*aa5*bb1*bb2*bb5+6*bb1*bb3*bb5+6*aa3*bb1*bb3*bb5+
+6*aa5*bb1*bb3*bb5+6*aa3*aa5*bb1*bb3*bb5+6*bb2*bb3*bb5+6*aa2*bb2*bb3*bb5+
+6*aa5*bb2*bb3*bb5+6*aa2*aa5*bb2*bb3*bb5+6*bb1*bb4*bb5+6*aa4*bb1*bb4*bb5+
+6*aa3*aa4*bb1*bb4*bb5+6*bb2*bb4*bb5+6*aa2*bb2*bb4*bb5+6*aa4*bb2*bb4*bb5+
+6*aa2*aa4*bb2*bb4*bb5+6*bb3*bb4*bb5+6*aa3*bb3*bb4*bb5+6*aa2*aa3*bb3*bb4*bb5)/6;
+
+tau3 = {t31,t32};
+nA3 = Sqrt[ N[tau3.tau3]];
+
+If[ nA3 < NA3,
+
+t41=(-1+4*bb1^3*bb2+4*bb1^3*bb3+4*aa3*bb1^3*bb3+12*bb1^2*bb2*bb3+12*aa2*bb1^2*bb2*bb3+
+12*bb1*bb2^2*bb3+24*aa2*bb1*bb2^2*bb3+12*aa2^2*bb1*bb2^2*bb3+4*bb2^3*bb3+12*aa2*bb2^3*bb3+
+12*aa2^2*bb2^3*bb3+4*aa2^3*bb2^3*bb3+4*bb1^3*bb4+4*aa4*bb1^3*bb4+4*aa3*aa4*bb1^3*bb4+
+12*bb1^2*bb2*bb4+12*aa2*bb1^2*bb2*bb4+12*aa4*bb1^2*bb2*bb4+12*aa2*aa4*bb1^2*bb2*bb4+
+12*bb1*bb2^2*bb4+24*aa2*bb1*bb2^2*bb4+12*aa2^2*bb1*bb2^2*bb4+12*aa4*bb1*bb2^2*bb4+
+24*aa2*aa4*bb1*bb2^2*bb4+12*aa2^2*aa4*bb1*bb2^2*bb4+4*bb2^3*bb4+12*aa2*bb2^3*bb4+12*aa2^2*bb2^3*bb4+
+4*aa2^3*bb2^3*bb4+4*aa4*bb2^3*bb4+12*aa2*aa4*bb2^3*bb4+12*aa2^2*aa4*bb2^3*bb4+
+4*aa2^3*aa4*bb2^3*bb4+12*bb1^2*bb3*bb4+12*aa3*bb1^2*bb3*bb4+12*aa2*aa3*bb1^2*bb3*bb4+
+24*bb1*bb2*bb3*bb4+24*aa2*bb1*bb2*bb3*bb4+24*aa3*bb1*bb2*bb3*bb4+48*aa2*aa3*bb1*bb2*bb3*bb4+
+24*aa2^2*aa3*bb1*bb2*bb3*bb4+12*bb2^2*bb3*bb4+24*aa2*bb2^2*bb3*bb4+12*aa2^2*bb2^2*bb3*bb4+
+12*aa3*bb2^2*bb3*bb4+36*aa2*aa3*bb2^2*bb3*bb4+36*aa2^2*aa3*bb2^2*bb3*bb4+12*aa2^3*aa3*bb2^2*bb3*
+bb4+12*bb1*bb3^2*bb4+24*aa3*bb1*bb3^2*bb4+24*aa2*aa3*bb1*bb3^2*bb4+12*aa3^2*bb1*bb3^2*bb4+
+24*aa2*aa3^2*bb1*bb3^2*bb4+12*aa2^2*aa3^2*bb1*bb3^2*bb4+12*bb2*bb3^2*bb4+12*aa2*bb2*bb3^2*bb4+
+24*aa3*bb2*bb3^2*bb4+48*aa2*aa3*bb2*bb3^2*bb4+24*aa2^2*aa3*bb2*bb3^2*bb4+12*aa3^2*bb2*bb3^2*bb4+
+36*aa2*aa3^2*bb2*bb3^2*bb4+36*aa2^2*aa3^2*bb2*bb3^2*bb4+12*aa2^3*aa3^2*bb2*bb3^2*bb4+4*bb3^3*bb4+
+12*aa3*bb3^3*bb4+12*aa2*aa3*bb3^3*bb4+12*aa3^2*bb3^3*bb4+24*aa2*aa3^2*bb3^3*bb4+
+12*aa2^2*aa3^2*bb3^3*bb4+4*aa3^3*bb3^3*bb4+12*aa2*aa3^3*bb3^3*bb4+12*aa2^2*aa3^3*bb3^3*bb4+
+4*aa2^3*aa3^3*bb3^3*bb4+4*bb1^3*bb5+4*aa5*bb1^3*bb5+4*aa4*aa5*bb1^3*bb5+4*aa3*aa4*aa5*bb1^3*bb5+
+12*bb1^2*bb2*bb5+12*aa2*bb1^2*bb2*bb5+12*aa5*bb1^2*bb2*bb5+12*aa2*aa5*bb1^2*bb2*bb5+
+12*aa4*aa5*bb1^2*bb2*bb5+12*aa2*aa4*aa5*bb1^2*bb2*bb5+12*bb1*bb2^2*bb5+24*aa2*bb1*bb2^2*bb5+
+12*aa2^2*bb1*bb2^2*bb5+12*aa5*bb1*bb2^2*bb5+24*aa2*aa5*bb1*bb2^2*bb5+12*aa2^2*aa5*bb1*bb2^2*bb5+
+12*aa4*aa5*bb1*bb2^2*bb5+24*aa2*aa4*aa5*bb1*bb2^2*bb5+12*aa2^2*aa4*aa5*bb1*bb2^2*bb5+4*bb2^3*bb5+
+12*aa2*bb2^3*bb5+12*aa2^2*bb2^3*bb5+4*aa2^3*bb2^3*bb5+4*aa5*bb2^3*bb5+
+12*aa2*aa5*bb2^3*bb5+12*aa2^2*aa5*bb2^3*bb5+4*aa2^3*aa5*bb2^3*bb5+4*aa4*aa5*bb2^3*bb5+
+12*aa2*aa4*aa5*bb2^3*bb5+12*aa2^2*aa4*aa5*bb2^3*bb5+4*aa2^3*aa4*aa5*bb2^3*bb5+12*bb1^2*bb3*bb5+
+12*aa3*bb1^2*bb3*bb5+12*aa2*aa3*bb1^2*bb3*bb5+12*aa5*bb1^2*bb3*bb5+12*aa3*aa5*bb1^2*bb3*bb5+
+12*aa2*aa3*aa5*bb1^2*bb3*bb5+24*bb1*bb2*bb3*bb5+24*aa2*bb1*bb2*bb3*bb5+24*aa3*bb1*bb2*bb3*bb5+
+48*aa2*aa3*bb1*bb2*bb3*bb5+24*aa2^2*aa3*bb1*bb2*bb3*bb5+24*aa5*bb1*bb2*bb3*bb5+24*aa2*aa5*bb1*bb2*
+bb3*bb5+24*aa3*aa5*bb1*bb2*bb3*bb5+48*aa2*aa3*aa5*bb1*bb2*bb3*bb5+
+24*aa2^2*aa3*aa5*bb1*bb2*bb3*bb5+12*bb2^2*bb3*bb5+24*aa2*bb2^2*bb3*bb5+12*aa2^2*bb2^2*bb3*bb5+
+12*aa3*bb2^2*bb3*bb5+36*aa2*aa3*bb2^2*bb3*bb5+36*aa2^2*aa3*bb2^2*bb3*bb5+12*aa2^3*aa3*bb2^2*bb3*
+bb5+12*aa5*bb2^2*bb3*bb5+24*aa2*aa5*bb2^2*bb3*bb5+12*aa2^2*aa5*bb2^2*bb3*bb5+
+12*aa3*aa5*bb2^2*bb3*bb5+36*aa2*aa3*aa5*bb2^2*bb3*bb5+36*aa2^2*aa3*aa5*bb2^2*bb3*bb5+
+12*aa2^3*aa3*aa5*bb2^2*bb3*bb5+12*bb1*bb3^2*bb5+24*aa3*bb1*bb3^2*bb5+24*aa2*aa3*bb1*bb3^2*bb5+
+12*aa3^2*bb1*bb3^2*bb5+24*aa2*aa3^2*bb1*bb3^2*bb5+12*aa2^2*aa3^2*bb1*bb3^2*bb5+12*aa5*bb1*bb3^2*bb5+
+24*aa3*aa5*bb1*bb3^2*bb5+24*aa2*aa3*aa5*bb1*bb3^2*bb5+12*aa3^2*aa5*bb1*bb3^2*bb5+
+24*aa2*aa3^2*aa5*bb1*bb3^2*bb5+12*aa2^2*aa3^2*aa5*bb1*bb3^2*bb5+12*bb2*bb3^2*bb5+12*aa2*bb2*bb3^2*bb5+
+24*aa3*bb2*bb3^2*bb5+48*aa2*aa3*bb2*bb3^2*bb5+24*aa2^2*aa3*bb2*bb3^2*bb5+12*aa3^2*bb2*bb3^2*bb5+
+36*aa2*aa3^2*bb2*bb3^2*bb5+36*aa2^2*aa3^2*bb2*bb3^2*bb5+12*aa2^3*aa3^2*bb2*bb3^2*bb5+
+12*aa5*bb2*bb3^2*bb5+12*aa2*aa5*bb2*bb3^2*bb5+24*aa3*aa5*bb2*bb3^2*bb5+48*aa2*aa3*aa5*bb2*bb3^2*
+bb5+24*aa2^2*aa3*aa5*bb2*bb3^2*bb5+12*aa3^2*aa5*bb2*bb3^2*bb5+36*aa2*aa3^2*aa5*bb2*bb3^2*
+bb5+36*aa2^2*aa3^2*aa5*bb2*bb3^2*bb5+12*aa2^3*aa3^2*aa5*bb2*bb3^2*bb5+4*bb3^3*bb5+
+12*aa3*bb3^3*bb5+12*aa2*aa3*bb3^3*bb5+12*aa3^2*bb3^3*bb5+24*aa2*aa3^2*bb3^3*bb5+
+12*aa2^2*aa3^2*bb3^3*bb5+4*aa3^3*bb3^3*bb5+12*aa2*aa3^3*bb3^3*bb5+12*aa2^2*aa3^3*bb3^3*bb5+
+4*aa2^3*aa3^3*bb3^3*bb5+4*aa5*bb3^3*bb5+12*aa3*aa5*bb3^3*bb5+12*aa2*aa3*aa5*bb3^3*bb5+
+12*aa3^2*aa5*bb3^3*bb5+24*aa2*aa3^2*aa5*bb3^3*bb5+12*aa2^2*aa3^2*aa5*bb3^3*bb5+4*aa3^3*aa5*bb3^3*bb5+
+12*aa2*aa3^3*aa5*bb3^3*bb5+12*aa2^2*aa3^3*aa5*bb3^3*bb5+4*aa2^3*aa3^3*aa5*bb3^3*bb5+12*bb1^2*bb4*bb5+
+12*aa4*bb1^2*bb4*bb5+12*aa3*aa4*bb1^2*bb4*bb5+12*aa2*aa3*aa4*bb1^2*bb4*bb5+24*bb1*bb2*bb4*bb5+
+24*aa2*bb1*bb2*bb4*bb5+24*aa4*bb1*bb2*bb4*bb5+24*aa2*aa4*bb1*bb2*bb4*bb5+24*aa3*aa4*bb1*bb2*bb4*
+bb5+48*aa2*aa3*aa4*bb1*bb2*bb4*bb5+24*aa2^2*aa3*aa4*bb1*bb2*bb4*bb5+12*bb2^2*bb4*bb5+
+24*aa2*bb2^2*bb4*bb5+12*aa2^2*bb2^2*bb4*bb5+12*aa4*bb2^2*bb4*bb5+24*aa2*aa4*bb2^2*bb4*bb5+
+12*aa2^2*aa4*bb2^2*bb4*bb5+12*aa3*aa4*bb2^2*bb4*bb5+36*aa2*aa3*aa4*bb2^2*bb4*bb5+36*aa2^2*aa3*aa4*bb2^2*
+bb4*bb5+12*aa2^3*aa3*aa4*bb2^2*bb4*bb5+24*bb1*bb3*bb4*bb5+24*aa3*bb1*bb3*bb4*bb5+
+24*aa2*aa3*bb1*bb3*bb4*bb5+24*aa4*bb1*bb3*bb4*bb5+48*aa3*aa4*bb1*bb3*bb4*bb5+48*aa2*aa3*aa4*bb1*bb3*
+bb4*bb5+24*aa3^2*aa4*bb1*bb3*bb4*bb5+48*aa2*aa3^2*aa4*bb1*bb3*bb4*bb5+
+24*aa2^2*aa3^2*aa4*bb1*bb3*bb4*bb5+24*bb2*bb3*bb4*bb5+24*aa2*bb2*bb3*bb4*bb5+
+24*aa3*bb2*bb3*bb4*bb5+48*aa2*aa3*bb2*bb3*bb4*bb5+24*aa2^2*aa3*bb2*bb3*bb4*bb5+24*aa4*bb2*bb3*bb4*
+bb5+24*aa2*aa4*bb2*bb3*bb4*bb5+48*aa3*aa4*bb2*bb3*bb4*bb5+96*aa2*aa3*aa4*bb2*bb3*
+bb4*bb5+48*aa2^2*aa3*aa4*bb2*bb3*bb4*bb5+24*aa3^2*aa4*bb2*bb3*bb4*bb5+72*aa2*aa3^2*aa4*bb2*
+bb3*bb4*bb5+72*aa2^2*aa3^2*aa4*bb2*bb3*bb4*bb5+24*aa2^3*aa3^2*aa4*bb2*bb3*bb4*bb5+12*bb3^2*bb4*bb5+
+24*aa3*bb3^2*bb4*bb5+24*aa2*aa3*bb3^2*bb4*bb5+12*aa3^2*bb3^2*bb4*bb5+24*aa2*aa3^2*bb3^2*bb4*bb5+
+12*aa2^2*aa3^2*bb3^2*bb4*bb5+12*aa4*bb3^2*bb4*bb5+36*aa3*aa4*bb3^2*bb4*bb5+36*aa2*aa3*aa4*bb3^2*bb4*
+bb5+36*aa3^2*aa4*bb3^2*bb4*bb5+72*aa2*aa3^2*aa4*bb3^2*bb4*bb5+36*aa2^2*aa3^2*aa4*
+bb3^2*bb4*bb5+12*aa3^3*aa4*bb3^2*bb4*bb5+36*aa2*aa3^3*aa4*bb3^2*bb4*bb5+36*aa2^2*aa3^3*aa4*
+bb3^2*bb4*bb5+12*aa2^3*aa3^3*aa4*bb3^2*bb4*bb5+12*bb1*bb4^2*bb5+24*aa4*bb1*bb4^2*bb5+
+24*aa3*aa4*bb1*bb4^2*bb5+24*aa2*aa3*aa4*bb1*bb4^2*bb5+12*aa4^2*bb1*bb4^2*bb5+24*aa3*aa4^2*bb1*bb4^2*
+bb5+24*aa2*aa3*aa4^2*bb1*bb4^2*bb5+12*aa3^2*aa4^2*bb1*bb4^2*bb5+24*aa2*aa3^2*aa4^2*bb1*
+bb4^2*bb5+12*aa2^2*aa3^2*aa4^2*bb1*bb4^2*bb5+12*bb2*bb4^2*bb5+12*aa2*bb2*bb4^2*bb5+
+24*aa4*bb2*bb4^2*bb5+24*aa2*aa4*bb2*bb4^2*bb5+24*aa3*aa4*bb2*bb4^2*bb5+48*aa2*aa3*aa4*bb2*bb4^2*
+bb5+24*aa2^2*aa3*aa4*bb2*bb4^2*bb5+12*aa4^2*bb2*bb4^2*bb5+12*aa2*aa4^2*bb2*bb4^2*bb5+
+24*aa3*aa4^2*bb2*bb4^2*bb5+48*aa2*aa3*aa4^2*bb2*bb4^2*bb5+24*aa2^2*aa3*aa4^2*bb2*bb4^2*bb5+
+12*aa3^2*aa4^2*bb2*bb4^2*bb5+36*aa2*aa3^2*aa4^2*bb2*bb4^2*bb5+36*aa2^2*aa3^2*aa4^2*bb2*bb4^2*bb5+
+12*aa2^3*aa3^2*aa4^2*bb2*bb4^2*bb5+12*bb3*bb4^2*bb5+12*aa3*bb3*bb4^2*bb5+12*aa2*aa3*bb3*bb4^2*bb5+
+24*aa4*bb3*bb4^2*bb5+48*aa3*aa4*bb3*bb4^2*bb5+48*aa2*aa3*aa4*bb3*bb4^2*bb5+24*aa3^2*aa4*bb3*bb4^2*
+bb5+48*aa2*aa3^2*aa4*bb3*bb4^2*bb5+24*aa2^2*aa3^2*aa4*bb3*bb4^2*bb5+
+12*aa4^2*bb3*bb4^2*bb5+36*aa3*aa4^2*bb3*bb4^2*bb5+36*aa2*aa3*aa4^2*bb3*bb4^2*bb5+36*aa3^2*aa4^2*bb3*
+bb4^2*bb5+72*aa2*aa3^2*aa4^2*bb3*bb4^2*bb5+36*aa2^2*aa3^2*aa4^2*bb3*bb4^2*bb5+
+12*aa3^3*aa4^2*bb3*bb4^2*bb5+36*aa2*aa3^3*aa4^2*bb3*bb4^2*bb5+36*aa2^2*aa3^3*aa4^2*bb3*bb4^2*bb5+
+12*aa2^3*aa3^3*aa4^2*bb3*bb4^2*bb5+4*bb4^3*bb5+12*aa4*bb4^3*bb5+12*aa3*aa4*bb4^3*bb5+
+12*aa2*aa3*aa4*bb4^3*bb5+12*aa4^2*bb4^3*bb5+24*aa3*aa4^2*bb4^3*bb5+24*aa2*aa3*aa4^2*bb4^3*bb5+
+12*aa3^2*aa4^2*bb4^3*bb5+24*aa2*aa3^2*aa4^2*bb4^3*bb5+12*aa2^2*aa3^2*aa4^2*bb4^3*bb5+4*aa4^3*bb4^3*bb5+
+12*aa3*aa4^3*bb4^3*bb5+12*aa2*aa3*aa4^3*bb4^3*bb5+12*aa3^2*aa4^3*bb4^3*bb5+24*aa2*aa3^2*aa4^3*bb4^3*bb5+
+12*aa2^2*aa3^2*aa4^3*bb4^3*bb5+4*aa3^3*aa4^3*bb4^3*bb5+12*aa2*aa3^3*aa4^3*bb4^3*bb5+
+12*aa2^2*aa3^3*aa4^3*bb4^3*bb5+4*aa2^3*aa3^3*aa4^3*bb4^3*bb5)/24;
+
+t42=(-1+8*bb1^2*bb2*bb3+8*bb1*bb2^2*bb3+8*aa2*bb1*bb2^2*bb3+8*bb1^2*bb2*bb4+
+8*aa4*bb1^2*bb2*bb4+8*bb1*bb2^2*bb4+8*aa2*bb1*bb2^2*bb4+8*aa4*bb1*bb2^2*bb4+
+8*aa2*aa4*bb1*bb2^2*bb4+8*bb1^2*bb3*bb4+8*aa3*bb1^2*bb3*bb4+24*bb1*bb2*bb3*bb4+
+16*aa2*bb1*bb2*bb3*bb4+16*aa3*bb1*bb2*bb3*bb4+16*aa2*aa3*bb1*bb2*bb3*bb4+8*bb2^2*bb3*bb4+
+16*aa2*bb2^2*bb3*bb4+8*aa2^2*bb2^2*bb3*bb4+8*bb1*bb3^2*bb4+16*aa3*bb1*bb3^2*bb4+
+8*aa2*aa3*bb1*bb3^2*bb4+8*aa3^2*bb1*bb3^2*bb4+8*aa2*aa3^2*bb1*bb3^2*bb4+8*bb2*bb3^2*bb4+
+8*aa2*bb2*bb3^2*bb4+8*aa3*bb2*bb3^2*bb4+16*aa2*aa3*bb2*bb3^2*bb4+8*aa2^2*aa3*bb2*bb3^2*bb4+
+8*bb1^2*bb2*bb5+8*aa5*bb1^2*bb2*bb5+8*aa4*aa5*bb1^2*bb2*bb5+8*bb1*bb2^2*bb5+
+8*aa2*bb1*bb2^2*bb5+8*aa5*bb1*bb2^2*bb5+8*aa2*aa5*bb1*bb2^2*bb5+8*aa4*aa5*bb1*bb2^2*bb5+
+8*aa2*aa4*aa5*bb1*bb2^2*bb5+8*bb1^2*bb3*bb5+8*aa3*bb1^2*bb3*bb5+8*aa5*bb1^2*bb3*bb5+
+8*aa3*aa5*bb1^2*bb3*bb5+24*bb1*bb2*bb3*bb5+16*aa2*bb1*bb2*bb3*bb5+16*aa3*bb1*bb2*bb3*bb5+
+16*aa2*aa3*bb1*bb2*bb3*bb5+24*aa5*bb1*bb2*bb3*bb5+16*aa2*aa5*bb1*bb2*bb3*bb5+16*aa3*aa5*bb1*bb2*bb3*
+bb5+16*aa2*aa3*aa5*bb1*bb2*bb3*bb5+8*bb2^2*bb3*bb5+16*aa2*bb2^2*bb3*bb5+
+8*aa2^2*bb2^2*bb3*bb5+8*aa5*bb2^2*bb3*bb5+16*aa2*aa5*bb2^2*bb3*bb5+8*aa2^2*aa5*bb2^2*bb3*bb5+
+8*bb1*bb3^2*bb5+16*aa3*bb1*bb3^2*bb5+8*aa2*aa3*bb1*bb3^2*bb5+8*aa3^2*bb1*bb3^2*bb5+
+8*aa2*aa3^2*bb1*bb3^2*bb5+8*aa5*bb1*bb3^2*bb5+16*aa3*aa5*bb1*bb3^2*bb5+8*aa2*aa3*aa5*bb1*bb3^2*
+bb5+8*aa3^2*aa5*bb1*bb3^2*bb5+8*aa2*aa3^2*aa5*bb1*bb3^2*bb5+8*bb2*bb3^2*bb5+
+8*aa2*bb2*bb3^2*bb5+8*aa3*bb2*bb3^2*bb5+16*aa2*aa3*bb2*bb3^2*bb5+8*aa2^2*aa3*bb2*bb3^2*bb5+
+8*aa5*bb2*bb3^2*bb5+8*aa2*aa5*bb2*bb3^2*bb5+8*aa3*aa5*bb2*bb3^2*bb5+16*aa2*aa3*aa5*bb2*bb3^2*
+bb5+8*aa2^2*aa3*aa5*bb2*bb3^2*bb5+8*bb1^2*bb4*bb5+8*aa4*bb1^2*bb4*bb5+
+8*aa3*aa4*bb1^2*bb4*bb5+24*bb1*bb2*bb4*bb5+16*aa2*bb1*bb2*bb4*bb5+24*aa4*bb1*bb2*bb4*bb5+
+16*aa2*aa4*bb1*bb2*bb4*bb5+16*aa3*aa4*bb1*bb2*bb4*bb5+16*aa2*aa3*aa4*bb1*bb2*bb4*bb5+
+8*bb2^2*bb4*bb5+16*aa2*bb2^2*bb4*bb5+8*aa2^2*bb2^2*bb4*bb5+8*aa4*bb2^2*bb4*bb5+
+16*aa2*aa4*bb2^2*bb4*bb5+8*aa2^2*aa4*bb2^2*bb4*bb5+24*bb1*bb3*bb4*bb5+24*aa3*bb1*bb3*bb4*bb5+
+16*aa2*aa3*bb1*bb3*bb4*bb5+16*aa4*bb1*bb3*bb4*bb5+32*aa3*aa4*bb1*bb3*bb4*bb5+16*aa2*aa3*aa4*bb1*bb3*
+bb4*bb5+16*aa3^2*aa4*bb1*bb3*bb4*bb5+16*aa2*aa3^2*aa4*bb1*bb3*bb4*bb5+
+24*bb2*bb3*bb4*bb5+24*aa2*bb2*bb3*bb4*bb5+16*aa3*bb2*bb3*bb4*bb5+32*aa2*aa3*bb2*bb3*bb4*bb5+
+16*aa2^2*aa3*bb2*bb3*bb4*bb5+16*aa4*bb2*bb3*bb4*bb5+16*aa2*aa4*bb2*bb3*bb4*bb5+
+16*aa3*aa4*bb2*bb3*bb4*bb5+32*aa2*aa3*aa4*bb2*bb3*bb4*bb5+16*aa2^2*aa3*aa4*bb2*bb3*bb4*bb5+
+8*bb3^2*bb4*bb5+16*aa3*bb3^2*bb4*bb5+16*aa2*aa3*bb3^2*bb4*bb5+8*aa3^2*bb3^2*bb4*bb5+
+16*aa2*aa3^2*bb3^2*bb4*bb5+8*aa2^2*aa3^2*bb3^2*bb4*bb5+8*bb1*bb4^2*bb5+16*aa4*bb1*bb4^2*bb5+
+16*aa3*aa4*bb1*bb4^2*bb5+8*aa2*aa3*aa4*bb1*bb4^2*bb5+8*aa4^2*bb1*bb4^2*bb5+16*aa3*aa4^2*bb1*bb4^2*
+bb5+8*aa2*aa3*aa4^2*bb1*bb4^2*bb5+8*aa3^2*aa4^2*bb1*bb4^2*bb5+8*aa2*aa3^2*aa4^2*bb1*
+bb4^2*bb5+8*bb2*bb4^2*bb5+8*aa2*bb2*bb4^2*bb5+16*aa4*bb2*bb4^2*bb5+16*aa2*aa4*bb2*bb4^2*bb5+
+8*aa3*aa4*bb2*bb4^2*bb5+16*aa2*aa3*aa4*bb2*bb4^2*bb5+8*aa2^2*aa3*aa4*bb2*bb4^2*bb5+
+8*aa4^2*bb2*bb4^2*bb5+8*aa2*aa4^2*bb2*bb4^2*bb5+8*aa3*aa4^2*bb2*bb4^2*bb5+16*aa2*aa3*aa4^2*bb2*bb4^2*
+bb5+8*aa2^2*aa3*aa4^2*bb2*bb4^2*bb5+8*bb3*bb4^2*bb5+8*aa3*bb3*bb4^2*bb5+
+8*aa2*aa3*bb3*bb4^2*bb5+8*aa4*bb3*bb4^2*bb5+16*aa3*aa4*bb3*bb4^2*bb5+16*aa2*aa3*aa4*bb3*bb4^2*
+bb5+8*aa3^2*aa4*bb3*bb4^2*bb5+16*aa2*aa3^2*aa4*bb3*bb4^2*bb5+8*aa2^2*aa3^2*aa4*bb3*
+bb4^2*bb5)/8;
+
+
+t43=(-1+12*bb1^2*bb2*bb3+12*bb1^2*bb2*bb4+12*aa4*bb1^2*bb2*bb4+12*bb1^2*bb3*bb4+
+12*aa3*bb1^2*bb3*bb4+24*bb1*bb2*bb3*bb4+24*aa2*bb1*bb2*bb3*bb4+12*bb2^2*bb3*bb4+
+24*aa2*bb2^2*bb3*bb4+12*aa2^2*bb2^2*bb3*bb4+12*bb1^2*bb2*bb5+12*aa5*bb1^2*bb2*bb5+
+12*aa4*aa5*bb1^2*bb2*bb5+12*bb1^2*bb3*bb5+12*aa3*bb1^2*bb3*bb5+12*aa5*bb1^2*bb3*bb5+
+12*aa3*aa5*bb1^2*bb3*bb5+24*bb1*bb2*bb3*bb5+24*aa2*bb1*bb2*bb3*bb5+24*aa5*bb1*bb2*bb3*bb5+
+24*aa2*aa5*bb1*bb2*bb3*bb5+12*bb2^2*bb3*bb5+24*aa2*bb2^2*bb3*bb5+12*aa2^2*bb2^2*bb3*bb5+
+12*aa5*bb2^2*bb3*bb5+24*aa2*aa5*bb2^2*bb3*bb5+12*aa2^2*aa5*bb2^2*bb3*bb5+12*bb1^2*bb4*bb5+
+12*aa4*bb1^2*bb4*bb5+12*aa3*aa4*bb1^2*bb4*bb5+24*bb1*bb2*bb4*bb5+24*aa2*bb1*bb2*bb4*bb5+
+24*aa4*bb1*bb2*bb4*bb5+24*aa2*aa4*bb1*bb2*bb4*bb5+12*bb2^2*bb4*bb5+24*aa2*bb2^2*bb4*bb5+
+12*aa2^2*bb2^2*bb4*bb5+12*aa4*bb2^2*bb4*bb5+24*aa2*aa4*bb2^2*bb4*bb5+12*aa2^2*aa4*bb2^2*bb4*bb5+
+24*bb1*bb3*bb4*bb5+24*aa3*bb1*bb3*bb4*bb5+24*aa2*aa3*bb1*bb3*bb4*bb5+24*bb2*bb3*bb4*bb5+
+24*aa2*bb2*bb3*bb4*bb5+24*aa3*bb2*bb3*bb4*bb5+48*aa2*aa3*bb2*bb3*bb4*bb5+24*aa2^2*aa3*bb2*bb3*bb4*
+bb5+12*bb3^2*bb4*bb5+24*aa3*bb3^2*bb4*bb5+24*aa2*aa3*bb3^2*bb4*bb5+12*aa3^2*bb3^2*bb4*bb5+
+24*aa2*aa3^2*bb3^2*bb4*bb5+12*aa2^2*aa3^2*bb3^2*bb4*bb5)/24;
+
+t44=(-1+24*bb1*bb2*bb3*bb4+24*bb1*bb2*bb3*bb5+24*aa5*bb1*bb2*bb3*bb5+24*bb1*bb2*bb4*bb5+
+24*aa4*bb1*bb2*bb4*bb5+24*bb1*bb3*bb4*bb5+24*aa3*bb1*bb3*bb4*bb5+24*bb2*bb3*bb4*bb5+
+24*aa2*bb2*bb3*bb4*bb5)/24;
+
+t59=(-1+tt5*bb1*bb2*bb3*bb4*bb5)/tt5;
+
+(* ================================================================== *)
+
+tau3 = {t31,t32};
+tau4 = {t41,t42,t43,t44};
+
+nA1 = Abs[ N[t11] ];
+nA2 = Abs[ N[t21] ];
+nA3 = Sqrt[ N[tau3.tau3]];
+nA4 = Sqrt[ N[tau4.tau4]];
+nA = N[{nA3, nA4},4];
+minC = N[Min[c],4];
+maxC = N[Max[c],4];
+
+If[ minC > -0.1 && maxC < 1.25 && nA3 < NA3 && nA4 < NA4,
+
+iteractual = iteractual + 1;
+
+(* ================================================================== *)
+
+tau11=-1+BB1+BB2+AA2*BB2+BB3+AA3*BB3+AA2*AA3*BB3+BB4+AA4*BB4+AA3*AA4*BB4+
+AA2*AA3*AA4*BB4+BB5+AA5*BB5+AA4*AA5*BB5+AA3*AA4*AA5*BB5+AA2*AA3*AA4*AA5*BB5;
+
+tau21=(-1+2*BB1*BB2+2*BB1*BB3+2*AA3*BB1*BB3+2*BB2*BB3+2*AA2*BB2*BB3+2*BB1*BB4+2*AA4*BB1*BB4+
+2*AA3*AA4*BB1*BB4+2*BB2*BB4+2*AA2*BB2*BB4+2*AA4*BB2*BB4+2*AA2*AA4*BB2*BB4+2*BB3*BB4+
+2*AA3*BB3*BB4+2*AA2*AA3*BB3*BB4+2*BB1*BB5+2*AA5*BB1*BB5+2*AA4*AA5*BB1*BB5+
+2*AA3*AA4*AA5*BB1*BB5+2*BB2*BB5+2*AA2*BB2*BB5+2*AA5*BB2*BB5+2*AA2*AA5*BB2*BB5+
+2*AA4*AA5*BB2*BB5+2*AA2*AA4*AA5*BB2*BB5+2*BB3*BB5+2*AA3*BB3*BB5+2*AA2*AA3*BB3*BB5+
+2*AA5*BB3*BB5+2*AA3*AA5*BB3*BB5+2*AA2*AA3*AA5*BB3*BB5+2*BB4*BB5+2*AA4*BB4*BB5+
+2*AA3*AA4*BB4*BB5+2*AA2*AA3*AA4*BB4*BB5)/2;
+
+tau31=(-1+3*BB1^2*BB2+3*BB1^2*BB3+3*AA3*BB1^2*BB3+6*BB1*BB2*BB3+6*AA2*BB1*BB2*BB3+3*BB2^2*BB3+
+6*AA2*BB2^2*BB3+3*AA2^2*BB2^2*BB3+3*BB1^2*BB4+3*AA4*BB1^2*BB4+3*AA3*AA4*BB1^2*BB4+6*BB1*BB2*BB4+
+6*AA2*BB1*BB2*BB4+6*AA4*BB1*BB2*BB4+6*AA2*AA4*BB1*BB2*BB4+3*BB2^2*BB4+6*AA2*BB2^2*BB4+
+3*AA2^2*BB2^2*BB4+3*AA4*BB2^2*BB4+6*AA2*AA4*BB2^2*BB4+3*AA2^2*AA4*BB2^2*BB4+
+6*BB1*BB3*BB4+6*AA3*BB1*BB3*BB4+6*AA2*AA3*BB1*BB3*BB4+6*BB2*BB3*BB4+
+6*AA2*BB2*BB3*BB4+6*AA3*BB2*BB3*BB4+12*AA2*AA3*BB2*BB3*BB4+6*AA2^2*AA3*BB2*BB3*BB4+
+3*BB3^2*BB4+6*AA3*BB3^2*BB4+6*AA2*AA3*BB3^2*BB4+3*AA3^2*BB3^2*BB4+6*AA2*AA3^2*BB3^2*BB4+
+3*AA2^2*AA3^2*BB3^2*BB4+3*BB1^2*BB5+3*AA5*BB1^2*BB5+3*AA4*AA5*BB1^2*BB5+3*AA3*AA4*AA5*BB1^2*BB5+
+6*BB1*BB2*BB5+6*AA2*BB1*BB2*BB5+6*AA5*BB1*BB2*BB5+6*AA2*AA5*BB1*BB2*BB5+
+6*AA4*AA5*BB1*BB2*BB5+6*AA2*AA4*AA5*BB1*BB2*BB5+3*BB2^2*BB5+6*AA2*BB2^2*BB5+3*AA2^2*BB2^2*BB5+
+3*AA5*BB2^2*BB5+6*AA2*AA5*BB2^2*BB5+3*AA2^2*AA5*BB2^2*BB5+3*AA4*AA5*BB2^2*BB5+
+6*AA2*AA4*AA5*BB2^2*BB5+3*AA2^2*AA4*AA5*BB2^2*BB5+6*BB1*BB3*BB5+6*AA3*BB1*BB3*BB5+
+6*AA2*AA3*BB1*BB3*BB5+6*AA5*BB1*BB3*BB5+6*AA3*AA5*BB1*BB3*BB5+6*AA2*AA3*AA5*BB1*BB3*BB5+
+6*BB2*BB3*BB5+6*AA2*BB2*BB3*BB5+6*AA3*BB2*BB3*BB5+12*AA2*AA3*BB2*BB3*BB5+
+6*AA2^2*AA3*BB2*BB3*BB5+6*AA5*BB2*BB3*BB5+6*AA2*AA5*BB2*BB3*BB5+6*AA3*AA5*BB2*BB3*BB5+
+12*AA2*AA3*AA5*BB2*BB3*BB5+6*AA2^2*AA3*AA5*BB2*BB3*BB5+3*BB3^2*BB5+6*AA3*BB3^2*BB5+
+6*AA2*AA3*BB3^2*BB5+3*AA3^2*BB3^2*BB5+6*AA2*AA3^2*BB3^2*BB5+3*AA2^2*AA3^2*BB3^2*BB5+
+3*AA5*BB3^2*BB5+6*AA3*AA5*BB3^2*BB5+6*AA2*AA3*AA5*BB3^2*BB5+3*AA3^2*AA5*BB3^2*BB5+
+6*AA2*AA3^2*AA5*BB3^2*BB5+3*AA2^2*AA3^2*AA5*BB3^2*BB5+6*BB1*BB4*BB5+6*AA4*BB1*BB4*BB5+
+6*AA3*AA4*BB1*BB4*BB5+6*AA2*AA3*AA4*BB1*BB4*BB5+6*BB2*BB4*BB5+6*AA2*BB2*BB4*BB5+
+6*AA4*BB2*BB4*BB5+6*AA2*AA4*BB2*BB4*BB5+6*AA3*AA4*BB2*BB4*BB5+12*AA2*AA3*AA4*BB2*BB4*BB5+
+6*AA2^2*AA3*AA4*BB2*BB4*BB5+6*BB3*BB4*BB5+6*AA3*BB3*BB4*BB5+6*AA2*AA3*BB3*BB4*BB5+
+6*AA4*BB3*BB4*BB5+12*AA3*AA4*BB3*BB4*BB5+12*AA2*AA3*AA4*BB3*BB4*BB5+6*AA3^2*AA4*BB3*BB4*
+BB5+12*AA2*AA3^2*AA4*BB3*BB4*BB5+6*AA2^2*AA3^2*AA4*BB3*BB4*BB5+3*BB4^2*BB5+
+6*AA4*BB4^2*BB5+6*AA3*AA4*BB4^2*BB5+6*AA2*AA3*AA4*BB4^2*BB5+3*AA4^2*BB4^2*BB5+
+6*AA3*AA4^2*BB4^2*BB5+6*AA2*AA3*AA4^2*BB4^2*BB5+3*AA3^2*AA4^2*BB4^2*BB5+6*AA2*AA3^2*AA4^2*BB4^2*BB5+
+3*AA2^2*AA3^2*AA4^2*BB4^2*BB5)/6;
+
+tau32=(-1+6*BB1*BB2*BB3+6*BB1*BB2*BB4+6*AA4*BB1*BB2*BB4+6*BB1*BB3*BB4+
+6*AA3*BB1*BB3*BB4+6*BB2*BB3*BB4+6*AA2*BB2*BB3*BB4+6*BB1*BB2*BB5+
+6*AA5*BB1*BB2*BB5+6*AA4*AA5*BB1*BB2*BB5+6*BB1*BB3*BB5+6*AA3*BB1*BB3*BB5+
+6*AA5*BB1*BB3*BB5+6*AA3*AA5*BB1*BB3*BB5+6*BB2*BB3*BB5+6*AA2*BB2*BB3*BB5+
+6*AA5*BB2*BB3*BB5+6*AA2*AA5*BB2*BB3*BB5+6*BB1*BB4*BB5+6*AA4*BB1*BB4*BB5+
+6*AA3*AA4*BB1*BB4*BB5+6*BB2*BB4*BB5+6*AA2*BB2*BB4*BB5+6*AA4*BB2*BB4*BB5+
+6*AA2*AA4*BB2*BB4*BB5+6*BB3*BB4*BB5+6*AA3*BB3*BB4*BB5+6*AA2*AA3*BB3*BB4*BB5)/6;
+tau41=(-1+4*BB1^3*BB2+4*BB1^3*BB3+4*AA3*BB1^3*BB3+12*BB1^2*BB2*BB3+12*AA2*BB1^2*BB2*BB3+
+12*BB1*BB2^2*BB3+24*AA2*BB1*BB2^2*BB3+12*AA2^2*BB1*BB2^2*BB3+4*BB2^3*BB3+12*AA2*BB2^3*BB3+
+12*AA2^2*BB2^3*BB3+4*AA2^3*BB2^3*BB3+4*BB1^3*BB4+4*AA4*BB1^3*BB4+4*AA3*AA4*BB1^3*BB4+
+12*BB1^2*BB2*BB4+12*AA2*BB1^2*BB2*BB4+12*AA4*BB1^2*BB2*BB4+12*AA2*AA4*BB1^2*BB2*BB4+
+12*BB1*BB2^2*BB4+24*AA2*BB1*BB2^2*BB4+12*AA2^2*BB1*BB2^2*BB4+12*AA4*BB1*BB2^2*BB4+
+24*AA2*AA4*BB1*BB2^2*BB4+12*AA2^2*AA4*BB1*BB2^2*BB4+4*BB2^3*BB4+12*AA2*BB2^3*BB4+12*AA2^2*BB2^3*BB4+
+4*AA2^3*BB2^3*BB4+4*AA4*BB2^3*BB4+12*AA2*AA4*BB2^3*BB4+12*AA2^2*AA4*BB2^3*BB4+
+4*AA2^3*AA4*BB2^3*BB4+12*BB1^2*BB3*BB4+12*AA3*BB1^2*BB3*BB4+12*AA2*AA3*BB1^2*BB3*BB4+
+24*BB1*BB2*BB3*BB4+24*AA2*BB1*BB2*BB3*BB4+24*AA3*BB1*BB2*BB3*BB4+48*AA2*AA3*BB1*BB2*BB3*BB4+
+24*AA2^2*AA3*BB1*BB2*BB3*BB4+12*BB2^2*BB3*BB4+24*AA2*BB2^2*BB3*BB4+12*AA2^2*BB2^2*BB3*BB4+
+12*AA3*BB2^2*BB3*BB4+36*AA2*AA3*BB2^2*BB3*BB4+36*AA2^2*AA3*BB2^2*BB3*BB4+12*AA2^3*AA3*BB2^2*BB3*
+BB4+12*BB1*BB3^2*BB4+24*AA3*BB1*BB3^2*BB4+24*AA2*AA3*BB1*BB3^2*BB4+12*AA3^2*BB1*BB3^2*BB4+
+24*AA2*AA3^2*BB1*BB3^2*BB4+12*AA2^2*AA3^2*BB1*BB3^2*BB4+12*BB2*BB3^2*BB4+12*AA2*BB2*BB3^2*BB4+
+24*AA3*BB2*BB3^2*BB4+48*AA2*AA3*BB2*BB3^2*BB4+24*AA2^2*AA3*BB2*BB3^2*BB4+12*AA3^2*BB2*BB3^2*BB4+
+36*AA2*AA3^2*BB2*BB3^2*BB4+36*AA2^2*AA3^2*BB2*BB3^2*BB4+12*AA2^3*AA3^2*BB2*BB3^2*BB4+4*BB3^3*BB4+
+12*AA3*BB3^3*BB4+12*AA2*AA3*BB3^3*BB4+12*AA3^2*BB3^3*BB4+24*AA2*AA3^2*BB3^3*BB4+
+12*AA2^2*AA3^2*BB3^3*BB4+4*AA3^3*BB3^3*BB4+12*AA2*AA3^3*BB3^3*BB4+12*AA2^2*AA3^3*BB3^3*BB4+
+4*AA2^3*AA3^3*BB3^3*BB4+4*BB1^3*BB5+4*AA5*BB1^3*BB5+4*AA4*AA5*BB1^3*BB5+4*AA3*AA4*AA5*BB1^3*BB5+
+12*BB1^2*BB2*BB5+12*AA2*BB1^2*BB2*BB5+12*AA5*BB1^2*BB2*BB5+12*AA2*AA5*BB1^2*BB2*BB5+
+12*AA4*AA5*BB1^2*BB2*BB5+12*AA2*AA4*AA5*BB1^2*BB2*BB5+12*BB1*BB2^2*BB5+24*AA2*BB1*BB2^2*BB5+
+12*AA2^2*BB1*BB2^2*BB5+12*AA5*BB1*BB2^2*BB5+24*AA2*AA5*BB1*BB2^2*BB5+12*AA2^2*AA5*BB1*BB2^2*BB5+
+12*AA4*AA5*BB1*BB2^2*BB5+24*AA2*AA4*AA5*BB1*BB2^2*BB5+12*AA2^2*AA4*AA5*BB1*BB2^2*BB5+4*BB2^3*BB5+
+12*AA2*BB2^3*BB5+12*AA2^2*BB2^3*BB5+4*AA2^3*BB2^3*BB5+4*AA5*BB2^3*BB5+
+12*AA2*AA5*BB2^3*BB5+12*AA2^2*AA5*BB2^3*BB5+4*AA2^3*AA5*BB2^3*BB5+4*AA4*AA5*BB2^3*BB5+
+12*AA2*AA4*AA5*BB2^3*BB5+12*AA2^2*AA4*AA5*BB2^3*BB5+4*AA2^3*AA4*AA5*BB2^3*BB5+12*BB1^2*BB3*BB5+
+12*AA3*BB1^2*BB3*BB5+12*AA2*AA3*BB1^2*BB3*BB5+12*AA5*BB1^2*BB3*BB5+12*AA3*AA5*BB1^2*BB3*BB5+
+12*AA2*AA3*AA5*BB1^2*BB3*BB5+24*BB1*BB2*BB3*BB5+24*AA2*BB1*BB2*BB3*BB5+24*AA3*BB1*BB2*BB3*BB5+
+48*AA2*AA3*BB1*BB2*BB3*BB5+24*AA2^2*AA3*BB1*BB2*BB3*BB5+24*AA5*BB1*BB2*BB3*BB5+24*AA2*AA5*BB1*BB2*
+BB3*BB5+24*AA3*AA5*BB1*BB2*BB3*BB5+48*AA2*AA3*AA5*BB1*BB2*BB3*BB5+
+24*AA2^2*AA3*AA5*BB1*BB2*BB3*BB5+12*BB2^2*BB3*BB5+24*AA2*BB2^2*BB3*BB5+12*AA2^2*BB2^2*BB3*BB5+
+12*AA3*BB2^2*BB3*BB5+36*AA2*AA3*BB2^2*BB3*BB5+36*AA2^2*AA3*BB2^2*BB3*BB5+12*AA2^3*AA3*BB2^2*BB3*
+BB5+12*AA5*BB2^2*BB3*BB5+24*AA2*AA5*BB2^2*BB3*BB5+12*AA2^2*AA5*BB2^2*BB3*BB5+
+12*AA3*AA5*BB2^2*BB3*BB5+36*AA2*AA3*AA5*BB2^2*BB3*BB5+36*AA2^2*AA3*AA5*BB2^2*BB3*BB5+
+12*AA2^3*AA3*AA5*BB2^2*BB3*BB5+12*BB1*BB3^2*BB5+24*AA3*BB1*BB3^2*BB5+24*AA2*AA3*BB1*BB3^2*BB5+
+12*AA3^2*BB1*BB3^2*BB5+24*AA2*AA3^2*BB1*BB3^2*BB5+12*AA2^2*AA3^2*BB1*BB3^2*BB5+12*AA5*BB1*BB3^2*BB5+
+24*AA3*AA5*BB1*BB3^2*BB5+24*AA2*AA3*AA5*BB1*BB3^2*BB5+12*AA3^2*AA5*BB1*BB3^2*BB5+
+24*AA2*AA3^2*AA5*BB1*BB3^2*BB5+12*AA2^2*AA3^2*AA5*BB1*BB3^2*BB5+12*BB2*BB3^2*BB5+12*AA2*BB2*BB3^2*BB5+
+24*AA3*BB2*BB3^2*BB5+48*AA2*AA3*BB2*BB3^2*BB5+24*AA2^2*AA3*BB2*BB3^2*BB5+12*AA3^2*BB2*BB3^2*BB5+
+36*AA2*AA3^2*BB2*BB3^2*BB5+36*AA2^2*AA3^2*BB2*BB3^2*BB5+12*AA2^3*AA3^2*BB2*BB3^2*BB5+
+12*AA5*BB2*BB3^2*BB5+12*AA2*AA5*BB2*BB3^2*BB5+24*AA3*AA5*BB2*BB3^2*BB5+48*AA2*AA3*AA5*BB2*BB3^2*
+BB5+24*AA2^2*AA3*AA5*BB2*BB3^2*BB5+12*AA3^2*AA5*BB2*BB3^2*BB5+36*AA2*AA3^2*AA5*BB2*BB3^2*
+BB5+36*AA2^2*AA3^2*AA5*BB2*BB3^2*BB5+12*AA2^3*AA3^2*AA5*BB2*BB3^2*BB5+4*BB3^3*BB5+
+12*AA3*BB3^3*BB5+12*AA2*AA3*BB3^3*BB5+12*AA3^2*BB3^3*BB5+24*AA2*AA3^2*BB3^3*BB5+
+12*AA2^2*AA3^2*BB3^3*BB5+4*AA3^3*BB3^3*BB5+12*AA2*AA3^3*BB3^3*BB5+12*AA2^2*AA3^3*BB3^3*BB5+
+4*AA2^3*AA3^3*BB3^3*BB5+4*AA5*BB3^3*BB5+12*AA3*AA5*BB3^3*BB5+12*AA2*AA3*AA5*BB3^3*BB5+
+12*AA3^2*AA5*BB3^3*BB5+24*AA2*AA3^2*AA5*BB3^3*BB5+12*AA2^2*AA3^2*AA5*BB3^3*BB5+4*AA3^3*AA5*BB3^3*BB5+
+12*AA2*AA3^3*AA5*BB3^3*BB5+12*AA2^2*AA3^3*AA5*BB3^3*BB5+4*AA2^3*AA3^3*AA5*BB3^3*BB5+12*BB1^2*BB4*BB5+
+12*AA4*BB1^2*BB4*BB5+12*AA3*AA4*BB1^2*BB4*BB5+12*AA2*AA3*AA4*BB1^2*BB4*BB5+24*BB1*BB2*BB4*BB5+
+24*AA2*BB1*BB2*BB4*BB5+24*AA4*BB1*BB2*BB4*BB5+24*AA2*AA4*BB1*BB2*BB4*BB5+24*AA3*AA4*BB1*BB2*BB4*
+BB5+48*AA2*AA3*AA4*BB1*BB2*BB4*BB5+24*AA2^2*AA3*AA4*BB1*BB2*BB4*BB5+12*BB2^2*BB4*BB5+
+24*AA2*BB2^2*BB4*BB5+12*AA2^2*BB2^2*BB4*BB5+12*AA4*BB2^2*BB4*BB5+24*AA2*AA4*BB2^2*BB4*BB5+
+12*AA2^2*AA4*BB2^2*BB4*BB5+12*AA3*AA4*BB2^2*BB4*BB5+36*AA2*AA3*AA4*BB2^2*BB4*BB5+36*AA2^2*AA3*AA4*BB2^2*
+BB4*BB5+12*AA2^3*AA3*AA4*BB2^2*BB4*BB5+24*BB1*BB3*BB4*BB5+24*AA3*BB1*BB3*BB4*BB5+
+24*AA2*AA3*BB1*BB3*BB4*BB5+24*AA4*BB1*BB3*BB4*BB5+48*AA3*AA4*BB1*BB3*BB4*BB5+48*AA2*AA3*AA4*BB1*BB3*
+BB4*BB5+24*AA3^2*AA4*BB1*BB3*BB4*BB5+48*AA2*AA3^2*AA4*BB1*BB3*BB4*BB5+
+24*AA2^2*AA3^2*AA4*BB1*BB3*BB4*BB5+24*BB2*BB3*BB4*BB5+24*AA2*BB2*BB3*BB4*BB5+
+24*AA3*BB2*BB3*BB4*BB5+48*AA2*AA3*BB2*BB3*BB4*BB5+24*AA2^2*AA3*BB2*BB3*BB4*BB5+24*AA4*BB2*BB3*BB4*
+BB5+24*AA2*AA4*BB2*BB3*BB4*BB5+48*AA3*AA4*BB2*BB3*BB4*BB5+96*AA2*AA3*AA4*BB2*BB3*
+BB4*BB5+48*AA2^2*AA3*AA4*BB2*BB3*BB4*BB5+24*AA3^2*AA4*BB2*BB3*BB4*BB5+72*AA2*AA3^2*AA4*BB2*
+BB3*BB4*BB5+72*AA2^2*AA3^2*AA4*BB2*BB3*BB4*BB5+24*AA2^3*AA3^2*AA4*BB2*BB3*BB4*BB5+12*BB3^2*BB4*BB5+
+24*AA3*BB3^2*BB4*BB5+24*AA2*AA3*BB3^2*BB4*BB5+12*AA3^2*BB3^2*BB4*BB5+24*AA2*AA3^2*BB3^2*BB4*BB5+
+12*AA2^2*AA3^2*BB3^2*BB4*BB5+12*AA4*BB3^2*BB4*BB5+36*AA3*AA4*BB3^2*BB4*BB5+36*AA2*AA3*AA4*BB3^2*BB4*
+BB5+36*AA3^2*AA4*BB3^2*BB4*BB5+72*AA2*AA3^2*AA4*BB3^2*BB4*BB5+36*AA2^2*AA3^2*AA4*
+BB3^2*BB4*BB5+12*AA3^3*AA4*BB3^2*BB4*BB5+36*AA2*AA3^3*AA4*BB3^2*BB4*BB5+36*AA2^2*AA3^3*AA4*
+BB3^2*BB4*BB5+12*AA2^3*AA3^3*AA4*BB3^2*BB4*BB5+12*BB1*BB4^2*BB5+24*AA4*BB1*BB4^2*BB5+
+24*AA3*AA4*BB1*BB4^2*BB5+24*AA2*AA3*AA4*BB1*BB4^2*BB5+12*AA4^2*BB1*BB4^2*BB5+24*AA3*AA4^2*BB1*BB4^2*
+BB5+24*AA2*AA3*AA4^2*BB1*BB4^2*BB5+12*AA3^2*AA4^2*BB1*BB4^2*BB5+24*AA2*AA3^2*AA4^2*BB1*
+BB4^2*BB5+12*AA2^2*AA3^2*AA4^2*BB1*BB4^2*BB5+12*BB2*BB4^2*BB5+12*AA2*BB2*BB4^2*BB5+
+24*AA4*BB2*BB4^2*BB5+24*AA2*AA4*BB2*BB4^2*BB5+24*AA3*AA4*BB2*BB4^2*BB5+48*AA2*AA3*AA4*BB2*BB4^2*
+BB5+24*AA2^2*AA3*AA4*BB2*BB4^2*BB5+12*AA4^2*BB2*BB4^2*BB5+12*AA2*AA4^2*BB2*BB4^2*BB5+
+24*AA3*AA4^2*BB2*BB4^2*BB5+48*AA2*AA3*AA4^2*BB2*BB4^2*BB5+24*AA2^2*AA3*AA4^2*BB2*BB4^2*BB5+
+12*AA3^2*AA4^2*BB2*BB4^2*BB5+36*AA2*AA3^2*AA4^2*BB2*BB4^2*BB5+36*AA2^2*AA3^2*AA4^2*BB2*BB4^2*BB5+
+12*AA2^3*AA3^2*AA4^2*BB2*BB4^2*BB5+12*BB3*BB4^2*BB5+12*AA3*BB3*BB4^2*BB5+12*AA2*AA3*BB3*BB4^2*BB5+
+24*AA4*BB3*BB4^2*BB5+48*AA3*AA4*BB3*BB4^2*BB5+48*AA2*AA3*AA4*BB3*BB4^2*BB5+24*AA3^2*AA4*BB3*BB4^2*
+BB5+48*AA2*AA3^2*AA4*BB3*BB4^2*BB5+24*AA2^2*AA3^2*AA4*BB3*BB4^2*BB5+
+12*AA4^2*BB3*BB4^2*BB5+36*AA3*AA4^2*BB3*BB4^2*BB5+36*AA2*AA3*AA4^2*BB3*BB4^2*BB5+36*AA3^2*AA4^2*BB3*
+BB4^2*BB5+72*AA2*AA3^2*AA4^2*BB3*BB4^2*BB5+36*AA2^2*AA3^2*AA4^2*BB3*BB4^2*BB5+
+12*AA3^3*AA4^2*BB3*BB4^2*BB5+36*AA2*AA3^3*AA4^2*BB3*BB4^2*BB5+36*AA2^2*AA3^3*AA4^2*BB3*BB4^2*BB5+
+12*AA2^3*AA3^3*AA4^2*BB3*BB4^2*BB5+4*BB4^3*BB5+12*AA4*BB4^3*BB5+12*AA3*AA4*BB4^3*BB5+
+12*AA2*AA3*AA4*BB4^3*BB5+12*AA4^2*BB4^3*BB5+24*AA3*AA4^2*BB4^3*BB5+24*AA2*AA3*AA4^2*BB4^3*BB5+
+12*AA3^2*AA4^2*BB4^3*BB5+24*AA2*AA3^2*AA4^2*BB4^3*BB5+12*AA2^2*AA3^2*AA4^2*BB4^3*BB5+4*AA4^3*BB4^3*BB5+
+12*AA3*AA4^3*BB4^3*BB5+12*AA2*AA3*AA4^3*BB4^3*BB5+12*AA3^2*AA4^3*BB4^3*BB5+24*AA2*AA3^2*AA4^3*BB4^3*BB5+
+12*AA2^2*AA3^2*AA4^3*BB4^3*BB5+4*AA3^3*AA4^3*BB4^3*BB5+12*AA2*AA3^3*AA4^3*BB4^3*BB5+
+12*AA2^2*AA3^3*AA4^3*BB4^3*BB5+4*AA2^3*AA3^3*AA4^3*BB4^3*BB5)/24;
+
+tau42=(-1+8*BB1^2*BB2*BB3+8*BB1*BB2^2*BB3+8*AA2*BB1*BB2^2*BB3+8*BB1^2*BB2*BB4+
+8*AA4*BB1^2*BB2*BB4+8*BB1*BB2^2*BB4+8*AA2*BB1*BB2^2*BB4+8*AA4*BB1*BB2^2*BB4+
+8*AA2*AA4*BB1*BB2^2*BB4+8*BB1^2*BB3*BB4+8*AA3*BB1^2*BB3*BB4+24*BB1*BB2*BB3*BB4+
+16*AA2*BB1*BB2*BB3*BB4+16*AA3*BB1*BB2*BB3*BB4+16*AA2*AA3*BB1*BB2*BB3*BB4+8*BB2^2*BB3*BB4+
+16*AA2*BB2^2*BB3*BB4+8*AA2^2*BB2^2*BB3*BB4+8*BB1*BB3^2*BB4+16*AA3*BB1*BB3^2*BB4+
+8*AA2*AA3*BB1*BB3^2*BB4+8*AA3^2*BB1*BB3^2*BB4+8*AA2*AA3^2*BB1*BB3^2*BB4+8*BB2*BB3^2*BB4+
+8*AA2*BB2*BB3^2*BB4+8*AA3*BB2*BB3^2*BB4+16*AA2*AA3*BB2*BB3^2*BB4+8*AA2^2*AA3*BB2*BB3^2*BB4+
+8*BB1^2*BB2*BB5+8*AA5*BB1^2*BB2*BB5+8*AA4*AA5*BB1^2*BB2*BB5+8*BB1*BB2^2*BB5+
+8*AA2*BB1*BB2^2*BB5+8*AA5*BB1*BB2^2*BB5+8*AA2*AA5*BB1*BB2^2*BB5+8*AA4*AA5*BB1*BB2^2*BB5+
+8*AA2*AA4*AA5*BB1*BB2^2*BB5+8*BB1^2*BB3*BB5+8*AA3*BB1^2*BB3*BB5+8*AA5*BB1^2*BB3*BB5+
+8*AA3*AA5*BB1^2*BB3*BB5+24*BB1*BB2*BB3*BB5+16*AA2*BB1*BB2*BB3*BB5+16*AA3*BB1*BB2*BB3*BB5+
+16*AA2*AA3*BB1*BB2*BB3*BB5+24*AA5*BB1*BB2*BB3*BB5+16*AA2*AA5*BB1*BB2*BB3*BB5+16*AA3*AA5*BB1*BB2*BB3*
+BB5+16*AA2*AA3*AA5*BB1*BB2*BB3*BB5+8*BB2^2*BB3*BB5+16*AA2*BB2^2*BB3*BB5+
+8*AA2^2*BB2^2*BB3*BB5+8*AA5*BB2^2*BB3*BB5+16*AA2*AA5*BB2^2*BB3*BB5+8*AA2^2*AA5*BB2^2*BB3*BB5+
+8*BB1*BB3^2*BB5+16*AA3*BB1*BB3^2*BB5+8*AA2*AA3*BB1*BB3^2*BB5+8*AA3^2*BB1*BB3^2*BB5+
+8*AA2*AA3^2*BB1*BB3^2*BB5+8*AA5*BB1*BB3^2*BB5+16*AA3*AA5*BB1*BB3^2*BB5+8*AA2*AA3*AA5*BB1*BB3^2*
+BB5+8*AA3^2*AA5*BB1*BB3^2*BB5+8*AA2*AA3^2*AA5*BB1*BB3^2*BB5+8*BB2*BB3^2*BB5+
+8*AA2*BB2*BB3^2*BB5+8*AA3*BB2*BB3^2*BB5+16*AA2*AA3*BB2*BB3^2*BB5+8*AA2^2*AA3*BB2*BB3^2*BB5+
+8*AA5*BB2*BB3^2*BB5+8*AA2*AA5*BB2*BB3^2*BB5+8*AA3*AA5*BB2*BB3^2*BB5+16*AA2*AA3*AA5*BB2*BB3^2*
+BB5+8*AA2^2*AA3*AA5*BB2*BB3^2*BB5+8*BB1^2*BB4*BB5+8*AA4*BB1^2*BB4*BB5+
+8*AA3*AA4*BB1^2*BB4*BB5+24*BB1*BB2*BB4*BB5+16*AA2*BB1*BB2*BB4*BB5+24*AA4*BB1*BB2*BB4*BB5+
+16*AA2*AA4*BB1*BB2*BB4*BB5+16*AA3*AA4*BB1*BB2*BB4*BB5+16*AA2*AA3*AA4*BB1*BB2*BB4*BB5+
+8*BB2^2*BB4*BB5+16*AA2*BB2^2*BB4*BB5+8*AA2^2*BB2^2*BB4*BB5+8*AA4*BB2^2*BB4*BB5+
+16*AA2*AA4*BB2^2*BB4*BB5+8*AA2^2*AA4*BB2^2*BB4*BB5+24*BB1*BB3*BB4*BB5+24*AA3*BB1*BB3*BB4*BB5+
+16*AA2*AA3*BB1*BB3*BB4*BB5+16*AA4*BB1*BB3*BB4*BB5+32*AA3*AA4*BB1*BB3*BB4*BB5+16*AA2*AA3*AA4*BB1*BB3*
+BB4*BB5+16*AA3^2*AA4*BB1*BB3*BB4*BB5+16*AA2*AA3^2*AA4*BB1*BB3*BB4*BB5+
+24*BB2*BB3*BB4*BB5+24*AA2*BB2*BB3*BB4*BB5+16*AA3*BB2*BB3*BB4*BB5+32*AA2*AA3*BB2*BB3*BB4*BB5+
+16*AA2^2*AA3*BB2*BB3*BB4*BB5+16*AA4*BB2*BB3*BB4*BB5+16*AA2*AA4*BB2*BB3*BB4*BB5+
+16*AA3*AA4*BB2*BB3*BB4*BB5+32*AA2*AA3*AA4*BB2*BB3*BB4*BB5+16*AA2^2*AA3*AA4*BB2*BB3*BB4*BB5+
+8*BB3^2*BB4*BB5+16*AA3*BB3^2*BB4*BB5+16*AA2*AA3*BB3^2*BB4*BB5+8*AA3^2*BB3^2*BB4*BB5+
+16*AA2*AA3^2*BB3^2*BB4*BB5+8*AA2^2*AA3^2*BB3^2*BB4*BB5+8*BB1*BB4^2*BB5+16*AA4*BB1*BB4^2*BB5+
+16*AA3*AA4*BB1*BB4^2*BB5+8*AA2*AA3*AA4*BB1*BB4^2*BB5+8*AA4^2*BB1*BB4^2*BB5+16*AA3*AA4^2*BB1*BB4^2*
+BB5+8*AA2*AA3*AA4^2*BB1*BB4^2*BB5+8*AA3^2*AA4^2*BB1*BB4^2*BB5+8*AA2*AA3^2*AA4^2*BB1*
+BB4^2*BB5+8*BB2*BB4^2*BB5+8*AA2*BB2*BB4^2*BB5+16*AA4*BB2*BB4^2*BB5+16*AA2*AA4*BB2*BB4^2*BB5+
+8*AA3*AA4*BB2*BB4^2*BB5+16*AA2*AA3*AA4*BB2*BB4^2*BB5+8*AA2^2*AA3*AA4*BB2*BB4^2*BB5+
+8*AA4^2*BB2*BB4^2*BB5+8*AA2*AA4^2*BB2*BB4^2*BB5+8*AA3*AA4^2*BB2*BB4^2*BB5+16*AA2*AA3*AA4^2*BB2*BB4^2*
+BB5+8*AA2^2*AA3*AA4^2*BB2*BB4^2*BB5+8*BB3*BB4^2*BB5+8*AA3*BB3*BB4^2*BB5+
+8*AA2*AA3*BB3*BB4^2*BB5+8*AA4*BB3*BB4^2*BB5+16*AA3*AA4*BB3*BB4^2*BB5+16*AA2*AA3*AA4*BB3*BB4^2*
+BB5+8*AA3^2*AA4*BB3*BB4^2*BB5+16*AA2*AA3^2*AA4*BB3*BB4^2*BB5+8*AA2^2*AA3^2*AA4*BB3*
+BB4^2*BB5)/8;
+
+
+tau43=(-1+12*BB1^2*BB2*BB3+12*BB1^2*BB2*BB4+12*AA4*BB1^2*BB2*BB4+12*BB1^2*BB3*BB4+
+12*AA3*BB1^2*BB3*BB4+24*BB1*BB2*BB3*BB4+24*AA2*BB1*BB2*BB3*BB4+12*BB2^2*BB3*BB4+
+24*AA2*BB2^2*BB3*BB4+12*AA2^2*BB2^2*BB3*BB4+12*BB1^2*BB2*BB5+12*AA5*BB1^2*BB2*BB5+
+12*AA4*AA5*BB1^2*BB2*BB5+12*BB1^2*BB3*BB5+12*AA3*BB1^2*BB3*BB5+12*AA5*BB1^2*BB3*BB5+
+12*AA3*AA5*BB1^2*BB3*BB5+24*BB1*BB2*BB3*BB5+24*AA2*BB1*BB2*BB3*BB5+24*AA5*BB1*BB2*BB3*BB5+
+24*AA2*AA5*BB1*BB2*BB3*BB5+12*BB2^2*BB3*BB5+24*AA2*BB2^2*BB3*BB5+12*AA2^2*BB2^2*BB3*BB5+
+12*AA5*BB2^2*BB3*BB5+24*AA2*AA5*BB2^2*BB3*BB5+12*AA2^2*AA5*BB2^2*BB3*BB5+12*BB1^2*BB4*BB5+
+12*AA4*BB1^2*BB4*BB5+12*AA3*AA4*BB1^2*BB4*BB5+24*BB1*BB2*BB4*BB5+24*AA2*BB1*BB2*BB4*BB5+
+24*AA4*BB1*BB2*BB4*BB5+24*AA2*AA4*BB1*BB2*BB4*BB5+12*BB2^2*BB4*BB5+24*AA2*BB2^2*BB4*BB5+
+12*AA2^2*BB2^2*BB4*BB5+12*AA4*BB2^2*BB4*BB5+24*AA2*AA4*BB2^2*BB4*BB5+12*AA2^2*AA4*BB2^2*BB4*BB5+
+24*BB1*BB3*BB4*BB5+24*AA3*BB1*BB3*BB4*BB5+24*AA2*AA3*BB1*BB3*BB4*BB5+24*BB2*BB3*BB4*BB5+
+24*AA2*BB2*BB3*BB4*BB5+24*AA3*BB2*BB3*BB4*BB5+48*AA2*AA3*BB2*BB3*BB4*BB5+24*AA2^2*AA3*BB2*BB3*BB4*
+BB5+12*BB3^2*BB4*BB5+24*AA3*BB3^2*BB4*BB5+24*AA2*AA3*BB3^2*BB4*BB5+12*AA3^2*BB3^2*BB4*BB5+
+24*AA2*AA3^2*BB3^2*BB4*BB5+12*AA2^2*AA3^2*BB3^2*BB4*BB5)/24;
+
+tau44=(-1+24*BB1*BB2*BB3*BB4+24*BB1*BB2*BB3*BB5+24*AA5*BB1*BB2*BB3*BB5+24*BB1*BB2*BB4*BB5+
+24*AA4*BB1*BB2*BB4*BB5+24*BB1*BB3*BB4*BB5+24*AA3*BB1*BB3*BB4*BB5+24*BB2*BB3*BB4*BB5+
+24*AA2*BB2*BB3*BB4*BB5)/24;
+
+tau59=(-1+tt5*BB1*BB2*BB3*BB4*BB5)/tt5;
+
+(* ================================================================== *)
+
+itt = Mod[iteractual, 100] - 1 ;
+If[(itt < 0), Print["===>iter = ",{iter,iteractual},"  {Min.,Max.}c = ",{minC,maxC}," A3,A4 = ",N[nA,3]]];
+
+
+(*
+aa2 = -0.60579046597752549480;
+aa3 = -2.5461770360591190165;
+aa4 = -0.69260166805507913951;
+aa5 = -1.3549983768106878354;
+bb1 = 0.26883950920591762654;
+bb2 = 0.85915691733533461236;
+bb3 = 0.43831930864530177656;
+bb4 = 0.43380045368187695752;
+bb5 = 0.11384758304146720307;
+*)
+
+  gA = Table[RandomReal[{-0.01,0.01}], 11];
+
+  ans = Quiet[ FindRoot[{tau11==0,tau21==0,tau31==0,tau32==0,tau41==0,tau42==0,tau43==0,tau44==0,tau59==0},
+                     {AA2,gA[[1]]+aa2}, {AA3,gA[[2]]+aa3}, {AA4,gA[[3]]+aa4}, {AA5,gA[[4]]+aa5},
+  {BB1,gA[[5]]+bb1}, {BB2,gA[[6]]+bb2}, {BB3,gA[[7]]+bb3}, {BB4,gA[[8]]+bb4}, {BB5,gA[[9]]+bb5},
+  Jacobian -> Symbolic, AccuracyGoal -> Infinity, PrecisionGoal -> 150, MaxIterations -> 250] ];
+
+                                    AA2 = N[AA2 /. Part[ans, 1], 25]; AA3 = N[AA3 /. Part[ans, 2], 25];
+  AA4 = N[AA4 /. Part[ans, 3], 25]; AA5 = N[AA5 /. Part[ans, 4], 25];
+  BB1 = N[BB1 /. Part[ans, 5], 25]; BB2 = N[BB2 /. Part[ans, 6], 25]; BB3 = N[BB3 /. Part[ans, 7], 25];
+  BB4 = N[BB4 /. Part[ans, 8], 25]; BB5 = N[BB5 /. Part[ans, 9], 25];
+
+ans1 = Rationalize[ {AA2,AA3,AA4,AA5,BB1,BB2,BB3,BB4,BB5} ,10^(-15)];
+
+(* Accuracy check *)
+
+b1  = BB1 + AA2*BB2 + AA2*AA3*BB3 + AA2*AA3*AA4*BB4 + AA2*AA3*AA4*AA5*BB5;
+a51 = BB1 + AA2*BB2 + AA2*AA3*BB3 + AA2*AA3*AA4*BB4;
+b2  = BB2 + AA3*BB3 + AA3*AA4*BB4 + AA3*AA4*AA5*BB5;
+a41 = BB1 + AA2*BB2 + AA2*AA3*BB3;
+a52 = BB2 + AA3*BB3 + AA3*AA4*BB4;
+b3  = BB3 + AA4*BB4 + AA4*AA5*BB5;
+a31 = BB1 + AA2*BB2;
+a42 = BB2 + AA3*BB3;
+a53 = BB3 + AA4*BB4;
+b4  = BB4 + AA5*BB5;
+a21 = BB1;
+a32 = BB2;
+a43 = BB3;
+a54 = BB4;
+b5  = BB5;
+
+ae = Factor[ a.e ];
+c2 = ae[[2]];
+c3 = ae[[3]];
+c4 = ae[[4]];
+c5 = ae[[5]];
+
+bc   = Factor[ b*c ];
+bc2  = Factor[ b*c^2 ];
+ba   = Factor[ b.a ];
+ac   = Factor[ a.c ];
+bac  = Factor[ ba*c ];
+aa   = Factor[ a.a ];
+
+t11  = Factor[ b.e               -  1    ]; t21  = Factor[ b.c                -  1/2! ];
+t31  = Factor[ b.c^2/2           -  1/3! ]; t32  = Factor[ ba.c               -  1/3! ];
+t41  = Factor[ b.c^3/6           -  1/4! ]; t42  = Factor[ (bc).a.c           -  3/4! ];
+t43  = Factor[ ba.c^2/2          -  1/4! ]; t44  = Factor[ ba.ac              -  1/4! ];
+t51  = Factor[ b.c^4/24          -  1/5! ]; t52  = Factor[ (bc2).ac/2         -  6/5! ];
+t53  = Factor[ b.(ac)^2/2        -  3/5! ]; t54  = Factor[ (bc).a.c^2/2       -  4/5! ];
+t55  = Factor[ b.a.c^3/6         -  1/5! ]; t56  = Factor[ (bc).a.ac          -  4/5! ];
+t57  = Factor[ bac.ac            -  3/5! ]; t58  = Factor[ ba.a.c^2/2         -  1/5! ];
+t59  = Factor[ ba.aa.c           -  1/5! ];
+
+t1 = {t11};
+t2 = {t21};
+t3 = {t31,t32};
+t4 = {t41,t42,t43,t44};
+t5 = {t51,t52,t53,t54,t55,t56,t57,t58,t59};
+
+A1 = Sqrt[ Factor[t1.t1] ];
+A2 = Sqrt[ Factor[t2.t2] ];
+A3 = Sqrt[ Factor[t3.t3] ];
+A4 = Sqrt[ Factor[t4.t4] ];
+A5 = Sqrt[ Factor[t5.t5] ];
+
+dd = Max[ Abs[a], Abs[b], Abs[c] ];
+
+If[A4 < 10^(-10) && A5 < A5max, 
+Print["<======= Begin ==========>" ];
+Print["Initial Guess: ===> {Min.,Max.}c = ",{minC,maxC}," A3,A4 = ",N[nA,3]];
+Print["A5 = ", N[A5,5],"  c = ", N[ae,5],"    D = ", dd,"   1/tt5 = ",N[tt5],"  iter = ",iter,"  iterActual = ",iteractual];    
+Print["AA2<->BB5 = ", N[ans1,10]];
+
+(*
+nA5 = N[A5,5];
+listA5 = Sort[AppendTo[listA5,nA5]];
+Print["A5 List = ", listA5];
+*)
+
+c    = Factor[ a.e ];
+ac   = Factor[ a.c ];
+aa   = Factor[ a.a ];
+tau11h =  Factor[ bh.e/0!   - 1/1!];   tau21h =  Factor[ bh.c^1/1! - 1/2!];
+tau31h =  Factor[ bh.c^2/2! - 1/3!];   tau32h =  Factor[ bh.a.c    - 1/3!];
+tau44h =  Factor[ bh.a.ac   - 1/tth4];
+
+ans = Factor[ Solve[{tau11h==0,tau21h==0,tau31h==0,tau32h==0,tau44h==0},{bh1,bh2,bh3,bh4,bh5}]];
+bh1 = Factor[Part[bh1 /. ans, 1]]; bh2 = Factor[Part[bh2 /. ans, 1]];
+bh3 = Factor[Part[bh3 /. ans, 1]]; bh4 = Factor[Part[bh4 /. ans, 1]];
+bh5 = Factor[Part[bh5 /. ans, 1]];
+
+tt1r = Factor[ 1/b.e];
+tt2r = Factor[ 1/b.c];
+tt3r = Factor[ 1/b.a.c];
+tt4r = Factor[ 1/b.a.ac];
+tt5r = Factor[ 1/b.a.aa.c];
+
+tth1r = Factor[ 1/bh.e];
+tth2r = Factor[ 1/bh.c];
+tth3r = Factor[ 1/bh.a.c];
+tth4r = Factor[ 1/bh.a.ac];
+tth5r = Factor[ 1/bh.a.aa.c];
+
+
+(* =========================================================== *)
+bc   = Factor[ b*c ];
+bc2  = Factor[ b*c^2 ];
+bc3  = Factor[ b*c^3 ];
+ba   = Factor[ b.a ];
+baa  = Factor[ ba.a ];
+bac  = Factor[ ba*c ];
+baac = Factor[ baa*c ];
+
+ac   = Factor[ a.c ];
+aa   = Factor[ a.a ];
+aac  = Factor[ aa.c ];
+
+t11  = Factor[ b.e                -  1    ]; t21  = Factor[ b.c                -  1/2! ];
+t31  = Factor[ b.c^2/2            -  1/3! ]; t32  = Factor[ ba.c               -  1/3! ];
+t41  = Factor[ b.c^3/6            -  1/4! ]; t42  = Factor[ (bc).a.c           -  3/4! ];
+t43  = Factor[ ba.c^2/2           -  1/4! ]; t44  = Factor[ ba.ac              -  1/4! ];
+t51  = Factor[ b.c^4/24           -  1/5! ]; t52  = Factor[ (bc2).ac/2         -  6/5! ];
+t53  = Factor[ b.(a.c)^2/2        -  3/5! ]; t54  = Factor[ (bc).a.c^2/2       -  4/5! ];
+t55  = Factor[ b.a.c^3/6          -  1/5! ]; t56  = Factor[ (bc).a.ac          -  4/5! ];
+t57  = Factor[ bac.ac             -  3/5! ]; t58  = Factor[ ba.a.c^2/2         -  1/5! ];
+t59  = Factor[ ba.aa.c            -  1/5! ];
+
+
+bhc   = Factor[ bh*c ];
+bhc2  = Factor[ bh*c^2 ];
+bhc3  = Factor[ bh*c^3 ];
+bha   = Factor[ bh.a ];
+bhaa  = Factor[ bha.a ];
+bhac  = Factor[ bha*c ];
+bhaac = Factor[ bhaa*c ];
+
+t11h  = Factor[ bh.e                -  1    ]; t21h  = Factor[ bh.c                -  1/2! ];
+t31h  = Factor[ bh.c^2/2            -  1/3! ]; t32h  = Factor[ bha.c               -  1/3! ];
+t41h  = Factor[ bh.c^3/6            -  1/4! ]; t42h  = Factor[ (bhc).a.c           -  3/4! ];
+t43h  = Factor[ bha.c^2/2           -  1/4! ]; t44h  = Factor[ bha.ac              -  1/4! ];
+t51h  = Factor[ bh.c^4/24           -  1/5! ]; t52h  = Factor[ (bhc2).ac/2         -  6/5! ];
+t53h  = Factor[ bh.(a.c)^2/2        -  3/5! ]; t54h  = Factor[ (bhc).a.c^2/2       -  4/5! ];
+t55h  = Factor[ bh.a.c^3/6          -  1/5! ]; t56h  = Factor[ (bhc).a.ac          -  4/5! ];
+t57h  = Factor[ bhac.ac             -  3/5! ]; t58h  = Factor[ bha.a.c^2/2         -  1/5! ];
+t59h  = Factor[ bha.aa.c            -  1/5! ];
+
+t4 = {t41,t42,t43,t44};
+t5 = {t51,t52,t53,t54,t55,t56,t57,t58,t59};
+
+t4h = {t41h,t42h,t43h,t44h};
+t5h = {t51h,t52h,t53h,t54h,t55h,t56h,t57h,t58h,t59h};
+
+A4h = Sqrt[ Factor[t4h.t4h] ];
+A5h = Sqrt[ Factor[t5h.t5h] ];
+
+d4 = Factor[ t4h - t4 ];
+d5 = Factor[ t5h - t5 ];
+
+Cnum42h = Factor[ d4.d4 ];
+Cnum52h = Factor[ d5.d5 ];
+
+B5 = N[A5h/A4h];
+C5 = N[Sqrt[N[Cnum52h,8]]/A4h];
+E5 = N[A5/A4h];
+
+(* =========================================================== *)
+
+Print["Main tall trees     = 1/", N[{tt1r,tt2r,tt3r,tt4r,tt5r},4]];
+Print["Embedded tall trees = 1/", N[{tth1r,tth2r,tth3r,tth4r,tth5r},4]];
+Print["B5 = ", N[B5,4],"   C5 = ", N[C5,4],"   E5 = ", N[E5,4]];
+Print["                     "];
+
+rint = Inverse[ (IdentityMatrix[Length[b]] - z*a)].e;
+rz   = 1 + z*b.rint;
+rzList  = CoefficientList[rz,z];
+Do[ 
+  rzint[i] = CoefficientList[rint[[i]],z];
+  Print["Internal Tall Trees for Stage ",i," = 1/", N[1/rzint[i],10] ];
+,{i,2,5}];
+
+(* Compute rF2 *)
+test = Length[DeleteDuplicates[NonNegative[b]]];
+If[test< 2,
+  bbb = b*IdentityMatrix[Length[b]];
+  mm = Transpose[bbb].a + Transpose[a].bbb - Outer[Times,b,b];
+  mmm = N[Inverse[Sqrt[bbb]].mm.Inverse[Sqrt[bbb]],5];
+  eigmmm = Min[Eigenvalues[mmm]];
+  Print["rF2 = ", -1/eigmmm ];,
+  Print["rF2 = ", 0 ];
+];
+  Print["<======== End ===========>" ];
+
+, dog=3];
+, dog==0];
+, dog==0];
+, dog==0];
+
+it2 = it;
+it = Mod[iteractual, 10000] - 1 ;
+If[(it < 0 && it != it2), Print["Iteration #  = ", iteractual," | ",iter]] ;
+
+Clear[BB1]; Clear[BB2]; Clear[BB3]; Clear[BB4]; Clear[BB5];
+            Clear[AA2]; Clear[AA3]; Clear[AA4]; Clear[AA5];
+            Clear[ c2]; Clear[ c3]; Clear[ c4]; Clear[ c5];
+Clear[bh1]; Clear[bh2]; Clear[bh3]; Clear[bh4]; Clear[bh5];
+
+,{iter,500000000}];
+(* ================================================================== *)

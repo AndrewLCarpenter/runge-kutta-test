@@ -1,4 +1,4 @@
-Tecplot 16.2.0.71391 Batch Log
+Tecplot 2017.2.0.79771 Batch Log
 ACTION: PAGECONTROL: CREATE
 ACTION: LOADADDON
 ACTION: LOADADDON
@@ -33,9 +33,12 @@ ACTION: LOADADDON
 ACTION: LOADADDON
 ACTION: LOADADDON
 ACTION: LOADADDON
+ACTION: LOADADDON
+ACTION: LOADADDON
+ACTION: LOADADDON
 ACTION: PAGECONTROL: CREATE
-ACTION: OPENLAYOUT: /ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/tecplot scripts/err1.lay
+ACTION: OPENLAYOUT: /ump/fldmd/home/mhcarpen/runge-kutta-test/tecplot scripts/err1.lay
 ACTION: PAGECONTROL: CREATE
-ACTION: READDATASET: "/ump/fldmd/home/bmurray3/Desktop/runge-kutta-test/Code/IMEX/Broadwell/ARK548[2]SA_2/Broadwell_ARK548[2]SA_2_3.dat"
+ACTION: READDATASET: "/ump/fldmd/home/mhcarpen/runge-kutta-test/Code/IMEX/Broadwell/ESDIRK548L[2]SA/Broadwell_ESDIRK548L[2]SA_3.dat"
 ACTION: REDRAWALL
 ACTION: EXPORT

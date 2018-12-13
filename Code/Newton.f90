@@ -66,7 +66,7 @@
       
       use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
 
-      integer, parameter :: iter_max=20
+      integer, parameter :: iter_max=1500
       logical, parameter :: Line_search=.false. !set to TRUE for line search
       logical, parameter :: QR=.false. !set to TRUE for QR factorization
 
@@ -88,7 +88,7 @@
             icount = icount + 1
             uveciter(:) = uvec(:)
             uvec(:)=usum(:)
-            if(check_exit(uveciter,k)) exit            
+            if(check_exit(uveciter,iter_max,k)) exit            
           enddo   
         case default !IMEX or IMPLICIT
           line: if (Line_search) then
@@ -106,7 +106,7 @@
                 
                   uvec(:)=uvec(:)-LU_solver(Rnewton)
                   
-                  if(check_exit(uveciter,k)) exit
+                  if(check_exit(uveciter,iter_max,k)) exit
                               
                 enddo  
               case('DENSE')
@@ -133,7 +133,7 @@
                     enddo  
                   endif
           
-                  if(check_exit(uveciter,k)) exit
+                  if(check_exit(uveciter,iter_max,k)) exit
                     
                 enddo
             end select Jac_select 
@@ -163,18 +163,18 @@
 ! OUTPUTS:
 ! check_exit -> logical output function for if statement in newton iteration, logical
 !******************************************************************************
-      function check_exit(uveciter,k)
+      function check_exit(uveciter,iter_max,k)
       
       use control_variables, only: tol,uvec
       
       real(wp), dimension(:), intent(in) :: uveciter
-      integer,                intent(in) :: k
+      integer,                intent(in) :: iter_max,k
       real(wp)                           :: tmp
       logical                            :: check_exit
       
       check_exit=.false.
       tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-      if (k>=10) write(*,*)'tmp',tmp,'k',k
+      if (k>=iter_max) write(*,*)'tmp',tmp,'k',k
       if (tmp/=tmp) then
         print*,'stopping NaN k=',k
         stop
@@ -688,14 +688,21 @@
       real(wp) :: x41,x42,x43,x44
       real(wp) :: det,detI   
 
+      real(wp), parameter :: tol = 1.0e-20_wp
+
       mat_size=size(mat(:,1))
            
       if(mat_size==2)then
+
         det = (mat(1,1)*mat(2,2)-mat(1,2)*mat(2,1))
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
+
         xinv(1,1) =  mat(2,2)/det
         xinv(1,2) = -mat(1,2)/det
         xinv(2,1) = -mat(2,1)/det
         xinv(2,2) =  mat(1,1)/det
+
       elseif(mat_size==3)then
 
         x11 = mat(1,1)
@@ -710,6 +717,8 @@
 
         det = - x13*x22*x31 + x12*x23*x31 +  x13*x21*x32& 
      &        - x11*x23*x32 - x12*x21*x33 +  x11*x22*x33
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
 
         detI = 1.0_wp/det
 
@@ -755,6 +764,8 @@
      &   x13*x22*x31*x44 + x12*x23*x31*x44 + &
      &   x13*x21*x32*x44 - x11*x23*x32*x44 - &
      &   x12*x21*x33*x44 + x11*x22*x33*x44)
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
 
         detI = 1.0_wp/det
 
@@ -806,10 +817,13 @@
         xinv(4,4) = (&
      & -(x13*x22*x31) + x12*x23*x31 + x13*x21*x32 - &
      &   x11*x23*x32  - x12*x21*x33 + x11*x22*x33  ) * detI
+
       endif
+
       Mat_invert=xinv
-      return
+
       end function Mat_invert
+
 !==============================================================================
 !******************************************************************************
 ! Subroutine to convert a dense matrix to CSR and store it as the global CSR

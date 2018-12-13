@@ -1,0 +1,8 @@
+ zone T = "Differential Variable - IMPLICIT",
+ 0.00000E+00  0.29785E-16
+ 0.62500E-01 -0.11914E-16
+ 0.12500E+00 -0.11914E-16
+ zone T = "Algebraic Variable - IMPLICIT",
+ 0.00000E+00  0.20849E-16
+ 0.62500E-01  0.47655E-16
+ 0.12500E+00  0.29785E-16

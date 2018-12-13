@@ -1,0 +1,97 @@
+NN = 2 ;
+
+vars = {x,y} ;
+
+eqn1 = y ;
+eqn2 = ((1 - x x) y - x ) / ep ;
+
+eqns = Table["eqn"<>ToString[i], {i, 1, NN}]
+f = ToExpression[eqns] ;
+
+Jac = Table[0,{i,1,NN},{j,1,NN}] ;
+For[i=1,i<=NN,i++,
+   For[j=1,j<=NN,j++,
+      Jac[[i,j]] = D[ToExpression[eqns[[i]]],vars[[j]]]
+      ] ;
+   ] ;
+
+JacI = Inverse[Jac] ;
+
+Hes = Table[0,{i,1,NN},{j,1,NN},{k,1,NN}] ;
+For[i=1,i<=NN,i++,
+   For[j=1,j<=NN,j++,
+      For[k=1,k<=NN,k++,
+      Hes[[i,j,k]] = D[ToExpression[eqns[[i]]],vars[[j]],vars[[k]]]
+         ] ;
+      ] ;
+   ] ;
+
+dU = Array[du,{NN}] ;
+wrk = Table[0,{i,1,NN}] ;
+For[i=1,i<=NN,i++,
+   wrk[[i]] = 0 ;
+   For[j=1,j<=NN,j++,
+      For[k=1,k<=NN,k++,
+           wrk[[i]] = wrk[[i]] + Hes[[i,j,k]]*dU[[j]]*dU[[k]]
+         ] ;
+      ] ;
+   ] ;
+
+
+res = Array[rs,{NN}] ;
+eqnNon = res + Jac.dU + 1/2 Hes.dU.dU ;
+
+str1 = OpenWrite["fcnvanderPol", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str1,
+           SequenceForm[ Format["      ", OutputForm],
+                         eqn[i],
+                         Format[" = ", OutputForm],
+                         ToExpression[eqns[[i]]]
+                       ] ] ]
+Close[str1]
+
+            (* Create Jacobian Matrix in Fortran form *)
+
+str2 = OpenWrite["jacvanderPol", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+      Write[str2,
+            SequenceForm[Format["      ", OutputForm],
+                         JAC[i, j],
+                         Format[" = ", OutputForm],
+                         D[ToExpression[eqns[[i]]], vars[[j]] ]
+                        ] ] ] ]
+Close[str2]
+
+            (* Create Hessian Matrix in Fortran form *)
+
+str3 = OpenWrite["hesvanderPol", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+       For[ k = 1, k<= Length[vars], k++,
+          Write[str3,
+                SequenceForm[Format["      ", OutputForm],
+                             HES[i, j, k],
+                             Format[" = ", OutputForm],
+                             D[ToExpression[eqns[[i]]], vars[[j]], vars[[k]] ]
+                            ] ] ] ] ]
+
+Close[str3]
+
+str4 = OpenWrite["HessdotdotvanderPol", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str4,
+           SequenceForm[ Format["      ", OutputForm],
+                         hessdotdot[i],
+                         Format[" = ", OutputForm],
+                         wrk[[i]]
+                       ] ] ]
+Close[str4]
+
+
+

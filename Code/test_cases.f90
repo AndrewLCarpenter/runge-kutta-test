@@ -103,7 +103,7 @@
 !     To find the exact solution:
 !     1) set temporal_splitting (in control_variables) to "IMPLICIT"
 !     2) turn iDT_sol_flag=.true. and run desired problem and RK case.
-!     3) complile convergence_testing and move executable to IMPLICIT/probname/casename
+!     3) compile convergence_testing and move executable to IMPLICIT/probname/casename
 !     4) Take note of terminal output "Location = ##"
 !     5) set that number to exact_sol_iDT=##
 !     6) set exact_sol_flag=.true.
@@ -126,7 +126,9 @@
      &                              uveco,errvec,errvecT,tmpvec,resE,resI,    &
      &                              error,errorP,b1save,b1Psave,ustage,       &
      &                              predvec,jactual,uvec,uexact,b,usum,       &
-     &                              programstep,errorL2,b1L2save
+     &                              programstep,errorL2,b1L2save,             &
+     &                              Temporal_Splitting
+                       
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
@@ -150,9 +152,9 @@
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
       logical,  parameter                   :: time_sol_flag=.false. !True to output time solution
-      integer,  parameter                   :: time_sol_iDT=45      !which dt value to output (You only want one timestep in the file,
-                                                                    !                          system could be improved)
-      logical,  parameter                   :: iDT_sol_flag=.false.               
+      integer,  parameter                   :: time_sol_iDT=45       !which dt value to output (You only want one timestep in the file,
+                                                                     !                          system could be improved)
+      logical,  parameter                   :: iDT_sol_flag=.false.     
       logical,  parameter                   :: exact_sol_flag=.false.
       integer,  parameter                   :: exact_sol_iDT =70
                                                      
@@ -160,15 +162,17 @@
 !      real(wp),dimension(40) :: tmpv
                           
 !-----------------------------USER INPUT---------------------------------------
-      write(*,*)'what is ipred?' !input predictor number
-      read(*,*)ipred
+!     write(*,*)'what is ipred?' !input predictor number
+!     read(*,*)ipred
+      ipred = 0 ;
 !     write(*,*)'what is case?'  !input range of runge kutta cases
 !     read(*,*)cases
-      write(*,*)'which problem?' !input problem number
-      read(*,*)problem
+!     write(*,*)'which problem?' !input problem number
+!     read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
 !     do icase = cases,cases
-      do icase = 101,109
+!     do icase = 101,109
+      do icase = 1,18   !  1,7
       
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -177,11 +181,19 @@
         icount = 0                                  !cost counters
         jcount = 0                                  !cost counters
         
-        !**GET RK COEFFICIENTS**
-        call rungeadd(icase)
+        call rungeadd(icase)                        !**GET RK COEFFICIENTS**
+
+        if( (maxval(abs(ae(:,:))) <= 1.0e-12_wp) .and.  &
+            (Temporal_Splitting   == 'IMEX'    ) ) then
+            write(*,*)'icase = ',  icase
+            write(*,*)'Running IMEX with DIRK coefficients; '
+            write(*,*)'Cycling icase loop '
+            cycle
+        endif
 
 !--------------------------PROBLEMS LOOP---------------------------------------
-        do iprob = problem,problem
+!       do iprob = problem,problem
+        do iprob = 1,4
         
           call cpu_time(cputime1)
               
@@ -258,7 +270,7 @@
                  
                   ! Fill in resE and resI with the converged data
                   programStep='BUILD_RHS'
-                  call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),L)
+                  call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(L,L),L)
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,ktime)
 

@@ -1,0 +1,40 @@
+      hessdotdot(1) = 0
+      hessdotdot(2) = 0
+              hessdotdot(3) = 
+     -  (2*(du(1)**2 + du(2)**2 - 2*du(1)*du(3)))/ep
+      hessdotdot(4) = 0
+      hessdotdot(5) = 0
+              hessdotdot(6) = 
+     -  (2*(du(4)**2 + du(5)**2 - 2*du(4)*du(6)))/ep
+      hessdotdot(7) = 0
+      hessdotdot(8) = 0
+              hessdotdot(9) = 
+     -  (2*(du(7)**2 + du(8)**2 - 2*du(7)*du(9)))/ep
+      hessdotdot(10) = 0
+      hessdotdot(11) = 0
+              hessdotdot(12) = 
+     -  (2*(du(10)**2 + du(11)**2 - 2*du(10)*du(12)))/ep
+      hessdotdot(13) = 0
+      hessdotdot(14) = 0
+              hessdotdot(15) = 
+     -  (2*(du(13)**2 + du(14)**2 - 2*du(13)*du(15)))/ep
+      hessdotdot(16) = 0
+      hessdotdot(17) = 0
+              hessdotdot(18) = 
+     -  (2*(du(16)**2 + du(17)**2 - 2*du(16)*du(18)))/ep
+      hessdotdot(19) = 0
+      hessdotdot(20) = 0
+              hessdotdot(21) = 
+     -  (2*(du(19)**2 + du(20)**2 - 2*du(19)*du(21)))/ep
+      hessdotdot(22) = 0
+      hessdotdot(23) = 0
+              hessdotdot(24) = 
+     -  (2*(du(22)**2 + du(23)**2 - 2*du(22)*du(24)))/ep
+      hessdotdot(25) = 0
+      hessdotdot(26) = 0
+              hessdotdot(27) = 
+     -  (2*(du(25)**2 + du(26)**2 - 2*du(25)*du(27)))/ep
+      hessdotdot(28) = 0
+      hessdotdot(29) = 0
+              hessdotdot(30) = 
+     -  (2*(du(28)**2 + du(29)**2 - 2*du(28)*du(30)))/ep

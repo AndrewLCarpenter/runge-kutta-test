@@ -64,7 +64,7 @@
       if(L <= ns-1) then
         predvec(:,M) = ustage(:,L) ! previous guess as starter
       else
-        predvec(:,2) = ustage(:,6)
+        predvec(:,2) = ustage(:,ns)
       endif
 
 !     if(L .ge. 2)then

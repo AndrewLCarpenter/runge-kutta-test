@@ -1,0 +1,2 @@
+      hessdotdot(1) = 0
+      hessdotdot(2) = -((du(1)**2*Sin(x))/ep)

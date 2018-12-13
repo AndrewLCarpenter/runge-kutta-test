@@ -1,0 +1,3 @@
+      hessdotdot(1) = 0
+      hessdotdot(2) = -2*d1*d3
+      hessdotdot(3) = 2*d1*d2
