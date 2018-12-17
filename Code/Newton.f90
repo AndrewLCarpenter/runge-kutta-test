@@ -66,9 +66,10 @@
       
       use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
 
-      integer, parameter :: iter_max=1500
+!     integer, parameter :: iter_max=1500
+      integer, parameter :: iter_max=100
       logical, parameter :: Line_search=.false. !set to TRUE for line search
-      logical, parameter :: QR=.false. !set to TRUE for QR factorization
+      logical, parameter :: QR = .true. !set to TRUE for QR factorization
 
       integer,  intent(in   ) :: iprob,L
       real(wp), intent(in   ) :: ep,dt
@@ -115,6 +116,7 @@
                   uveciter(:) = uvec(:) !store old uvec   
                                 
                   Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
+!                 write(*,*)k,sqrt(dot_product(rnewton,rnewton))
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                     
                   if (nveclen>4 .and. .not. QR) then !No explicit inverse
@@ -122,6 +124,10 @@
                     uvec(:)=uvec(:)-LU_solver(Rnewton)
                       
                   elseif (nveclen>4 .and. QR) then !QR factorization
+!                   write(*,*)'xjac'
+!                   do i = 1,nvecLen
+!                      write(*,*)i,(j,xjac(i,j),j=1,nvecLen)
+!                   enddo
                     call QR_decomp(xjac,nveclen,rnewton) 
                        
                   elseif (nveclen<=4) then !Explicit inverse
@@ -136,6 +142,7 @@
                   if(check_exit(uveciter,iter_max,k)) exit
                     
                 enddo
+!               write(*,*)k,sqrt(dot_product(rnewton,rnewton))
             end select Jac_select 
           endif line
       end select temporal_select

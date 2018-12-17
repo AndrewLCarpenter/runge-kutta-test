@@ -9,8 +9,11 @@
       module Lorenz_mod
       private
       public :: Lorenz
+
       contains
+
       subroutine Lorenz(nveclen,neq,ep,dt,tfinal,iDT,rese_vec,resi_vec,akk)
+
       use precision_vars,    only: wp
       use control_variables, only: temporal_splitting,probname,xjac,var_names,&
      &                             tol,dt_error_tol,uvec,uexact,programstep
@@ -61,13 +64,19 @@
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')
       
-          !Time information
-          !dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp) !used for exact solution
-          dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
           tfinal = 1.0_wp                    ! final time
 
+          !Timestep information
+          choose_dt: select case(temporal_splitting)
+            case('EXPLICIT'); dt = 0.005_wp/10**((iDT-1)/20.0_wp) ! explicit timestep
+            case default    ; dt = 0.250_wp/10**((iDT-1)/20.0_wp) ! implicit timestep      
+          end select choose_dt
+
+!         dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp) !used for exact solution
+!         dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
+
           !**Exact Solution**
-          open(unit=39,file='exact.lorenz.data')
+          open(unit=39,file='exact.Lorenz.data')
           rewind(39)
           do i=1,81
             read(39,*)ExactTot(i,1),ExactTot(i,2),ExactTot(i,3)
@@ -100,27 +109,27 @@
         case('BUILD_RHS')
           choose_RHS_type: select case (Temporal_Splitting)
             case('EXPLICIT') ! For fully explicit schemes
-              resI_vec(:)=0.0_wp
               resE_vec(1)=dt*sigma*(uvec(2)-uvec(1))
               resE_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
               resE_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
+              resI_vec(:)=0.0_wp
             case('IMEX') ! For IMEX schemes
-              rese_vec(1)=0.0_wp
-              rese_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
-              rese_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))     
-              resi_vec(1)=dt*sigma*(uvec(2)-uvec(1))
-              resi_vec(2)=0.0_wp
-              resi_vec(3)=0.0_wp            
+              resE_vec(1)=0.0_wp
+              resE_vec(2)=dt*(-uvec(1)*uvec(3)+rho*uvec(1)-uvec(2))
+              resE_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))     
+              resI_vec(1)=dt*sigma*(uvec(2)-uvec(1))
+              resI_vec(2)=0.0_wp
+              resI_vec(3)=0.0_wp            
             case('IMPLICIT') ! For fully implicit schemes
-              rese_vec(:)=0.0_wp
-              resi_vec(1)=dt*(sigma*(uvec(2)-uvec(1)))
-              resi_vec(2)=dt*( (rho - uvec(3))*uvec(1) - uvec(2) )
-              resi_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
+              resE_vec(:)=0.0_wp
+              resI_vec(1)=dt*(sigma*(uvec(2)-uvec(1)))
+              resI_vec(2)=dt*( (rho - uvec(3))*uvec(1) - uvec(2) )
+              resI_vec(3)=dt*(+uvec(1)*uvec(2)-beta*uvec(3))
           end select choose_RHS_type
           
         case('BUILD_JACOBIAN')          
           choose_Jac_type: select case (Temporal_Splitting)
-            case('EXPLICIT') ! For fully implicit schemes
+            case('EXPLICIT') ! For fully explicit schemes
               xjac(1,1) = 1.0_wp
               xjac(1,2) = 0.0_wp
               xjac(1,3) = 0.0_wp

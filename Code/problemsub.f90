@@ -14,6 +14,7 @@
 ! BURGERS_MOD.F90        *PROBLEM CONSTANTS AND ROUTINES FOR BURGERS
 ! BOSCARINO31_MOD.F90    *PROBLEM CONSTANTS AND ROUTINES FOR BOSCARINO-31
 ! BROADWELL_MOD.F90      *PROBLEM CONSTANTS AND ROUTINES FOR BROADWELL
+! CHARNEY_DeVORE6.F90    *PROBLEM CONSTANTS AND ROUTINES FOR CHARNEY_DeVore 6 eqn model
 !******************************************************************************
 ! GLOBAL VARIABLES/ROUTINES:
 ! From precision_variables:
@@ -51,18 +52,19 @@
       
       subroutine problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,time,akk,L)
 
-      use control_variables, only: resE,resI,uvec
-      use vanderPol_mod,     only: vanderPol
-      use Pureschi_mod,      only: Pureschi
-      use Kaps_mod,          only: Kaps
-      use Kreiss_mod,        only: Kreiss
-      use Lorenz_mod,        only: Lorenz
-      use Rossler_mod,       only: Rossler_Chaos
-      use Oregonator_mod,    only: Oregonator
-      use Brusselator_mod,   only: Brusselator
-      use Burgers_Module,    only: Burgers
-      use Boscarino31_Mod,   only: Boscarino31
-      use Broadwell_Mod,     only: Broadwell
+      use control_variables,   only: resE,resI,uvec
+      use vanderPol_mod,       only: vanderPol
+      use Pureschi_mod,        only: Pureschi
+      use Kaps_mod,            only: Kaps
+      use Kreiss_mod,          only: Kreiss
+      use Lorenz_mod,          only: Lorenz
+      use Rossler_mod,         only: Rossler_Chaos
+      use Oregonator_mod,      only: Oregonator
+      use Brusselator_mod,     only: Brusselator
+      use Burgers_Module,      only: Burgers
+      use Boscarino31_Mod,     only: Boscarino31
+      use Broadwell_Mod,       only: Broadwell
+      use Charney_DeVore6_mod, only: Charney_DeVore6
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
@@ -78,27 +80,31 @@
       real(wp), dimension(size(uvec)) :: resE_vec,resI_vec
 
       if     (iprob==1)  then
-       call vanderPol(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call vanderPol(      nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==2)  then
-       call Pureschi(     nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Pureschi(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==3)  then
-       call Kaps(         nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Kaps(           nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==4)  then
-       call Kreiss(       nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Kreiss(         nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==5)  then 
-       call Lorenz(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Lorenz(         nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==6)  then 
-       call Rossler_Chaos(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Rossler_Chaos(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==7)  then 
-       call Oregonator(   nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Oregonator(     nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==8)  then 
-       call Brusselator(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Brusselator(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==9)  then
-       call Burgers(      nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
+       call Burgers(        nveclen,neq,ep,dt,tfinal,iDT,time,resE_vec,resI_vec,akk)
       elseif (iprob==10) then
-       call Boscarino31(  nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Boscarino31(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==11) then
-       call Broadwell(    nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Broadwell(      nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+      elseif (iprob==12) then
+       call Charney_DeVore6(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+
+
       else
        print*,'Invalid problem number!'
        stop

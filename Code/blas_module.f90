@@ -7,7 +7,7 @@
       private
 
       public ::   daxpy, dcopy
-      public ::   dsetC, mat_AxB_C, eye, hh_inverse, HR_Fac
+      public ::   dsetC, mat_AxB_C, hh_inverse, HR_Fac
       public ::   ddot, dnrm2, lctcsr
 
       contains

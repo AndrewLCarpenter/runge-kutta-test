@@ -5242,7 +5242,7 @@
       real(wp) :: mag1,mag2
       real(wp) :: pi, disc, phi
       real(wp) :: r1,r2,r3,t1, err, mag, al
-      complex(wp) :: z3p,z3m, eye
+      complex(wp) :: z3p,z3m
       integer        :: j
 
       continue

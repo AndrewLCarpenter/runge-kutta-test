@@ -23,9 +23,9 @@
       public :: allocate_vars,deallocate_vars
       public :: programstep,var_names
 !--------------------------VARIABLES-------------------------------------------
-       character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
-!      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
 !      character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
+!      character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
+       character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
       character(len=9)             :: probname
       character(len=6)             :: Jac_case='DENSE' !default value
       character(len=80)            :: programstep

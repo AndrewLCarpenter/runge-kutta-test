@@ -1,0 +1,96 @@
+eqn1 =  g1s x3 - C (x1 - x1s) ;
+eqn2 = -(a1 x1 - b1) x3 - C x2 - d1 x4 x6 ;
+eqn3 = +(a1 x1 - b1) x2 - g1 x1 - C x3 + d1 x4 x5 ;
+eqn4 = g2s x6 - C (x4 - x4s) + ep (x2 x6 - x3 x5) ;
+eqn5 = -(a2 x1 - b2) x6 - C x5 - d2 x3 x4 ;
+eqn6 =  (a2 x1 - b2) x5 - g2 x4 - C x6 + d2 x2 x4 ;
+
+eqns = Table["eqn"<>ToString[i], {i, 1, 6}]
+f = ToExpression[eqns] ;
+
+vars = {x1,x2,x3,x4,x5,x6} ;
+
+Jac = Table[0,{i,1,6},{j,1,6}] ;
+For[i=1,i<=6,i++,
+   For[j=1,j<=6,j++,
+      Jac[[i,j]] = D[ToExpression[eqns[[i]]],vars[[j]]]
+      ] ;
+   ] ;
+
+JacI = Inverse[Jac] ;
+
+du = {d1,d2,d3,d4,d5,d6} ;
+Hes = Table[0,{i,1,6},{j,1,6},{k,1,6}] ;
+For[i=1,i<=6,i++,
+   For[j=1,j<=6,j++,
+      For[k=1,k<=6,k++,
+      Hes[[i,j,k]] = D[ToExpression[eqns[[i]]],vars[[j]],vars[[k]]]
+         ] ;
+      ] ;
+   ] ;
+
+wrk = Table[0,{i,1,6}] ;
+For[i=1,i<=6,i++,
+   wrk[[i]] = 0 ;
+   For[j=1,j<=6,j++,
+      For[k=1,k<=6,k++,
+           wrk[[i]] = wrk[[i]] + Hes[[i,j,k]]*du[[j]]*du[[k]]
+         ] ;
+      ] ;
+   ] ;
+
+
+res = {r1,r2,r3,r4,r5,r6} ;
+eqnNon = res + Jac.du + 1/2 Hes.du.du ;
+
+str1 = OpenWrite["fcnCharney_DeVore", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str1,
+           SequenceForm[ Format["      ", OutputForm],
+                         eqn[i],
+                         Format[" = ", OutputForm],
+                         ToExpression[eqns[[i]]]
+                       ] ] ]
+Close[str1]
+
+            (* Create Jacobian Matrix in Fortran form *)
+
+str2 = OpenWrite["jacCharney_DeVore", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+      Write[str2,
+            SequenceForm[Format["      ", OutputForm],
+                         JAC[i, j],
+                         Format[" = ", OutputForm],
+                         D[ToExpression[eqns[[i]]], vars[[j]] ]
+                        ] ] ] ]
+Close[str2]
+
+            (* Create Hessian Matrix in Fortran form *)
+
+str3 = OpenWrite["hesCharney_DeVore", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+   For[ j = 1, j<= Length[vars], j++,
+       For[ k = 1, k<= Length[vars], k++,
+          Write[str3,
+                SequenceForm[Format["      ", OutputForm],
+                             HES[i, j, k],
+                             Format[" = ", OutputForm],
+                             D[ToExpression[eqns[[i]]], vars[[j]], vars[[k]] ]
+                            ] ] ] ] ]
+
+Close[str3]
+
+str4 = OpenWrite["HessdotdotCharney_DeVore", FormatType -> FortranForm, PageWidth -> 60]
+
+For[i = 1, i <= Length[eqns], i++,
+    Write[ str4,
+           SequenceForm[ Format["      ", OutputForm],
+                         hessdotdot[i],
+                         Format[" = ", OutputForm],
+                         wrk[[i]]
+                       ] ] ]
+Close[str4]

@@ -14,6 +14,7 @@
 !     problem 9 ) Burgers
 !     problem 10) Boscarino31 
 !     problem 11) Broadwell Model
+!     problem 12) Charney_DeVore6
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -136,7 +137,7 @@
       implicit none     
 !-----------------------------VARIABLES----------------------------------------  
       !internal variables
-      real(wp)                              :: itmp,t,dto,tt,cputime1,cputime2
+      real(wp)                              :: itmp,t,dt0,tt,cputime1,cputime2
       real(wp), dimension(jmax)             :: epsave
      
       integer            :: ipred,problem,cases                   !user inputs     
@@ -151,12 +152,12 @@
       !data out variables
       real(wp), dimension(isamp)            :: cost         
       real(wp), dimension(is)               :: stageE,stageI,maxiter
-      logical,  parameter                   :: time_sol_flag=.false. !True to output time solution
-      integer,  parameter                   :: time_sol_iDT=45       !which dt value to output (You only want one timestep in the file,
-                                                                     !                          system could be improved)
-      logical,  parameter                   :: iDT_sol_flag=.false.     
-      logical,  parameter                   :: exact_sol_flag=.false.
-      integer,  parameter                   :: exact_sol_iDT =70
+      logical,  parameter                   :: time_sol_flag  = .false. !True to output time solution
+      integer,  parameter                   :: time_sol_iDT   =  45     !which dt value to output (You only want one timestep in the file,
+                                                                        !                          system could be improved)
+      logical,  parameter                   :: iDT_sol_flag   = .false.
+      logical,  parameter                   :: exact_sol_flag = .false.
+      integer,  parameter                   :: exact_sol_iDT  =   70
                                                      
       
 !      real(wp),dimension(40) :: tmpv
@@ -167,12 +168,13 @@
       ipred = 0 ;
 !     write(*,*)'what is case?'  !input range of runge kutta cases
 !     read(*,*)cases
-!     write(*,*)'which problem?' !input problem number
-!     read(*,*)problem
+      write(*,*)'which problem?' !input problem number
+      read(*,*)problem
 !-------------------------ALGORITHMS LOOP--------------------------------------  
 !     do icase = cases,cases
-!     do icase = 101,109
-      do icase = 1,18   !  1,7
+!     do icase = 101,101
+!     do icase = 1,18   !  1,7
+      do icase = 18,18
       
         !**initilizations?**
         stageE(:) = 0.0_wp
@@ -184,16 +186,17 @@
         call rungeadd(icase)                        !**GET RK COEFFICIENTS**
 
         if( (maxval(abs(ae(:,:))) <= 1.0e-12_wp) .and.  &
-            (Temporal_Splitting   == 'IMEX'    ) ) then
-            write(*,*)'icase = ',  icase
-            write(*,*)'Running IMEX with DIRK coefficients; '
-            write(*,*)'Cycling icase loop '
-            cycle
+            ((Temporal_Splitting   == 'IMEX'    ) .or.  &
+             (Temporal_splitting   == 'EXPLICIT'))) then
+             write(*,*)'icase = ',  icase
+             write(*,*)'Running EXPLICIT or IMEX'
+             write(*,*)'with only DIRK coefficients'
+             write(*,*)'Cycling icase loop '
+             cycle
         endif
 
 !--------------------------PROBLEMS LOOP---------------------------------------
-!       do iprob = problem,problem
-        do iprob = 1,4
+        do iprob = problem,problem
         
           call cpu_time(cputime1)
               
@@ -209,11 +212,12 @@
 
 !--------------------------STIFFNESS LOOP--------------------------------------
           do jepsil = 1,jactual,1    
+!         do jepsil = 21,21,1    
            
             cost(:)=0.0_wp       
                                     
             itmp = 11 - jmax/jactual         !used for 81 values of ep
-            ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
+              ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
             
             !**INIT. OUTPUT FILES**
             call init_output_files(neq,ep)
@@ -228,7 +232,7 @@
               !**INITIALIZE PROBLEM INFORMATION**
               programStep='SET_INITIAL_CONDITIONS'
               call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
-              dto = dt        !store time step
+              dt0 = dt        !store time step
               t = 0.0_wp      !init. start time
 
               !**INIT. ERROR VECTOR**
@@ -287,6 +291,7 @@
                 do LL = 1,ns 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
                 enddo
+
 !-----------------------Final Sum of RK loop using the b_{j}-------------------
 
                 ! ERROR ESTIMATE
@@ -309,14 +314,18 @@
                 t = t + dt                  !increment time
                 if(t >= tfinal) exit        
               enddo                                                     
+
 !-----------------------END TIME ADVANCEMENT LOOP------------------------------
               if (iDT_sol_flag .and. jepsil==jmax) call output_iDT_sol(iDT)           
      
-              cost(iDT) = log10((ns-1)/dto)    !  ns - 1 implicit stages
+              cost(iDT) = log10((ns-1)/dt0)    !  ns - 1 implicit stages
               
               call output_conv_error(cost(iDT),nveclen,neq,iprob)
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
+!             write(*,*)'dt and max-error = ',dt0, maxval(abs(tmpvec(:)))
+!             write(*,*)'uvec ',uvec(:)
+!             write(*,*)'exact',uexact(:)
 
               do i = 1,nvecLen
                 if(tmpvec(i) <= 0.0_wp)tmpvec(i)=1.0e-15_wp
@@ -325,7 +334,7 @@
               errorP(iDT,:) = log10(errvecT(:))
               do i = 1,neq
                 errorL2(iDT,i)= log10(sqrt(dot_product(tmpvec(i:nveclen:neq), &
-     &                                   tmpvec(i:nveclen:neq))/(nveclen/neq)))
+     &                                                 tmpvec(i:nveclen:neq))/(nveclen/neq)))
               enddo
             enddo  
 !----------------------------END TIMESTEP LOOP---------------------------------
