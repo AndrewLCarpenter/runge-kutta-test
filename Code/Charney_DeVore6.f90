@@ -191,7 +191,7 @@
           update_Jac=.true. !reset every new epsilon/dt
 
 
-          dt_max =   0001.00_wp                                   ! maximum dt
+          dt_max =   0002.00_wp                                   ! maximum dt
           tfinal =   4000.00_wp                                   ! final time   
           choose_dt: select case(temporal_splitting)
             case('EXPLICIT'); dt = dt_max/10**((iDT-1)/20.0_wp)   ! explicit timestep

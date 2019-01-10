@@ -22,16 +22,21 @@
       public :: b1save,b1Psave,b1L2save,ustage,predvec 
       public :: allocate_vars,deallocate_vars
       public :: programstep,var_names
+      public :: OTD, OTDN, Ovec, Oveco, errvecO, OTD_RHS, resO, orth_proj, wr, wi
+
 !--------------------------VARIABLES-------------------------------------------
-!      character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
-!      character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
-       character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
+!     character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
+!     character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
+      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
       character(len=9)             :: probname
       character(len=6)             :: Jac_case='DENSE' !default value
       character(len=80)            :: programstep
-      integer, parameter           :: isamp=71   
+      integer, parameter           :: isamp=70
       integer, parameter           :: jmax=81     
       integer, parameter           :: jactual=81     
+
+      logical, parameter           :: OTD  = .true.
+      integer, parameter           :: OTDN = 5
       
       real(wp) :: tol,dt_error_tol
 
@@ -40,6 +45,11 @@
       real(wp), dimension(:,:), allocatable :: resE,resI,error,errorP,xjac
       real(wp), dimension(:,:), allocatable :: b1save,b1Psave,ustage,predvec
       real(wp), dimension(:,:), allocatable :: errorL2,b1L2save
+      real(wp), dimension(:,:), allocatable :: Ovec, Oveco, errvecO
+      real(wp), dimension(:,:), allocatable :: OTD_RHS
+      real(wp), dimension(:,:,:), allocatable :: resO
+      real(wp), dimension(:),   allocatable :: orth_proj, wr, wi
+       
       character(len=12), dimension(:), allocatable :: var_names
 !------------------------------------------------------------------------------
  
@@ -96,6 +106,22 @@
       ALLOCATE(ustage(nveclen,is),predvec(nveclen,is),uveco(nveclen))
       ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
       ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,neq))
+
+      if(OTD .eqv. .true.) then 
+
+        allocate(       wr(OTDN           ))
+        allocate(       wi(OTDN           ))
+
+        allocate(orth_proj(nveclen        ))
+
+        allocate(Ovec     (nveclen,OTDN   ))
+        allocate(Oveco    (nveclen,OTDN   ))
+        allocate(errvecO  (nveclen,OTDN   ))
+        allocate(OTD_RHS  (nveclen,OTDN   ))
+
+        allocate(resO     (nveclen,OTDN,is))
+
+      endif
 
       end subroutine allocate_vars
      
@@ -165,6 +191,17 @@
       !Jacobian CSR
       if(allocated(iaJac)) deallocate(iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw)  
       
+      if(OTD .eqv. .true.) then 
+
+        deallocate(wr,wi)                        ! dimension: (OTDN)
+        deallocate(orth_proj)                    ! dimension: (nveclen)
+
+        deallocate(Ovec,Oveco,errvecO,OTD_RHS)   ! dimension: (nveclen,OTDN)
+
+        deallocate(resO)                         ! dimension: (nveclen,OTDN,is)
+
+      endif
+
       !close all open files
      ! do i=10,900
        ! inquire(unit=i, opened=open_logical)!, iostat=io_int)

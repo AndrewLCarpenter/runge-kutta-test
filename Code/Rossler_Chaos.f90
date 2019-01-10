@@ -10,7 +10,7 @@
       private
       public :: Rossler_Chaos
       contains
-      subroutine Rossler_Chaos(nveclen,neq,ep,dt,tfinal,iDT,rese_vec,resi_vec,akk)
+      subroutine Rossler_Chaos(nveclen,neq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
       use precision_vars,    only: wp
       use control_variables, only: temporal_splitting,probname,xjac,var_names,&
      &                             tol,dt_error_tol,uvec,uexact,programstep
@@ -39,7 +39,7 @@
       integer                        :: i
 
       !RHS vars
-      real(wp), dimension(vecl), intent(  out) :: rese_vec,resi_vec
+      real(wp), dimension(vecl), intent(  out) :: resE_vec,resI_vec
       
       !Jacob vars
       real(wp), intent(in   ) :: akk

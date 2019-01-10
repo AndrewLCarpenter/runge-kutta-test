@@ -52,7 +52,7 @@
       
       subroutine problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,time,akk,L)
 
-      use control_variables,   only: resE,resI,uvec
+      use control_variables,   only: resE,resI,uvec,OTD_RHS,resO,OTD
       use vanderPol_mod,       only: vanderPol
       use Pureschi_mod,        only: Pureschi
       use Kaps_mod,            only: Kaps
@@ -65,6 +65,7 @@
       use Boscarino31_Mod,     only: Boscarino31
       use Broadwell_Mod,       only: Broadwell
       use Charney_DeVore6_mod, only: Charney_DeVore6
+      use Charney_DeVore10_mod,only: Charney_DeVore10
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
@@ -103,8 +104,8 @@
        call Broadwell(      nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==12) then
        call Charney_DeVore6(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
-
-
+      elseif (iprob==13) then
+       call Charney_DeVore10(nveclen,neq,ep,dt,tfinal,iDT,    resE_vec,resI_vec,OTD_RHS,akk)
       else
        print*,'Invalid problem number!'
        stop
@@ -114,6 +115,7 @@
         case('BUILD_RHS')  
           resE(:,L)=resE_vec(:)
           resI(:,L)=resI_vec(:)
+          if(OTD .eqv. .true.) resO(:,:,L) = OTD_RHS(:,:)
       end select
 
       end subroutine problemsub

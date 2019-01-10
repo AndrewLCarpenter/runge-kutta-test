@@ -9,6 +9,7 @@
       public ::   daxpy, dcopy
       public ::   dsetC, mat_AxB_C, hh_inverse, HR_Fac
       public ::   ddot, dnrm2, lctcsr
+      public ::   toeplitz
 
       contains
 
@@ -739,5 +740,40 @@
       end if
 !
       end function lctcsr
+
+!=============================================================================80
+
+      subroutine toeplitz(n,ncol,nrow,amat) 
+!                                                                       
+!     build a dense toeplitz matrix
+!                                                                       
+      integer,                  intent(in   )  :: n
+
+      real(wp), dimension(n),   intent(in   )  :: ncol, nrow
+      real(wp), dimension(n,n), intent(  out)  :: amat
+
+      if(n <= 0)return 
+
+      if(n == 1) amat(1,1) = ncol(1)
+                                                                        
+!     assemble upper triangular factor
+                                                                        
+      do j = 1,n 
+         do i = 1,n+1-j 
+           amat(i,i+j-1) = nrow(j)
+         enddo
+      enddo
+                                                                        
+!     assemble lower triangular factor
+                                                                        
+      do i = 1,n 
+         do j = 1,n+1-i 
+           amat(i+j-1,j) = ncol(i)
+         enddo
+      enddo
+
+      end subroutine toeplitz
+
+!=============================================================================80
 
       end module blas_module

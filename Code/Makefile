@@ -9,15 +9,19 @@ CC = gcc
 #FCFLAGS = -check uninit -warn all -no-wrap-margin -WB -O3 $(INCLUDESDIR)
 #FCFLAGS = -Wsurprising -fbacktrace -fbounds-check -O3 $(INCLUDESDIR)
  FCFLAGS = -Wuninitialized -Wsurprising -O3 $(INCLUDESDIR)
-CFLAGS = -Ofast  $(INCLUDESDIR)
+  CFLAGS = -Ofast  $(INCLUDESDIR)
 
 SRCS = precision_vars.f90\
        unary_mod.f90\
+       eispack_module.f90\
+       blas_module.f90\
+       OTD_Module.f90\
        SBP_Coef_Module.f90\
        Jacobian_CSR_Mod.f90\
        control_variables.f90\
        poly_fit_Mod.f90\
        runge_kutta.f90\
+       Fourier_Coef_Module.f90\
        Stage_Value_module.f90\
        QR_Module.f90\
        matvec_module.f90\
@@ -34,6 +38,7 @@ SRCS = precision_vars.f90\
        Boscarino31_mod.f90\
        Broadwell_mod.f90\
        Charney_DeVore6.f90\
+       Charney_DeVore10.f90\
        problemsub.f90\
        output_module.f90\
        Newton.f90\
@@ -48,11 +53,15 @@ $(OBJS1)
 
 OBJS = precision_vars.o\
        unary_mod.o\
+       eispack_module.o\
+       blas_module.o\
+       OTD_Module.o\
        SBP_Coef_Module.o\
        Jacobian_CSR_Mod.o\
        control_variables.o\
        poly_fit_Mod.o\
        runge_kutta.o\
+       Fourier_Coef_Module.o\
        Stage_Value_module.o\
        QR_Module.o\
        matvec_module.o\
@@ -69,6 +78,7 @@ OBJS = precision_vars.o\
        Boscarino31_mod.o\
        Broadwell_mod.o\
        Charney_DeVore6.o\
+       Charney_DeVore10.o\
        problemsub.o\
        output_module.o\
        Newton.o\

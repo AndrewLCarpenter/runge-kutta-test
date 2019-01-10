@@ -15,6 +15,7 @@
 !     problem 10) Boscarino31 
 !     problem 11) Broadwell Model
 !     problem 12) Charney_DeVore6
+!     problem 13) Charney_DeVore10
 !------------------------------------------------------------------------------
 !
 !-----------------------------REQUIRED FILES-----------------------------------
@@ -100,22 +101,27 @@
 ! /"probname"/"casename"/"probname"_"casename"_"variable number".dat
 ! /"probname"/"casename"/"probname"_"casename"_"variable number"P.dat
 ! /"probname"/"casename"/"probname"_"casename"_conv.dat
-!**Find exact solution
-!     To find the exact solution:
+
+!================Find exact solution for all epsilons=============================
 !     1) set temporal_splitting (in control_variables) to "IMPLICIT"
 !     2) turn iDT_sol_flag=.true. and run desired problem and RK case.
 !     3) compile convergence_testing and move executable to IMPLICIT/probname/casename
 !     4) Take note of terminal output "Location = ##"
-!     5) set that number to exact_sol_iDT=##
-!     6) set exact_sol_flag=.true.
+!     5) set exact_sol_flag=.true. and choose number for exact_sol_iDT=##
 !     6) compile this program and run problem & RK case again
 !     7) exact solution will be output to IMPLICIT/probname/casename, move/rename file to parent directory as appropriate
-!     NOTE: remember to turn all flags==.FALSE. as soon as they are no longer needed
+!     8) turn all flags==.FALSE. as soon as they are no longer needed
+!================Find exact solution for all epsilons=============================
+
+!================RUN Individual Test Case for single epsilon =====================
+!     1) set temporal_splitting (in control_variables) to "IMPLICIT" (better stability properties)
+!     2) turn iDT_sol_flag=.true. 
+!     2) 
 ! 
 !********************************BEGIN PROGRAM*********************************
       program test_cases
 
-      use precision_vars,     only: wp
+      use precision_vars,     only: wp, eyeN
       use output_module,      only: create_file_paths, output_names,          & 
      &                              init_output_files, output_conv_stiff,     &
      &                              output_terminal_iteration,                &
@@ -128,11 +134,14 @@
      &                              error,errorP,b1save,b1Psave,ustage,       &
      &                              predvec,jactual,uvec,uexact,b,usum,       &
      &                              programstep,errorL2,b1L2save,             &
-     &                              Temporal_Splitting
+     &                              Temporal_Splitting,                       &
+     &                              OTD, OTDN, Ovec, Oveco, resO, orth_proj,  &
+     &                              errvecO
                        
       use runge_kutta,        only: aE,aI,bE,bI,bEH,bIH,cI,is,ns,rungeadd
       use Newton,             only: Newton_Iteration
       use problemsub_mod,     only: problemsub
+      use OTD_Module,         only: Orthogonalize_SubSpace
 
       implicit none     
 !-----------------------------VARIABLES----------------------------------------  
@@ -146,8 +155,10 @@
       
       !problemsub variables
       real(wp)                              :: ep,dt,tfinal 
+      real(wp)                              :: errmaxO, errmaxO_orth, proj_percent
       integer                               :: nveclen,neq
       integer                               :: iDT_Low, iDT_High
+      integer                               :: iEP_Low, iEP_High
 
       !data out variables
       real(wp), dimension(isamp)            :: cost         
@@ -155,9 +166,14 @@
       logical,  parameter                   :: time_sol_flag  = .false. !True to output time solution
       integer,  parameter                   :: time_sol_iDT   =  45     !which dt value to output (You only want one timestep in the file,
                                                                         !                          system could be improved)
-      logical,  parameter                   :: iDT_sol_flag   = .false.
-      logical,  parameter                   :: exact_sol_flag = .false.
-      integer,  parameter                   :: exact_sol_iDT  =   70
+      logical,  parameter                   :: iDT_sol_flag   = .true.
+
+      logical,  parameter                   :: exact_sol_flag = .true.
+      integer,  parameter                   :: exact_sol_iDT  =   10
+
+      logical,  parameter                   :: single_EP_flag = .true.
+!  very rich : 40    ,   91 in interesting too
+      integer,  parameter                   :: single_EP_iEP  =   21    ! 21 -> ep = 0.1
                                                      
       
 !      real(wp),dimension(40) :: tmpv
@@ -168,20 +184,17 @@
       ipred = 0 ;
 !     write(*,*)'what is case?'  !input range of runge kutta cases
 !     read(*,*)cases
-      write(*,*)'which problem?' !input problem number
-      read(*,*)problem
+!     write(*,*)'which problem?' !input problem number
+!     read(*,*)problem
+      problem = 13
 !-------------------------ALGORITHMS LOOP--------------------------------------  
 !     do icase = cases,cases
 !     do icase = 101,101
 !     do icase = 1,18   !  1,7
       do icase = 18,18
       
-        !**initilizations?**
-        stageE(:) = 0.0_wp
-        stageI(:) = 0.0_wp
-        maxiter(:)= 0
-        icount = 0                                  !cost counters
-        jcount = 0                                  !cost counters
+        stageE(:) = 0.0_wp ; stageI(:) = 0.0_wp ; maxiter(:)= 0 ;  !  Vector initilizations
+        icount = 0 ; jcount = 0                                    !  cost counters
         
         call rungeadd(icase)                        !**GET RK COEFFICIENTS**
 
@@ -211,69 +224,87 @@
           call output_names                           
 
 !--------------------------STIFFNESS LOOP--------------------------------------
-          do jepsil = 1,jactual,1    
-!         do jepsil = 21,21,1    
+          iEP_Low = 1 ; iEP_High = jactual ; 
+
+          if(single_EP_flag) then ; iEP_Low  = single_EP_iEP ; iEP_High = single_EP_iEP ; endif
+
+          do jepsil = iEP_Low,iEP_High,1    
            
             cost(:)=0.0_wp       
                                     
             itmp = 11 - jmax/jactual         !used for 81 values of ep
               ep = 1.0_wp/10**((jepsil-1)/(itmp*1.0_wp))           
+              write(*,*)'ep = ',ep
             
             !**INIT. OUTPUT FILES**
             call init_output_files(neq,ep)
 
-!--------------------------TIMESTEP LOOP----------------------------------------
-            iDT_Low = 1 ; iDT_High = isamp ; 
+            !=============================================================
+            !----BEGIN: TIMESTEP LOOP----------------------------------------
+            !=============================================================
+            iDT_Low = 1 ; iDT_High = isamp ;             !  Define lower and upper bounds
 
             if(exact_sol_flag) then ; iDT_Low  = exact_sol_iDT ; iDT_High = exact_sol_iDT ; endif
 
-            do iDT =iDT_Low,iDT_High,1   
+            do iDT =iDT_Low,iDT_High,1                   !  Begin loop
 
-              !**INITIALIZE PROBLEM INFORMATION**
-              programStep='SET_INITIAL_CONDITIONS'
+              programStep='SET_INITIAL_CONDITIONS'   !**INITIALIZE PROBLEM INFORMATION**
               call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1)  
-              dt0 = dt        !store time step
-              t = 0.0_wp      !init. start time
+              dt0 = dt                               ! store time step
+              t = 0.0_wp                             ! initialize start time
 
-              !**INIT. ERROR VECTOR**
-              errvecT(:) = 0.0_wp
+              errvecT(:) = 0.0_wp                    !**INIT. ERROR VECTOR**
         
-              do i = 1,ns            !initialize stage value preditor
-                predvec(:,i) = uvec(:)
+              do i = 1,ns            
+                predvec(:,i) = uvec(:)               ! initialize stage value preditor
               enddo
-!--------------------------TIME ADVANCEMENT LOOP-------------------------------
+
+              !========================================================
+              !----BEGIN: TIME ADVANCEMENT LOOP------------------------
+              !========================================================
               do ktime = 1,100000000
+
                 if(t+dt > tfinal)dt = tfinal-t+1.0e-11_wp !check if dt>tfinal
-                tt=t+Ci(1)*dt
-                !**STORE VALUES OF UVEC**
-                uveco(:) = uvec(:)
+
+                tt = t + cI(1)*dt                        ! intermediate time (stage value)
+
+                uveco(:) = uvec(:)                       !**STORE VALUES OF UVEC**
+
+                if(OTD .eqv. .true.) Oveco(:,:) = Ovec(:,:)   !**STORE VALUES OF Ovec**
              
-                jcount = jcount + (ns-1)    !keep track of total RK stages  
-!--------------------------------RK LOOP---------------------------------------
+                jcount = jcount + (ns-1)                 ! Count total RK stages  
+                                 !=============================================
+                                 ! Begin: RK LOOP------------------------------
+                                 !=============================================
                 programStep='BUILD_RHS'
                 call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(1,1),1) 
 
-                ustage(:,1) = uvec(:)
+                ustage(:,1) = uvec(:)                    ! Save the solution at first stage
 
-                !  ESDIRK Loop
-                do L = 2,ns                        
-                  tt=t+Ci(L)*dt
+                do L = 2,ns                         !===== Begin: A_{k,j} portion of ESDIRK LOOP
 
-                  usum(:) = uveco(:)
+                  tt = t + cI(L)*dt                      ! intermediate time
+
+                  usum(:) = uveco(:)                     ! sum explicit and implicit rhs vector
                   do LL = 1,L-1 
                     usum(:) = usum(:)+ aI(L,LL)*resI(:,LL)+ aE(L,LL)*resE(:,LL)                               
                   enddo
-              
-                  if(ipred==2) predvec(:,L)=uvec(:)!previous guess as starter
+
+                  if(OTD .eqv. .true.) then     ! Orthog Time-Dependent Modes
+                    Ovec(:,:) = Oveco(:,:)                    
+                    do LL = 1,L-1 
+                      Ovec(:,:) = Ovec(:,:)+ aE(L,LL)*resO(:,:,LL)
+                    enddo
+                  endif
+
+                  if(ipred==2) predvec(:,L)=uvec(:)      !previous guess as starter
                   if(ipred/=2) uvec(:) = predvec(:,L)  
-!-----------------BEG NEWTON ITERATION ------------------------------------------
-                  call Newton_Iteration(iprob,L,ep,dt,nveclen,&
-     &                                      tt,aI(L,L),icount,k)
-!-----------------END NEWTON ITERATION-------------------------------------------
-                  ustage(:,L) = uvec(:)     !  Save the solution at each stage
+                                                         ! BEG NEWTON ITERATION ----------------
+                  call Newton_Iteration(iprob,L,ep,dt,nveclen,tt,aI(L,L),icount,k)
+                                                         ! END NEWTON ITERATION-----------------
+                  ustage(:,L) = uvec(:)                  !  Save the solution at each stage
                  
-                  ! Fill in resE and resI with the converged data
-                  programStep='BUILD_RHS'
+                  programStep='BUILD_RHS'                ! Fill resE and resI with the converged data
                   call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(L,L),L)
 
                   if(ipred/=2)call Stage_Value_Predictor(ipred,L,ktime)
@@ -284,28 +315,58 @@
                   stageI(L) = stageI(L) + 1.0_wp*k
 
                   if(ipred==2)call Stage_Value_Predictor(ipred,L,ktime)
-                enddo
-!-----------------------------END of A_{k,j} portion of RK LOOP----------------
+
+                enddo                               !===== End: A_{k,j} portion of ESDIRK LOOP
      
-                uvec(:) = uveco(:)
+                uvec(:) = uveco(:)                        !----Final b_{j} Sum of ESDIRK loop
                 do LL = 1,ns 
                   uvec(:) = uvec(:) + bI(LL)*resI(:,LL)+bE(LL)*resE(:,LL)
                 enddo
 
-!-----------------------Final Sum of RK loop using the b_{j}-------------------
+                if(OTD .eqv. .true.) then     ! Orthog Time-Dependent Modes
+                  Ovec(:,:)  = Oveco(:,:)                 !----Final EXPLICIT Sum b_{j} 
+                  do LL = 1,ns 
+                    Ovec (:,:) = Ovec (:,:) + bE (LL)*resO(:,:,LL)
+                  enddo
+                endif
+                                 !=============================================
+                                 ! END: RK LOOP------------------------------
+                                 !=============================================
 
-                ! ERROR ESTIMATE
-                if(t <= tfinal-1.0e-11_wp)then               
+                if(t <= tfinal-1.0e-11_wp)then               ! ERROR ESTIMATE
                   errvec(:) = 0.0_wp
                   do LL = 1,ns 
                     errvec(:) = errvec(:) + (bE(LL)-bEH(LL))*resE(:,LL) &
-     &                                    + (bI(LL)-bIH(LL))*resI(:,LL)
+                              &           + (bI(LL)-bIH(LL))*resI(:,LL)
 
                   enddo
                   errvec(:) = abs(errvec(:))
-                endif               
+
+                  if(OTD .eqv. .true.) then     ! Orthog Time-Dependent Modes
+                    write(80,*)t,uvec(1:10)
+                    errvecO(:,:) = 0.0_wp
+                    do LL = 1,ns 
+                      errvecO(:,:) = errvecO(:,:) + (bE(LL)-bEH(LL))*resO(:,:,LL)
+                    enddo
+                 
+                    errmaxO      = maxval(abs(errvecO(:,:)))
+                    errmaxO_orth = maxval(abs(eyeN(OTDN) - matmul(transpose(Ovec),Ovec)))
+
+                    programStep='CALCULATE_RITZ_VALUES'         ! Fill resE and resI with the converged data
+                    call problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,tt,aI(L,L),L)
   
-                errvecT(:) = errvecT(:) + errvec(:)
+                    orth_proj(:) = uvec(:) - matmul(Ovec,matmul(transpose(Ovec),uvec))
+                    proj_percent = sqrt(dot_product(orth_proj,orth_proj)/dot_product(uvec,uvec))
+
+                    write(95,'(20(e12.5,1x))') maxval(abs(errvec(:))),errmaxO,errmaxO_orth,proj_percent
+                    write(96,'(20(e12.5,1x))') matmul(transpose(Ovec),uvec)
+
+                    call Orthogonalize_SubSpace(nveclen,OTDN,Ovec)
+
+                  endif
+                endif               
+
+                errvecT(:) = errvecT(:) + errvec(:)          !tracking total error over entire time interval
 
                 if (time_sol_flag .and. iDT==time_sol_iDT) then
                   call write_time_depen_sol(t,ep,nveclen,neq)
@@ -313,9 +374,11 @@
                 
                 t = t + dt                  !increment time
                 if(t >= tfinal) exit        
-              enddo                                                     
 
-!-----------------------END TIME ADVANCEMENT LOOP------------------------------
+              enddo                                                     
+              !========================================================
+              !----END: TIME ADVANCEMENT LOOP-------------------------------
+              !========================================================
               if (iDT_sol_flag .and. jepsil==jmax) call output_iDT_sol(iDT)           
      
               cost(iDT) = log10((ns-1)/dt0)    !  ns - 1 implicit stages
@@ -323,9 +386,6 @@
               call output_conv_error(cost(iDT),nveclen,neq,iprob)
               
               tmpvec(:) = abs(uvec(:)-uexact(:))
-!             write(*,*)'dt and max-error = ',dt0, maxval(abs(tmpvec(:)))
-!             write(*,*)'uvec ',uvec(:)
-!             write(*,*)'exact',uexact(:)
 
               do i = 1,nvecLen
                 if(tmpvec(i) <= 0.0_wp)tmpvec(i)=1.0e-15_wp
@@ -337,8 +397,11 @@
      &                                                 tmpvec(i:nveclen:neq))/(nveclen/neq)))
               enddo
             enddo  
-!----------------------------END TIMESTEP LOOP---------------------------------
-            if(exact_sol_flag) call write_exact_sol()
+            !===================================================================
+            !----END TIMESTEP LOOP---------------------------------
+            !===================================================================
+            if(exact_sol_flag) call write_exact_sol()   ! write exact solution if .true.
+
 !----------------------------OUTPUTS-------------------------------------------
 
             call output_terminal_iteration(cost,0,ep,nveclen,neq)
@@ -353,12 +416,13 @@
             enddo
             
           enddo      
-!---------------------END STIFFNESS LOOP---------------------------------------
-          !**OUTPUT CONVERGENCE VS STIFFNESS**
-          call output_conv_stiff(nveclen,neq,epsave)
+          !===================================================================
+          !----END: STIFFNESS LOOP---------------------------------------
+          !===================================================================
+
+          call output_conv_stiff(nveclen,neq,epsave) !**OUTPUT CONVERGENCE VS STIFFNESS**
           
-          !**OUTPUT TO TERMINAL**
-          call output_terminal_final(icount,jcount,stageE,stageI,maxiter)
+          call output_terminal_final(icount,jcount,stageE,stageI,maxiter)   !**OUTPUT TO TERMINAL**
           
           call cpu_time(cputime2)
           write(*,*)'Total time elapsed for this case: ',cputime2-cputime1,'sec'  
@@ -370,4 +434,5 @@
       enddo                                 
 !----------------------END ALGORITHMS LOOP-------------------------------------
 !----------------------END PROGRAM---------------------------------------------
+
       END PROGRAM test_cases
