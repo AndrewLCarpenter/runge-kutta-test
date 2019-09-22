@@ -38,6 +38,9 @@
       !Jacob vars
       real(wp), intent(in   ) :: akk
       real(wp)                :: cct
+
+      real(wp)                :: dt_max
+
 !------------------------------------------------------------------------------
 
       Program_Step_Select: select case(programstep)
@@ -56,9 +59,13 @@
         case('SET_INITIAL_CONDITIONS')
 
           !Time information        
-          !dt = 0.25_wp*0.00001_wp/10**((iDT-1)/20.0_wp) !used for exact solution
-          dt = 0.0125_wp/10**((iDT-1)/20.0_wp) ! timestep  
-          tfinal = 360.0_wp                    ! final time
+           dt_max = 2.5_wp ;
+          choose_dt: select case(temporal_splitting)
+            case('EXPLICIT'); dt = 0.01*dt_max/10**((iDT-1)/80.0_wp)   ! explicit timestep
+            case default    ; dt = 1.00*dt_max/10**((iDT-1)/80.0_wp)   ! implicit timestep      
+          end select choose_dt
+
+          tfinal = 360.0_wp                     ! final time
 
           !**Exact Solution**
           uexact(1)=0.1000814870318523e1_wp
@@ -78,9 +85,10 @@
               resE_vec(1)=dt * (-uvec(2)-uvec(3)) ;
               resE_vec(2)=dt * (+uvec(1)+aa*uvec(2)) ;
               resE_vec(3)=dt * (bb*uvec(1) + uvec(3)*(    +uvec(1))) ;
-              resI_vec(1:2)=0.0_wp
+              resI_vec(1)=     0.0_wp
+              resI_vec(2)=     0.0_wp
               resI_vec(3)=dt * (           + uvec(3)*(-cct        )) ;
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:)=0.0_wp
               resI_vec(1)=dt * (aa*(uvec(2)+uvec(1)*(1.0_wp-bb*uvec(1)-uvec(2))) )
               resI_vec(2)=dt * ((uvec(3)-(1.0_wp+uvec(1))*uvec(2))/aa )
@@ -115,6 +123,18 @@
               xjac(3,1) = 0.0_wp - akk*dt*(+cc )
               xjac(3,2) = 0.0_wp - akk*dt*(0.0_wp)
               xjac(3,3) = 1.0_wp - akk*dt*(-cc )
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (aa*(1.0_wp-2.0_wp*bb*uvec(1)-uvec(2)) )
+              xjac(1,2) = (aa*(1.0_wp-uvec(1)) )
+              xjac(1,3) = (0.0_wp)
+
+              xjac(2,1) = (-uvec(2)/aa )
+              xjac(2,2) = (-(1.0_wp+uvec(1))/aa )
+              xjac(2,3) = (1.0_wp/aa )
+
+              xjac(3,1) = (+cc )
+              xjac(3,2) = (0.0_wp)
+              xjac(3,3) = (-cc )
           end select choose_Jac_type
           
       end select Program_Step_select

@@ -58,7 +58,7 @@
           tfinal = 5.0_wp                  ! final time
 
           !**Exact Solution**
-          open(unit=39,file='exact.pureschi.1.data')
+          open(unit=39,file='./Exact_Data/exact.pureschi.1.data')
           rewind(39)
           do i=1,81
             read(39,*)ExactTot(i,1),ExactTot(i,2)
@@ -85,7 +85,7 @@
               resE_vec(2) = dt*(+uvec(1))
               resI_vec(1) = 0.0_wp
               resI_vec(2) = dt*(sin(uvec(1)) - uvec(2))/ep
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:) = 0.0_wp
               resI_vec(1) = dt*(-uvec(2))
               resI_vec(2) = dt*(+uvec(1) + (sin(uvec(1)) - uvec(2))/ep)
@@ -103,6 +103,11 @@
               xjac(1,2) = 0.0_wp-akk*dt*(-1.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(+1.0_wp + cos(uvec(1))/ep)
               xjac(2,2) = 1.0_wp-akk*dt*(-1.0_wp)/ep
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (+0.0_wp)
+              xjac(1,2) = (-1.0_wp)
+              xjac(2,1) = (+1.0_wp + cos(uvec(1))/ep)
+              xjac(2,2) = (-1.0_wp)/ep
           end select choose_Jac_type
           
       end select Program_Step_Select     

@@ -26,6 +26,8 @@ SRCS = precision_vars.f90\
        QR_Module.f90\
        matvec_module.f90\
        ilut_module.f90\
+       Kuramoto_Sivashinsky.f90\
+       Boldrighini_Franceschini.f90\
        Burgers_Mod.f90\
        vanderPol.f90\
        Pureschi.f90\
@@ -42,6 +44,7 @@ SRCS = precision_vars.f90\
        problemsub.f90\
        output_module.f90\
        Newton.f90\
+       time_integ.f90\
        test_cases.f90
 
 
@@ -66,6 +69,8 @@ OBJS = precision_vars.o\
        QR_Module.o\
        matvec_module.o\
        ilut_module.o\
+       Kuramoto_Sivashinsky.o\
+       Boldrighini_Franceschini.o\
        Burgers_Mod.o\
        vanderPol.o\
        Pureschi.o\
@@ -82,6 +87,7 @@ OBJS = precision_vars.o\
        problemsub.o\
        output_module.o\
        Newton.o\
+       time_integ.o\
        test_cases.o
 
       

@@ -181,17 +181,22 @@
             case('EXPLICIT')
               resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
               resI_vec(:)=0.0_wp                   
-            case('IMPLICIT')
-              resE_vec(:)=0.0_wp
-              resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
             case('IMEX')
               resE_vec(:)=dt*dudt_D1(:)
               resI_vec(:)=dt*dudt_Source(:)
+            case('IMPLICIT','FIRK')
+              resE_vec(:)=0.0_wp
+              resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
           end select choose_RHS_type
           update_RHS=.false. !no need to update RHS until next epsilon
           
         case('BUILD_JACOBIAN')
           choose_Jac_type: select case(temporal_splitting)
+            case('IMEX')
+              nnz_Jac=vecl+vecl/2
+              call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
+              call Bosc_Jac(dt,akk,Source_p,jSource_p,iSource_p)
+              
             case('IMPLICIT')
             ! Note: update_Jac and the creation of the RHS/Jacobian can be reworked to be more efficent.
             ! it is currently updated more often than necessary
@@ -206,11 +211,6 @@
               endif
               call Bosc_Jac(dt,akk,wrk_Jac,jwrk_Jac,iwrk_Jac)       
                         
-            case('IMEX')
-              nnz_Jac=vecl+vecl/2
-              call Allocate_Jac_CSR_Storage(vecl,nnz_Jac)
-              call Bosc_Jac(dt,akk,Source_p,jSource_p,iSource_p)
-              
           end select choose_Jac_type
           update_Jac=.false.  !no need to update matrix that forms Jacobian until next epsilon/dt
           
@@ -271,7 +271,8 @@
       u(:)=0.0_wp
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Bosc_31_256.data')
+      open(unit=39,file='./Exact_Data/exact.Bosc_31_256.data')
+
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl)
@@ -502,5 +503,7 @@
       aJac = wrk
       
       end subroutine Bosc_Jac      
+
 !==============================================================================
+
       end module Boscarino31_mod

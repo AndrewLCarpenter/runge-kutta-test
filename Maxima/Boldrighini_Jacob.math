@@ -1,0 +1,13 @@
+load("eigen") $
+x: columnvector([x1,x2,x3,x4,x5]) ;
+u: columnvector([-2*x1 + a1*x2*x3 + a2*x4*x5,
+                 -9*x2 + b *x1*x3,
+                 -5*x3 - c *x1*x2 + R,
+                 -5*x4 - d *x1*x5,
+                 -1*x5 - e *x1*x4]) ;
+
+jac: zeromatrix(5,5);
+for i:1 thru 5 do 
+   (for j:1 thru 5 do
+     jac[i,j] : diff(u[i,1],x[j,1]) ) ;
+

@@ -11,7 +11,7 @@
 
       implicit none
 
-      public    ::  qrdcmp, qrsolv
+      public    ::  qrdcmp, qrsolv, qrsolv_MRHS
       private
       
       real(wp), parameter   :: tolerance = 1.0e-17_wp
@@ -136,6 +136,41 @@
       enddo
       
       end subroutine rsolv
+
+!==============================================================================
+
+      SUBROUTINE qrsolv_MRHS(a,n,np,m,c,d,b)
+
+      implicit none
+
+      INTEGER,                     intent(in   ) :: n,np,m
+      REAL(wp),  dimension(np,np), intent(inout) :: a
+      REAL(wp),  dimension(n),     intent(in   ) :: c,d
+      REAL(wp),  dimension(n,m),   intent(inout) :: b
+
+!     USES rsolv
+!      Solves the set of n linear equations A x = b ,where a is a matrix with physical dimension np.
+!      a , c ,and d are input  as  the output of the routine qrdcmp and  are not modi ed.  b(1:n,k)
+!      is input as the right-hand side vector, and is overwritten with the solution vector on output.
+
+      INTEGER                      ::  i,j,k
+      REAL(wp)                     ::  wrk,tau
+
+      do k=1,m                                !  loop over RHS vectors
+        do j=1,n-1                            !  Form Q^T . b
+          wrk = 0.0_wp
+          do i=j,n
+            wrk=wrk+a(i,j)*b(i,k)
+          enddo
+          tau=wrk/c(j)
+          do i=j,n
+            b(i,k)=b(i,k)-tau*a(i,j)
+          enddo
+        enddo
+        call rsolv(a,n,np,d,b(:,k))                   !  Solve R x = Q^T b
+      enddo
+      
+      END subroutine qrsolv_MRHS
 
 !==============================================================================
 

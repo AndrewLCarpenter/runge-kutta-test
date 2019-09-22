@@ -74,8 +74,9 @@
           
           !Time information
           choose_dt: select case(temporal_splitting)
-          case('IMEX');dt = 0.02_wp/10**((iDT-1)/30.0_wp) ! timestep
-          case('IMPLICIT'); dt = 1.0_wp/10**((iDT-1)/20.0_wp) ! timestep
+          case('IMEX')    ; dt = 0.02_wp/10**((iDT-1)/30.0_wp) ! timestep
+          case('IMPLICIT'); dt =  1.0_wp/10**((iDT-1)/20.0_wp) ! timestep
+          case('FIRK')    ; dt =  1.0_wp/10**((iDT-1)/20.0_wp) ! timestep
           end select choose_dt
           tfinal=tfinal_parameter                    ! final time
 
@@ -112,7 +113,7 @@
               rese_vec(2) = dt*( sin_t*cos_t*uvec(1)-cos_t*cos_t*uvec(2))
               resi_vec(1) = dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
               resi_vec(2) = dt*(-sin_t*cos_t*uvec(1)-sin_t*sin_t*uvec(2))/ep
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               rese_vec(:) = 0.0_wp
               resi_vec(1) =  dt*(-sin_t*sin_t*uvec(1)+sin_t*cos_t*uvec(2))+ &
      &                       dt*(-cos_t*cos_t*uvec(1)-sin_t*cos_t*uvec(2))/ep
@@ -134,17 +135,22 @@
               xjac(1,2) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*sin_t*cos_t)/ep
               xjac(2,1) = 0.0_wp-akk*dt*(-cos_t*sin_t+ep*cos_t*sin_t)/ep
               xjac(2,2) = 1.0_wp-akk*dt*(-sin_t*sin_t-ep*cos_t*cos_t)/ep
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (-cos_t*cos_t-ep*sin_t*sin_t)/ep
+              xjac(1,2) = (-cos_t*sin_t+ep*sin_t*cos_t)/ep
+              xjac(2,1) = (-cos_t*sin_t+ep*cos_t*sin_t)/ep
+              xjac(2,2) = (-sin_t*sin_t-ep*cos_t*cos_t)/ep
           end select choose_Jac_type
         
         case('ROTATE_VARS')
           tfinal=tfinal_parameter
-          E_mat(1,1)=cos(tfinal)
-          E_mat(1,2)=-sin(tfinal)
-          E_mat(2,1)=sin(tfinal)
-          E_mat(2,2)=cos(tfinal)
+          E_mat(1,1)= +cos(tfinal)
+          E_mat(1,2)= -sin(tfinal)
+          E_mat(2,1)= +sin(tfinal)
+          E_mat(2,2)= +cos(tfinal)
           E_inv(:,:) = Transpose(E_mat) 
-          uexact(:)=MatMul(E_inv(:,:),uexact(:))
-          uvec(:)=MatMul(E_inv(:,:),uvec(:))
+          uexact(:)  = MatMul(E_inv(:,:),uexact(:))
+          uvec(:)    = MatMul(E_inv(:,:),uvec(:))
 
           ustore =uvec(1)
           uvec(1)=uvec(2)

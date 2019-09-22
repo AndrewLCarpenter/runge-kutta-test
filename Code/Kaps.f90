@@ -82,7 +82,7 @@
               resE_vec(2) = dt*(-2.0_wp*uvec(2))
               resi_vec(1) = 0.0_wp
               resi_vec(2) = dt*(-epI*uvec(2) + epI*uvec(1)*uvec(1))
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:) = 0.0_wp
 !             resi_vec(1) = dt*(-(epI+2.0_wp)*uvec(1) + epI*uvec(2)*uvec(2))
 !             resi_vec(2) = dt*(uvec(1) - uvec(2) - uvec(2)*uvec(2) )
@@ -111,6 +111,11 @@
               xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(+epI*2.0_wp*uvec(1))
               xjac(2,2) = 1.0_wp-akk*dt*(-(epI+2.0_wp))
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (-(1.0_wp+2.0_wp*uvec(1)))
+              xjac(1,2) = (1.0_wp)
+              xjac(2,1) = (+epI*2.0_wp*uvec(1))
+              xjac(2,2) = (-(epI+2.0_wp))
           end select choose_Jac_type
           
       end select Program_Step_Select

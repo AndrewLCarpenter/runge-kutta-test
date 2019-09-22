@@ -276,7 +276,8 @@
       
       !**Exact Solution** 
       write(vstr,"(I2.1)")vecl
-      open(unit=39,file='exact.Brusselator_'//vstr//'.data')
+      open(unit=39,file='./Exact_Data/exact.Brusselator_'//vstr//'.data')
+
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl*2)

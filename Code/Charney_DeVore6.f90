@@ -13,7 +13,7 @@
 !******************************************************************************
       module Charney_DeVore6_mod
 
-      use precision_vars,    only: wp, pi
+      use precision_vars,    only: wp, pi, eyeN
       use control_variables, only: temporal_splitting,probname,xjac,var_names,&
      &                             tol,dt_error_tol,uvec,uexact,programstep
 
@@ -49,9 +49,9 @@
 
       real(wp), parameter :: ep = ( (16*sqrt2)/(5*pi) )
 
-      real(wp), parameter :: a1 = ( (8*sqrt2/pi) * (1*1/(4*1*1-1)) * &
+      real(wp), parameter :: a1 = ( (8*sqrt2/pi) * (1.0_wp*1/(4*1*1-1)) * &
                                     ((b*b+1*1 - 1)/(b*b+1*1)) )
-      real(wp), parameter :: a2 = ( (8*sqrt2/pi) * (2*2/(4*2*2-1)) * &
+      real(wp), parameter :: a2 = ( (8*sqrt2/pi) * (2.0_wp*2/(4*2*2-1)) * &
                                     ((b*b+2*2 - 1)/(b*b+2*2)) )
 
       real(wp), parameter :: b1 = ( (be*b*b)/ (b*b+1*1) )
@@ -62,25 +62,14 @@
       real(wp), parameter :: d2 = ( (64.0_wp*sqrt2)/(15*pi) *   &
                                 &   (b*b-2*2 + 1)/ (b*b+2*2) )
 
-      real(wp), parameter :: g1 = ( ga * (4*1*1*1)/ (4*1*1-1) *      &
+      real(wp), parameter :: g1 = ( ga * (4.0_wp*1*1*1)/ (4*1*1-1) *      &
                                 &   (sqrt2*b/(pi * (b*b+1*1))) )
-      real(wp), parameter :: g2 = ( ga * (4*2*2*2)/ (4*2*2-1) *      &
+      real(wp), parameter :: g2 = ( ga * (4.0_wp*2*2*2)/ (4*2*2-1) *      &
                                 &   (sqrt2*b/(pi * (b*b+2*2))) )
 
-      real(wp), parameter :: g1s= ( ga * (4*1 / (4*1*1-1)) * (sqrt2*b/pi) )
-      real(wp), parameter :: g2s= ( ga * (4*2 / (4*2*2-1)) * (sqrt2*b/pi) )
+      real(wp), parameter :: g1s= ( ga * (4.0_wp*1 / (4*1*1-1)) * (sqrt2*b/pi) )
+      real(wp), parameter :: g2s= ( ga * (4.0_wp*2 / (4*2*2-1)) * (sqrt2*b/pi) )
                              
-      real(wp), dimension(neq,neq)  :: eye= reshape(              &
-                                          & (/+1,+0,+0,+0,+0,+0,  &
-                                          &   +0,+1,+0,+0,+0,+0,  &
-                                          &   +0,+0,+1,+0,+0,+0,  &
-                                          &   +0,+0,+0,+1,+0,+0,  &
-                                          &   +0,+0,+0,+0,+1,+0,  &
-                                          &   +0,+0,+0,+0,+0,+1/),&
-                                          &      (/6,6/) ) 
-
-      logical :: update_Jac
-
       contains    
 
 !==============================================================================
@@ -142,7 +131,7 @@
 
       use control_variables, only: temporal_splitting,probname,Jac_case,     &
      &                             tol,dt_error_tol,uvec,uexact,programstep, &
-     &                             var_names
+     &                             var_names, update_Jac
 
 !-----------------------VARIABLES----------------------------------------------
       !INIT vars     
@@ -188,7 +177,7 @@
         case('SET_INITIAL_CONDITIONS')
           
           !Update=true for Jac/RHS updates
-          update_Jac=.true. !reset every new epsilon/dt
+          update_Jac = .true. !reset every new epsilon/dt
 
 
           dt_max =   0002.00_wp                                   ! maximum dt
@@ -224,7 +213,7 @@
             case('IMEX') ! For IMEX schemes
               resE_vec(:)= dt * (+ dudt_E(:)            ) 
               resI_vec(:)= dt * (            + dudt_I(:))
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:)= dt * 0.0_wp
               resI_vec(:)= dt * (+ dudt_E(:) + dudt_I(:))
           end select choose_RHS_type
@@ -237,15 +226,19 @@
 
             case('EXPLICIT') ! For fully implicit schemes
 
-              xjac(:,:) = eye(:,:)
+              xjac(:,:) = eyeN(nveclen)
 
             case('IMEX') ! For IMEX schemes
 
-              xjac(:,:) = eye(:,:) - akk*dt* (             + Jac_I(:,:))
+              xjac(:,:) = eyeN(nveclen) - akk*dt* (             + Jac_I(:,:))
 
             case('IMPLICIT') ! For fully implicit schemes
 
-              xjac(:,:) = eye(:,:) - akk*dt* (+ Jac_E(:,:) + Jac_I(:,:))
+              xjac(:,:) = eyeN(nveclen) - akk*dt* (+ Jac_E(:,:) + Jac_I(:,:))
+
+            case('FIRK') ! For fully implicit schemes
+
+              xjac(:,:) = (+ Jac_E(:,:) + Jac_I(:,:))
 
           end select choose_Jac_type
 
@@ -284,7 +277,7 @@
       u(:)=0.0_wp*ep
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Charney_DeVore6.data')
+      open(unit=39,file='./Exact_Data/exact.Charney_DeVore6.data')
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl)

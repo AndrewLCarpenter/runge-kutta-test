@@ -12,12 +12,14 @@
 !******************************************************************************
       module Newton
             
-      use precision_vars, only:wp
+      use precision_vars, only: wp, eyeN
 
       implicit none; save
       
-      public :: Newton_Iteration
+      public :: Newton_Iteration, Newton_Iteration_OTD, Newton_Iteration_FIRK
       private      
+
+      integer, parameter :: iter_max = 12
       
       contains    
 !==============================================================================
@@ -62,12 +64,14 @@
 ! OUTPUTS:
 ! k       -> total number of newton iterations used for max iteration,  integer
 !******************************************************************************
+
+!==============================================================================
+
       subroutine Newton_Iteration(iprob,L,ep,dt,nveclen,time,aI,icount,k)
       
       use control_variables, only: temporal_splitting,jac_case,uvec,usum,xjac
 
-!     integer, parameter :: iter_max=1500
-      integer, parameter :: iter_max=100
+      integer, parameter :: iter_max = 10
       logical, parameter :: Line_search=.false. !set to TRUE for line search
       logical, parameter :: QR = .true. !set to TRUE for QR factorization
 
@@ -84,14 +88,17 @@
 
 !------------------------------------------------------------------------------
       temporal_select: select case(temporal_splitting)
+
         case('EXPLICIT')
           do k = 1,iter_max
             icount = icount + 1
             uveciter(:) = uvec(:)
             uvec(:)=usum(:)
-            if(check_exit(uveciter,iter_max,k)) exit            
+            if(check_exit(uvec,uveciter,iter_max,k)) exit            
           enddo   
+
         case default !IMEX or IMPLICIT
+
           line: if (Line_search) then
             call newt_line_search(iprob,L,ep,dt,nveclen,time,aI,icount,k)    
 !           call Inexact_Newton_Dogleg(iprob,L,ep,dt,nveclen,time,aI,icount,k)
@@ -102,12 +109,12 @@
                   icount = icount + 1
                   uveciter(:) = uvec(:) !store old uvec
 
-                  Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
+                  Rnewton = Nonlinear_Residual(ep,dt,time,aI,iprob,L)
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                 
                   uvec(:)=uvec(:)-LU_solver(Rnewton)
                   
-                  if(check_exit(uveciter,iter_max,k)) exit
+                  if(check_exit(uvec,uveciter,iter_max,k)) exit
                               
                 enddo  
               case('DENSE')
@@ -116,7 +123,6 @@
                   uveciter(:) = uvec(:) !store old uvec   
                                 
                   Rnewton=Nonlinear_Residual(ep,dt,time,aI,iprob,L)
-!                 write(*,*)k,sqrt(dot_product(rnewton,rnewton))
                   call Build_Jac(ep,dt,time,aI,iprob,L)
                     
                   if (nveclen>4 .and. .not. QR) then !No explicit inverse
@@ -124,14 +130,11 @@
                     uvec(:)=uvec(:)-LU_solver(Rnewton)
                       
                   elseif (nveclen>4 .and. QR) then !QR factorization
-!                   write(*,*)'xjac'
-!                   do i = 1,nvecLen
-!                      write(*,*)i,(j,xjac(i,j),j=1,nvecLen)
-!                   enddo
-                    call QR_decomp(xjac,nveclen,rnewton) 
+                    call QR_decomp(xjac,nveclen,rnewton)  ! Backsolve is performed in place in QR_decomp routine
                        
                   elseif (nveclen<=4) then !Explicit inverse
                     xjacinv=Mat_invert(xjac)                  
+
                     do i = 1,nvecLen
                       do j = 1,nvecLen
                         uvec(i) = uvec(i) - xjacinv(i,j)*Rnewton(j)     !u^n+1=u^n-J^-1*F
@@ -139,16 +142,94 @@
                     enddo  
                   endif
           
-                  if(check_exit(uveciter,iter_max,k)) exit
+                  if(check_exit(uvec,uveciter,iter_max,k)) exit
                     
                 enddo
-!               write(*,*)k,sqrt(dot_product(rnewton,rnewton))
+
             end select Jac_select 
+
           endif line
+
       end select temporal_select
+
       end subroutine Newton_Iteration
       
 !==============================================================================
+
+      subroutine Newton_Iteration_FIRK(iprob,ep,dt,nveclen,nvecS,time,icount,k)
+      
+      use control_variables, only: temporal_splitting,Jac_case,uvec, &
+                                 & uvecS, uvecoS, xjacS
+
+      integer, parameter :: iter_max = 13
+      logical, parameter :: QR = .true. !set to TRUE for QR factorization
+
+      integer,  intent(in   ) :: iprob
+      real(wp), intent(in   ) :: ep,dt
+      integer,  intent(in   ) :: nveclen, nvecS
+      real(wp), intent(in   ) :: time
+      integer,  intent(inout) :: icount
+      integer,  intent(  out) :: k
+      
+      integer                          :: i,j                     !Do loop variables
+      real(wp), dimension(nvecS)       :: Rnewton_FIRK, uveciterS !Newton 
+      real(wp), dimension(nvecS,nvecS) :: xjacinvS                !Jacobian
+      real(wp)                         :: t1
+
+!------------------------------------------------------------------------------
+
+        Jac_select: select case(Jac_case)
+
+          case('SPARSE')
+            do k = 1,iter_max
+              icount = icount + 1
+              uveciterS(:) = uvecS(:) !store old uvecS vector   
+
+              Rnewton_FIRK = Nonlinear_Residual_FIRK(iprob,nveclen,nvecS,ep,dt,time)
+
+              call Build_Jac_FIRK(iprob,nveclen,ep,dt,time)
+
+              uvecS(:)=uvecS(:)-LU_solver(Rnewton_FIRK)
+              
+              if(check_exit(uvecS,uveciterS,iter_max,k)) exit
+                          
+            enddo  
+          case('DENSE')
+            do k = 1,iter_max
+              icount = icount + 1
+              uveciterS(:) = uvecS(:) !store old uvecS vector   
+                            
+              Rnewton_FIRK = Nonlinear_Residual_FIRK(iprob,nveclen,nvecS,ep,dt,time)
+
+              call Build_Jac_FIRK(iprob,nveclen,ep,dt,time)
+
+              if (nvecS>4 .and. .not. QR) then !No explicit inverse
+                call Convert_to_CSR(xjacS) !convert dense xjac to csr
+                uvecS(:)=uvecS(:)-LU_solver(Rnewton_FIRK)
+                  
+              elseif (nvecS>4 .and. QR) then !QR factorization
+                call QR_decomp_FIRK(xjacS,nvecS,rnewton_FIRK)  ! Backsolve is performed in place in QR_decomp routine
+
+              elseif (nvecS<=4) then !Explicit inverse
+                xjacinvS = Mat_invert(xjacS)                  
+
+                do i = 1,nvecS
+                  uvecS(i) = uvecS(i) - dot_product(xjacinvS(i,:),Rnewton_FIRK(:))
+                enddo  
+              endif
+
+              if(check_exit(uvecS,uveciterS,iter_max,k)) exit
+                
+            enddo
+
+        end select Jac_select 
+
+        Rnewton_FIRK = Nonlinear_Residual_FIRK(iprob,nveclen,nvecS,ep,dt,time)
+
+      end subroutine Newton_Iteration_FIRK
+      
+!==============================================================================
+
 !******************************************************************************
 ! Function to check exit conditions for Newton iteration 
 !******************************************************************************
@@ -170,26 +251,34 @@
 ! OUTPUTS:
 ! check_exit -> logical output function for if statement in newton iteration, logical
 !******************************************************************************
-      function check_exit(uveciter,iter_max,k)
+
+!==============================================================================
+
+      function check_exit(vec1,vec2,iter_max,k)
       
-      use control_variables, only: tol,uvec
+      use control_variables, only: tol
       
-      real(wp), dimension(:), intent(in) :: uveciter
+      real(wp), dimension(:), intent(in) :: vec1,vec2
       integer,                intent(in) :: iter_max,k
       real(wp)                           :: tmp
       logical                            :: check_exit
       
       check_exit=.false.
-      tmp = sum(abs(uvec(:)-uveciter(:))) !check accuracy of zeros         
-      if (k>=iter_max) write(*,*)'tmp',tmp,'k',k
+      tmp = sum(abs(vec1(:)-vec2(:))) !check accuracy of zeros         
       if (tmp/=tmp) then
         print*,'stopping NaN k=',k
         stop
       endif      
-      if(tmp < tol) check_exit=.true. 
+      if(tmp < tol) then
+        check_exit=.true. 
+        return
+      endif
+      if (k>=iter_max) write(*,*)'tmp',tmp,'k',k,'tol',tol
       
       end function check_exit
+
 !==============================================================================
+
 !******************************************************************************
 ! Function to create Rnewton from the RHS
 !******************************************************************************
@@ -219,6 +308,9 @@
 ! OUTPUTS: 
 ! Nonlinear_Residual -> array containing modified RHS for newton iteration,  real(wp), dimension(u-vector length)
 !******************************************************************************    
+
+!==============================================================================
+
       function Nonlinear_Residual(ep,dt,time,aI,iprob,L)
       
       use control_variables, only: uvec,usum,resI,programstep
@@ -238,7 +330,49 @@
       Nonlinear_Residual(:) = uvec(:)-aI*resI(:,L)-usum(:)
 
       end function Nonlinear_Residual
+
 !==============================================================================
+
+      function Nonlinear_Residual_FIRK(iprob,nveclen,nvecS,ep,dt,time)
+      
+      use control_variables, only: uvec,uvecS,uvecoS,resI,programstep
+      use problemsub_mod,    only: problemsub
+      use runge_kutta,       only: aI,cI,ns
+            
+      integer,                   intent(in   ) :: iprob,nveclen,nvecS
+      real(wp),                  intent(in   ) :: ep,dt,time
+
+      real(wp), dimension(nvecS) :: Nonlinear_Residual_FIRK
+      integer  :: L,j
+      integer  :: iDT,neq, iL, iH, jL, jH, nveclen_in
+      real(wp) :: tfinal,dt_in, tt
+      
+      dt_in=dt
+      nveclen_in = nveclen
+      
+      do L = 1,ns
+        tt = time + cI(L)*dt                      ! intermediate time
+        iL = (L-1)*nveclen + 1
+        iH = (L-1)*nveclen + nveclen
+        uvec(:) = uvecS(iL:iH)
+        programStep='BUILD_RHS'
+        call problemsub(iprob,nveclen_in,neq,ep,dt_in,tfinal,iDT,tt,aI(L,L),L)
+      enddo
+
+      Nonlinear_Residual_FIRK(:) = uvecS(:) - uvecoS(:)
+      do L = 1,ns
+        iL = (L-1)*nveclen + 1
+        iH = (L-1)*nveclen + nveclen
+        do j = 1,ns
+          Nonlinear_Residual_Firk(iL:iH) = Nonlinear_Residual_Firk(iL:iH) &
+                                         - aI(L,j)*resI(:,j)
+        enddo
+      enddo
+
+      end function Nonlinear_Residual_FIRK
+
+!==============================================================================
+
 !******************************************************************************
 ! Subroutine to get Jacobian for newton iteration
 !******************************************************************************
@@ -282,6 +416,190 @@
       end subroutine Build_Jac
       
 !==============================================================================
+      subroutine Build_Jac_FIRK(iprob,nveclen,ep,dt,time)
+      
+      use control_variables, only: programstep, uvec, uvecS, xjac, xjacS
+      use problemsub_mod,    only: problemsub     
+      use runge_kutta,       only: aI,cI,ns
+       
+      integer,                  intent(in) :: iprob,nveclen
+      real(wp),                 intent(in) :: ep,dt,time
+
+      integer  :: i,j
+      integer  :: iL,iH,jL,jH
+      integer  :: nveclen_in,iDT,neq
+      real(wp) :: tfinal,dt_in, tt
+      
+      dt_in      = dt
+      nveclen_in = nveclen
+  
+      xJacS(:,:) = eyeN(nveclen*ns)
+
+      do j = 1,ns
+
+        tt = time + cI(j)*dt                      ! intermediate time
+
+        jL = (j-1)*nveclen + 1
+        jH = (j-1)*nveclen + nveclen
+        uvec(:) = uvecS(jL:jH)
+        
+        programStep='BUILD_JACOBIAN'
+        call problemsub(iprob,nveclen_in,neq,ep,dt_in,tfinal,iDT,tt,aI(j,j),j)
+
+        do i = 1,ns
+          iL = (i-1)*nveclen + 1
+          iH = (i-1)*nveclen + nveclen
+          xjacS(iL:iH,jL:jH) = xjacS(iL:iH,jL:jH) - dt * aI(i,j) * xjac(:,:)
+        enddo
+
+      enddo
+      
+      end subroutine Build_Jac_FIRK
+      
+!==============================================================================
+
+      subroutine Newton_Iteration_OTD(iprob,L,ep,dt,nveclen,time,aI)
+      
+      use control_variables, only: temporal_splitting_OTD,jac_case,&
+                                   OTDN,Ovec,Osum,xjac
+
+      integer, parameter :: iter_max = 3
+      logical, parameter :: QR = .true. !set to TRUE for QR factorization
+
+      integer,  intent(in   ) :: iprob,L
+      real(wp), intent(in   ) :: ep,dt
+      integer,  intent(in   ) :: nveclen
+      real(wp), intent(in   ) :: time,aI
+      
+      integer                              :: i,j,k  !Do loop variables
+      real(wp), dimension(nveclen,OTDN)    :: Rnewton_OTD, Oveciter !Newton 
+      real(wp), dimension(nveclen,nveclen) :: xjacinv !Jacobian
+
+!------------------------------------------------------------------------------
+      temporal_select_OTD: select case(temporal_splitting_OTD)
+        case('EXPLICIT')
+          do k = 1,iter_max
+            Oveciter(:,:) = Ovec(:,:)
+            Ovec(:,:)     = Osum(:,:)
+            if(check_exit_OTD(Oveciter,iter_max,k)) exit 
+          enddo   
+
+        case default !IMEX or IMPLICIT
+
+          Jac_select_OTD: select case(Jac_case)
+            case('SPARSE')
+              do k = 1,iter_max
+                Oveciter(:,:) = Ovec(:,:) !store old uvec
+
+                Rnewton_OTD=Nonlinear_Residual_OTD(ep,dt,time,aI,iprob,L)
+                call Build_Jac(ep,dt,time,aI,iprob,L)
+              
+!               Ovec(:,:)= Ovec(:,:)-LU_solver(Rnewton_OTD)
+                
+                if(check_exit_OTD(Oveciter,iter_max,k)) exit
+                            
+              enddo  
+            case('DENSE')
+              do k = 1,iter_max
+                Oveciter(:,:) = Ovec(:,:) !store old uvec   
+                              
+                Rnewton_OTD = Nonlinear_Residual_OTD(ep,dt,time,aI,iprob,L)
+                call Build_Jac_OTD(ep,dt,time,aI,iprob,L)
+                  
+                if (nveclen>4 .and. .not. QR) then !No explicit inverse
+                  call Convert_to_CSR(xjac) !convert dense xjac to csr
+!                 Ovec(:,:) = Ovec(:,:)-LU_solver(Rnewton_OTD)
+                    
+                elseif (nveclen>4 .and. QR) then !QR factorization
+                  call QR_decomp_OTD(xjac,nveclen,Rnewton_OTD) 
+                     
+                elseif (nveclen<=4) then !Explicit inverse
+                  xjacinv=Mat_invert(xjac)                  
+                  do i = 1,nvecLen
+                    do j = 1,nvecLen
+                      Ovec(i,:) = Ovec(i,:) - xjacinv(i,j)*Rnewton_OTD(j,:)     ! u^{n+1}=u^{n}-J^{-1}*F
+                    enddo
+                  enddo  
+                endif
+        
+                if(check_exit_OTD(Oveciter,iter_max,k)) exit
+                  
+              enddo
+
+          end select Jac_select_OTD
+
+      end select temporal_select_OTD
+
+      end subroutine Newton_Iteration_OTD
+      
+!==============================================================================
+
+      function check_exit_OTD(Oveciter,iter_max,k)
+      
+      use control_variables, only: tol,Ovec
+      
+      real(wp), dimension(:,:), intent(in) :: Oveciter
+      integer,                  intent(in) :: iter_max,k
+      real(wp)                             :: tmp
+      logical                              :: check_exit_OTD
+      
+      check_exit_OTD=.false.
+      tmp = maxval(abs(Ovec(:,:)-Oveciter(:,:))) !check accuracy of zeros         
+      if (k>=iter_max) write(*,*)'tmp',tmp,'k',k
+      if (tmp/=tmp) then
+        print*,'stopping NaN k=',k
+        stop
+      endif      
+      if(tmp < tol) check_exit_OTD=.true. 
+      
+      end function check_exit_OTD
+
+!==============================================================================
+
+      function Nonlinear_Residual_OTD(ep,dt,time,aI,iprob,L)
+      
+      use control_variables, only: uvec,usum,resI,programstep,  &
+                                   OTDN,Ovec,resI_OTD,Osum
+      use problemsub_mod,    only: problemsub
+            
+      real(wp),               intent(in   ) :: ep,dt,time,aI
+      integer,                intent(in   ) :: iprob,L
+
+      real(wp), dimension(size(uvec),OTDN)  :: Nonlinear_Residual_OTD
+
+      integer  :: iDT,nveclen,neq
+      real(wp) :: tfinal,dt_in
+      
+      dt_in=dt
+      
+      programStep='BUILD_RHS_OTD'
+      call problemsub(iprob,nveclen,neq,ep,dt_in,tfinal,iDT,time,aI,L)
+      Nonlinear_Residual_OTD(:,:) = Ovec(:,:)-aI*resI_OTD(:,:)-Osum(:,:)
+
+      end function Nonlinear_Residual_OTD
+
+!==============================================================================
+
+      subroutine Build_Jac_OTD(ep,dt,time,aI,iprob,L)
+      
+      use control_variables, only: programstep
+      use problemsub_mod,    only: problemsub     
+       
+      real(wp), intent(in) :: ep,dt,time,aI
+      integer,  intent(in) :: iprob,L
+    
+      integer  :: nveclen,iDT,neq
+      real(wp) :: tfinal,dt_in
+      
+      dt_in=dt
+  
+      programStep='BUILD_JACOBIAN_OTD'
+      call problemsub(iprob,nveclen,neq,ep,dt_in,tfinal,iDT,time,aI,L)
+      
+      end subroutine Build_Jac_OTD
+      
+!==============================================================================
+
 !******************************************************************************
 ! Subroutine to perform LU decomposition and solving
 !******************************************************************************
@@ -334,6 +652,342 @@
         stop
       endif
       end function LU_solver 
+
+!==============================================================================
+!******************************************************************************
+! Subroutine to perform QR decomposition and solving
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
+! QR_MODULE.F90             *CONTAINS QR ROUTINES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From control_variables:
+!   uvec -> Array containing variables, real(wp), dimension(u-vector length), modified
+! From QR_Module:
+!   qrdcmp -> performs QR decomposition
+!   qrsolv -> performs QR solving 
+! MODULE ROUTINES:
+! Nonlinear_Residual -> Calls problemsub to build RHS and RNewton
+! 
+!******************************************************************************
+! INPUTS:
+! iprob   -> defines problem number,                                    integer
+! L       -> stage number,                                              integer
+! ep      -> Stiffness epsilon value,                                   real(wp)
+! dt      -> timestep: created and then used later in the problem case, real(wp)
+! nveclen -> total length of u-vector used for problem                  integer
+! time    -> current solution time,                                     integer
+! aI      -> Diagonal term from RK scheme,                              real(wp)
+! INOUTS:
+! icount  -> counter used to determine average iterations,              integer
+! OUTPUTS:
+! k       -> total number of newton iterations used for max iteration,  integer
+!****************************************************************************** 
+      subroutine QR_decomp(mat,nveclen,Rnewton)
+      
+      use control_variables, only: uvec
+      use QR_Module,         only: qrdcmp,qrsolv
+      
+      real(wp), dimension(:,:), intent(inout) :: mat
+      integer,                  intent(in   ) :: nveclen
+      real(wp), dimension(:),   intent(inout) :: Rnewton
+      
+      real(wp), dimension(nveclen) :: wrk_c,wrk_d
+      logical                      :: snglr
+      
+      call qrdcmp(mat,nveclen,nveclen,wrk_c,wrk_d,snglr)
+      if (snglr) then
+        write(*,*)'matrix is singular in Newton Iteration: Stopping'
+        stop
+      else
+        call qrsolv(mat,nveclen,nveclen,wrk_c,wrk_d,Rnewton)
+      endif
+
+      uvec(:)=uvec(:)-Rnewton(:) 
+
+      end subroutine QR_decomp       
+      
+!==============================================================================
+
+      subroutine QR_decomp_OTD(mat,nveclen,Rnewton_OTD)
+      
+      use control_variables, only: Ovec
+      use QR_Module,         only: qrdcmp,qrsolv_MRHS
+      
+      real(wp), dimension(:,:), intent(inout) :: mat
+      integer,                  intent(in   ) :: nveclen
+      real(wp), dimension(:,:), intent(inout) :: Rnewton_OTD
+      
+      real(wp), dimension(nveclen) :: wrk_c,wrk_d
+      logical                      :: snglr
+      integer                      :: m
+      
+      call qrdcmp(mat,nveclen,nveclen,wrk_c,wrk_d,snglr)
+      if (snglr) then
+        write(*,*)'matrix is singular in Newton Iteration: Stopping'
+        stop
+      else
+        m = size(Rnewton_OTD,2)
+        call qrsolv_MRHS(mat,nveclen,nveclen,m,wrk_c,wrk_d,Rnewton_OTD)
+      endif
+
+      Ovec(:,:)=Ovec(:,:)-Rnewton_OTD(:,:) 
+
+      end subroutine QR_decomp_OTD       
+      
+!==============================================================================
+
+      subroutine QR_decomp_FIRK(mat,nvecS,Rnewton_FIRK)
+      
+      use control_variables, only: uvecS
+      use QR_Module,         only: qrdcmp,qrsolv
+      
+      real(wp), dimension(:,:), intent(inout) :: mat
+      integer,                  intent(in   ) :: nvecS
+      real(wp), dimension(:),   intent(inout) :: Rnewton_FIRK
+      
+      real(wp), dimension(nvecS) :: wrk_c,wrk_d
+      logical                      :: snglr
+      
+      call qrdcmp(mat,nvecS,nvecS,wrk_c,wrk_d,snglr)
+      if (snglr) then
+        write(*,*)'matrix is singular in Newton Iteration: Stopping'
+        stop
+      else
+        call qrsolv(mat,nvecS,nvecS,wrk_c,wrk_d,Rnewton_FIRK)
+      endif
+
+      uvecS(:)=uvecS(:)-Rnewton_FIRK(:) 
+
+      end subroutine QR_decomp_FIRK
+!==============================================================================
+
+!******************************************************************************
+! Function to invert a dense matrix of rank<=4
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! 
+!******************************************************************************
+! INPUTS:
+! mat -> input dense matrix, real(wp), dimension(:,:) 
+! OUTPUTS:
+! Mat_invert -> output inverted matrix, real(wp), dimension(:,:) (same as input)
+!****************************************************************************** 
+      function Mat_invert(mat)
+
+      real(wp), dimension(:,:), intent(in   ) :: mat
+      integer  :: mat_size
+      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: xinv
+      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: Mat_invert
+      real(wp) :: x11,x12,x13,x14
+      real(wp) :: x21,x22,x23,x24
+      real(wp) :: x31,x32,x33,x34
+      real(wp) :: x41,x42,x43,x44
+      real(wp) :: det,detI   
+
+      real(wp), parameter :: tol = 1.0e-20_wp
+
+      mat_size=size(mat(:,1))
+           
+      if(mat_size==2)then
+
+        det = (mat(1,1)*mat(2,2)-mat(1,2)*mat(2,1))
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
+
+        xinv(1,1) =  mat(2,2)/det
+        xinv(1,2) = -mat(1,2)/det
+        xinv(2,1) = -mat(2,1)/det
+        xinv(2,2) =  mat(1,1)/det
+
+      elseif(mat_size==3)then
+
+        x11 = mat(1,1)
+        x12 = mat(1,2)
+        x13 = mat(1,3)
+        x21 = mat(2,1)
+        x22 = mat(2,2)
+        x23 = mat(2,3)
+        x31 = mat(3,1)
+        x32 = mat(3,2)
+        x33 = mat(3,3)
+
+        det = - x13*x22*x31 + x12*x23*x31 +  x13*x21*x32& 
+     &        - x11*x23*x32 - x12*x21*x33 +  x11*x22*x33
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
+
+        detI = 1.0_wp/det
+
+        xinv(1,1) =  (- x23*x32 + x22*x33) * detI
+        xinv(1,2) =  (+ x13*x32 - x12*x33) * detI
+        xinv(1,3) =  (- x13*x22 + x12*x23) * detI
+        xinv(2,1) =  (+ x23*x31 - x21*x33) * detI
+        xinv(2,2) =  (- x13*x31 + x11*x33) * detI
+        xinv(2,3) =  (+ x13*x21 - x11*x23) * detI
+        xinv(3,1) =  (- x22*x31 + x21*x32) * detI
+        xinv(3,2) =  (+ x12*x31 - x11*x32) * detI
+        xinv(3,3) =  (- x12*x21 + x11*x22) * detI
+
+      elseif(mat_size==4)then
+
+        x11 = mat(1,1)
+        x12 = mat(1,2)
+        x13 = mat(1,3)
+        x14 = mat(1,4)
+        x21 = mat(2,1)
+        x22 = mat(2,2)
+        x23 = mat(2,3)
+        x24 = mat(2,4)
+        x31 = mat(3,1)
+        x32 = mat(3,2)
+        x33 = mat(3,3)
+        x34 = mat(3,4)
+        x41 = mat(4,1)
+        x42 = mat(4,2)
+        x43 = mat(4,3)
+        x44 = mat(4,4)
+
+        det =& 
+     &  (x14*x23*x32*x41 - x13*x24*x32*x41 - &
+     &   x14*x22*x33*x41 + x12*x24*x33*x41 + &
+     &   x13*x22*x34*x41 - x12*x23*x34*x41 - &
+     &   x14*x23*x31*x42 + x13*x24*x31*x42 + &
+     &   x14*x21*x33*x42 - x11*x24*x33*x42 - &
+     &   x13*x21*x34*x42 + x11*x23*x34*x42 + &
+     &   x14*x22*x31*x43 - x12*x24*x31*x43 - &
+     &   x14*x21*x32*x43 + x11*x24*x32*x43 + &
+     &   x12*x21*x34*x43 - x11*x22*x34*x43 - &
+     &   x13*x22*x31*x44 + x12*x23*x31*x44 + &
+     &   x13*x21*x32*x44 - x11*x23*x32*x44 - &
+     &   x12*x21*x33*x44 + x11*x22*x33*x44)
+
+        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
+
+        detI = 1.0_wp/det
+
+        xinv(1,1) = (&
+     & -(x24*x33*x42) + x23*x34*x42 + x24*x32*x43 - &
+     &   x22*x34*x43  - x23*x32*x44 + x22*x33*x44  ) * detI
+        xinv(1,2) = (&
+     &   x14*x33*x42  - x13*x34*x42 - x14*x32*x43 + &
+     &   x12*x34*x43  + x13*x32*x44 - x12*x33*x44  ) * detI
+        xinv(1,3) = (&
+     & -(x14*x23*x42) + x13*x24*x42 + x14*x22*x43 - &
+     &   x12*x24*x43  - x13*x22*x44 + x12*x23*x44  ) * detI
+        xinv(1,4) = (&
+     &   x14*x23*x32  - x13*x24*x32 - x14*x22*x33 + &
+     &   x12*x24*x33  + x13*x22*x34 - x12*x23*x34  ) * detI
+        xinv(2,1) = (&
+     &   x24*x33*x41  - x23*x34*x41 - x24*x31*x43 + &
+     &   x21*x34*x43  + x23*x31*x44 - x21*x33*x44  ) * detI
+        xinv(2,2) = (&
+     & -(x14*x33*x41) + x13*x34*x41 + x14*x31*x43 - &
+     &   x11*x34*x43  - x13*x31*x44 + x11*x33*x44  ) * detI
+        xinv(2,3) = (&
+     &   x14*x23*x41  - x13*x24*x41 - x14*x21*x43 + &
+     &   x11*x24*x43  + x13*x21*x44 - x11*x23*x44  ) * detI
+        xinv(2,4) = (&
+     & -(x14*x23*x31) + x13*x24*x31 + x14*x21*x33 - &
+     &   x11*x24*x33  - x13*x21*x34 + x11*x23*x34  ) * detI
+        xinv(3,1) = (&
+     & -(x24*x32*x41) + x22*x34*x41 + x24*x31*x42 - &
+     &   x21*x34*x42  - x22*x31*x44 + x21*x32*x44  ) * detI
+        xinv(3,2) = (&
+     &   x14*x32*x41  - x12*x34*x41 - x14*x31*x42 + &
+     &   x11*x34*x42  + x12*x31*x44 - x11*x32*x44  ) * detI
+        xinv(3,3) = (&
+     & -(x14*x22*x41) + x12*x24*x41 + x14*x21*x42 - &
+     &   x11*x24*x42  - x12*x21*x44 + x11*x22*x44  ) * detI
+        xinv(3,4) = (&
+     &   x14*x22*x31  - x12*x24*x31 - x14*x21*x32 + &
+     &   x11*x24*x32  + x12*x21*x34 - x11*x22*x34  ) * detI
+        xinv(4,1) = (&
+     &   x23*x32*x41  - x22*x33*x41 - x23*x31*x42 + &
+     &   x21*x33*x42  + x22*x31*x43 - x21*x32*x43  ) * detI
+        xinv(4,2) = (&
+     & -(x13*x32*x41) + x12*x33*x41 + x13*x31*x42 - &
+     &   x11*x33*x42  - x12*x31*x43 + x11*x32*x43  ) * detI
+        xinv(4,3) = (&
+     &   x13*x22*x41  - x12*x23*x41 - x13*x21*x42 + &
+     &   x11*x23*x42  + x12*x21*x43 - x11*x22*x43  ) * detI
+        xinv(4,4) = (&
+     & -(x13*x22*x31) + x12*x23*x31 + x13*x21*x32 - &
+     &   x11*x23*x32  - x12*x21*x33 + x11*x22*x33  ) * detI
+
+      endif
+
+      Mat_invert=xinv
+
+      end function Mat_invert
+
+!==============================================================================
+!******************************************************************************
+! Subroutine to convert a dense matrix to CSR and store it as the global CSR
+! Jacobian
+!******************************************************************************
+! REQUIRED FILES:
+! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
+! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
+!******************************************************************************
+! GLOBAL VARIABLES/ROUTINES:
+! From precision_variables:
+!   wp  -> working precision
+! From Jacobian_CSR_Mod:
+!   iaJac  -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1), set
+!   jaJac  -> ja matrix for global storage of Jacobian, integer,  dimension(u-vector length **2), set
+!    aJac  ->  a matrix for global storage of Jacobian, real(wp), dimension(u-vector length **2), set
+!   Allocate_Jac_CSR_Storage -> Subroutine to create Jacobian and LU decomposition arrays for CSR problems
+!******************************************************************************
+! INPUTS:
+! a        -> input dense matrix, real(wp), dimension(:,:) 
+!****************************************************************************** 
+      subroutine Convert_to_CSR(a)
+ 
+      use Jacobian_CSR_Mod, only: Allocate_Jac_CSR_Storage,iaJac,jaJac,aJac      
+      
+      real(wp), dimension(:,:), intent(in   ) :: a
+      integer                                 :: i,j,icnt,jcnt,nnz,dimen
+      real(wp),    parameter              ::   toljac = 1.0e-13_wp     
+      dimen=size(a(:,1))
+      nnz=size(a)
+
+      call Allocate_Jac_CSR_Storage(dimen,nnz)
+
+!     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
+
+      ! Initialize CSR
+      iaJac(:) = 0
+      iaJac(1) = 1
+      jaJac(:) = 0 
+      aJac(:) = 0.0_wp
+      
+      ! Store dense matrix into CSR format
+      icnt = 0   
+      do i = 1,dimen
+        jcnt = 0   
+        do j = 1,dimen
+          if(abs(a(i,j)) >= tolJac) then
+            icnt = icnt + 1 
+            jcnt = jcnt + 1 
+             
+            jaJac(icnt) = j
+             aJac(icnt) = a(i,j)
+          endif
+        enddo
+        iaJac(i+1) = iaJac(i) + jcnt
+      enddo
+
+      end subroutine Convert_to_CSR
 
 !==============================================================================
 !******************************************************************************
@@ -610,286 +1264,6 @@
 
       end subroutine Inexact_Newton_Dogleg
       
-!==============================================================================
-!******************************************************************************
-! Subroutine to perform QR decomposition and solving
-!******************************************************************************
-! REQUIRED FILES:
-! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
-! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
-! QR_MODULE.F90             *CONTAINS QR ROUTINES
-!******************************************************************************
-! GLOBAL VARIABLES/ROUTINES:
-! From precision_variables:
-!   wp  -> working precision
-! From control_variables:
-!   uvec -> Array containing variables, real(wp), dimension(u-vector length), modified
-! From QR_Module:
-!   qrdcmp -> performs QR decomposition
-!   qrsolv -> performs QR solving 
-! MODULE ROUTINES:
-! Nonlinear_Residual -> Calls problemsub to build RHS and RNewton
-! 
-!******************************************************************************
-! INPUTS:
-! iprob   -> defines problem number,                                    integer
-! L       -> stage number,                                              integer
-! ep      -> Stiffness epsilon value,                                   real(wp)
-! dt      -> timestep: created and then used later in the problem case, real(wp)
-! nveclen -> total length of u-vector used for problem                  integer
-! time    -> current solution time,                                     integer
-! aI      -> Diagonal term from RK scheme,                              real(wp)
-! INOUTS:
-! icount  -> counter used to determine average iterations,              integer
-! OUTPUTS:
-! k       -> total number of newton iterations used for max iteration,  integer
-!****************************************************************************** 
-      subroutine QR_decomp(mat,nveclen,Rnewton)
-      
-      use control_variables, only: uvec
-      use QR_Module,         only: qrdcmp,qrsolv
-      
-      real(wp), dimension(:,:), intent(inout) :: mat
-      integer,                  intent(in   ) :: nveclen
-      real(wp), dimension(:),   intent(inout) :: Rnewton
-      
-      real(wp), dimension(nveclen) :: wrk_c,wrk_d
-      logical                      :: snglr
-      
-      call qrdcmp(mat,nveclen,nveclen,wrk_c,wrk_d,snglr)
-      if (snglr) then
-        write(*,*)'matrix is singular in Newton Iteration: Stopping'
-        stop
-      else
-        call qrsolv(mat,nveclen,nveclen,wrk_c,wrk_d,Rnewton)
-      endif
-      uvec(:)=uvec(:)-Rnewton(:) 
-      end subroutine QR_decomp       
-      
-!==============================================================================
-!******************************************************************************
-! Function to invert a dense matrix of rank<=4
-!******************************************************************************
-! REQUIRED FILES:
-! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
-!******************************************************************************
-! GLOBAL VARIABLES/ROUTINES:
-! From precision_variables:
-!   wp  -> working precision
-! 
-!******************************************************************************
-! INPUTS:
-! mat -> input dense matrix, real(wp), dimension(:,:) 
-! OUTPUTS:
-! Mat_invert -> output inverted matrix, real(wp), dimension(:,:) (same as input)
-!****************************************************************************** 
-      function Mat_invert(mat)
-
-      real(wp), dimension(:,:), intent(in   ) :: mat
-      integer  :: mat_size
-      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: xinv
-      real(wp), dimension(size(mat(:,1)),size(mat(1,:))) :: Mat_invert
-      real(wp) :: x11,x12,x13,x14
-      real(wp) :: x21,x22,x23,x24
-      real(wp) :: x31,x32,x33,x34
-      real(wp) :: x41,x42,x43,x44
-      real(wp) :: det,detI   
-
-      real(wp), parameter :: tol = 1.0e-20_wp
-
-      mat_size=size(mat(:,1))
-           
-      if(mat_size==2)then
-
-        det = (mat(1,1)*mat(2,2)-mat(1,2)*mat(2,1))
-
-        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
-
-        xinv(1,1) =  mat(2,2)/det
-        xinv(1,2) = -mat(1,2)/det
-        xinv(2,1) = -mat(2,1)/det
-        xinv(2,2) =  mat(1,1)/det
-
-      elseif(mat_size==3)then
-
-        x11 = mat(1,1)
-        x12 = mat(1,2)
-        x13 = mat(1,3)
-        x21 = mat(2,1)
-        x22 = mat(2,2)
-        x23 = mat(2,3)
-        x31 = mat(3,1)
-        x32 = mat(3,2)
-        x33 = mat(3,3)
-
-        det = - x13*x22*x31 + x12*x23*x31 +  x13*x21*x32& 
-     &        - x11*x23*x32 - x12*x21*x33 +  x11*x22*x33
-
-        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
-
-        detI = 1.0_wp/det
-
-        xinv(1,1) =  (- x23*x32 + x22*x33) * detI
-        xinv(1,2) =  (+ x13*x32 - x12*x33) * detI
-        xinv(1,3) =  (- x13*x22 + x12*x23) * detI
-        xinv(2,1) =  (+ x23*x31 - x21*x33) * detI
-        xinv(2,2) =  (- x13*x31 + x11*x33) * detI
-        xinv(2,3) =  (+ x13*x21 - x11*x23) * detI
-        xinv(3,1) =  (- x22*x31 + x21*x32) * detI
-        xinv(3,2) =  (+ x12*x31 - x11*x32) * detI
-        xinv(3,3) =  (- x12*x21 + x11*x22) * detI
-
-      elseif(mat_size==4)then
-
-        x11 = mat(1,1)
-        x12 = mat(1,2)
-        x13 = mat(1,3)
-        x14 = mat(1,4)
-        x21 = mat(2,1)
-        x22 = mat(2,2)
-        x23 = mat(2,3)
-        x24 = mat(2,4)
-        x31 = mat(3,1)
-        x32 = mat(3,2)
-        x33 = mat(3,3)
-        x34 = mat(3,4)
-        x41 = mat(4,1)
-        x42 = mat(4,2)
-        x43 = mat(4,3)
-        x44 = mat(4,4)
-
-        det =& 
-     &  (x14*x23*x32*x41 - x13*x24*x32*x41 - &
-     &   x14*x22*x33*x41 + x12*x24*x33*x41 + &
-     &   x13*x22*x34*x41 - x12*x23*x34*x41 - &
-     &   x14*x23*x31*x42 + x13*x24*x31*x42 + &
-     &   x14*x21*x33*x42 - x11*x24*x33*x42 - &
-     &   x13*x21*x34*x42 + x11*x23*x34*x42 + &
-     &   x14*x22*x31*x43 - x12*x24*x31*x43 - &
-     &   x14*x21*x32*x43 + x11*x24*x32*x43 + &
-     &   x12*x21*x34*x43 - x11*x22*x34*x43 - &
-     &   x13*x22*x31*x44 + x12*x23*x31*x44 + &
-     &   x13*x21*x32*x44 - x11*x23*x32*x44 - &
-     &   x12*x21*x33*x44 + x11*x22*x33*x44)
-
-        if(abs(det) <= tol)write(*,*)'determinant is nearly singular',det
-
-        detI = 1.0_wp/det
-
-        xinv(1,1) = (&
-     & -(x24*x33*x42) + x23*x34*x42 + x24*x32*x43 - &
-     &   x22*x34*x43  - x23*x32*x44 + x22*x33*x44  ) * detI
-        xinv(1,2) = (&
-     &   x14*x33*x42  - x13*x34*x42 - x14*x32*x43 + &
-     &   x12*x34*x43  + x13*x32*x44 - x12*x33*x44  ) * detI
-        xinv(1,3) = (&
-     & -(x14*x23*x42) + x13*x24*x42 + x14*x22*x43 - &
-     &   x12*x24*x43  - x13*x22*x44 + x12*x23*x44  ) * detI
-        xinv(1,4) = (&
-     &   x14*x23*x32  - x13*x24*x32 - x14*x22*x33 + &
-     &   x12*x24*x33  + x13*x22*x34 - x12*x23*x34  ) * detI
-        xinv(2,1) = (&
-     &   x24*x33*x41  - x23*x34*x41 - x24*x31*x43 + &
-     &   x21*x34*x43  + x23*x31*x44 - x21*x33*x44  ) * detI
-        xinv(2,2) = (&
-     & -(x14*x33*x41) + x13*x34*x41 + x14*x31*x43 - &
-     &   x11*x34*x43  - x13*x31*x44 + x11*x33*x44  ) * detI
-        xinv(2,3) = (&
-     &   x14*x23*x41  - x13*x24*x41 - x14*x21*x43 + &
-     &   x11*x24*x43  + x13*x21*x44 - x11*x23*x44  ) * detI
-        xinv(2,4) = (&
-     & -(x14*x23*x31) + x13*x24*x31 + x14*x21*x33 - &
-     &   x11*x24*x33  - x13*x21*x34 + x11*x23*x34  ) * detI
-        xinv(3,1) = (&
-     & -(x24*x32*x41) + x22*x34*x41 + x24*x31*x42 - &
-     &   x21*x34*x42  - x22*x31*x44 + x21*x32*x44  ) * detI
-        xinv(3,2) = (&
-     &   x14*x32*x41  - x12*x34*x41 - x14*x31*x42 + &
-     &   x11*x34*x42  + x12*x31*x44 - x11*x32*x44  ) * detI
-        xinv(3,3) = (&
-     & -(x14*x22*x41) + x12*x24*x41 + x14*x21*x42 - &
-     &   x11*x24*x42  - x12*x21*x44 + x11*x22*x44  ) * detI
-        xinv(3,4) = (&
-     &   x14*x22*x31  - x12*x24*x31 - x14*x21*x32 + &
-     &   x11*x24*x32  + x12*x21*x34 - x11*x22*x34  ) * detI
-        xinv(4,1) = (&
-     &   x23*x32*x41  - x22*x33*x41 - x23*x31*x42 + &
-     &   x21*x33*x42  + x22*x31*x43 - x21*x32*x43  ) * detI
-        xinv(4,2) = (&
-     & -(x13*x32*x41) + x12*x33*x41 + x13*x31*x42 - &
-     &   x11*x33*x42  - x12*x31*x43 + x11*x32*x43  ) * detI
-        xinv(4,3) = (&
-     &   x13*x22*x41  - x12*x23*x41 - x13*x21*x42 + &
-     &   x11*x23*x42  + x12*x21*x43 - x11*x22*x43  ) * detI
-        xinv(4,4) = (&
-     & -(x13*x22*x31) + x12*x23*x31 + x13*x21*x32 - &
-     &   x11*x23*x32  - x12*x21*x33 + x11*x22*x33  ) * detI
-
-      endif
-
-      Mat_invert=xinv
-
-      end function Mat_invert
-
-!==============================================================================
-!******************************************************************************
-! Subroutine to convert a dense matrix to CSR and store it as the global CSR
-! Jacobian
-!******************************************************************************
-! REQUIRED FILES:
-! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
-! JACOBIAN_CSR_MOD.F90      *ALLOCATE AND STORE CSR JACOBIAN VARIABLES
-!******************************************************************************
-! GLOBAL VARIABLES/ROUTINES:
-! From precision_variables:
-!   wp  -> working precision
-! From Jacobian_CSR_Mod:
-!   iaJac  -> ia matrix for global storage of Jacobian, integer,  dimension(u-vector length + 1), set
-!   jaJac  -> ja matrix for global storage of Jacobian, integer,  dimension(u-vector length **2), set
-!    aJac  ->  a matrix for global storage of Jacobian, real(wp), dimension(u-vector length **2), set
-!   Allocate_Jac_CSR_Storage -> Subroutine to create Jacobian and LU decomposition arrays for CSR problems
-!******************************************************************************
-! INPUTS:
-! a        -> input dense matrix, real(wp), dimension(:,:) 
-!****************************************************************************** 
-      subroutine Convert_to_CSR(a)
- 
-      use Jacobian_CSR_Mod, only: Allocate_Jac_CSR_Storage,iaJac,jaJac,aJac      
-      
-      real(wp), dimension(:,:), intent(in   ) :: a
-      integer                                 :: i,j,icnt,jcnt,nnz,dimen
-      real(wp),    parameter              ::   toljac = 1.0e-13_wp     
-      dimen=size(a(:,1))
-      nnz=size(a)
-
-      call Allocate_Jac_CSR_Storage(dimen,nnz)
-
-!     U_t = F(U);  Jac = \frac{\partial F(U)}{\partial U};  xjac = I - akk dt Jac
-
-      ! Initialize CSR
-      iaJac(:) = 0
-      iaJac(1) = 1
-      jaJac(:) = 0 
-      aJac(:) = 0.0_wp
-      
-      ! Store dense matrix into CSR format
-      icnt = 0   
-      do i = 1,dimen
-        jcnt = 0   
-        do j = 1,dimen
-          if(abs(a(i,j)) >= tolJac) then
-            icnt = icnt + 1 
-            jcnt = jcnt + 1 
-             
-            jaJac(icnt) = j
-             aJac(icnt) = a(i,j)
-          endif
-        enddo
-        iaJac(i+1) = iaJac(i) + jcnt
-      enddo
-
-      end subroutine Convert_to_CSR
-
 !==============================================================================      
 
       subroutine NL_Optimization_Delta_k(k, R_NonLin_L2_k, R_NonLin_L2_km1,   &
@@ -1064,5 +1438,7 @@
       gamma_k = min(gam_min, gam_P)
 
       end subroutine NL_Optimization_gamma
+
+!============================================================================
 
       end module Newton

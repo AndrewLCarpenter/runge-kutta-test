@@ -76,7 +76,7 @@
 !         dt = 0.25_wp/10**((iDT-1)/20.0_wp) ! timestep 
 
           !**Exact Solution**
-          open(unit=39,file='exact.Lorenz.data')
+          open(unit=39,file='./Exact_Data/exact.Lorenz.data')
           rewind(39)
           do i=1,81
             read(39,*)ExactTot(i,1),ExactTot(i,2),ExactTot(i,3)
@@ -120,7 +120,7 @@
               resI_vec(1)=dt*sigma*(uvec(2)-uvec(1))
               resI_vec(2)=0.0_wp
               resI_vec(3)=0.0_wp            
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:)=0.0_wp
               resI_vec(1)=dt*(sigma*(uvec(2)-uvec(1)))
               resI_vec(2)=dt*( (rho - uvec(3))*uvec(1) - uvec(2) )
@@ -165,6 +165,18 @@
               xjac(3,1) = 0.0_wp-akk*dt*(uvec(2))
               xjac(3,2) = 0.0_wp-akk*dt*(uvec(1))
               xjac(3,3) = 1.0_wp-akk*dt*(-beta)
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (-sigma)
+              xjac(1,2) = (+sigma)
+              xjac(1,3) = (0)
+
+              xjac(2,1) = (rho-uvec(3))
+              xjac(2,2) = (-1.0_wp)
+              xjac(2,3) = (-uvec(1))
+
+              xjac(3,1) = (uvec(2))
+              xjac(3,2) = (uvec(1))
+              xjac(3,3) = (-beta)
           end select choose_Jac_type
           
       end select Program_Step_Select

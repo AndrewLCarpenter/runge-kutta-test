@@ -43,19 +43,19 @@
 !  Thus, it is predicting the starting guesses of the next stage (L+1)
 
       integer,                    intent(in   ) :: L
-    !  real(wp),   dimension(:,:), intent(in   ) :: ustage
-     ! real(wp),   dimension(:,:), intent(inout) :: predvec
-      !real(wp),   dimension(is,4),         intent(in   ) :: bD
-      !real(wp),   dimension(is,is),        intent(  out) :: alpha
+     !real(wp),   dimension(:,:), intent(in   ) :: ustage
+     !real(wp),   dimension(:,:), intent(inout) :: predvec
+     !real(wp),   dimension(is,4),         intent(in   ) :: bD
+     !real(wp),   dimension(is,is),        intent(  out) :: alpha
 
-      !real(wp),   dimension(is)                          :: bint
+     !real(wp),   dimension(is)                          :: bint
 
 
-!     real(wp),   dimension(is,is,0:is),   intent(  out) :: svpB
-!     real(wp),   dimension(is,is),        intent(  out) :: al3N
-!     real(wp),   dimension(is,is),        intent(  out) :: al3D
-!     real(wp),   dimension(is,is),        intent(  out) :: al4N
-!     real(wp),   dimension(is,is),        intent(  out) :: al4D
+     !real(wp),   dimension(is,is,0:is),   intent(  out) :: svpB
+     !real(wp),   dimension(is,is),        intent(  out) :: al3N
+     !real(wp),   dimension(is,is),        intent(  out) :: al3D
+     !real(wp),   dimension(is,is),        intent(  out) :: al4N
+     !real(wp),   dimension(is,is),        intent(  out) :: al4D
 
       integer :: M!,j
 
@@ -99,7 +99,7 @@
       integer,                  intent(in  )  :: L,ktime
       !real(wp), dimension(:,:), intent(in   ) :: ustage
       !real(wp), dimension(:),   intent(inout) :: uvec
-   !   real(wp), dimension(:),   intent(in   ) :: uveco
+      !real(wp), dimension(:),   intent(in   ) :: uveco
       !real(wp), dimension(:,:), intent(in   ) :: alpha      
             
       integer :: j

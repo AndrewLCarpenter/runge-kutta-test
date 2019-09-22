@@ -1,4 +1,4 @@
-p   = 5 ;   % band on lhs
+p   = 1 ;   % band on lhs
 N   = 8 ;   % Order of accuracy
 pts = 9 ;
 

@@ -1,0 +1,34 @@
+load("eigen") $
+u: columnvector([u1,u2,u3]) ;
+M: matrix(
+[m11,m12,m13],
+[m21,m22,m23],
+[m31,m32,m33]) ;
+S: (u.transpose(u)).M.u ;
+jac: zeromatrix(3,3);
+for i:1 thru 3 do 
+   (for j:1 thru 3 do
+     jac[i,j] : diff(S[i,1],u[j,1]) ) ;
+
+wrk1: transpose(u).(M.u);
+wrk2: (u.transpose(u)).M;
+wrk3: (u.transpose(M.u));
+jac1: jac-ident(3)*wrk1 - wrk2 - wrk3  ;
+
+u: columnvector([u1,u2,u3,u4]) ;
+M: matrix(
+[m11,m12,m13,m14],
+[m21,m22,m23,m24],
+[m31,m32,m33,m34],
+[m41,m42,m43,m44]) ;
+S: (u.transpose(u)).M.u ;
+jac: zeromatrix(4,4);
+for i:1 thru 4 do 
+   (for j:1 thru 4 do
+     jac[i,j] : diff(S[i,1],u[j,1]) ) ;
+
+wrk1: transpose(u).(M.u);
+wrk2: (u.transpose(u)).M;
+wrk3: (u.transpose(M.u));
+jac1: jac-ident(4)*wrk1 - wrk2 - wrk3  ;
+

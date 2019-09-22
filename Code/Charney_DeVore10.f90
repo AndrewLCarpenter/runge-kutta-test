@@ -14,7 +14,8 @@
       module Charney_DeVore10_mod
 
       use precision_vars,    only: wp, pi, eyeN
-      use control_variables, only: temporal_splitting,probname,xjac,var_names,&
+      use control_variables, only: temporal_splitting,temporal_splitting_OTD, &
+                                   probname,xjac,var_names,                   &
      &                             tol,dt_error_tol,uvec,uexact,programstep
       use eispack_module,    only: rg, qsortd
 
@@ -33,7 +34,7 @@
       integer,  parameter :: neq  =   10 
       integer,  parameter :: vecl =   10
 
-      real(wp), parameter :: CC  = +0.01_wp   !  Cep is governed from the main program
+      real(wp), parameter :: CC  = +0.01_wp          !  Cep is governed from the main program
 
       !  DeStart, Acta1988
 !     real(wp), parameter :: x1s = +2.50000_wp
@@ -71,13 +72,13 @@
 
 !     ============  Original definitions of coefficients  ===================
 
-      real(wp), parameter :: a11 = ( (8*sqrt2*1*b)/(pi) * (1*1)/(4*1*1-1) * &
+      real(wp), parameter :: a11 = ( (8*sqrt2*1*b)/(pi) * (1.0_wp*1)/(4*1*1-1) * &
                                      (1*1*b*b+(1*1-1)) / (1*1*b*b+1*1)  )
-      real(wp), parameter :: a12 = ( (8*sqrt2*1*b)/(pi) * (2*2)/(4*2*2-1) * &
+      real(wp), parameter :: a12 = ( (8*sqrt2*1*b)/(pi) * (2.0_wp*2)/(4*2*2-1) * &
                                      (1*1*b*b+(2*2-1)) / (1*1*b*b+2*2)  )
-      real(wp), parameter :: a21 = ( (8*sqrt2*2*b)/(pi) * (1*1)/(4*1*1-1) * &
+      real(wp), parameter :: a21 = ( (8*sqrt2*2*b)/(pi) * (1.0_wp*1)/(4*1*1-1) * &
                                      (2*2*b*b+(1*1-1)) / (2*2*b*b+1*1)  )
-      real(wp), parameter :: a22 = ( (8*sqrt2*2*b)/(pi) * (2*2)/(4*2*2-1) * &
+      real(wp), parameter :: a22 = ( (8*sqrt2*2*b)/(pi) * (2.0_wp*2)/(4*2*2-1) * &
                                      (2*2*b*b+(2*2-1)) / (2*2*b*b+2*2)  )
 
       real(wp), parameter :: b11 = be * ( (1*b)/(1*1*b*b+1*1) )
@@ -85,10 +86,10 @@
       real(wp), parameter :: b21 = be * ( (2*b)/(2*2*b*b+1*1) )
       real(wp), parameter :: b22 = be * ( (2*b)/(2*2*b*b+2*2) ) 
 
-      real(wp), parameter :: g11 = ga * ( (4*1*1*1)/(4*1*1-1) * (sqrt2*1*b)/(pi*(1*1*b*b+1*1)) )
-      real(wp), parameter :: g12 = ga * ( (4*2*2*2)/(4*2*2-1) * (sqrt2*1*b)/(pi*(1*1*b*b+2*2)) )
-      real(wp), parameter :: g21 = ga * ( (4*1*1*1)/(4*1*1-1) * (sqrt2*2*b)/(pi*(2*2*b*b+1*1)) )
-      real(wp), parameter :: g22 = ga * ( (4*2*2*2)/(4*2*2-1) * (sqrt2*2*b)/(pi*(2*2*b*b+2*2)) )
+      real(wp), parameter :: g11 = ga * ( (4.0_wp*1*1*1)/(4*1*1-1) * (sqrt2*1*b)/(pi*(1*1*b*b+1*1)) )
+      real(wp), parameter :: g12 = ga * ( (4.0_wp*2*2*2)/(4*2*2-1) * (sqrt2*1*b)/(pi*(1*1*b*b+2*2)) )
+      real(wp), parameter :: g21 = ga * ( (4.0_wp*1*1*1)/(4*1*1-1) * (sqrt2*2*b)/(pi*(2*2*b*b+1*1)) )
+      real(wp), parameter :: g22 = ga * ( (4.0_wp*2*2*2)/(4*2*2-1) * (sqrt2*2*b)/(pi*(2*2*b*b+2*2)) )
                              
       real(wp), parameter :: d11 = ( (64.0_wp*sqrt2*1*b)/(15*pi) * &
                                      (1*1*b*b-(1*1-1))/(1*1*b*b+1*1)  )
@@ -104,27 +105,14 @@
       real(wp), parameter :: r21 = (9*b/2) * ( ((2-2)*b)**2 - (1-2)**2 ) / (2*2*b*b+1*1) 
       real(wp), parameter :: r22 = (9*b/2) * ( ((2-2)*b)**2 - (2-2)**2 ) / (2*2*b*b+2*2) 
 
-      real(wp), parameter :: g11S= ga * ( (4*1)/(4*1*1-1) * (sqrt2*1*b)/(pi) )
-      real(wp), parameter :: g12S= ga * ( (4*2)/(4*2*2-1) * (sqrt2*1*b)/(pi) )
+      real(wp), parameter :: g11S= ga * ( (4.0_wp*1)/(4*1*1-1) * (sqrt2*1*b)/(pi) )
+      real(wp), parameter :: g12S= ga * ( (4.0_wp*2)/(4*2*2-1) * (sqrt2*1*b)/(pi) )
 
       real(wp), parameter :: g12P= ga * ( (3*b)/(4*(1*1*b*b+2*2)) )
       real(wp), parameter :: g21P= ga * ( (3*b)/(4*(2*2*b*b+1*1)) )
 
       real(wp), parameter :: ep1 = ( (16*sqrt2*1*b)/(5*pi) )
       real(wp), parameter :: ep2 = ( (16*sqrt2*2*b)/(5*pi) )
-
-      real(wp), dimension(neq,neq) :: eye= reshape((/                  &
-                                   &  +1,+0,+0,+0,+0,+0,+0,+0,+0,+0,   &
-                                   &  +0,+1,+0,+0,+0,+0,+0,+0,+0,+0,   &
-                                   &  +0,+0,+1,+0,+0,+0,+0,+0,+0,+0,   &
-                                   &  +0,+0,+0,+1,+0,+0,+0,+0,+0,+0,   &
-                                   &  +0,+0,+0,+0,+1,+0,+0,+0,+0,+0,   &
-                                   &  +0,+0,+0,+0,+0,+1,+0,+0,+0,+0,   &
-                                   &  +0,+0,+0,+0,+0,+0,+1,+0,+0,+0,   &
-                                   &  +0,+0,+0,+0,+0,+0,+0,+1,+0,+0,   &
-                                   &  +0,+0,+0,+0,+0,+0,+0,+0,+1,+0,   &
-                                   &  +0,+0,+0,+0,+0,+0,+0,+0,+0,+1/), &
-                                   &         (/10,10/) ) 
 
       logical :: update_Jac
 
@@ -185,13 +173,14 @@
 ! resI_vec -> implicit residual for a particular stage               real(wp), dimension(u-vector length)
 !******************************************************************************
 
-      subroutine Charney_DeVore10(nveclen,eq,Cep,dt,tfinal,iDT,resE_vec,resI_vec,OTD_RHS,akk)
+      subroutine Charney_DeVore10(nveclen,eq,Cep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use control_variables, only: temporal_splitting,probname,Jac_case,     &
      &                             tol,dt_error_tol,uvec,uexact,programstep, &
-     &                             var_names, OTD, OTDN, Ovec, wr, wi
+     &                             var_names, OTD, OTDN, Ovec, wr, wi,       &
+     &                             dudtE_OTD, dudtI_OTD,                   &
+     &                             resE_OTD, resI_OTD
       use OTD_Module,        only: Orthogonalize_SubSpace
-      use Fourier_Coef_Module, only: Fourier_Coefficients
 
 !-----------------------VARIABLES----------------------------------------------
 
@@ -208,19 +197,12 @@
       real(wp)                :: dt_max
       
       !RHS vars
+      real(wp),                       intent(in   ) :: akk
       real(wp), dimension(vecl),      intent(  out) :: resE_vec,resI_vec
-      real(wp), dimension(vecl,OTDN), intent(  out) :: OTD_RHS
+
       real(wp), dimension(vecl)                :: dudt_E,dudt_I
-      real(wp), dimension(vecl,vecl)           :: Jac_E, Jac_I, Z
+      real(wp), dimension(vecl,vecl)           :: Jac_E, Jac_I, Z, Jac_OTD
       real(wp), dimension(vecl)                :: r
-      
-      integer                  :: i
-      integer,  dimension(OTDN)                :: ind
-
-      !Jacob vars
-      real(wp), intent(in   )  :: akk
-
-      real(wp), dimension(:,:), allocatable  :: Tmat
 
 !------------------------------------------------------------------------------   
       
@@ -229,12 +211,15 @@
         !**Pre-initialization. Get problem name, vector length and grid**
 
         case('INITIALIZE_PROBLEM_INFORMATION')
-          nveclen = vecl
-          eq      = vecl
-          probname='Charney_DeVore10'     
-          Jac_case='DENSE'
-          tol=1.0e-14_wp  
-          dt_error_tol=5.0e-14_wp
+          nveclen     = vecl
+          eq          = vecl
+          probname    = 'Charney_DeVore10'     
+          Jac_case    = 'DENSE'
+          tol         = 1.0e-11_wp  
+          dt_error_tol= 5.0e-14_wp
+
+          OTD  = .true.                    !  Optimal time dependent modes
+          OTDN = 1                         !  Dimension of optimal time dependent modes
           
           allocate(var_names(neq))
           var_names(:)=(/ 'Differential', 'Differential',  &
@@ -243,12 +228,11 @@
                           'Differential', 'Differential',  &
                           'Differential', 'Differential'/)
           
-          call Fourier_Coefficients(9,Tmat)
         !**Initialization of problem information**        
         case('SET_INITIAL_CONDITIONS')
           
           !Update=true for Jac/RHS updates
-          update_Jac=.true. !reset every new epsilon/dt
+          update_Jac = .true. !reset every new epsilon/dt
 
           dt_max =   0001.00_wp                                   ! maximum dt
           tfinal =   4000.00_wp                                   ! final time   
@@ -272,24 +256,6 @@
 
           call exact_Charney_DeVore10(uexact,Cep)                    !set exact solution at tfinal
 
-          if(OTD .eqv. .true.) then
-
-            call Charney_DeVore10_Jacobian_Eigenvalues(uvec,Cep,Z)
-
-!           call random_number(Ovec(:,:))
-            Ovec(:,:) = Z(:,1:OTDN)
-
-            call Orthogonalize_SubSpace(vecl,OTDN,Ovec(:,:))
-
-            call Charney_DeVore10_Build_OTD_Ritz(uvec,Ovec,Cep,OTDN,wr,wi)
-
-          endif
-
-          if(maxval(abs(eyeN(OTDN) - matmul(transpose(Ovec),Ovec))) >= tol) then
-            write(*,*)'OTDN eqns are not orthogonal;  stopping'
-            stop
-          endif
-
         case('BUILD_RHS')
 
           call Charney_DeVore10_dUdt(uvec,Cep,dudt_E,dudt_I)        
@@ -301,16 +267,11 @@
             case('IMEX') ! For IMEX schemes
               resE_vec(:)= dt * (+ dudt_E(:)            ) 
               resI_vec(:)= dt * (            + dudt_I(:))
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:)= dt * 0.0_wp
               resI_vec(:)= dt * (+ dudt_E(:) + dudt_I(:))
           end select choose_RHS_type
           
-          if(OTD .eqv. .true.) then
-             call Charney_DeVore10_Build_OTD_RHS(uvec,Ovec,Cep,OTDN,OTD_RHS)
-             OTD_RHS = dt * OTD_RHS
-          endif
-
         case('BUILD_JACOBIAN')
 
           call Charney_DeVore10_Build_Jac(uvec,Cep,Jac_E,Jac_I)
@@ -319,23 +280,78 @@
 
             case('EXPLICIT') ! For fully implicit schemes
 
-              xjac(:,:) = eye(:,:)
+              xjac(:,:) = eyeN(vecl)
 
             case('IMEX') ! For IMEX schemes
 
-              xjac(:,:) = eye(:,:) - akk*dt* (             + Jac_I(:,:))
+              xjac(:,:) = eyeN(vecl) - akk*dt* (             + Jac_I(:,:))
 
             case('IMPLICIT') ! For fully implicit schemes
 
-              xjac(:,:) = eye(:,:) - akk*dt* (+ Jac_E(:,:) + Jac_I(:,:))
+              xjac(:,:) = eyeN(vecl) - akk*dt* (+ Jac_E(:,:) + Jac_I(:,:))
+
+            case('FIRK') ! For fully implicit schemes
+
+              xjac(:,:) = (+ Jac_E(:,:) + Jac_I(:,:))
 
           end select choose_Jac_type
 
+        case('SET_INITIAL_CONDITIONS_OTD')
+
+          call Charney_DeVore10_Jacobian_Eigenvalues(uvec,Cep,Z)
+
+!         call random_number(Ovec(:,:))
+          Ovec(:,:) = Z(:,1:OTDN)
+
+          call Orthogonalize_SubSpace(vecl,OTDN,Ovec(:,:))
+
+          call Charney_DeVore10_Build_OTD_Ritz(uvec,Ovec,Cep,OTDN,wr,wi)
+
+          if(maxval(abs(eyeN(OTDN) - matmul(transpose(Ovec),Ovec))) >= tol) then
+            write(*,*)'OTDN eqns are not orthogonal;  stopping'
+            stop
+          endif
+
+        case('BUILD_RHS_OTD')
+
+          call Charney_DeVore10_dUdt_OTD(uvec,Ovec,Cep,OTDN,dudtE_OTD,dudtI_OTD)
+
+          choose_RHS_OTD_type: select case (Temporal_Splitting_OTD)
+            case('EXPLICIT') ! For fully explicit schemes
+              resE_OTD(:,:)= dt * (+ dudtE_OTD(:,:) + dudtI_OTD(:,:))
+              resI_OTD(:,:)= dt * 0.0_wp
+            case('IMEX') ! For IMEX schemes
+              resE_OTD(:,:)= dt * (+ dudtE_OTD(:,:)                 ) 
+              resI_OTD(:,:)= dt * (                 + dudtI_OTD(:,:))
+            case('IMPLICIT') ! For fully implicit schemes
+          end select choose_RHS_OTD_type
+
+        case('BUILD_JACOBIAN_OTD')
+
+          call Charney_DeVore10_Build_Jac(uvec,Cep,Jac_E,Jac_I)
+  
+          Jac_OTD(:,:) = Jac_E(:,:) + Jac_I(:,:)
+
+          choose_Jac_type_OTD: select case(temporal_splitting_OTD)
+
+            case('EXPLICIT') ! For fully implicit schemes
+
+              xjac(:,:) = eyeN(neq)
+
+            case('IMEX') ! For IMEX schemes
+
+              xjac(:,:) = eyeN(neq) - akk*dt* (             + Jac_OTD(:,:))
+
+          end select choose_Jac_type_OTD
+
         case('CALCULATE_RITZ_VALUES')
+
+          !Update=true for Jac/RHS updates
 
 !         call Charney_DeVore10_Jacobian_Eigenvalues(uvec,Cep,Z)
 
 !         call Charney_DeVore10_Build_OTD_Ritz(uvec,Ovec,Cep,OTDN,wr,wi)
+
 
       end select Program_Step_Select     
 
@@ -372,7 +388,7 @@
       u(:)=0.0_wp*ep
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Charney_DeVore10.data')
+      open(unit=39,file='./Exact_Data/exact.Charney_DeVore10.data')
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl)
@@ -575,13 +591,13 @@
 ! a  ->  a combined derivative matrix for output to main routine, real(wp), dimension(neq,neq)
 !******************************************************************************
 
-      subroutine Charney_DeVore10_Build_OTD_RHS(uvec,Ovec,Cep,OTDN,OTD_RHS)
+      subroutine Charney_DeVore10_dUdt_OTD(uvec,Ovec,Cep,OTDN,dudtE_OTD,dudtI_OTD)
 
       integer,                  intent(in   ) :: OTDN
       real(wp), dimension(:  ), intent(in   ) :: uvec
       real(wp), dimension(:,:), intent(in   ) :: Ovec
       real(wp),                 intent(in   ) :: Cep
-      real(wp), dimension(:,:), intent(  out) :: OTD_RHS
+      real(wp), dimension(:,:), intent(  out) :: dudtE_OTD,dudtI_OTD
 
       real(wp), dimension(neq,neq)            :: Jac_E, Jac_I, Jac
       real(wp), dimension(neq ,OTDN)          :: Jac_Ovec
@@ -594,9 +610,10 @@
         Jac_Ovec(:,:) = matmul(Jac(:,:),Ovec(:,:))
         Ovec_Jac_Ovec(:,:) = matmul(transpose(Ovec),Jac_Ovec(:,:))
 
-        OTD_RHS(:,:) = Jac_Ovec(:,:) - matmul(Ovec(:,:),Ovec_Jac_Ovec(:,:))
+        dudtI_OTD(:,:) = Jac_Ovec(:,:)
+        dudtE_OTD(:,:) =               - matmul(Ovec(:,:),Ovec_Jac_Ovec(:,:))
 
-      end subroutine Charney_DeVore10_Build_OTD_RHS      
+      end subroutine Charney_DeVore10_dUdt_OTD
 
 !==============================================================================
 

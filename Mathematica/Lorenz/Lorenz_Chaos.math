@@ -98,6 +98,3 @@ For[i = 1, i <= Length[eqns], i++,
                        ] ] ]
 Close[str4]
 *)
-
-
-

@@ -148,11 +148,12 @@
           choose_dt: select case(temporal_splitting)       
             case('EXPLICIT')
               dt = 0.00005_wp*0.1_wp/10**((iDT-1)/20.0_wp) ! timestep  explicit 
+            case('IMEX')
+              print*,'Wrong case: IMEX not implemented.  Stopping'
+              stop
             case('IMPLICIT')
               dt = 0.05_wp*0.1_wp/10**((iDT-1)/20.0_wp)    ! timestep  implcit
             case default
-              print*,'Wrong case!'
-              stop
           end select choose_dt
           
           call exact_Burg(uvec,ep,tinitial) !set initial conditions   
@@ -163,7 +164,7 @@
             case('EXPLICIT')
               call Burgers_dUdt(uvec,resE_vec,time,ep,dt)
               resI_vec(:)=0.0_wp
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               call Burgers_dUdt(uvec,resI_vec,time,ep,dt)
               resE_vec(:)=0.0_wp
           end select choose_RHS_type

@@ -59,7 +59,7 @@
           tfinal = 0.5_wp                   ! final time
           
           !**Exact Solution** 
-          open(unit=39,file='exact.vanderpol.data')
+          open(unit=39,file='./Exact_Data/exact.vanderpol.data')
           rewind(39)
           do i=1,81
             read(39,*)ExactTot(i,1),ExactTot(i,2)
@@ -86,7 +86,7 @@
               resE_vec(2) = 0.0_wp
               resI_vec(1) = 0.0_wp
               resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
-            case('IMPLICIT') ! For fully implicit schemes
+            case('IMPLICIT','FIRK') ! For fully implicit schemes
               resE_vec(:) = 0.0_wp
               resI_vec(1) = dt*uvec(2)
               resI_vec(2) = dt*((1-uvec(1)*uvec(1))*uvec(2) - uvec(1))/ep
@@ -104,8 +104,13 @@
               xjac(1,2) = 0.0_wp-akk*dt*(1.0_wp)
               xjac(2,1) = 0.0_wp-akk*dt*(-2*uvec(1)*uvec(2)-1)/ep
               xjac(2,2) = 1.0_wp-akk*dt*(+1-uvec(1)*uvec(1))/ep
+            case('FIRK') ! For fully implicit schemes
+              xjac(1,1) = (0.0_wp)
+              xjac(1,2) = (1.0_wp)
+              xjac(2,1) = (-2*uvec(1)*uvec(2)-1)/ep
+              xjac(2,2) = (+1-uvec(1)*uvec(1))/ep
           end select choose_Jac_type
-          
+
       end select Program_Step_Select
       end subroutine vanderPol
       end module vanderPol_mod

@@ -138,13 +138,13 @@
       integer              :: i
           
       do i = 1,neq
-        write(istr,"(I1.1)")i
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
-        open(49+i,file=trim(fileloc)//filename)
-        write(49+i,*)'zone T = "ep = ',ep,'",'
-        filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
-        open(59+i,file=trim(fileloc)//filename)
-        write(59+i,*)'zone T = "ep = ',ep,'",'
+!       write(istr,"(I1.1)")i
+!       filename=trim(probname)//'_'//trim(casename)//'_'//istr//ext
+!       open(149+i,file=trim(fileloc)//filename)
+!       write(149+i,*)'zone T = "ep = ',ep,'",'
+!       filename=trim(probname)//'_'//trim(casename)//'_'//istr//'P'//ext
+!       open(249+i,file=trim(fileloc)//filename)
+!       write(249+i,*)'zone T = "ep = ',ep,'",'
       enddo
 
       end subroutine init_output_files
@@ -330,10 +330,12 @@
 !******************************************************************************
       subroutine output_terminal_final(icount,jcount,stageE,stageI,maxiter)
       
-      use runge_kutta, only : ns
+      use runge_kutta,       only : ns
+      use control_variables, only : temporal_splitting
       
       integer,                intent(in   ) :: icount,jcount
-      real(wp), dimension(:), intent(inout) :: stageE,stageI,maxiter
+      integer,  dimension(:), intent(inout) :: maxiter
+      real(wp), dimension(:), intent(inout) :: stageE,stageI
       
       real(wp) :: tmp
       integer  :: i
@@ -344,10 +346,12 @@
       stageE(2:) = (ns-1)*stageE(2:)/jcount
       stageI(2:) = (ns-1)*stageI(2:)/jcount
 
-      write(*,*)'error of initial guess is '
-      do i = 2,ns
-        write(*,*) i,stageE(i),maxiter(i),stageI(i)
-      enddo
+      if(temporal_splitting /= 'FIRK') then
+        write(*,*)'error of initial guess is '
+        do i = 2,ns
+          write(*,*) i,stageE(i),maxiter(i),stageI(i)
+        enddo
+      endif
       
       end subroutine output_terminal_final
 
@@ -446,7 +450,8 @@
           
         if (time<=1e-16_wp) then ! check if new epsilon
           write(istr,"(I1.1)")i
-          filename=trim(probname)//'_'//trim(casename)//'_time_dependant_solution_'//istr//ext
+          filename=trim(probname)//'_'//trim(casename)&
+            &//'_time_dependant_solution_'//istr//ext
           open(849+i,file=trim(fileloc)//filename)   
           write(849+i,*)'zone T = "ep = ',ep,'",'
         endif

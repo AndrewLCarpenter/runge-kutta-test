@@ -1,0 +1,37 @@
+load("eigen") $
+
+/* 2nd order Gauss */ 
+
+t: sqrt(3)/6 ;
+c: columnvector([1/2-t,1/2+t]) ;
+A: matrix(
+[1/4, 1/4-t],
+[1/4+t, 1/4]);
+
+b: columnvector([1/2,1/2]) ;
+
+B: zeromatrix(2,2) ;
+for i:1 thru 2 do 
+     B[i,i]: b[i,1] ;
+
+/* 4th order Gauss */ 
+t: sqrt(15) ;
+c: columnvector([1/2-t/10,1/2,1/2+t/10]) ;
+b: columnvector([5/18, 4/9, 5/18]) ;
+A: matrix(
+[5/36     , 2/9-t/15, 5/36-t/30],
+[5/36+t/24, 2/9     , 5/36-t/24],
+[5/36+t/30, 2/9+t/15, 5/36     ]) ;
+B: zeromatrix(3,3) ;
+for i:1 thru 3 do 
+     B[i,i]: b[i,1] ;
+
+M : B.A + transpose(B.A) - b.transpose(b) ;
+
+b1: (sqrt(6) - 6)*b2 / (sqrt(6) + 6) ;
+c: columnvector([(4-sqrt(6))/10,(4+sqrt(6))/10,1]); 
+b: columnvector([b1,b2,-b1-b2]) ;
+
+bb: columnvector([(+16-sqrt(6))/36,(+16+sqrt(6))/36,1/9]) ;
+
+c: columnvector([1/2-sqrt(15)/10,1/2,1/2+sqrt(15)/10]) ;

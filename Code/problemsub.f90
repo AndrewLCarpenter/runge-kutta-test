@@ -52,20 +52,24 @@
       
       subroutine problemsub(iprob,nveclen,neq,ep,dt,tfinal,iDT,time,akk,L)
 
-      use control_variables,   only: resE,resI,uvec,OTD_RHS,resO,OTD
-      use vanderPol_mod,       only: vanderPol
-      use Pureschi_mod,        only: Pureschi
-      use Kaps_mod,            only: Kaps
-      use Kreiss_mod,          only: Kreiss
-      use Lorenz_mod,          only: Lorenz
-      use Rossler_mod,         only: Rossler_Chaos
-      use Oregonator_mod,      only: Oregonator
-      use Brusselator_mod,     only: Brusselator
-      use Burgers_Module,      only: Burgers
-      use Boscarino31_Mod,     only: Boscarino31
-      use Broadwell_Mod,       only: Broadwell
-      use Charney_DeVore6_mod, only: Charney_DeVore6
-      use Charney_DeVore10_mod,only: Charney_DeVore10
+      use control_variables,       only: resE,resI,uvec,               &
+                                       & resE_Tens_OTD,resI_Tens_OTD,  &
+                                       & resE_OTD,resI_OTD
+      use vanderPol_mod,           only: vanderPol
+      use Pureschi_mod,            only: Pureschi
+      use Kaps_mod,                only: Kaps
+      use Kreiss_mod,              only: Kreiss
+      use Lorenz_mod,              only: Lorenz
+      use Rossler_mod,             only: Rossler_Chaos
+      use Oregonator_mod,          only: Oregonator
+      use Brusselator_mod,         only: Brusselator
+      use Burgers_Module,          only: Burgers
+      use Boscarino31_Mod,         only: Boscarino31
+      use Broadwell_Mod,           only: Broadwell
+      use Charney_DeVore6_mod,     only: Charney_DeVore6
+      use Charney_DeVore10_mod,    only: Charney_DeVore10
+      use Kuramoto_Sivashinsky_mod,only: Kuramoto_Sivashinsky
+      use Boldrighini_Franceschini_mod,only: Boldrighini_Franceschini
    
       !PROBLEM PARAMETERS
       integer,  intent(in   ) :: iprob
@@ -105,7 +109,11 @@
       elseif (iprob==12) then
        call Charney_DeVore6(nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==13) then
-       call Charney_DeVore10(nveclen,neq,ep,dt,tfinal,iDT,    resE_vec,resI_vec,OTD_RHS,akk)
+       call Charney_DeVore10(nveclen,neq,ep,dt,tfinal,iDT,    resE_vec,resI_vec,akk)
+      elseif (iprob==14) then
+       call Kuramoto_Sivashinsky(nveclen,neq,ep,dt,tfinal,iDT,    resE_vec,resI_vec,akk)
+      elseif (iprob==15) then
+       call Boldrighini_Franceschini(nveclen,neq,ep,dt,tfinal,iDT,    resE_vec,resI_vec,akk)
       else
        print*,'Invalid problem number!'
        stop
@@ -115,7 +123,9 @@
         case('BUILD_RHS')  
           resE(:,L)=resE_vec(:)
           resI(:,L)=resI_vec(:)
-          if(OTD .eqv. .true.) resO(:,:,L) = OTD_RHS(:,:)
+        case('BUILD_RHS_OTD')  
+          resE_Tens_OTD(:,:,L) = resE_OTD(:,:)
+          resI_Tens_OTD(:,:,L) = resI_OTD(:,:)
       end select
 
       end subroutine problemsub

@@ -7,7 +7,7 @@
       implicit none; save
       
       private
-      public :: third, half, twothird, pi, wp, two
+      public :: third, half, twothird, pi, wp, qp, two, piq
       public :: eyeN
       
 !--------------------VARIABLES-------------------------------------------------
@@ -18,6 +18,7 @@
       
       ! Set the working precision
       integer, parameter :: wp = dp
+      integer, parameter :: qp = 16
 
       integer, parameter :: prec = dp
 
@@ -50,6 +51,8 @@
       real(wp), parameter :: large = 1.0e05_wp
       real(wp), parameter :: realsmall = 1.d-20, big = 1.d10, realbig = 1.d20
       real(wp), parameter :: pi = &
+     &         3.1415926535897932384626433832795028841971693993751058209749_wp
+      real(qp), parameter :: piq= &
      &         3.1415926535897932384626433832795028841971693993751058209749_wp
  !-----------------------------------------------------------------------------
 
@@ -169,7 +172,7 @@
                          & +0,+0,+0,+0,+0,+0,+0,+0,+1,+0,   &
                          & +0,+0,+0,+0,+0,+0,+0,+0,+0,+1/), &
                          & (/10,10/) ) 
-        case(11:100)
+        case(11:1000)
            eyeN(:,:) = 0 ;
            do i = 1,N;
              eyeN(i,i) = 1 ;

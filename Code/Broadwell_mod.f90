@@ -231,12 +231,12 @@
             case('EXPLICIT')
               resE_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
               resI_vec(:)=0.0_wp                   
-            case('IMPLICIT')
-              resE_vec(:)=0.0_wp
-              resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
             case('IMEX')
               resE_vec(:)=dt*dudt_D1(:)
               resI_vec(:)=dt*dudt_Source(:)
+            case('IMPLICIT')
+              resE_vec(:)=0.0_wp
+              resI_vec(:)=dt*(dudt_D1(:)+dudt_Source(:))
           end select choose_RHS_type
           
         case('BUILD_JACOBIAN')
@@ -323,7 +323,8 @@
       u(:)=0.0_wp*ep
       
       !**Exact Solution** 
-      open(unit=39,file='exact.Broadwell_32.data')
+      open(unit=39,file='./Exact_Data/exact.Broadwell_32.data')
+
       rewind(39)
       do i=1,81
         read(39,*)ExactTot(i,1:vecl)

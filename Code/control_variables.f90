@@ -4,7 +4,7 @@
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90            *DEFINES PRECISION FOR ALL VARIABLES
-! SBP_COEF_MODULE.F90       *DEFINES CSR DERIVATIVE OPERATORS
+! SBP_COEF_MODULE.F90           *DEFINES CSR DERIVATIVE OPERATORS
 !******************************************************************************
 
       module control_variables
@@ -14,7 +14,8 @@
       implicit none; save
       
       private
-      public :: Temporal_splitting, probname, Jac_case, isamp,jmax,jactual
+      public :: probname, Jac_case, isamp,jmax,jactual
+      public :: Temporal_splitting, Temporal_Splitting_OTD
       public :: tol,dt_error_tol
       public :: uvec,uexact,b,usum,uveco
       public :: errvec,errvecT,tmpvec
@@ -22,33 +23,53 @@
       public :: b1save,b1Psave,b1L2save,ustage,predvec 
       public :: allocate_vars,deallocate_vars
       public :: programstep,var_names
-      public :: OTD, OTDN, Ovec, Oveco, errvecO, OTD_RHS, resO, orth_proj, wr, wi
+      public :: ipred
+      public :: OTD, OTDN, Ovec, Oveco, Osum, err_OTD
+      public :: orth_proj, wr, wi
+      public :: resE_Tens_OTD, resI_Tens_OTD
+      public :: dudtE_OTD, dudtI_OTD, resE_OTD, resI_OTD, Jac_OTD
+      public :: uvecS, uvecoS, xjacS
+      public :: update_jac
 
 !--------------------------VARIABLES-------------------------------------------
-!     character(len=80), parameter :: Temporal_Splitting = 'EXPLICIT'
-!     character(len=80), parameter :: Temporal_Splitting = 'IMEX' 
-      character(len=80), parameter :: Temporal_Splitting = 'IMPLICIT'  
-      character(len=9)             :: probname
+!     character(len=80), parameter :: Temporal_Splitting    = 'EXPLICIT'
+!     character(len=80), parameter :: Temporal_Splitting    = 'IMEX' 
+      character(len=80)            :: Temporal_Splitting    = 'IMPLICIT'  
+!     character(len=80), parameter :: Temporal_Splitting    = 'FIRK'  
+
+      character(len=80), parameter :: Temporal_Splitting_OTD= 'EXPLICIT'
+!     character(len=80), parameter :: Temporal_Splitting_OTD= 'IMEX'
+
+      character(len=17)            :: probname
       character(len=6)             :: Jac_case='DENSE' !default value
       character(len=80)            :: programstep
-      integer, parameter           :: isamp=70
-      integer, parameter           :: jmax=81     
+      integer, parameter           :: isamp  =70
+      integer, parameter           :: jmax   =81     
       integer, parameter           :: jactual=81     
+      integer, parameter           :: ipred  = 0
 
-      logical, parameter           :: OTD  = .true.
-      integer, parameter           :: OTDN = 5
+      logical                      :: update_jac = .true. !  Default value
+
+      logical                      :: OTD    = .false.    !  Default value
+      integer                      :: OTDN   = 1          !  Default value
       
-      real(wp) :: tol,dt_error_tol
+      real(wp)                     :: tol,dt_error_tol
 
       real(wp), dimension(:),   ALLOCATABLE :: uvec,uexact,b,usum,uveco
       real(wp), dimension(:),   allocatable :: errvec,errvecT,tmpvec
       real(wp), dimension(:,:), allocatable :: resE,resI,error,errorP,xjac
       real(wp), dimension(:,:), allocatable :: b1save,b1Psave,ustage,predvec
       real(wp), dimension(:,:), allocatable :: errorL2,b1L2save
-      real(wp), dimension(:,:), allocatable :: Ovec, Oveco, errvecO
-      real(wp), dimension(:,:), allocatable :: OTD_RHS
-      real(wp), dimension(:,:,:), allocatable :: resO
+
+      real(wp), dimension(:,:), allocatable :: Ovec, Oveco, err_OTD, Osum
+      real(wp), dimension(:,:), allocatable :: dudtE_OTD, dudtI_OTD
+      real(wp), dimension(:,:), allocatable :: resE_OTD, resI_OTD, Jac_OTD
+      real(wp), dimension(:,:,:), allocatable :: resE_Tens_OTD,resI_Tens_OTD
       real(wp), dimension(:),   allocatable :: orth_proj, wr, wi
+
+!  FIRK storage variables
+      real(wp), dimension(:),   allocatable :: uvecS, uvecoS
+      real(wp), dimension(:,:), allocatable :: xjacS
        
       character(len=12), dimension(:), allocatable :: var_names
 !------------------------------------------------------------------------------
@@ -87,9 +108,10 @@
 ! neq     -> number of equations,      integer
 ! is      -> maximum number of stages, integer
 !******************************************************************************
-      subroutine allocate_vars(nveclen,neq,is)
+      subroutine allocate_vars(nveclen,nvecS,neq,ns,is)
       
-      integer, intent(in) :: nveclen,neq,is
+      integer, intent(in)    :: nveclen,neq,ns,is
+      integer, intent(  out) :: nvecS
     
       !**ALLOCATE VARIABLES**
       !problemsub
@@ -107,6 +129,13 @@
       ALLOCATE(errvec(nveclen),errvecT(nveclen),tmpvec(nveclen))
       ALLOCATE(b1save(jmax,nveclen),b1Psave(jmax,nveclen),b1L2save(jmax,neq))
 
+      if(Temporal_Splitting == 'FIRK') then
+        nvecS = nveclen * ns
+        allocate(uvecS (nvecS      ))
+        allocate(uvecoS(nvecS      ))
+        allocate(xjacS (nvecS,nvecS))
+      endif
+
       if(OTD .eqv. .true.) then 
 
         allocate(       wr(OTDN           ))
@@ -116,10 +145,16 @@
 
         allocate(Ovec     (nveclen,OTDN   ))
         allocate(Oveco    (nveclen,OTDN   ))
-        allocate(errvecO  (nveclen,OTDN   ))
-        allocate(OTD_RHS  (nveclen,OTDN   ))
+        allocate(Osum     (nveclen,OTDN   ))
+        allocate(err_OTD  (nveclen,OTDN   ))
 
-        allocate(resO     (nveclen,OTDN,is))
+        allocate(dudtE_OTD(nveclen,OTDN   ))
+        allocate(dudtI_OTD(nveclen,OTDN   ))
+        allocate(resE_OTD (nveclen,OTDN   ))
+        allocate(resI_OTD (nveclen,OTDN   ))
+
+        allocate(resE_Tens_OTD(nveclen,OTDN,is))
+        allocate(resI_Tens_OTD(nveclen,OTDN,is))
 
       endif
 
@@ -190,15 +225,22 @@
      
       !Jacobian CSR
       if(allocated(iaJac)) deallocate(iaJac,jaJac,aJac,jUJac,jLUJac,aLUJac,iw)  
+
+      if(Temporal_Splitting == 'FIRK') then
+        deallocate(uvecS,uvecoS)
+        deallocate(xjacS)
+      endif
+
       
       if(OTD .eqv. .true.) then 
 
         deallocate(wr,wi)                        ! dimension: (OTDN)
         deallocate(orth_proj)                    ! dimension: (nveclen)
 
-        deallocate(Ovec,Oveco,errvecO,OTD_RHS)   ! dimension: (nveclen,OTDN)
+        deallocate(Ovec,Oveco,Osum, err_OTD)     ! dimension: (nveclen,OTDN)
+        deallocate(resE_OTD, resI_OTD, dudtE_OTD, dudtI_OTD)           ! dimension: (nveclen,OTDN)
 
-        deallocate(resO)                         ! dimension: (nveclen,OTDN,is)
+        deallocate(resE_Tens_OTD,resI_Tens_OTD)                ! dimension: (nveclen,OTDN,is)
 
       endif
 
