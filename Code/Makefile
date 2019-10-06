@@ -30,7 +30,7 @@ SRCS = precision_vars.f90\
        Boldrighini_Franceschini.f90\
        Burgers_Mod.f90\
        vanderPol.f90\
-       Pureschi.f90\
+       Pareschi.f90\
        Kaps.f90\
        Kreiss.f90\
        Lorenz.f90\
@@ -73,7 +73,7 @@ OBJS = precision_vars.o\
        Boldrighini_Franceschini.o\
        Burgers_Mod.o\
        vanderPol.o\
-       Pureschi.o\
+       Pareschi.o\
        Kaps.o\
        Kreiss.o\
        Lorenz.o\
@@ -98,8 +98,7 @@ TARGET = test_cases90.out
 .PHONY: depend clean
 
 all: $(TARGET)
-	@echo  Simple compiler named SSDCNSE has been compiled
-
+	@echo  Runge-Kutta compiled. Executable in test_cases90.out
 
 $(TARGET) : $(OBJS)
 	$(FC) $(FCFLAGS) $(INCLUDESDIR) -o $(TARGET) $(OBJS) $(LFLAGS) $(LIBS)

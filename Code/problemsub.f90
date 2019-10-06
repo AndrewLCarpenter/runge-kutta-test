@@ -56,7 +56,7 @@
                                        & resE_Tens_OTD,resI_Tens_OTD,  &
                                        & resE_OTD,resI_OTD
       use vanderPol_mod,           only: vanderPol
-      use Pureschi_mod,            only: Pureschi
+      use Pareschi_mod,            only: Pareschi
       use Kaps_mod,                only: Kaps
       use Kreiss_mod,              only: Kreiss
       use Lorenz_mod,              only: Lorenz
@@ -87,7 +87,7 @@
       if     (iprob==1)  then
        call vanderPol(      nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==2)  then
-       call Pureschi(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
+       call Pareschi(       nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==3)  then
        call Kaps(           nveclen,neq,ep,dt,tfinal,iDT,     resE_vec,resI_vec,akk)
       elseif (iprob==4)  then

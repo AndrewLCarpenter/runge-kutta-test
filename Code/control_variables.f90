@@ -34,8 +34,8 @@
 !--------------------------VARIABLES-------------------------------------------
 !     character(len=80), parameter :: Temporal_Splitting    = 'EXPLICIT'
 !     character(len=80), parameter :: Temporal_Splitting    = 'IMEX' 
-      character(len=80)            :: Temporal_Splitting    = 'IMPLICIT'  
-!     character(len=80), parameter :: Temporal_Splitting    = 'FIRK'  
+!     character(len=80)            :: Temporal_Splitting    = 'IMPLICIT'  
+      character(len=80)            :: Temporal_Splitting    = 'FIRK'  
 
       character(len=80), parameter :: Temporal_Splitting_OTD= 'EXPLICIT'
 !     character(len=80), parameter :: Temporal_Splitting_OTD= 'IMEX'

@@ -1,16 +1,16 @@
 !******************************************************************************
 ! Subroutine to Initialize, calculate the RHS, and calculate the Jacobian
-! of the Pureschi and Russo problem 
+! of the Pareschi and Russo problem 
 !******************************************************************************
 ! REQUIRED FILES:
 ! PRECISION_VARS.F90        *DEFINES PRECISION FOR ALL VARIABLES
 ! CONTROL_VARIABLES.F90     *CONTAINS VARIABLES AND ALLOCATION ROUTINES
 !******************************************************************************
-      module Pureschi_mod
+      module Pareschi_mod
       private
-      public :: Pureschi
+      public :: Pareschi
       contains
-      subroutine Pureschi(nveclen,neq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
+      subroutine Pareschi(nveclen,neq,ep,dt,tfinal,iDT,resE_vec,resI_vec,akk)
 
       use precision_vars,    only: wp, pi
       use control_variables, only: temporal_splitting,probname,xjac,var_names,&
@@ -43,7 +43,7 @@
         case('INITIALIZE_PROBLEM_INFORMATION')
           nvecLen = vecl
           neq = vecl
-          probname='Pureschi '   
+          probname='Pareschi '   
           tol=1.0e-12_wp
           dt_error_tol=1.0e-13_wp
           
@@ -58,7 +58,7 @@
           tfinal = 5.0_wp                  ! final time
 
           !**Exact Solution**
-          open(unit=39,file='./Exact_Data/exact.pureschi.1.data')
+          open(unit=39,file='./Exact_Data/exact.pareschi.1.data')
           rewind(39)
           do i=1,81
             read(39,*)ExactTot(i,1),ExactTot(i,2)
@@ -111,5 +111,5 @@
           end select choose_Jac_type
           
       end select Program_Step_Select     
-      end subroutine Pureschi
-      end module Pureschi_mod
+      end subroutine Pareschi
+      end module Pareschi_mod

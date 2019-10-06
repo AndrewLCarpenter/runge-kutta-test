@@ -4,7 +4,7 @@
 !
 !----------------------------PROBLEM LIST--------------------------------------
 !     problem 1 ) van der Pol (Hairer II, pp 403)
-!     problem 2 ) Pureschi and Russo 
+!     problem 2 ) Pareschi and Russo 
 !     problem 3 ) Dekker 7.5.2 pp. 215 (Kaps problem   : Index 1)
 !     problem 4 ) Dekker 7.5.1 pp. 214 (Kreiss' problem: Index 2)
 !     problem 5 ) Lorenz attractor
@@ -189,8 +189,9 @@
 !     do icase = 101,101
 !     do icase = 1,18   !  1,7
 !     do icase = 18,18
+      do icase = 2005,2007
 !     do icase = 1004,1004
-      do icase = 108,110
+!     do icase = 108,110
       
         call rungeadd(icase)                        !**GET RK COEFFICIENTS**
 
@@ -205,8 +206,8 @@
         endif
 
 !--------------------------PROBLEMS LOOP---------------------------------------
-        do iprob = problem,problem
-!       do iprob = 1,15
+!       do iprob = problem,problem
+        do iprob = 1,4
 
           stageE(:) = 0.0_wp ; stageI(:) = 0.0_wp ; maxiter(:)= 0 ;  !  Vector initilizations
           icount = 0 ; jcount = 0                                    !  cost counters
