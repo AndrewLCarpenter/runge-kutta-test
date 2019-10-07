@@ -189,7 +189,7 @@
 !     do icase = 101,101
 !     do icase = 1,18   !  1,7
 !     do icase = 18,18
-      do icase = 2005,2007
+      do icase = 2008,2008
 !     do icase = 1004,1004
 !     do icase = 108,110
       
